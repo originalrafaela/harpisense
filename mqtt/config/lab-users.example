@@ -1,0 +1,4 @@
+# Example-only laboratory users. Replace passwords before real lab use.
+# Format: username:password
+iot_device_lab:change-me-iot-lab
+mqtt_test_subscriber:change-me-subscriber-lab
