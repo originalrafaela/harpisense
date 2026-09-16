@@ -6,15 +6,25 @@ Data: 2026-09-16
 
 Nao ha VM/interface de gateway Linux disponivel neste ambiente de trabalho para executar Scapy contra trafego real. Por isso, nao foi registrada captura real de laboratorio nesta etapa.
 
-## Validado sem laboratorio
+## Preparado sem laboratorio
 
 - Contrato `network_event` preservado para eventos gerados.
 - `classification.stage` permanece `raw_capture`.
 - `classification.label` permanece `unknown`.
-- Agregacao por janela validada com entradas conhecidas em teste automatizado.
-- Verificacao de travessia validada com entradas conhecidas observadas em duas interfaces configuradas.
-- Caso de uma unica interface validado para nao declarar travessia.
-- Parser MQTT validado para extrair topico de `PUBLISH` sem inventar resultado de autenticacao.
+- Ha teste automatizado preparado para agregacao por janela com entradas conhecidas.
+- Ha teste automatizado preparado para verificacao de travessia com entradas conhecidas observadas em duas interfaces configuradas.
+- Ha teste automatizado preparado para o caso de uma unica interface nao declarar travessia.
+- Ha teste automatizado preparado para parser MQTT extrair topico de `PUBLISH` sem inventar resultado de autenticacao.
+- Envio ao backend preparado via HTTP `POST /api/v1/ingest/network-events`, com entrega confirmada apenas em `202 Accepted`.
+- Ha testes automatizados preparados para falha HTTP e falha de conexao com backend simulado.
+
+## Execucao de testes neste host
+
+Em 2026-09-16, os testes nao foram executados com sucesso neste host porque nao ha Python completo disponivel no PATH. Foram encontrados runtimes embarcados em ferramentas de terceiros, mas eles nao incluem `unittest`; uma tentativa de criar venv temporario com o Python da NVIDIA nao concluiu. A execucao deve ser repetida com Python completo na VM Linux ou em ambiente local adequado.
+
+## Contrato pendente
+
+Os contratos vigentes nao definem autenticacao obrigatoria para o endpoint de ingestao de eventos de rede. O capturador suporta token bearer opcional por variavel de ambiente ou arquivo local, mas a exigencia e o formato final de autenticacao precisam ser alinhados pelo Arquiteto com `backend-data` antes de serem tratados como obrigatorios.
 
 ## Pendencia externa
 

@@ -39,6 +39,7 @@ class WindowAggregator:
         total_bytes = sum(item.packet_size_bytes for item in ordered)
         window_end = window_start + timedelta(seconds=self.window_seconds)
         traversal_verified = self._traversal_verified(interfaces)
+        traversal_evidence = self._traversal_evidence(first, interfaces)
 
         aggregate_observation = PacketObservation(
             observed_at=first.observed_at,
@@ -71,6 +72,7 @@ class WindowAggregator:
                 "interfaces_observed": interfaces,
                 "expected_interfaces": sorted(self.expected_interfaces),
                 "traversal_verified": traversal_verified,
+                "traversal_evidence": traversal_evidence,
                 "traversal_reason": self._traversal_reason(interfaces, traversal_verified),
             },
         )
@@ -90,8 +92,24 @@ class WindowAggregator:
 
     def _traversal_reason(self, interfaces: list[str], verified: bool) -> str:
         if verified:
-            return "flow observed on both configured gateway sides"
+            return "same flow key observed on all configured gateway interfaces"
         if len(self.expected_interfaces) >= 2:
             missing = sorted(self.expected_interfaces.difference(interfaces))
             return f"missing configured gateway interface observation: {','.join(missing)}"
         return "at least two gateway interfaces are required to prove traversal"
+
+    def _traversal_evidence(self, observation: PacketObservation, interfaces: list[str]) -> dict[str, Any]:
+        return {
+            "observed_interfaces": interfaces,
+            "required_interfaces": sorted(self.expected_interfaces),
+            "flow_key": {
+                "protocol": observation.protocol,
+                "src_ip": observation.src_ip,
+                "src_port": observation.src_port,
+                "dst_ip": observation.dst_ip,
+                "dst_port": observation.dst_port,
+                "direction": observation.direction,
+                "mqtt_message_type": observation.mqtt_message_type,
+                "mqtt_topic": observation.mqtt_topic,
+            },
+        }

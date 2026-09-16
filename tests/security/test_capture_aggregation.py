@@ -61,6 +61,7 @@ class CaptureAggregationTests(unittest.TestCase):
         self.assertEqual(event["aggregation"]["packet_count"], 2)
         self.assertEqual(event["aggregation"]["total_packet_size_bytes"], 230)
         self.assertTrue(event["aggregation"]["traversal_verified"])
+        self.assertEqual(event["aggregation"]["traversal_evidence"]["observed_interfaces"], ["eth-iot", "eth-test"])
         self.assertEqual(event["mqtt"]["message_type"], "PUBLISH")
         self.assertIsNone(event["mqtt"]["client_id"])
 

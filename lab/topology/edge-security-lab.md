@@ -30,7 +30,14 @@ Para considerar que o trafego atravessou o gateway, a mesma chave de fluxo preci
 - direcao derivada dos CIDRs configurados;
 - metadados MQTT visiveis quando houver.
 
-Quando apenas uma interface e observada, o evento continua sendo emitido, mas `aggregation.traversal_verified` fica `false` e `aggregation.traversal_reason` informa a interface ausente.
+Configurar duas interfaces no comando nao prova travessia por si so. O agregado registra `aggregation.traversal_evidence.observed_interfaces` com as interfaces que realmente observaram a chave de fluxo naquela janela. Quando apenas uma interface e observada, o evento continua sendo emitido, mas `aggregation.traversal_verified` fica `false` e `aggregation.traversal_reason` informa a interface ausente.
+
+Limites desta verificacao:
+
+- Ela prova observacao da mesma chave de fluxo nas interfaces configuradas durante a janela.
+- Ela nao substitui validacao de roteamento/NAT do laboratorio.
+- Se NAT alterar IP/porta entre as interfaces, a chave de fluxo pode nao casar e a travessia nao sera marcada como verificada.
+- Trafego cifrado permite metadados IP/TCP, mas nao topico MQTT.
 
 ## Operacao permitida nesta etapa
 
