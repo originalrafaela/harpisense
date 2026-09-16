@@ -1,0 +1,42 @@
+# Maestri
+.maestri/
+
+# Credenciais e variáveis
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Compilações
+build/
+dist/
+coverage/
+
+# ESP32 / PlatformIO
+.pio/
+.vscode/.browse.c_cpp.db*
+.vscode/ipch/
+
+# Editores e sistema
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
