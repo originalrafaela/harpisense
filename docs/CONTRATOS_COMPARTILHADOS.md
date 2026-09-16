@@ -12,6 +12,7 @@ Este documento define os contratos iniciais entre `iot-mqtt`, `edge-security` e 
 - Payloads MQTT e payloads HTTP devem ser JSON UTF-8.
 - Payloads nao devem incluir senhas, tokens, chaves privadas ou conteudo sensivel desnecessario.
 - Telemetria de sensores e eventos de seguranca sao fluxos separados.
+- A ingestao HTTP nao deve ficar desprotegida para resolver incompatibilidade entre areas.
 
 ## Identificacao de dispositivos
 
@@ -78,9 +79,12 @@ Payload de telemetria:
 Regras:
 
 - `message_id` deve ser unico por mensagem.
+- `message_id` e chave de idempotencia para telemetria; reenvios com o mesmo valor nao devem criar novo registro.
 - `sequence` deve ser monotonico por dispositivo quando o produtor conseguir manter estado.
 - `measurements` varia por `sensor_type`.
-- Valores desconhecidos devem ser `null` ou omitidos; nao usar strings como `"N/A"`.
+- Valores desconhecidos podem ser `null` ou omitidos; nao usar strings como `"N/A"`.
+- `measurements` nao pode ser objeto vazio.
+- Para o firmware atual do Poste 1, `temperature_c` e `humidity_pct` podem ser `null` ate sensor e pinagem serem aprovados.
 
 ## Topicos MQTT de eventos de seguranca
 
@@ -143,9 +147,13 @@ Payload canonico para ingestao e persistencia:
 Regras:
 
 - `event_id` deve ser unico.
+- `event_id` e chave de idempotencia para eventos de rede; reenvios com o mesmo valor nao devem criar novo registro.
 - `classification.stage` na primeira entrega deve ser `raw_capture`.
 - `label` deve ser `unknown` enquanto nao houver ML treinado ou regra IDS validada.
 - O gateway nao deve alterar payload de telemetria; ele registra metadados do trafego observado.
+- Campos de metadados MQTT que nao estiverem visiveis na captura podem ser `null`.
+- `classification.confidence` deve ser `null` na primeira entrega.
+- A implementacao `edge-security` pode incluir um objeto adicional `aggregation`; a implementacao atual do backend ignora campos extras no payload de entrada. Para evitar perda silenciosa, `backend-data` deve decidir se persiste ou rejeita explicitamente esse objeto antes da validacao integrada.
 
 ## Evento de autenticacao MQTT
 
@@ -208,6 +216,129 @@ Regras:
 - O backend deve adicionar `received_at`.
 - Persistencia inicial pode ser banco local ou armazenamento simples definido pela area `backend-data`, desde que a API consiga persistir e consultar.
 - Contratos devem permanecer independentes do dashboard.
+- Sucesso de ingestao deve responder `202 Accepted`.
+- Reenvio idempotente deve responder `202 Accepted` com `duplicate: true`.
+- Payload invalido deve responder `422 Unprocessable Entity`.
+- Credencial ausente ou invalida deve responder `401 Unauthorized`.
+- Senha administrativa nao configurada deve responder `503 Service Unavailable`.
+
+## Autenticacao HTTP
+
+Ha duas autenticacoes separadas:
+
+- Autenticacao do administrador: protege consultas operacionais e futuras acoes administrativas.
+- Autenticacao do gateway: protege ingestao HTTP feita pelo Edge Security.
+
+Nao usar ingestao sem autenticacao como compatibilidade temporaria.
+
+### Administrador unico
+
+Implementacao existente em `backend-data`:
+
+- `backend/app/core/security.py` usa HTTP Basic.
+- `HARPI_ADMIN_USERNAME` define o usuario.
+- `HARPI_ADMIN_PASSWORD` define a senha.
+- `GET /api/v1/health` e publico.
+- Os demais endpoints atuais exigem HTTP Basic.
+
+Header:
+
+```text
+Authorization: Basic <base64(usuario:senha)>
+```
+
+Configuracao:
+
+```text
+HARPI_ADMIN_USERNAME=admin
+HARPI_ADMIN_PASSWORD=<senha-local-nao-versionada>
+```
+
+Respostas esperadas:
+
+| Situacao | Status | Observacao |
+| --- | --- | --- |
+| Credencial valida | `200`, `202` | Conforme endpoint |
+| Credencial ausente ou invalida | `401` | Deve incluir `WWW-Authenticate: Basic` |
+| `HARPI_ADMIN_PASSWORD` ausente | `503` | API mal configurada para endpoint protegido |
+
+### Gateway Edge Security
+
+Contrato decidido para compatibilidade segura com a implementacao existente:
+
+- O gateway deve usar credencial propria, separada da senha do administrador.
+- O header contratado para o gateway sera HTTP Basic na primeira integracao, porque o backend existente so aceita Basic.
+- Bearer opcional implementado em `edge-security` nao deve ser usado contra o backend atual ate haver suporte explicito no backend.
+- A senha do gateway nao deve ser igual a `HARPI_ADMIN_PASSWORD`.
+
+Header contratado:
+
+```text
+Authorization: Basic <base64(gateway_id:gateway_secret)>
+```
+
+Configuracao alvo no backend:
+
+```text
+HARPI_GATEWAY_USERNAME=harpisense.gateway.edge-1
+HARPI_GATEWAY_PASSWORD=<senha-local-nao-versionada>
+```
+
+Configuracao alvo no Edge:
+
+```text
+HARPISENSE_BACKEND_USERNAME=harpisense.gateway.edge-1
+HARPISENSE_BACKEND_PASSWORD=<senha-local-nao-versionada>
+```
+
+Endpoints autorizados para a credencial do gateway nesta entrega:
+
+- `POST /api/v1/ingest/network-events`
+
+Endpoints que continuam administrativos:
+
+- `POST /api/v1/ingest/telemetry`
+- `GET /api/v1/telemetry`
+- `GET /api/v1/network-events`
+
+Respostas esperadas para ingestao do gateway:
+
+| Situacao | Status | Corpo esperado |
+| --- | --- | --- |
+| Evento aceito | `202` | `accepted: true`, `duplicate: false`, `id`, `received_at` |
+| Evento repetido por `event_id` | `202` | `accepted: true`, `duplicate: true`, `id`, `received_at` |
+| Credencial ausente ou invalida | `401` | Erro de autenticacao |
+| Payload invalido | `422` | Erro de validacao |
+| Senha de gateway nao configurada | `503` | API mal configurada para ingestao do gateway |
+
+Alteracoes necessarias por area:
+
+- `backend-data`: adicionar configuracao `HARPI_GATEWAY_USERNAME` e `HARPI_GATEWAY_PASSWORD`; aceitar Basic do gateway em `POST /api/v1/ingest/network-events`; manter Basic administrativo nos demais endpoints; nao aceitar Bearer sem contrato novo; manter `GET /api/v1/health` publico.
+- `edge-security`: adicionar envio de HTTP Basic com usuario/senha do gateway; manter Bearer apenas como capacidade nao usada nesta integracao; atualizar exemplo de execucao para nao enviar sem credencial.
+- `iot-mqtt`: sem mudanca HTTP; manter credenciais MQTT separadas de qualquer credencial HTTP.
+
+## Consumidor MQTT para persistencia
+
+A area `backend-data` possui o consumidor responsavel por alimentar o banco a partir do broker:
+
+```text
+backend/app/mqtt/consumer.py
+```
+
+Execucao:
+
+```powershell
+$env:HARPI_MQTT_ENABLED="true"
+python -m app.mqtt_worker
+```
+
+Regras de operacao:
+
+- O consumidor assina `HARPI_MQTT_TELEMETRY_TOPIC`, padrao `harpisense/v1/telemetry/+/+`.
+- O consumidor valida o payload com o mesmo schema de `POST /api/v1/ingest/telemetry`.
+- O consumidor rejeita mensagem cujo topico nao combine com `device_id` e `sensor_type`.
+- O consumidor persiste telemetria diretamente pelo servico backend, sem HTTP.
+- Credenciais MQTT do consumidor devem usar usuario de leitura proprio no Mosquitto; se a ACL atual permitir apenas `mqtt_test_subscriber`, usar esse usuario temporariamente ou criar usuario dedicado `harpisense_backend_consumer`.
 
 ## Consulta minima da primeira entrega
 
