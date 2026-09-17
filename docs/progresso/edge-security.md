@@ -14,10 +14,10 @@ Branch: `edge-security`
 - Implementado parser MQTT conservador em `edge/capture/events.py`, sem inferir resultado de autenticacao.
 - Implementado capturador Scapy configuravel em `edge/capture/scapy_gateway.py`.
 - Implementado cliente HTTP de backend em `edge/capture/backend_client.py`.
-- Entrega ao backend considera sucesso somente com HTTP `202 Accepted`.
-- Falhas de envio, timeout e status diferente de `202` sao registradas como nao entregues.
-- URL do backend, timeout e token bearer opcional sao configuraveis por argumento.
-- Credenciais nao foram versionadas; nomes suportados: `HARPISENSE_BACKEND_TOKEN` ou arquivo local passado por `--backend-token-file`.
+- Entrega ao backend considera sucesso com HTTP `202 Accepted`, incluindo reenvio idempotente com `duplicate: true`.
+- Falhas de envio, timeout, credencial ausente e status diferente de `202` sao registradas como nao entregues.
+- Cliente HTTP ajustado para Basic obrigatorio do gateway via `HARPISENSE_BACKEND_USERNAME` e `HARPISENSE_BACKEND_PASSWORD`.
+- Bearer foi removido da integracao de envio ao backend e nao ha fallback para envio sem autenticacao quando `--backend-url` estiver configurado.
 - Documentada a topologia esperada em `lab/topology/edge-security-lab.md`.
 - Atualizado `edge/README.md` com dependencias e comandos para Linux.
 - Registrado status de captura em `docs/evidence/edge-security-capture-status.md`.
@@ -27,6 +27,7 @@ Branch: `edge-security`
 - Eventos brutos usam `record_kind: raw_event`; janelas usam `record_kind: aggregate_window` e `event_type: network_window`.
 - As janelas offline reutilizam `WindowAggregator` e sao baseadas em `observed_at` dos pacotes.
 - Campos de autenticacao indisponiveis permanecem desconhecidos (`auth_result: unknown`, `auth_failure_count: null`).
+- `network_window` permanece apenas na exportacao offline; o cliente HTTP recusa enviar registros que nao sejam `network_event` ao endpoint `/api/v1/ingest/network-events`.
 
 Arquivos principais:
 
@@ -53,8 +54,10 @@ Arquivos principais:
 - Nenhuma regra foi apresentada como ML treinado.
 - Nenhum resultado de autenticacao MQTT foi inferido de pacotes TCP.
 - Eventos `mqtt_auth_event` permanecem dependentes de logs/exportador do Mosquitto.
-- Os contratos vigentes nao definem autenticacao obrigatoria para ingestao de `network_event`; token bearer foi deixado opcional para alinhamento futuro.
-- Nao foi alterado `docs/CONTRATOS_COMPARTILHADOS.md`; se `network_window` ou `format_version` precisarem virar contrato compartilhado, a proposta deve ser levada ao Arquiteto.
+- O contrato atualizado exige HTTP Basic para a credencial propria do gateway no `POST /api/v1/ingest/network-events`.
+- O cliente Edge usa `HARPISENSE_BACKEND_USERNAME` e `HARPISENSE_BACKEND_PASSWORD`, conforme solicitado para a integracao da area.
+- Nao foi alterado `docs/CONTRATOS_COMPARTILHADOS.md`; `network_window` e `format_version` continuam fora do endpoint de ingestao.
+- `409 identifier_conflict` deve ser tratado como falha; a Edge nao altera `event_id` para contornar conflito.
 
 ## Validacao realmente executada
 
@@ -74,10 +77,17 @@ Validacao adicional em 2026-09-17:
 - Parse sintatico com `ast.parse` para `edge/capture/backend_client.py`, `edge/capture/aggregator.py`, `edge/capture/events.py`, `edge/capture/scapy_gateway.py`, `edge/capture/offline_pcap.py` e testes em `tests/security`: passou.
 - Smoke test direto de `export_offline_observations`: passou, validando ordenacao temporal, contagem de eventos/janelas, campos offline de autenticacao desconhecidos e `traversal_verified: false` quando falta interface esperada.
 
+Validacao adicional em 2026-09-17 apos merge da `main`:
+
+- Parse sintatico com `ast.parse` para modulos e testes da area: passou.
+- Smoke test direto do cliente HTTP com backend simulado: passou para Basic, `202 duplicate=false`, `202 duplicate=true`, credencial ausente, recusa de `network_window` e falhas `401`, `403`, `409 identifier_conflict` e `503`.
+- Estes testes continuam sendo simulacao local, nao integracao real com `backend-data`.
+
 ## Testes nao executados, bloqueios e dependencias
 
 - `python -m unittest discover -s tests/security -p "test_*.py"` nao foi executado com sucesso neste host.
 - `python` nao existe no PATH.
+- Tentativa de `unittest discover` com o Python embarcado do Nsight Systems em 2026-09-17 falhou com `No module named unittest`.
 - `py` existe em `C:\Windows\py.exe`, mas retornou `No installed Python found!`.
 - Pythons encontrados fora do PATH:
   - `C:\Program Files\NVIDIA Corporation\Nsight Systems 2025.5.2\host-windows-x64\python\bin\python.exe` - Python 3.12.4, mas sem modulo `unittest`.
@@ -92,7 +102,7 @@ Validacao adicional em 2026-09-17:
 - Executar testes `unittest` em Python completo.
 - Validar captura real na VM Linux com duas interfaces e trafego MQTT legitimo.
 - Validar envio real ao backend `backend-data` e consulta posterior em `GET /api/v1/network-events`.
-- Alinhar com Arquiteto/backend se o endpoint de ingestao exigira autenticacao; contrato atual nao especifica obrigatoriedade nem formato.
+- Validar no backend real que `POST /api/v1/ingest/network-events` aceita Basic do gateway e retorna `202`, `duplicate: true`, `401`, `403`, `409` e `503` conforme contrato.
 - Se houver NAT entre interfaces do gateway, revisar a chave de fluxo usada para `traversal_verified`, pois alteracao de IP/porta pode impedir o casamento.
 
 ## Proximos passos
@@ -148,12 +158,12 @@ tail -n 5 edge/capture/network-event-delivery.jsonl
 curl 'http://<backend-host>:<port>/api/v1/network-events?limit=5'
 ```
 
-6. Se autenticacao for acordada, usar apenas nome de variavel ou arquivo local nao versionado:
+6. Configurar credenciais Basic do gateway por variaveis de ambiente, sem versionar segredos:
 
 ```bash
-export HARPISENSE_BACKEND_TOKEN='<valor-fora-do-git>'
-sudo --preserve-env=HARPISENSE_BACKEND_TOKEN .venv/bin/python -m edge.capture.scapy_gateway \
-  --backend-token-env HARPISENSE_BACKEND_TOKEN \
+export HARPISENSE_BACKEND_USERNAME='<gateway-id>'
+export HARPISENSE_BACKEND_PASSWORD='<gateway-secret>'
+sudo --preserve-env=HARPISENSE_BACKEND_USERNAME,HARPISENSE_BACKEND_PASSWORD .venv/bin/python -m edge.capture.scapy_gateway \
   --backend-url http://<backend-host>:<port>/api/v1/ingest/network-events \
   --iface <iot-iface> \
   --iface <test-iface>

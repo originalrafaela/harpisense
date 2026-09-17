@@ -8,12 +8,15 @@ O processamento offline de PCAP usa o mesmo normalizador de pacotes e a mesma ag
 
 ## Contrato de backend
 
-O contrato vigente define HTTP `POST /api/v1/ingest/network-events` e sucesso somente com `202 Accepted`. Os documentos em `docs/` nao definem autenticacao obrigatoria para este endpoint. Por isso, o capturador envia sem credencial por padrao e aceita token bearer opcional apenas se isso for acordado com `backend-data`/Arquiteto.
+O contrato vigente define HTTP `POST /api/v1/ingest/network-events`, autenticacao HTTP Basic propria do gateway e sucesso com `202 Accepted`. Reenvio idempotente do mesmo `event_id` com o mesmo conteudo tambem e confirmado por `202 Accepted` com `duplicate: true`.
+
+O capturador nao usa Bearer e nao envia ao backend sem credenciais. Quando `--backend-url` estiver configurado, defina `HARPISENSE_BACKEND_USERNAME` e `HARPISENSE_BACKEND_PASSWORD` no ambiente de execucao. Falta de configuracao produz erro local claro no registro de entrega, sem expor credenciais.
 
 O evento capturado e sempre gravado no JSONL local. A entrega ao backend e registrada separadamente em `network-event-delivery.jsonl`:
 
 - `backend_delivered: true`: somente quando o backend respondeu `202`.
-- `backend_delivered: false`: timeout, falha de conexao ou qualquer status diferente de `202`.
+- `backend_duplicate: true`: backend confirmou reenvio idempotente com `duplicate: true`.
+- `backend_delivered: false`: credencial ausente, timeout, falha de conexao ou qualquer status diferente de `202`, incluindo `401`, `403`, `409` e `503`.
 
 ## Dependencias
 
@@ -60,7 +63,9 @@ Escolha uma interface do lado IoT e outra do lado teste/broker. Configure os CID
 Exemplo com duas interfaces do gateway:
 
 ```bash
-sudo .venv/bin/python -m edge.capture.scapy_gateway \
+export HARPISENSE_BACKEND_USERNAME='<gateway-id>'
+export HARPISENSE_BACKEND_PASSWORD='<gateway-secret>'
+sudo --preserve-env=HARPISENSE_BACKEND_USERNAME,HARPISENSE_BACKEND_PASSWORD .venv/bin/python -m edge.capture.scapy_gateway \
   --iface eth-iot \
   --iface eth-test \
   --iot-cidr 192.168.20.0/24 \
@@ -75,11 +80,12 @@ sudo .venv/bin/python -m edge.capture.scapy_gateway \
   --duration-seconds 120
 ```
 
-Se houver token bearer acordado posteriormente, nao versione o segredo. Use variavel de ambiente ou arquivo local ignorado pelo Git, como `.env.edge-backend-token` contendo apenas o token:
+Se os nomes das variaveis precisarem ser diferentes no ambiente do laboratorio, informe-os explicitamente. Nao registre os valores no Git:
 
 ```bash
-export HARPISENSE_BACKEND_TOKEN='<token-fornecido-fora-do-git>'
-sudo --preserve-env=HARPISENSE_BACKEND_TOKEN .venv/bin/python -m edge.capture.scapy_gateway \
+export LAB_GATEWAY_USERNAME='<gateway-id>'
+export LAB_GATEWAY_PASSWORD='<gateway-secret>'
+sudo --preserve-env=LAB_GATEWAY_USERNAME,LAB_GATEWAY_PASSWORD .venv/bin/python -m edge.capture.scapy_gateway \
   --iface eth-iot \
   --iface eth-test \
   --iot-cidr 192.168.20.0/24 \
@@ -88,23 +94,10 @@ sudo --preserve-env=HARPISENSE_BACKEND_TOKEN .venv/bin/python -m edge.capture.sc
   --mqtt-port 1883 \
   --window-seconds 30 \
   --backend-url http://127.0.0.1:8000/api/v1/ingest/network-events \
-  --backend-token-env HARPISENSE_BACKEND_TOKEN \
+  --backend-username-env LAB_GATEWAY_USERNAME \
+  --backend-password-env LAB_GATEWAY_PASSWORD \
   --output-jsonl edge/capture/network-events.jsonl \
   --delivery-jsonl edge/capture/network-event-delivery.jsonl \
-  --duration-seconds 120
-```
-
-Alternativa com arquivo local ignorado por `.gitignore`:
-
-```bash
-sudo .venv/bin/python -m edge.capture.scapy_gateway \
-  --iface eth-iot \
-  --iface eth-test \
-  --iot-cidr 192.168.20.0/24 \
-  --test-cidr 192.168.30.0/24 \
-  --mqtt-port 1883 \
-  --backend-url http://127.0.0.1:8000/api/v1/ingest/network-events \
-  --backend-token-file .env.edge-backend-token \
   --duration-seconds 120
 ```
 
@@ -152,13 +145,13 @@ Inspecione confirmacoes de envio:
 tail -n 5 edge/capture/network-event-delivery.jsonl
 ```
 
-Confirme que a API do backend lista o evento persistido, quando a integracao real estiver disponivel:
+Confirme que a API do backend lista o evento persistido com credencial administrativa, quando a integracao real estiver disponivel:
 
 ```bash
-curl 'http://127.0.0.1:8000/api/v1/network-events?limit=5'
+curl -u '<admin-user>:<admin-password>' 'http://127.0.0.1:8000/api/v1/network-events?limit=5'
 ```
 
-Esse `curl` verifica a consulta real do backend; os testes automatizados desta area foram escritos com backend simulado e devem ser descritos como simulacao.
+Esse `curl` verifica a consulta real do backend com credencial administrativa. Os testes automatizados desta area foram escritos com backend simulado e devem ser descritos como simulacao, nao como integracao real.
 
 Use `--iface` uma vez para cada lado observado do gateway. A verificacao de travessia so fica verdadeira quando a mesma chave de fluxo aparece nas interfaces esperadas dentro da mesma janela de agregacao. Configurar duas interfaces nao basta: `aggregation.traversal_evidence.observed_interfaces` precisa conter as interfaces onde o fluxo foi realmente observado, e `aggregation.traversal_verified` permanece `false` se uma delas nao aparecer.
 

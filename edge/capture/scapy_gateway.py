@@ -11,7 +11,12 @@ from pathlib import Path
 from typing import Any
 
 from edge.capture.aggregator import WindowAggregator
-from edge.capture.backend_client import BackendClient, BackendClientConfig
+from edge.capture.backend_client import (
+    DEFAULT_BACKEND_PASSWORD_ENV,
+    DEFAULT_BACKEND_USERNAME_ENV,
+    BackendClient,
+    BackendClientConfig,
+)
 from edge.capture.events import PacketObservation, parse_mqtt_from_tcp_payload
 
 
@@ -26,8 +31,8 @@ class CaptureConfig:
     window_seconds: int
     backend_url: str | None
     backend_timeout_seconds: float
-    backend_token_env: str | None
-    backend_token_file: Path | None
+    backend_username_env: str
+    backend_password_env: str
     output_jsonl: Path
     delivery_jsonl: Path | None
     bpf_filter: str
@@ -44,8 +49,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--window-seconds", type=int, default=30)
     parser.add_argument("--backend-url", help="Backend endpoint, for example http://localhost:8000/api/v1/ingest/network-events")
     parser.add_argument("--backend-timeout-seconds", type=float, default=5.0)
-    parser.add_argument("--backend-token-env", help="Optional environment variable containing a backend bearer token if agreed")
-    parser.add_argument("--backend-token-file", help="Optional local file containing a backend bearer token if agreed")
+    parser.add_argument("--backend-username-env", default=DEFAULT_BACKEND_USERNAME_ENV, help="Environment variable containing the gateway HTTP Basic username")
+    parser.add_argument("--backend-password-env", default=DEFAULT_BACKEND_PASSWORD_ENV, help="Environment variable containing the gateway HTTP Basic password")
     parser.add_argument("--output-jsonl", default="edge/capture/network-events.jsonl")
     parser.add_argument("--delivery-jsonl", default="edge/capture/network-event-delivery.jsonl")
     parser.add_argument("--duration-seconds", type=int, default=0, help="0 means run until interrupted")
@@ -64,8 +69,8 @@ def config_from_args(args: argparse.Namespace) -> CaptureConfig:
         window_seconds=args.window_seconds,
         backend_url=args.backend_url,
         backend_timeout_seconds=args.backend_timeout_seconds,
-        backend_token_env=args.backend_token_env,
-        backend_token_file=Path(args.backend_token_file) if args.backend_token_file else None,
+        backend_username_env=args.backend_username_env,
+        backend_password_env=args.backend_password_env,
         output_jsonl=Path(args.output_jsonl),
         delivery_jsonl=Path(args.delivery_jsonl) if args.delivery_jsonl else None,
         bpf_filter=args.bpf_filter or f"tcp port {args.mqtt_port}",
@@ -142,7 +147,14 @@ def flush_events(
             output.write(json.dumps(event, separators=(",", ":"), ensure_ascii=False) + "\n")
             if backend_client:
                 delivery = backend_client.post_network_event(event)
-                write_delivery_record(delivery_jsonl, event, delivery.delivered, delivery.status_code, delivery.error)
+                write_delivery_record(
+                    delivery_jsonl,
+                    event,
+                    delivery.delivered,
+                    delivery.status_code,
+                    delivery.error,
+                    delivery.duplicate,
+                )
     return len(events)
 
 
@@ -152,6 +164,7 @@ def write_delivery_record(
     delivered: bool,
     status_code: int | None,
     error: str | None,
+    duplicate: bool | None = None,
 ) -> None:
     if delivery_jsonl is None:
         return
@@ -161,6 +174,7 @@ def write_delivery_record(
         "backend_delivered": delivered,
         "backend_status_code": status_code,
         "backend_error": error,
+        "backend_duplicate": duplicate,
     }
     with delivery_jsonl.open("a", encoding="utf-8") as output:
         output.write(json.dumps(record, separators=(",", ":"), ensure_ascii=False) + "\n")
@@ -180,8 +194,8 @@ def run_capture(config: CaptureConfig, duration_seconds: int) -> int:
             BackendClientConfig(
                 url=config.backend_url,
                 timeout_seconds=config.backend_timeout_seconds,
-                token_env=config.backend_token_env,
-                token_file=config.backend_token_file,
+                username_env=config.backend_username_env,
+                password_env=config.backend_password_env,
             )
         )
         if config.backend_url
