@@ -140,6 +140,33 @@ Payload canonico para ingestao e persistencia:
     "stage": "raw_capture",
     "label": "unknown",
     "confidence": null
+  },
+  "aggregation": {
+    "window_seconds": 30,
+    "window_start": "2026-09-15T22:30:00.000Z",
+    "window_end": "2026-09-15T22:30:30.000Z",
+    "first_observed_at": "2026-09-15T22:30:01.125Z",
+    "last_observed_at": "2026-09-15T22:30:02.431Z",
+    "packet_count": 4,
+    "total_packet_size_bytes": 512,
+    "interfaces_observed": ["eth-iot", "eth-test"],
+    "expected_interfaces": ["eth-iot", "eth-test"],
+    "traversal_verified": true,
+    "traversal_reason": "same flow key observed on all configured gateway interfaces",
+    "traversal_evidence": {
+      "observed_interfaces": ["eth-iot", "eth-test"],
+      "required_interfaces": ["eth-iot", "eth-test"],
+      "flow_key": {
+        "protocol": "tcp",
+        "src_ip": "192.168.20.31",
+        "src_port": 49152,
+        "dst_ip": "192.168.30.20",
+        "dst_port": 1883,
+        "direction": "iot_to_test",
+        "mqtt_message_type": "PUBLISH",
+        "mqtt_topic": "harpisense/v1/telemetry/harpisense.poste.poste-1/environment"
+      }
+    }
   }
 }
 ```
@@ -153,7 +180,16 @@ Regras:
 - O gateway nao deve alterar payload de telemetria; ele registra metadados do trafego observado.
 - Campos de metadados MQTT que nao estiverem visiveis na captura podem ser `null`.
 - `classification.confidence` deve ser `null` na primeira entrega.
-- A implementacao `edge-security` pode incluir um objeto adicional `aggregation`; a implementacao atual do backend ignora campos extras no payload de entrada. Para evitar perda silenciosa, `backend-data` deve decidir se persiste ou rejeita explicitamente esse objeto antes da validacao integrada.
+- A implementacao `edge-security` inclui um objeto adicional `aggregation` nos eventos agregados por janela.
+- Decisao desta entrega: `aggregation` deve ser aceito, validado e persistido pelo backend como parte do `network_event`.
+- O backend nao pode descartar `aggregation` silenciosamente. Se o objeto estiver presente e invalido, deve responder `422 Unprocessable Entity`.
+- `aggregation` e opcional para eventos brutos sem agregacao. Quando presente, deve conter os campos do exemplo acima.
+- `aggregation.packet_count`, `aggregation.total_packet_size_bytes` e `aggregation.window_seconds` devem ser inteiros positivos.
+- `aggregation.window_start`, `aggregation.window_end`, `aggregation.first_observed_at` e `aggregation.last_observed_at` devem usar ISO 8601 UTC com sufixo `Z`.
+- `aggregation.interfaces_observed` e `aggregation.expected_interfaces` devem ser listas de strings.
+- `aggregation.traversal_verified` deve ser booleano.
+- `aggregation.traversal_evidence.flow_key` deve refletir a chave usada pela Edge para agrupar o fluxo, sem incluir segredos.
+- A exportacao offline `network_window` produzida por `edge.capture.offline_pcap` permanece artefato JSONL offline nesta entrega. Nao criar endpoint de ingestao de janelas nem persistir `network_window` na API enquanto nao houver contrato novo.
 
 ## Evento de autenticacao MQTT
 
@@ -218,9 +254,45 @@ Regras:
 - Contratos devem permanecer independentes do dashboard.
 - Sucesso de ingestao deve responder `202 Accepted`.
 - Reenvio idempotente deve responder `202 Accepted` com `duplicate: true`.
+- Reutilizacao de identificador com conteudo diferente deve responder `409 Conflict` com `error.code = "identifier_conflict"`.
 - Payload invalido deve responder `422 Unprocessable Entity`.
 - Credencial ausente ou invalida deve responder `401 Unauthorized`.
 - Senha administrativa nao configurada deve responder `503 Service Unavailable`.
+
+### Idempotencia
+
+Telemetria:
+
+- Primeira persistencia valida: `202 Accepted`, `duplicate: false`.
+- Reenvio do mesmo `message_id` com conteudo identico: `202 Accepted`, `duplicate: true`, sem criar novo registro.
+- Reenvio do mesmo `message_id` com conteudo diferente: `409 Conflict`, `error.code = "identifier_conflict"`.
+- Comparacao canonica de conteudo para `message_id`: `schema_version`, `message_id`, `device_id`, `observed_at`, `sensor_type`, `sequence`, `measurements` e `status`.
+- Campos gerados pelo servidor ficam fora da comparacao: `id`, `received_at`, colunas derivadas, ordem fisica de armazenamento e metadados de banco.
+
+Eventos de rede:
+
+- Primeira persistencia valida: `202 Accepted`, `duplicate: false`.
+- Reenvio do mesmo `event_id` com conteudo identico: `202 Accepted`, `duplicate: true`, sem criar novo registro.
+- Reenvio do mesmo `event_id` com conteudo diferente: `409 Conflict`, `error.code = "identifier_conflict"`.
+- Comparacao canonica de conteudo para `event_id`: `schema_version`, `event_id`, `event_type`, `observed_at`, `sensor_id`, `capture`, `mqtt`, `classification` e `aggregation` quando presente.
+- Campos gerados pelo servidor ficam fora da comparacao: `id`, `received_at`, colunas de consulta derivadas de `capture` ou `mqtt`, ordem fisica de armazenamento e metadados de banco.
+- Objetos JSON devem ser comparados apos validacao de schema, sem depender da ordem textual das chaves. Campo opcional omitido e campo opcional `null` devem ser normalizados de modo consistente pela implementacao antes da comparacao.
+
+Exemplo de conflito:
+
+```json
+{
+  "error": {
+    "code": "identifier_conflict",
+    "message": "event_id already exists with different content",
+    "details": [
+      {
+        "field": "event_id"
+      }
+    ]
+  }
+}
+```
 
 ## Autenticacao HTTP
 
@@ -268,7 +340,8 @@ Respostas esperadas:
 | --- | --- | --- |
 | Credencial valida | `200`, `202` | Conforme endpoint |
 | Credencial ausente ou invalida | `401` | Deve incluir `WWW-Authenticate: Basic` |
-| `HARPI_ADMIN_PASSWORD` ausente | `503` | API mal configurada para endpoint protegido |
+| Configuracao administrativa incompleta | `503` | `HARPI_ADMIN_PASSWORD` ausente ou invalido para endpoint protegido |
+| Credencial de gateway em endpoint administrativo | `401` ou `403` | Gateway nao tem permissao administrativa |
 
 ### Gateway Edge Security
 
@@ -315,9 +388,11 @@ Respostas esperadas para ingestao do gateway:
 | --- | --- | --- |
 | Evento aceito | `202` | `accepted: true`, `duplicate: false`, `id`, `received_at` |
 | Evento repetido por `event_id` | `202` | `accepted: true`, `duplicate: true`, `id`, `received_at` |
+| Mesmo `event_id` com conteudo diferente | `409` | `error.code: identifier_conflict` |
 | Credencial ausente ou invalida | `401` | Erro de autenticacao |
 | Payload invalido | `422` | Erro de validacao |
-| Senha de gateway nao configurada | `503` | API mal configurada para ingestao do gateway |
+| Configuracao de gateway incompleta | `503` | `HARPI_GATEWAY_USERNAME` ou `HARPI_GATEWAY_PASSWORD` ausente/invalido |
+| Gateway tentando consulta administrativa | `401` ou `403` | Acesso negado, sem dados operacionais |
 
 Alteracoes necessarias por area:
 
@@ -325,12 +400,25 @@ Alteracoes necessarias por area:
 - `edge-security`: adicionar envio de HTTP Basic com usuario/senha do gateway; manter Bearer apenas como capacidade nao usada nesta integracao; atualizar exemplo de execucao para nao enviar sem credencial.
 - `iot-mqtt`: sem mudanca HTTP; manter credenciais MQTT separadas de qualquer credencial HTTP.
 
+Permissoes por endpoint:
+
+| Metodo | Caminho | Publico | Administrador | Gateway |
+| --- | --- | --- | --- | --- |
+| `GET` | `/api/v1/health` | Sim | Sim | Sim |
+| `POST` | `/api/v1/ingest/telemetry` | Nao | Sim | Nao |
+| `POST` | `/api/v1/ingest/network-events` | Nao | Opcional para teste local controlado | Sim |
+| `GET` | `/api/v1/telemetry` | Nao | Sim | Nao |
+| `GET` | `/api/v1/network-events` | Nao | Sim | Nao |
+
+HTTP Basic codifica usuario e senha em Base64, mas nao cifra credenciais. Em laboratorio isolado pode ser usado sobre HTTP local/controlado; fora desse laboratorio, ou em qualquer rede compartilhada, deve rodar sobre HTTPS/TLS ou tunel equivalente. Senhas administrativas, de gateway e MQTT nao devem ser iguais entre si.
+
 Checklist minimo antes da validacao integrada:
 
 - Backend deve responder `401 Unauthorized` quando `POST /api/v1/ingest/network-events` chegar sem `Authorization`.
 - Backend deve responder `401 Unauthorized` quando o Basic do gateway estiver incorreto.
-- Backend deve responder `503 Service Unavailable` se `HARPI_GATEWAY_PASSWORD` nao estiver configurada.
+- Backend deve responder `503 Service Unavailable` se `HARPI_GATEWAY_USERNAME` ou `HARPI_GATEWAY_PASSWORD` nao estiver configurado.
 - Backend deve responder `202 Accepted` para evento valido com Basic do gateway.
+- Backend deve responder `409 Conflict` para mesmo `event_id` ou `message_id` com conteudo diferente.
 - Edge deve enviar `Authorization: Basic ...` quando receber usuario/senha do gateway.
 - Edge nao deve enviar `Authorization: Bearer ...` contra o backend atual.
 
@@ -355,14 +443,29 @@ Regras de operacao:
 - O consumidor valida o payload com o mesmo schema de `POST /api/v1/ingest/telemetry`.
 - O consumidor rejeita mensagem cujo topico nao combine com `device_id` e `sensor_type`.
 - O consumidor persiste telemetria diretamente pelo servico backend, sem HTTP.
-- Credenciais MQTT do consumidor devem usar usuario de leitura proprio no Mosquitto; se a ACL atual permitir apenas `mqtt_test_subscriber`, usar esse usuario temporariamente ou criar usuario dedicado `harpisense_backend_consumer`.
+- Credenciais MQTT do consumidor devem usar usuario dedicado de leitura `harpisense_backend_consumer`.
+- `harpisense_backend_consumer` deve ter permissao apenas de leitura/assinatura nos topicos de telemetria necessarios: `harpisense/v1/telemetry/#`.
+- `harpisense_backend_consumer` nao deve publicar telemetria, nao deve ler topicos de seguranca e nao deve escrever em `harpisense/v1/security/#`.
 
 Detalhes confirmados na implementacao:
 
 - `backend/app/mqtt/consumer.py` cria cliente com `client_id="harpisense-backend-telemetry"`.
 - Se `HARPI_MQTT_USERNAME` estiver configurado, o worker usa `username_pw_set(settings.mqtt_username, settings.mqtt_password)`.
 - A persistencia chama `ingest_telemetry`, portanto a idempotencia por `message_id` tambem vale para mensagens consumidas do MQTT.
-- A ACL atual de `iot-mqtt` possui `mqtt_test_subscriber` com leitura em `harpisense/v1/telemetry/#`; usuario dedicado ainda nao existe.
+- A ACL atual de `iot-mqtt` possui `mqtt_test_subscriber` com leitura em `harpisense/v1/telemetry/#`; a area `iot-mqtt` deve adicionar `harpisense_backend_consumer` com a mesma leitura minima e sem permissao de escrita.
+
+Correspondencia de configuracao MQTT:
+
+| Uso | Variavel/arquivo | Valor de exemplo sem segredo real |
+| --- | --- | --- |
+| Usuario do consumidor backend | `HARPI_MQTT_USERNAME` | `harpisense_backend_consumer` |
+| Senha do consumidor backend | `HARPI_MQTT_PASSWORD` | `<senha-mqtt-backend-consumer>` |
+| Host do broker para o backend | `HARPI_MQTT_HOST` | `localhost` |
+| Porta do broker para o backend | `HARPI_MQTT_PORT` | `1883` |
+| Topico assinado pelo backend | `HARPI_MQTT_TELEMETRY_TOPIC` | `harpisense/v1/telemetry/+/+` |
+| Provisionamento de usuario no broker | `mqtt/config/lab-users.example` ou arquivo local equivalente | `harpisense_backend_consumer:<senha-mqtt-backend-consumer>` |
+| ACL do usuario no broker | `mqtt/config/aclfile` | `user harpisense_backend_consumer` + `topic read harpisense/v1/telemetry/#` |
+| Geracao do password file | `mqtt/config/create-password-file.sh` | Entrada `username:password`; saida `mqtt/config/passwords` |
 
 ## Consulta minima da primeira entrega
 

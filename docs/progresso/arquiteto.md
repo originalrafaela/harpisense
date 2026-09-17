@@ -1,5 +1,71 @@
 # Progresso - arquiteto
 
+## Atualizacao em 2026-09-17 - contratos fechados para implementacao
+
+Rodada documental na `main`, sem merge das branches de area e sem validacao real.
+
+Branches locais mais recentes lidas sem checkout:
+
+- `backend-data` em `f142aaeb819d80bace6f272b1f157a2e055fba54` (`Harden backend ingestion idempotency`).
+- `edge-security` em `b48c9dc649b85ff782b0fa21f379948e72ad02c6` (`Add offline PCAP export pipeline`).
+- `iot-mqtt` em `d92120c68fda7395ab73b03e8011ac426d3c3ddd` (`Expand synthetic MQTT simulator`).
+
+Implementacoes conferidas nesta rodada:
+
+- `backend-data`:
+  - `backend/app/services/telemetry.py` compara conteudo existente e novo para `message_id`.
+  - `backend/app/services/security_events.py` compara `payload` persistido e novo para `event_id`.
+  - `backend/app/services/idempotency.py` define `IdentifierConflictError`.
+  - `backend/app/api/errors.py` transforma conflito em `409` com `error.code = "identifier_conflict"`.
+  - `backend/app/api/v1/routes/ingest.py` ainda aplica `require_admin` ao router inteiro.
+  - `backend/app/core/config.py` ainda nao possui `HARPI_GATEWAY_USERNAME` e `HARPI_GATEWAY_PASSWORD`.
+  - `backend/app/schemas/security_event.py` ainda nao declara `aggregation`.
+- `edge-security`:
+  - `edge/capture/aggregator.py` produz `aggregation` em `network_event`.
+  - `edge/capture/events.py` adiciona `aggregation` ao evento quando fornecido.
+  - `edge/capture/offline_pcap.py` exporta `network_event` bruto e `network_window` offline em JSONL.
+  - `edge/README.md` ainda documenta Bearer opcional e envio sem credencial por padrao.
+- `iot-mqtt`:
+  - `mqtt/config/lab-users.example` ainda contem `iot_device_lab` e `mqtt_test_subscriber`, sem `harpisense_backend_consumer`.
+  - `mqtt/config/aclfile` ainda nao declara ACL do usuario dedicado do backend.
+  - `mqtt/config/create-password-file.sh` provisiona usuarios a partir de linhas `username:password`.
+  - `lab/legitimate-traffic/simulate_poste.py` foi expandido para multiplos postes, duracao, seed e JSONL local.
+
+Decisoes fechadas:
+
+- HTTP Basic separado:
+  - Administrador: `HARPI_ADMIN_USERNAME` e `HARPI_ADMIN_PASSWORD`.
+  - Gateway no backend: `HARPI_GATEWAY_USERNAME` e `HARPI_GATEWAY_PASSWORD`.
+  - Cliente Edge: `HARPISENSE_BACKEND_USERNAME` e `HARPISENSE_BACKEND_PASSWORD`, com valores correspondentes aos do gateway.
+- Gateway so pode acessar `POST /api/v1/ingest/network-events`; nao pode consultar endpoints administrativos.
+- Basic nao cifra credenciais; HTTPS/TLS ou tunel equivalente e obrigatorio fora de laboratorio isolado.
+- Idempotencia:
+  - primeira persistencia ou reenvio identico: `202 Accepted`;
+  - reenvio identico: `duplicate: true`;
+  - mesmo identificador com conteudo diferente: `409 Conflict`, `error.code = "identifier_conflict"`.
+- Comparacao de idempotencia exclui metadados gerados pelo servidor, como `id`, `received_at`, colunas derivadas e metadados de banco.
+- `aggregation` produzido pela Edge em `network_event` deve ser aceito, validado e persistido nesta entrega.
+- `aggregation` invalido deve retornar `422`; descarte silencioso esta proibido.
+- `network_window` permanece exportacao offline JSONL; nao ha endpoint de ingestao de janelas nesta entrega.
+- Usuario MQTT dedicado definido: `harpisense_backend_consumer`, somente leitura em `harpisense/v1/telemetry/#`.
+- Mantidas regras existentes: valores desconhecidos podem ser `null` ou omitidos; `measurements` nao pode ser vazio; consumidor MQTT deve validar topico contra `device_id` e `sensor_type`.
+
+Documentos atualizados:
+
+- `docs/CONTRATOS_COMPARTILHADOS.md`: permissoes por endpoint, respostas de autenticacao, nota de Basic/HTTPS, idempotencia completa, tratamento de `aggregation`, `network_window` offline e usuario MQTT dedicado.
+- `docs/ROTEIRO_INTEGRACAO_PRIMEIRA_ENTREGA.md`: roteiro ajustado para `harpisense_backend_consumer`, Basic do gateway, 409 de idempotencia, validacao/persistencia de `aggregation` e verificacao negativa de permissao do gateway.
+
+Implementacoes ainda necessarias por area:
+
+- `backend-data`: adicionar `HARPI_GATEWAY_USERNAME` e `HARPI_GATEWAY_PASSWORD`; separar dependencia de autenticacao do gateway em `POST /api/v1/ingest/network-events`; negar consultas administrativas ao gateway; validar e persistir `aggregation`; manter `409 identifier_conflict`.
+- `edge-security`: trocar a integracao real de Bearer opcional/sem credencial para HTTP Basic com `HARPISENSE_BACKEND_USERNAME` e `HARPISENSE_BACKEND_PASSWORD`; nao enviar `network_window` a API; manter `network_window` offline.
+- `iot-mqtt`: adicionar `harpisense_backend_consumer` ao provisionamento local de usuarios e ACL com somente `topic read harpisense/v1/telemetry/#`; manter publicadores sem permissao de leitura/consulta administrativa.
+
+Validacao:
+
+- Nao foi executada integracao real.
+- `git diff --check` executado nesta rodada; apenas avisos LF/CRLF esperados no Windows, sem erro de whitespace.
+
 ## Atualizacao em 2026-09-17
 
 Rodada de preparacao documental da integracao, sem merge das branches de area e sem validacao real.

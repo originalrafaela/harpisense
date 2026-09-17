@@ -27,6 +27,9 @@ Commits de implementacao base lidos:
 - `observed_at` vem do produtor ou da observacao; `received_at` vem do backend.
 - `message_id` e chave de idempotencia para telemetria; `event_id` e chave de idempotencia para eventos de rede.
 - Valores desconhecidos podem ser `null` ou omitidos, mas `measurements` nao pode ser objeto vazio.
+- Reenvio identico deve retornar `202 Accepted` com `duplicate: true`; identificador reutilizado com conteudo diferente deve retornar `409 Conflict` com `error.code = "identifier_conflict"`.
+- `aggregation` em `network_event` deve ser aceito, validado e persistido. Descarte silencioso nao e permitido.
+- `network_window` gerado pelo processamento offline de PCAP permanece exportacao JSONL offline nesta entrega, sem endpoint de ingestao.
 
 ## Contrato de autenticacao para a integracao
 
@@ -47,6 +50,7 @@ HARPI_ADMIN_PASSWORD=<senha-local-nao-versionada>
   - `POST /api/v1/ingest/telemetry`
   - `GET /api/v1/telemetry`
   - `GET /api/v1/network-events`
+- A credencial do gateway nao pode acessar consultas administrativas.
 
 ### Gateway
 
@@ -69,9 +73,13 @@ HARPISENSE_BACKEND_PASSWORD=<senha-local-nao-versionada>
 - Respostas esperadas:
   - Evento valido com Basic do gateway: `202 Accepted`.
   - Evento repetido por `event_id`: `202 Accepted` com `duplicate: true`.
+  - Mesmo `event_id` com conteudo diferente: `409 Conflict` com `error.code = "identifier_conflict"`.
   - Credencial ausente ou invalida: `401 Unauthorized`.
   - Payload invalido: `422 Unprocessable Entity`.
-  - `HARPI_GATEWAY_PASSWORD` ausente: `503 Service Unavailable`.
+  - `HARPI_GATEWAY_USERNAME` ou `HARPI_GATEWAY_PASSWORD` ausente/invalido: `503 Service Unavailable`.
+  - Gateway tentando `GET /api/v1/telemetry` ou `GET /api/v1/network-events`: `401 Unauthorized` ou `403 Forbidden`.
+
+HTTP Basic usa Base64 e nao cifra credenciais. No laboratorio isolado pode rodar em HTTP local/controlado; fora dele deve usar HTTPS/TLS ou tunel equivalente.
 
 Estado atual a corrigir antes da validacao:
 
@@ -79,6 +87,7 @@ Estado atual a corrigir antes da validacao:
 - `edge-security` ainda envia somente Bearer opcional quando configurado.
 - Bearer nao deve ser usado contra o backend atual.
 - A ingestao nao deve ser aberta sem autenticacao para contornar essa incompatibilidade.
+- `backend-data` ja possui tratamento de `409 identifier_conflict` para identificadores reutilizados com conteudo diferente, mas ainda precisa aplicar a credencial de gateway separada.
 
 ## Ordem de inicializacao
 
@@ -153,6 +162,18 @@ Usuarios MQTT existentes:
 - `mqtt_test_subscriber`: le `harpisense/v1/telemetry/#`.
 - `mqtt_auth_exporter`: reservado para futuro `mqtt-auth-event`.
 
+Usuario MQTT decidido para o backend:
+
+- Adicionar `harpisense_backend_consumer:<senha-mqtt-backend-consumer>` ao arquivo local de usuarios usado por `mqtt/config/create-password-file.sh`.
+- Adicionar no `mqtt/config/aclfile`:
+
+```text
+user harpisense_backend_consumer
+topic read harpisense/v1/telemetry/#
+```
+
+- `harpisense_backend_consumer` nao deve ter permissao de publicacao nem acesso a `harpisense/v1/security/#`.
+
 Dependencias:
 
 - Docker com Compose.
@@ -169,8 +190,8 @@ cd backend
 $env:HARPI_MQTT_ENABLED="true"
 $env:HARPI_MQTT_HOST="localhost"
 $env:HARPI_MQTT_PORT="1883"
-$env:HARPI_MQTT_USERNAME="mqtt_test_subscriber"
-$env:HARPI_MQTT_PASSWORD="<senha-mqtt-leitura>"
+$env:HARPI_MQTT_USERNAME="harpisense_backend_consumer"
+$env:HARPI_MQTT_PASSWORD="<senha-mqtt-backend-consumer>"
 $env:HARPI_MQTT_TELEMETRY_TOPIC="harpisense/v1/telemetry/+/+"
 python -m app.mqtt_worker
 ```
@@ -181,10 +202,13 @@ Responsabilidade:
 - Validar topico contra `device_id` e `sensor_type`.
 - Persistir no banco usando `backend/app/mqtt/consumer.py`.
 - Usar `ingest_telemetry`, mantendo idempotencia por `message_id`.
+- Retornar/registrar conflito de idempotencia quando `message_id` for reutilizado com conteudo diferente.
 
-Pendencia recomendada:
+Correspondencia com o broker:
 
-- Criar usuario MQTT dedicado `harpisense_backend_consumer` com permissao de leitura em `harpisense/v1/telemetry/#`, ou documentar que `mqtt_test_subscriber` sera usado temporariamente na primeira validacao.
+- `HARPI_MQTT_USERNAME` deve corresponder ao usuario `harpisense_backend_consumer` provisionado no Mosquitto.
+- `HARPI_MQTT_PASSWORD` deve corresponder a senha local desse usuario no password file.
+- `HARPI_MQTT_TELEMETRY_TOPIC` deve ficar dentro da ACL `topic read harpisense/v1/telemetry/#`.
 
 ### 5. Simulador MQTT
 
@@ -211,6 +235,7 @@ Contrato observado:
 - `message_id` gerado com UUID hexadecimal.
 - `observed_at` em UTC com sufixo `Z`.
 - `status.battery_pct` pode ser `null`.
+- O simulador sintetico atual pode publicar multiplos postes com `--devices`, `--post-count`, `--duration`, `--seed` e tambem gerar JSONL local com `--jsonl`.
 
 ### 6. Poste 1 ESP32
 
@@ -288,6 +313,14 @@ tail -n 5 edge/capture/network-events.jsonl
 tail -n 5 edge/capture/network-event-delivery.jsonl
 ```
 
+Tratamento do payload:
+
+- `network_event` enviado ao backend deve manter `event_type: network_event`.
+- Se `aggregation` estiver presente, o backend deve validar e persistir esse objeto junto do evento.
+- Reenvio com mesmo `event_id` e mesmo conteudo deve resultar em `duplicate: true`.
+- Reenvio com mesmo `event_id` e conteudo diferente deve resultar em `409 identifier_conflict`.
+- `network_window` emitido por `edge.capture.offline_pcap` fica em JSONL offline e nao deve ser enviado a `/api/v1/ingest/network-events` nesta entrega.
+
 ### 8. Consulta pela API
 
 Depois de telemetria e eventos persistidos, consultar com Basic administrativo:
@@ -301,14 +334,26 @@ Invoke-RestMethod -Method Get -Uri "http://localhost:8000/api/v1/telemetry?limit
 Invoke-RestMethod -Method Get -Uri "http://localhost:8000/api/v1/network-events?dst_port=1883&limit=10" -Headers $headers
 ```
 
+Confirmacao negativa de permissao do gateway:
+
+```powershell
+$gatewayPair = "harpisense.gateway.edge-1:<senha-gateway-local>"
+$gatewayToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($gatewayPair))
+$gatewayHeaders = @{ Authorization = "Basic $gatewayToken" }
+
+# Deve retornar 401 ou 403; o gateway nao consulta dados administrativos.
+Invoke-RestMethod -Method Get -Uri "http://localhost:8000/api/v1/network-events?limit=10" -Headers $gatewayHeaders
+```
+
 ## Incompatibilidades a corrigir antes da validacao real
 
 | Area | Correcao necessaria |
 | --- | --- |
-| `backend-data` | Implementar credencial Basic separada para gateway em `POST /api/v1/ingest/network-events`, com `HARPI_GATEWAY_USERNAME` e `HARPI_GATEWAY_PASSWORD`. |
-| `edge-security` | Implementar envio de `Authorization: Basic ...` com usuario/senha do gateway; remover exemplos sem credencial para integracao real. |
-| `backend-data` | Decidir e implementar tratamento de `aggregation` enviado pelo Edge: persistir como JSON ou rejeitar explicitamente; evitar ignorar silenciosamente na integracao validada. |
-| `iot-mqtt` | Definir se o consumidor backend usara `mqtt_test_subscriber` temporariamente ou um novo usuario MQTT dedicado de leitura. |
+| `backend-data` | Implementar credencial Basic separada para gateway em `POST /api/v1/ingest/network-events`, com `HARPI_GATEWAY_USERNAME` e `HARPI_GATEWAY_PASSWORD`; negar consultas administrativas ao gateway. |
+| `edge-security` | Implementar envio de `Authorization: Basic ...` com usuario/senha do gateway; remover exemplos sem credencial para integracao real; nao usar Bearer contra o backend atual. |
+| `backend-data` | Aceitar, validar e persistir `aggregation` enviado pelo Edge em `network_event`; rejeitar com `422` se presente e invalido; nao descartar silenciosamente. |
+| `edge-security` | Manter `network_window` como exportacao offline JSONL; nao enviar `network_window` para a API nesta entrega. |
+| `iot-mqtt` | Criar usuario MQTT dedicado `harpisense_backend_consumer` com permissao somente de leitura em `harpisense/v1/telemetry/#`. |
 | `iot-mqtt` | Definir sensor fisico e pinagem do ESP32 para substituir `temperature_c` e `humidity_pct` nulos quando houver hardware. |
 | `iot-mqtt` | Validar sincronizacao de hora do ESP32 antes de aceitar evidencias com `observed_at`. |
 | `edge-security` | Confirmar nomes reais das interfaces e CIDRs; duas interfaces configuradas nao provam travessia se o fluxo nao aparecer em ambas. |
