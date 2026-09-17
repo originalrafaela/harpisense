@@ -174,6 +174,44 @@ $env:HARPI_MQTT_ENABLED="true"
 python -m app.mqtt_worker
 ```
 
+## Estado em 2026-09-17
+
+Revisao complementar na branch `backend-data`, preservando API, autenticacao existente, modelos, migration inicial e consumidor MQTT.
+
+Implementado/preparado:
+
+- Reenvio identico por `message_id` e `event_id` permanece idempotente com `202 Accepted` e `duplicate: true`.
+- Reutilizacao do mesmo identificador com conteudo diferente agora retorna conflito por `IdentifierConflictError`.
+- Proposta para o Arquiteto registrada em `backend/README.md`: formalizar `409 Conflict` com `error.code = identifier_conflict` para identificador idempotente reutilizado com payload divergente.
+- Persistencia HTTP continua respondendo `202` somente apos `commit` e `refresh`; falhas SQLAlchemy passam pelo handler `database_error` com `503`.
+- Valores `null` permitidos nos payloads continuam como `None`/JSON null, sem conversao para zero.
+- Consultas adicionaram desempate por `id` depois de `observed_at` e `received_at`, mantendo filtros temporais e limite maximo `500`.
+- `ensure_device` usa `INSERT ... ON CONFLICT DO NOTHING` em PostgreSQL para reduzir corrida na criacao canonica de dispositivo.
+- Worker MQTT permanece executavel separado (`python -m app.mqtt_worker`), nao e iniciado por `app.main`, fecha a conexao no encerramento e nao loga credenciais.
+- Testes de integracao preparados em `backend/tests/`, exigindo PostgreSQL real via `HARPI_TEST_DATABASE_URL` ou `--postgres-url`.
+
+Testes preparados nesta rodada:
+
+- duplicata identica de telemetria;
+- conflito de `message_id` com payload diferente;
+- duplicata concorrente de telemetria;
+- payload invalido;
+- preservacao de `null`;
+- filtros temporais e limite maximo;
+- conflito de `event_id` com payload diferente;
+- falha de banco sem resposta `202`.
+
+Testes realmente executados nesta rodada:
+
+- Ainda nao executados com Python/PostgreSQL neste host.
+
+Pendencias de validacao real:
+
+- Executar `pytest` com `HARPI_TEST_DATABASE_URL` apontando para PostgreSQL de teste.
+- Executar `alembic upgrade head` em PostgreSQL real.
+- Validar API com PostgreSQL ativo e credencial local.
+- Validar worker MQTT com broker real.
+
 ## Commits relevantes
 
 - `5a05547e58b1f3b4b3d8183e51374b1c4a26beef` - `Implement backend ingestion base`

@@ -7,11 +7,18 @@ from sqlalchemy.orm import Session
 from app.models import SecurityEvent
 from app.schemas.security_event import NetworkEventIn
 from app.services.devices import ensure_device
+from app.services.idempotency import IdentifierConflictError
+
+
+def _ensure_same_payload(existing: SecurityEvent, payload: NetworkEventIn) -> None:
+    if existing.payload != payload.model_dump(mode="json"):
+        raise IdentifierConflictError("event_id", payload.event_id)
 
 
 def ingest_network_event(db: Session, payload: NetworkEventIn) -> tuple[SecurityEvent, bool]:
     existing = db.scalar(select(SecurityEvent).where(SecurityEvent.event_id == payload.event_id))
     if existing:
+        _ensure_same_payload(existing, payload)
         return existing, True
 
     ensure_device(db, payload.sensor_id)
@@ -52,6 +59,7 @@ def ingest_network_event(db: Session, payload: NetworkEventIn) -> tuple[Security
         db.rollback()
         duplicate = db.scalar(select(SecurityEvent).where(SecurityEvent.event_id == payload.event_id))
         if duplicate:
+            _ensure_same_payload(duplicate, payload)
             return duplicate, True
         raise
     db.refresh(event)
@@ -69,7 +77,7 @@ def build_network_events_query(
     query = (
         select(SecurityEvent)
         .where(SecurityEvent.event_type == "network_event")
-        .order_by(SecurityEvent.observed_at.desc(), SecurityEvent.received_at.desc())
+        .order_by(SecurityEvent.observed_at.desc(), SecurityEvent.received_at.desc(), SecurityEvent.id.desc())
     )
     if src_ip:
         query = query.where(SecurityEvent.src_ip == src_ip)

@@ -55,11 +55,13 @@ Duplicidade e tratada pelos identificadores contratados:
 - Telemetria: `message_id`
 - Evento de rede/seguranca: `event_id`
 
-Ao reenviar o mesmo identificador, a API responde `202 Accepted` com `duplicate: true` e nao cria novo registro.
+Ao reenviar o mesmo identificador com conteudo identico, a API responde `202 Accepted` com `duplicate: true` e nao cria novo registro. Se o mesmo identificador for reutilizado com conteudo diferente, a implementacao atual retorna `409 Conflict` com `error.code = identifier_conflict`.
+
+Proposta registrada para o Arquiteto: formalizar no contrato que `message_id` e `event_id` sao chaves idempotentes imutaveis; reenvio identico deve retornar `202`, reutilizacao com conteudo divergente deve retornar `409`, e o corpo de erro nao deve ecoar o payload para evitar vazamento de dados.
 
 ## Ingestao MQTT
 
-O worker MQTT consome telemetria em `harpisense/v1/telemetry/+/+` e persiste o mesmo payload aceito por `POST /api/v1/ingest/telemetry`.
+O worker MQTT consome telemetria em `harpisense/v1/telemetry/+/+` e persiste o mesmo payload aceito por `POST /api/v1/ingest/telemetry`. Ele deve ser executado como processo separado da API; `app.main` nao inicia consumidor MQTT, evitando um consumidor duplicado por worker da API.
 
 ```powershell
 $env:HARPI_MQTT_ENABLED="true"
@@ -75,6 +77,27 @@ HARPI_MQTT_USERNAME=
 HARPI_MQTT_PASSWORD=
 HARPI_MQTT_TELEMETRY_TOPIC=harpisense/v1/telemetry/+/+
 ```
+
+O worker fecha a conexao MQTT no encerramento do processo. Logs registram host/topico, ids de mensagem e erros operacionais, sem imprimir usuario ou senha MQTT.
+
+## Testes preparados
+
+Os testes de integracao usam PostgreSQL real e pulam quando o banco de teste nao esta configurado. SQLite nao deve ser usado para afirmar compatibilidade.
+
+```powershell
+$env:HARPI_TEST_DATABASE_URL="postgresql+psycopg://harpisense:harpisense@localhost:5432/harpisense_test"
+pytest
+```
+
+Cobertura preparada:
+
+- duplicata identica de `message_id`;
+- reutilizacao de `message_id` e `event_id` com conteudo diferente;
+- duplicata concorrente de telemetria;
+- payload invalido;
+- valores `null` preservados em telemetria, captura MQTT e classificacao;
+- filtros temporais e limite maximo;
+- falha de banco sem resposta `202`.
 
 ## Verificacao com dados conhecidos
 

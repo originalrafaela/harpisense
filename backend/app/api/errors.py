@@ -2,6 +2,9 @@ from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import SQLAlchemyError
+
+from app.services.idempotency import IdentifierConflictError
 
 
 def error_response(status_code: int, code: str, message: str, details: list | None = None) -> JSONResponse:
@@ -20,5 +23,24 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
+async def identifier_conflict_handler(request: Request, exc: IdentifierConflictError) -> JSONResponse:
+    return error_response(
+        status.HTTP_409_CONFLICT,
+        "identifier_conflict",
+        f"{exc.identifier_name} already exists with different content",
+        [{"field": exc.identifier_name}],
+    )
+
+
+async def database_exception_handler(request: Request, exc: SQLAlchemyError) -> JSONResponse:
+    return error_response(
+        status.HTTP_503_SERVICE_UNAVAILABLE,
+        "database_error",
+        "Database operation failed",
+    )
+
+
 def register_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
+    app.add_exception_handler(IdentifierConflictError, identifier_conflict_handler)
+    app.add_exception_handler(SQLAlchemyError, database_exception_handler)

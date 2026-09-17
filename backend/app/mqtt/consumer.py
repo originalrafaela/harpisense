@@ -3,10 +3,12 @@ import logging
 
 import paho.mqtt.client as mqtt
 from pydantic import ValidationError
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.config import settings
 from app.db.session import SessionLocal
 from app.schemas.telemetry import TelemetryIn
+from app.services.idempotency import IdentifierConflictError
 from app.services.telemetry import ingest_telemetry
 
 logger = logging.getLogger(__name__)
@@ -45,9 +47,14 @@ def _on_message(client: mqtt.Client, userdata: object, message: mqtt.MQTTMessage
         logger.warning("Rejected MQTT telemetry payload with mismatched topic %s", message.topic)
         return
 
-    with SessionLocal() as db:
-        record, duplicate = ingest_telemetry(db, payload)
-        logger.info("Stored MQTT telemetry message_id=%s duplicate=%s id=%s", payload.message_id, duplicate, record.id)
+    try:
+        with SessionLocal() as db:
+            record, duplicate = ingest_telemetry(db, payload)
+            logger.info("Stored MQTT telemetry message_id=%s duplicate=%s id=%s", payload.message_id, duplicate, record.id)
+    except IdentifierConflictError:
+        logger.warning("Rejected MQTT telemetry with reused message_id=%s and different content", payload.message_id)
+    except SQLAlchemyError:
+        logger.exception("Failed to store MQTT telemetry message_id=%s", payload.message_id)
 
 
 def build_client() -> mqtt.Client:
@@ -62,4 +69,7 @@ def build_client() -> mqtt.Client:
 def run_forever() -> None:
     client = build_client()
     client.connect(settings.mqtt_host, settings.mqtt_port)
-    client.loop_forever()
+    try:
+        client.loop_forever()
+    finally:
+        client.disconnect()

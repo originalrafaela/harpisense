@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.dialects.postgresql import insert
 
 from app.models import Device
 
@@ -15,7 +16,17 @@ def ensure_device(db: Session, device_id: str, origin: str | None = None) -> Dev
     if device:
         return device
 
-    device = Device(device_id=device_id, device_type=infer_device_type(device_id), origin=origin)
+    device_type = infer_device_type(device_id)
+    if db.bind and db.bind.dialect.name == "postgresql":
+        statement = (
+            insert(Device)
+            .values(device_id=device_id, device_type=device_type, origin=origin)
+            .on_conflict_do_nothing(index_elements=[Device.device_id])
+        )
+        db.execute(statement)
+        return db.get_one(Device, device_id)
+
+    device = Device(device_id=device_id, device_type=device_type, origin=origin)
     db.add(device)
     db.flush()
     return device
