@@ -1,4 +1,6 @@
 # Example-only laboratory users. Replace passwords before real lab use.
 # Format: username:password
+# harpisense_backend_consumer is added by create-password-file.sh from
+# HARPISENSE_BACKEND_CONSUMER_PASSWORD so its password is never versioned here.
 iot_device_lab:change-me-iot-lab
 mqtt_test_subscriber:change-me-subscriber-lab

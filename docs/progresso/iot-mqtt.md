@@ -132,6 +132,60 @@ Testes preparados, mas nao executados neste ambiente por falta de Python:
 .\.venv\Scripts\python -m pytest tests\integration\test_mqtt_contract.py
 ```
 
+## Atualizacao - usuario MQTT do consumidor backend
+
+Contrato atualizado lido da `main` incorporada:
+
+- Consumidor backend MQTT: `harpisense_backend_consumer`.
+- Usuario deve ser dedicado a leitura de telemetria.
+- ACL minima: `topic read harpisense/v1/telemetry/#`.
+- Sem permissao de publicacao e sem acesso a `harpisense/v1/security/#`.
+- Variaveis esperadas pelo consumidor backend: `HARPI_MQTT_USERNAME`, `HARPI_MQTT_PASSWORD`, `HARPI_MQTT_HOST`, `HARPI_MQTT_PORT` e `HARPI_MQTT_TELEMETRY_TOPIC`.
+
+Implementacao preparada nesta rodada:
+
+- `mqtt/config/aclfile`: adiciona `harpisense_backend_consumer` com leitura apenas em `harpisense/v1/telemetry/#`.
+- `mqtt/config/create-password-file.sh`: adiciona o usuario backend ao password file a partir de `HARPISENSE_BACKEND_CONSUMER_PASSWORD`; recusa senha desse usuario no arquivo de usuarios; recusa sobrescrever `mqtt/config/passwords` sem `--force`.
+- `mqtt/config/lab-users.example`: documenta que a senha do consumidor backend e externa e nao versionada.
+- `.gitignore`: ignora `mqtt/config/lab-users.local` para credenciais locais opcionais.
+- `tests/integration/run_mqtt_smoke.ps1`: passa a receber `-BackendConsumerPassword` para provisionar o usuario exigido.
+- `tests/integration/test_mqtt_backend_consumer_acl.ps1`: prepara teste com broker real para assinatura permitida, publicacao proibida e acesso proibido a topicos de seguranca.
+- `mqtt/README.md`: documenta criacao, atualizacao, ACLs e correspondencia com variaveis `HARPI_MQTT_*` usadas pelo consumidor backend, sem alterar arquivos de `backend-data`.
+
+Comandos preparados:
+
+```powershell
+cd mqtt
+$env:HARPISENSE_BACKEND_CONSUMER_PASSWORD="<senha-mqtt-backend-consumer>"
+docker compose --profile init run --rm -e HARPISENSE_BACKEND_CONSUMER_PASSWORD mosquitto-init
+docker compose up -d mosquitto
+Remove-Item Env:\HARPISENSE_BACKEND_CONSUMER_PASSWORD
+```
+
+```powershell
+cd mqtt
+$env:HARPISENSE_BACKEND_CONSUMER_PASSWORD="<nova-senha-mqtt-backend-consumer>"
+docker compose --profile init run --rm -e HARPISENSE_BACKEND_CONSUMER_PASSWORD mosquitto-init /mosquitto/config/create-password-file.sh /mosquitto/config/lab-users.example /mosquitto/config/passwords --force
+Remove-Item Env:\HARPISENSE_BACKEND_CONSUMER_PASSWORD
+```
+
+```powershell
+.\tests\integration\test_mqtt_backend_consumer_acl.ps1 -BackendConsumerPassword "<senha-mqtt-backend-consumer>"
+```
+
+Testes preparados, mas dependentes de broker real para validar ACL:
+
+- Assinatura permitida: `harpisense_backend_consumer` assina `harpisense/v1/telemetry/#`.
+- Publicacao proibida: `harpisense_backend_consumer` tenta publicar em topico de telemetria.
+- Acesso a seguranca proibido: `harpisense_backend_consumer` tenta assinar e publicar em `harpisense/v1/security/#`.
+
+Pendencias mantidas:
+
+- Nao houve alteracao em firmware, sensores, pinagem, NTP ou validacao fisica.
+- Sensor fisico e pinagem do Poste 1 continuam pendentes de aprovacao.
+- Validacao fisica com ESP32 e broker real continua pendente.
+- ACLs so devem ser declaradas validadas apos executar `test_mqtt_backend_consumer_acl.ps1` contra Mosquitto real.
+
 ## Proximos passos sugeridos
 
 1. Ativar Docker Desktop ou Mosquitto local.

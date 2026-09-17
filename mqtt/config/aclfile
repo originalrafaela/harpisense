@@ -7,6 +7,10 @@ pattern write harpisense/v1/telemetry/harpisense.poste.%c/#
 user mqtt_test_subscriber
 topic read harpisense/v1/telemetry/#
 
+# Backend consumer can read only telemetry topics for persistence.
+user harpisense_backend_consumer
+topic read harpisense/v1/telemetry/#
+
 # Reserved for a future broker auth event exporter. No password is created by default.
 user mqtt_auth_exporter
 topic write harpisense/v1/security/mqtt-auth-event

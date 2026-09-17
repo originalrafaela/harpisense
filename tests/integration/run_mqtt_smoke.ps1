@@ -3,7 +3,9 @@ param(
     [string]$HostName = "127.0.0.1",
     [int]$Port = 1883,
     [string]$PublisherPassword = "change-me-iot-lab",
-    [string]$SubscriberPassword = "change-me-subscriber-lab"
+    [string]$SubscriberPassword = "change-me-subscriber-lab",
+    [Parameter(Mandatory = $true)]
+    [string]$BackendConsumerPassword
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,9 +14,15 @@ $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 Set-Location $repoRoot
 
 Push-Location mqtt
-docker compose --profile init run --rm mosquitto-init
-docker compose up -d mosquitto
-Pop-Location
+try {
+    $env:HARPISENSE_BACKEND_CONSUMER_PASSWORD = $BackendConsumerPassword
+    docker compose --profile init run --rm -e HARPISENSE_BACKEND_CONSUMER_PASSWORD mosquitto-init /mosquitto/config/create-password-file.sh /mosquitto/config/lab-users.example /mosquitto/config/passwords --force
+    docker compose up -d mosquitto
+}
+finally {
+    Remove-Item Env:\HARPISENSE_BACKEND_CONSUMER_PASSWORD -ErrorAction SilentlyContinue
+    Pop-Location
+}
 
 $subscriberScript = Join-Path $repoRoot "lab\legitimate-traffic\test_subscriber.py"
 $publisherScript = Join-Path $repoRoot "lab\legitimate-traffic\simulate_poste.py"
