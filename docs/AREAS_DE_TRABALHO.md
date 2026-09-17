@@ -10,6 +10,7 @@ Arquivos de contrato e decisao compartilhados:
 - `docs/CONTRATOS_COMPARTILHADOS.md`
 - `docs/PLANO_PRIMEIRA_ENTREGA.md`
 - `docs/AREAS_DE_TRABALHO.md`
+- `docs/ROTEIRO_INTEGRACAO_PRIMEIRA_ENTREGA.md`
 
 Regras:
 
