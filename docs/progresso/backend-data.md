@@ -262,6 +262,157 @@ Pendencias para integracao:
 - Provisionar no Mosquitto o usuario `harpisense_backend_consumer` com somente leitura em `harpisense/v1/telemetry/#`.
 - Executar `pytest` com `HARPI_TEST_DATABASE_URL` apontando para PostgreSQL real.
 
+## Encerramento do dia em 2026-09-17
+
+Conferencia feita no codigo da branch `backend-data`, em `D:\Projetos\harpisense-worktrees\backend-data`, apos os commits `f142aae`, `41413f2` e `e3b781b`.
+
+Itens realmente implementados no codigo:
+
+- Autenticacao separada:
+  - `backend/app/core/config.py` define `gateway_username` e `gateway_password`, mapeados para `HARPI_GATEWAY_USERNAME` e `HARPI_GATEWAY_PASSWORD`.
+  - `backend/app/core/security.py` possui `require_admin` e `require_gateway` separados.
+  - `require_gateway` retorna `503` quando usuario/senha do gateway nao estao configurados ou quando a senha do gateway e igual a senha administrativa configurada.
+  - Credenciais ausentes ou invalidas retornam `401` com `WWW-Authenticate: Basic`.
+- Restricoes de acesso:
+  - `backend/app/api/v1/routes/ingest.py` exige admin para `POST /api/v1/ingest/telemetry`.
+  - `backend/app/api/v1/routes/ingest.py` exige gateway para `POST /api/v1/ingest/network-events`.
+  - Consultas seguem protegidas por admin em `backend/app/api/v1/routes/telemetry.py` e `backend/app/api/v1/routes/network_events.py`.
+  - Nao ha fallback que aceite credenciais administrativas em `network-events`.
+- Respostas contratadas:
+  - `backend/app/api/errors.py` envelopa `HTTPException` como `authentication_error`, `authorization_error` ou `configuration_error`.
+  - `IdentifierConflictError` continua mapeado para `409 identifier_conflict`.
+  - Falhas SQLAlchemy continuam mapeadas para `503 database_error`.
+- `aggregation`:
+  - `backend/app/schemas/security_event.py` define os modelos `Aggregation`, `TraversalEvidence` e `AggregationFlowKey`.
+  - `aggregation` e opcional em `NetworkEventIn`; se presente, e validado por Pydantic.
+  - Inteiros positivos usam `gt=0`; timestamps de aggregation exigem sufixo `Z`; `protocol` do flow key e normalizado para minusculo.
+  - `network_window` nao foi adicionado a ingestao; `event_type` continua restrito a `network_event`.
+- Persistencia de `aggregation`:
+  - `backend/app/services/security_events.py` persiste `aggregation` dentro do JSONB `payload` existente, junto do `network_event`.
+  - Nao foi criada coluna ou tabela nova para `aggregation`.
+  - `backend/app/models/security_event.py` expoe `aggregation` por propriedade que le `payload["aggregation"]`.
+  - `NetworkEventOut` inclui `aggregation`, permitindo consulta via `GET /api/v1/network-events`.
+- Idempotencia:
+  - `message_id` e `event_id` continuam protegidos por constraints unicas nos modelos/migration existentes.
+  - Reenvio identico retorna `202` com `duplicate: true`.
+  - Mesmo identificador com conteudo diferente retorna `409 identifier_conflict`.
+  - Comparacao de `event_id` usa payload canonico validado e inclui `aggregation`; omission de `aggregation` e `aggregation: null` sao normalizados como equivalentes.
+- Consumidor MQTT:
+  - `backend/app/mqtt/consumer.py` permanece separado da API.
+  - O worker fecha conexao no encerramento e nao loga usuario/senha MQTT.
+  - `backend/.env.example` e `backend/README.md` documentam `HARPI_MQTT_USERNAME=harpisense_backend_consumer` e senha externa.
+  - A ACL do Mosquitto para esse usuario ainda depende da area `iot-mqtt`.
+
+Arquivos principais tocados nesta rodada:
+
+- `backend/app/core/config.py`
+- `backend/app/core/security.py`
+- `backend/app/api/errors.py`
+- `backend/app/api/v1/routes/ingest.py`
+- `backend/app/schemas/security_event.py`
+- `backend/app/services/security_events.py`
+- `backend/app/models/security_event.py`
+- `backend/app/mqtt/consumer.py`
+- `backend/.env.example`
+- `backend/README.md`
+- `backend/scripts/verify_known_data.ps1`
+- `backend/tests/conftest.py`
+- `backend/tests/test_ingestion_behaviors.py`
+- `docs/progresso/backend-data.md`
+
+Decisoes registradas/seguidas:
+
+- Nao alterar `main`.
+- Nao editar contratos compartilhados nesta rodada.
+- Nao trocar PostgreSQL por SQLite para alegar compatibilidade.
+- Nao criar tabelas futuras nem endpoint de `network_window`.
+- Manter worker MQTT como processo separado da API.
+- Senhas reais ficam fora do repositorio; `.env` real, venvs e artefatos locais nao foram versionados.
+
+Testes realmente executados no host:
+
+- `git branch --show-current`: confirmou `backend-data`.
+- `git remote -v`: confirmou `origin` como `https://github.com/originalrafaela/harpisense.git`.
+- `git status --short`: conferido antes e depois das alteracoes.
+- `git diff --check`: passou; apenas avisos de conversao LF/CRLF no Windows.
+- `git diff --cached --check`: passou antes do commit `e3b781b`.
+
+Testes nao executados:
+
+- `pytest`: nao executado porque `python` continua indisponivel no PATH deste host.
+- `alembic upgrade head`: nao executado sem Python/PostgreSQL disponiveis.
+- Subida da API com `uvicorn`: nao executada.
+- Validacao real com PostgreSQL: pendente.
+- Validacao real com broker Mosquitto e usuario `harpisense_backend_consumer`: pendente.
+
+Trabalho ainda incompleto/parcial:
+
+- Implementacao funcional esta preparada no codigo, mas ainda nao foi validada em runtime com Python/PostgreSQL.
+- Persistencia de `aggregation` esta implementada no JSONB `payload`, nao em colunas especificas; isso atende ao contrato atual de persistir como parte do `network_event`, mas deve ser confirmado em teste real.
+- A credencial de gateway depende de variaveis reais no ambiente de execucao.
+- A Edge ainda precisa enviar HTTP Basic separado.
+- O Mosquitto ainda precisa provisionar `harpisense_backend_consumer` e ACL somente leitura em telemetria.
+
+Comandos para retomar amanha:
+
+```powershell
+cd D:\Projetos\harpisense-worktrees\backend-data
+git status --short
+git branch --show-current
+git pull --ff-only
+```
+
+Preparar backend:
+
+```powershell
+cd D:\Projetos\harpisense-worktrees\backend-data\backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
+```
+
+Editar `.env` local, sem versionar segredo:
+
+```text
+HARPI_ADMIN_PASSWORD=<senha-admin-local>
+HARPI_GATEWAY_USERNAME=harpisense.gateway.edge-1
+HARPI_GATEWAY_PASSWORD=<senha-gateway-local>
+HARPI_MQTT_USERNAME=harpisense_backend_consumer
+HARPI_MQTT_PASSWORD=<senha-mqtt-backend-consumer>
+```
+
+Subir banco e migrar:
+
+```powershell
+docker compose up -d postgres
+alembic upgrade head
+```
+
+Rodar testes preparados com PostgreSQL real:
+
+```powershell
+$env:HARPI_TEST_DATABASE_URL="postgresql+psycopg://harpisense:harpisense@localhost:5432/harpisense_test"
+pytest
+```
+
+Subir API e verificar dados conhecidos:
+
+```powershell
+uvicorn app.main:app --reload
+.\scripts\verify_known_data.ps1 -Password "<senha-admin-local>" -GatewayPassword "<senha-gateway-local>"
+```
+
+Validar worker MQTT apos Mosquitto estar provisionado:
+
+```powershell
+$env:HARPI_MQTT_ENABLED="true"
+$env:HARPI_MQTT_USERNAME="harpisense_backend_consumer"
+$env:HARPI_MQTT_PASSWORD="<senha-mqtt-backend-consumer>"
+$env:HARPI_MQTT_TELEMETRY_TOPIC="harpisense/v1/telemetry/+/+"
+python -m app.mqtt_worker
+```
+
 ## Commits relevantes
 
 - `5a05547e58b1f3b4b3d8183e51374b1c4a26beef` - `Implement backend ingestion base`
