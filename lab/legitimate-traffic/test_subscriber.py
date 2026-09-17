@@ -12,6 +12,25 @@ import paho.mqtt.client as mqtt
 from mqtt_contract import validate_environment_payload
 
 
+def format_received_message(topic: str, payload: dict[str, object], errors: list[str]) -> str:
+    status = "INVALID" if errors else "VALID"
+    device_id = payload.get("device_id") or "<missing>"
+    sequence = payload.get("sequence", "<missing>")
+    message_id = payload.get("message_id") or "<missing>"
+    return json.dumps(
+        {
+            "status": status,
+            "topic": topic,
+            "device_id": device_id,
+            "sequence": sequence,
+            "message_id": message_id,
+            "errors": errors,
+            "payload": payload,
+        },
+        ensure_ascii=False,
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Subscribe and validate HarpiSense telemetry.")
     parser.add_argument("--host", default=os.getenv("MQTT_HOST", "127.0.0.1"))
@@ -66,7 +85,7 @@ def main() -> int:
                 continue
 
             received += 1
-            print(json.dumps({"topic": topic, "payload": payload, "errors": errors}, ensure_ascii=False))
+            print(format_received_message(topic, payload, errors))
             if errors:
                 failed = True
     finally:

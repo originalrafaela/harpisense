@@ -105,6 +105,33 @@ Dependencias pendentes:
 - A configuracao de laboratorio usa credenciais de exemplo e exige substituicao fora do Git antes de uso real.
 - Logs reais de Mosquitto nao foram gerados nesta sessao porque o broker nao foi iniciado.
 
+## Atualizacao - simulador sintetico configuravel
+
+Implementacao preparada nesta rodada:
+
+- `lab/legitimate-traffic/simulate_poste.py`: simulador agora aceita quantidade de postes, identificadores, intervalo, duracao, semente aleatoria e modo JSONL local sem broker.
+- `lab/legitimate-traffic/mqtt_contract.py`: helpers para derivar topico por `device_id` e validacoes de faixas plausiveis para temperatura, umidade e RSSI.
+- `lab/legitimate-traffic/test_subscriber.py`: saida estruturada com `status` `VALID` ou `INVALID`, mantendo erros de validacao visiveis.
+- `tests/integration/test_mqtt_contract.py`: testes preparados para geracao multi-poste, JSONL, variacao plausivel, classificacao do subscriber e retransmissao com o mesmo `message_id`.
+- `lab/legitimate-traffic/README.md`: comandos exatos atualizados e marcacao dos dados como sinteticos nos metadados/wrappers, sem alterar o payload MQTT compartilhado.
+
+Comandos documentados para uso posterior:
+
+```powershell
+$env:MQTT_PASSWORD="change-me-iot-lab"
+.\.venv\Scripts\python lab\legitimate-traffic\simulate_poste.py --devices poste-2,poste-3,poste-4 --count 5 --interval 2 --duration 30 --seed 12345
+```
+
+```powershell
+.\.venv\Scripts\python lab\legitimate-traffic\simulate_poste.py --devices poste-2,poste-3 --count 2 --interval 0 --seed 123 --jsonl lab\legitimate-traffic\samples\synthetic-telemetry.jsonl
+```
+
+Testes preparados, mas nao executados neste ambiente por falta de Python:
+
+```powershell
+.\.venv\Scripts\python -m pytest tests\integration\test_mqtt_contract.py
+```
+
 ## Proximos passos sugeridos
 
 1. Ativar Docker Desktop ou Mosquitto local.
