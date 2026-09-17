@@ -59,8 +59,12 @@ Ao final da primeira entrega, deve ser possivel demonstrar:
 - Estrutura de diretorios para as areas principais.
 - `README.md` com descricao curta.
 - `backend/requirements.txt` vazio.
+- Na branch `iot-mqtt`, existem implementacoes de Mosquitto, simulador MQTT, firmware ESP32 e testes de fumaca MQTT.
+- Na branch `edge-security`, existem implementacoes de captura Scapy, agregacao e envio de `network_event` ao backend.
+- Na branch `backend-data`, existem implementacoes de FastAPI, PostgreSQL, schemas, idempotencia, API e consumidor MQTT.
+- Essas implementacoes ainda nao estao integradas na `main` e nao foram validadas ponta a ponta nesta rodada.
 
-## O que falta para esta entrega
+## O que falta integrar na `main` para esta entrega
 
 - Codigo do publicador ESP32.
 - Simuladores MQTT dos postes adicionais.
@@ -71,6 +75,9 @@ Ao final da primeira entrega, deve ser possivel demonstrar:
 - Persistencia local definida e inicializada.
 - Testes ou scripts de validacao ponta a ponta.
 - Evidencias executadas da demonstracao.
+- Correcao da autenticacao entre Edge e Backend: Basic de gateway separado do Basic administrativo.
+- Decisao de persistir ou rejeitar explicitamente o campo `aggregation` produzido pelo Edge.
+- Usuario MQTT dedicado ou decisao formal de uso temporario de `mqtt_test_subscriber` pelo consumidor backend.
 
 ## Dependencias externas
 
