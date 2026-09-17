@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://harpisense:harpisense@localhost:5432/harpisense"
     admin_username: str = "admin"
     admin_password: str | None = None
+    gateway_username: str | None = None
+    gateway_password: str | None = None
     mqtt_enabled: bool = False
     mqtt_host: str = "localhost"
     mqtt_port: int = 1883

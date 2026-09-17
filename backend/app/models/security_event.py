@@ -56,3 +56,9 @@ class SecurityEvent(Base):
 
     sensor = relationship("Device", back_populates="sensor_events", foreign_keys=[sensor_id])
     broker = relationship("Device", back_populates="broker_events", foreign_keys=[broker_id])
+
+    @property
+    def aggregation(self) -> dict | None:
+        if not self.payload:
+            return None
+        return self.payload.get("aggregation")

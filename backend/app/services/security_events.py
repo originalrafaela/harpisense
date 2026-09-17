@@ -10,8 +10,18 @@ from app.services.devices import ensure_device
 from app.services.idempotency import IdentifierConflictError
 
 
+def _network_event_payload(payload: NetworkEventIn) -> dict:
+    return payload.model_dump(mode="json")
+
+
+def _stored_network_event_payload(existing: SecurityEvent) -> dict:
+    stored_payload = dict(existing.payload)
+    stored_payload.setdefault("aggregation", None)
+    return stored_payload
+
+
 def _ensure_same_payload(existing: SecurityEvent, payload: NetworkEventIn) -> None:
-    if existing.payload != payload.model_dump(mode="json"):
+    if _stored_network_event_payload(existing) != _network_event_payload(payload):
         raise IdentifierConflictError("event_id", payload.event_id)
 
 
@@ -50,7 +60,7 @@ def ingest_network_event(db: Session, payload: NetworkEventIn) -> tuple[Security
         capture=capture,
         mqtt=mqtt,
         classification=classification,
-        payload=payload.model_dump(mode="json"),
+        payload=_network_event_payload(payload),
     )
     db.add(event)
     try:

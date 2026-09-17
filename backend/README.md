@@ -8,7 +8,7 @@ Os comandos abaixo assumem o diretorio `backend/` como diretorio atual.
 
 ```powershell
 Copy-Item .env.example .env
-# Edite HARPI_ADMIN_PASSWORD no .env antes de subir a API.
+# Edite HARPI_ADMIN_PASSWORD, HARPI_GATEWAY_PASSWORD e HARPI_MQTT_PASSWORD no .env local.
 
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -31,14 +31,21 @@ Senhas reais nao devem ser versionadas. Use `.env`, que ja esta coberto pelo `.g
 
 ## Autenticacao
 
-Exceto `GET /api/v1/health`, os endpoints usam HTTP Basic com um unico administrador:
+`GET /api/v1/health` e publico. Os demais endpoints usam HTTP Basic com clientes separados:
 
 ```text
 HARPI_ADMIN_USERNAME=admin
 HARPI_ADMIN_PASSWORD=<senha-local>
+HARPI_GATEWAY_USERNAME=harpisense.gateway.edge-1
+HARPI_GATEWAY_PASSWORD=<senha-local-do-gateway>
 ```
 
-Nao ha cadastro publico, multiplos perfis ou RBAC nesta etapa.
+Permissoes desta entrega:
+
+- Administrador: `POST /api/v1/ingest/telemetry`, `GET /api/v1/telemetry`, `GET /api/v1/network-events`.
+- Gateway: `POST /api/v1/ingest/network-events`.
+
+Credenciais administrativas nao sao aceitas como substituto implicito das credenciais do gateway. Credenciais de gateway tambem nao acessam endpoints administrativos. Nao ha cadastro publico, multiplos perfis ou RBAC nesta etapa.
 
 ## Endpoints
 
@@ -55,9 +62,9 @@ Duplicidade e tratada pelos identificadores contratados:
 - Telemetria: `message_id`
 - Evento de rede/seguranca: `event_id`
 
-Ao reenviar o mesmo identificador com conteudo identico, a API responde `202 Accepted` com `duplicate: true` e nao cria novo registro. Se o mesmo identificador for reutilizado com conteudo diferente, a implementacao atual retorna `409 Conflict` com `error.code = identifier_conflict`.
+Ao reenviar o mesmo identificador com conteudo identico, a API responde `202 Accepted` com `duplicate: true` e nao cria novo registro. Se o mesmo identificador for reutilizado com conteudo diferente, a API retorna `409 Conflict` com `error.code = identifier_conflict`.
 
-Proposta registrada para o Arquiteto: formalizar no contrato que `message_id` e `event_id` sao chaves idempotentes imutaveis; reenvio identico deve retornar `202`, reutilizacao com conteudo divergente deve retornar `409`, e o corpo de erro nao deve ecoar o payload para evitar vazamento de dados.
+Para `network_event`, o objeto opcional `aggregation` e aceito, validado e persistido como parte do payload. Se `aggregation` estiver presente e invalido, a API retorna `422 Unprocessable Entity`. `network_window` permanece fora da ingestao HTTP atual.
 
 ## Ingestao MQTT
 
@@ -73,12 +80,14 @@ Variaveis relevantes:
 ```text
 HARPI_MQTT_HOST=localhost
 HARPI_MQTT_PORT=1883
-HARPI_MQTT_USERNAME=
-HARPI_MQTT_PASSWORD=
+HARPI_MQTT_USERNAME=harpisense_backend_consumer
+HARPI_MQTT_PASSWORD=<senha-mqtt-backend-consumer>
 HARPI_MQTT_TELEMETRY_TOPIC=harpisense/v1/telemetry/+/+
 ```
 
-O worker fecha a conexao MQTT no encerramento do processo. Logs registram host/topico, ids de mensagem e erros operacionais, sem imprimir usuario ou senha MQTT.
+O usuario MQTT dedicado do worker deve ser `harpisense_backend_consumer`, com segredo fornecido externamente e nao versionado. No broker, esse usuario deve ter apenas leitura/assinatura em `harpisense/v1/telemetry/#`, sem permissao de publicacao ou leitura em `harpisense/v1/security/#`.
+
+O worker fecha a conexao MQTT no encerramento do processo. Logs registram topico, ids de mensagem e erros operacionais, sem imprimir usuario ou senha MQTT.
 
 ## Testes preparados
 
@@ -94,6 +103,10 @@ Cobertura preparada:
 - duplicata identica de `message_id`;
 - reutilizacao de `message_id` e `event_id` com conteudo diferente;
 - duplicata concorrente de telemetria;
+- autenticacao separada de administrador e gateway;
+- restricao de endpoints por cliente;
+- `aggregation` valido, invalido e persistido em `network_event`;
+- rejeicao de `network_window` na ingestao atual;
 - payload invalido;
 - valores `null` preservados em telemetria, captura MQTT e classificacao;
 - filtros temporais e limite maximo;
@@ -101,10 +114,10 @@ Cobertura preparada:
 
 ## Verificacao com dados conhecidos
 
-Com PostgreSQL migrado, API rodando e `HARPI_ADMIN_PASSWORD` configurada:
+Com PostgreSQL migrado, API rodando, `HARPI_ADMIN_PASSWORD` e `HARPI_GATEWAY_PASSWORD` configuradas:
 
 ```powershell
-.\scripts\verify_known_data.ps1 -Password "<senha-local>"
+.\scripts\verify_known_data.ps1 -Password "<senha-admin-local>" -GatewayPassword "<senha-gateway-local>"
 ```
 
 O script verifica:

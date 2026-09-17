@@ -212,6 +212,56 @@ Pendencias de validacao real:
 - Validar API com PostgreSQL ativo e credencial local.
 - Validar worker MQTT com broker real.
 
+## Estado em 2026-09-17 apos merge de `main`
+
+Revisao de compatibilidade com o contrato atualizado incorporado da `main`, sem editar `docs/CONTRATOS_COMPARTILHADOS.md` ou demais contratos compartilhados.
+
+Implementado nesta rodada:
+
+- Separacao de HTTP Basic administrativo e HTTP Basic do gateway.
+- Novas configuracoes `HARPI_GATEWAY_USERNAME` e `HARPI_GATEWAY_PASSWORD`.
+- `POST /api/v1/ingest/network-events` agora exige credencial do gateway e nao aceita a credencial administrativa como fallback.
+- Endpoints administrativos continuam exigindo credencial administrativa:
+  - `POST /api/v1/ingest/telemetry`
+  - `GET /api/v1/telemetry`
+  - `GET /api/v1/network-events`
+- Respostas envelopadas para credencial ausente/invalida (`401`), configuracao ausente/invalida (`503`) e conflitos de identificador (`409 identifier_conflict`).
+- `aggregation` em `network_event` passou a ser aceito, validado e persistido no JSONB `payload`; objeto invalido retorna `422`.
+- `network_window` permanece fora da ingestao atual, rejeitado pelo contrato de `event_type`.
+- Comparacao de idempotencia de `event_id` inclui `aggregation` normalizado; campo opcional omitido e `null` sao tratados de forma consistente.
+- Worker MQTT documentado/configurado para usar o usuario dedicado `harpisense_backend_consumer`, com senha fornecida externamente.
+- Script `backend/scripts/verify_known_data.ps1` atualizado para usar senha administrativa nas consultas/telemetria e senha de gateway nos eventos de rede.
+
+Testes preparados nesta rodada:
+
+- autenticacao administrativa valida nos endpoints administrativos;
+- credencial do gateway aceita somente em `POST /api/v1/ingest/network-events`;
+- credencial administrativa recusada em ingestao de `network-events`;
+- ausencia de credencial do gateway retorna `401`;
+- configuracao ausente de gateway retorna `503`;
+- gateway recusado em endpoints administrativos;
+- `aggregation` valido aceito, persistido e idempotente;
+- `aggregation` invalido retorna `422`;
+- `network_window` rejeitado pela ingestao atual;
+- duplicatas e `409 identifier_conflict` preservados para `message_id` e `event_id`.
+
+Testes realmente executados nesta rodada:
+
+- `git diff --check`: executado apos as alteracoes.
+- `git diff --cached --check`: executado antes do commit.
+
+Nao executados nesta rodada:
+
+- `pytest`, pois o host continua sem `python` no PATH e a validacao real com PostgreSQL ficara para etapa posterior.
+- Validacao com broker MQTT real.
+
+Pendencias para integracao:
+
+- Configurar `HARPI_GATEWAY_USERNAME=harpisense.gateway.edge-1` e `HARPI_GATEWAY_PASSWORD` no ambiente real do backend.
+- Atualizar a Edge para enviar HTTP Basic com `HARPISENSE_BACKEND_USERNAME` e `HARPISENSE_BACKEND_PASSWORD`.
+- Provisionar no Mosquitto o usuario `harpisense_backend_consumer` com somente leitura em `harpisense/v1/telemetry/#`.
+- Executar `pytest` com `HARPI_TEST_DATABASE_URL` apontando para PostgreSQL real.
+
 ## Commits relevantes
 
 - `5a05547e58b1f3b4b3d8183e51374b1c4a26beef` - `Implement backend ingestion base`

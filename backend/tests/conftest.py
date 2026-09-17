@@ -67,8 +67,14 @@ def client(engine: Engine):
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 
+    original_admin_username = settings.admin_username
+    original_admin_password = settings.admin_password
+    original_gateway_username = settings.gateway_username
+    original_gateway_password = settings.gateway_password
     settings.admin_username = "admin"
     settings.admin_password = "secret"
+    settings.gateway_username = "harpisense.gateway.edge-1"
+    settings.gateway_password = "gateway-secret"
     app = create_app()
 
     def override_get_db() -> Generator[Session, None, None]:
@@ -86,3 +92,7 @@ def client(engine: Engine):
             yield test_client
     finally:
         app.dependency_overrides.clear()
+        settings.admin_username = original_admin_username
+        settings.admin_password = original_admin_password
+        settings.gateway_username = original_gateway_username
+        settings.gateway_password = original_gateway_password

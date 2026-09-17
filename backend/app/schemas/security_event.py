@@ -32,6 +32,50 @@ class Classification(BaseModel):
     confidence: float | None = Field(default=None, ge=0, le=1)
 
 
+class AggregationFlowKey(BaseModel):
+    protocol: str = Field(min_length=1, max_length=32)
+    src_ip: str
+    src_port: int | None = Field(default=None, ge=0, le=65535)
+    dst_ip: str
+    dst_port: int | None = Field(default=None, ge=0, le=65535)
+    direction: str = Field(min_length=1, max_length=64)
+    mqtt_message_type: str | None = Field(default=None, max_length=64)
+    mqtt_topic: str | None = Field(default=None, max_length=255)
+
+    @field_validator("protocol")
+    @classmethod
+    def normalize_protocol(cls, value: str) -> str:
+        return value.lower()
+
+
+class TraversalEvidence(BaseModel):
+    observed_interfaces: list[str]
+    required_interfaces: list[str]
+    flow_key: AggregationFlowKey
+
+
+class Aggregation(BaseModel):
+    window_seconds: int = Field(gt=0)
+    window_start: UtcDatetime
+    window_end: UtcDatetime
+    first_observed_at: UtcDatetime
+    last_observed_at: UtcDatetime
+    packet_count: int = Field(gt=0)
+    total_packet_size_bytes: int = Field(gt=0)
+    interfaces_observed: list[str]
+    expected_interfaces: list[str]
+    traversal_verified: bool
+    traversal_reason: str = Field(min_length=1, max_length=255)
+    traversal_evidence: TraversalEvidence
+
+    @field_validator("window_start", "window_end", "first_observed_at", "last_observed_at", mode="before")
+    @classmethod
+    def timestamps_must_use_z_suffix(cls, value: object) -> object:
+        if isinstance(value, str) and not value.endswith("Z"):
+            raise ValueError("aggregation timestamps must use UTC ISO 8601 format with suffix Z")
+        return value
+
+
 class NetworkEventIn(BaseModel):
     schema_version: str = Field(pattern=r"^1\.0$")
     event_id: str = Field(min_length=1, max_length=64)
@@ -41,6 +85,7 @@ class NetworkEventIn(BaseModel):
     capture: Capture
     mqtt: MqttMetadata | None = None
     classification: Classification
+    aggregation: Aggregation | None = None
 
     @field_validator("observed_at", mode="before")
     @classmethod
@@ -82,6 +127,7 @@ class NetworkEventOut(BaseModel):
     capture: dict | None
     mqtt: dict | None
     classification: dict | None
+    aggregation: dict | None
     src_ip: str | None
     dst_ip: str | None
     dst_port: int | None

@@ -2,13 +2,23 @@ param(
     [string]$BaseUrl = "http://localhost:8000",
     [string]$Username = "admin",
     [Parameter(Mandatory = $true)]
-    [string]$Password
+    [string]$Password,
+    [string]$GatewayUsername = "harpisense.gateway.edge-1",
+    [Parameter(Mandatory = $true)]
+    [string]$GatewayPassword
 )
 
 $pair = "${Username}:${Password}"
 $token = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($pair))
 $headers = @{
     Authorization = "Basic $token"
+    "Content-Type" = "application/json"
+}
+
+$gatewayPair = "${GatewayUsername}:${GatewayPassword}"
+$gatewayToken = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($gatewayPair))
+$gatewayHeaders = @{
+    Authorization = "Basic $gatewayToken"
     "Content-Type" = "application/json"
 }
 
@@ -62,7 +72,7 @@ $networkEvent = @{
 Invoke-RestMethod -Method Get -Uri "$BaseUrl/api/v1/health"
 Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/v1/ingest/telemetry" -Headers $headers -Body $telemetry
 Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/v1/ingest/telemetry" -Headers $headers -Body $telemetry
-Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/v1/ingest/network-events" -Headers $headers -Body $networkEvent
-Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/v1/ingest/network-events" -Headers $headers -Body $networkEvent
+Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/v1/ingest/network-events" -Headers $gatewayHeaders -Body $networkEvent
+Invoke-RestMethod -Method Post -Uri "$BaseUrl/api/v1/ingest/network-events" -Headers $gatewayHeaders -Body $networkEvent
 Invoke-RestMethod -Method Get -Uri "$BaseUrl/api/v1/telemetry?device_id=harpisense.poste.poste-1&limit=10" -Headers $headers
 Invoke-RestMethod -Method Get -Uri "$BaseUrl/api/v1/network-events?dst_port=1883&limit=10" -Headers $headers

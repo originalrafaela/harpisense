@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -12,6 +12,24 @@ def error_response(status_code: int, code: str, message: str, details: list | No
         status_code=status_code,
         content=jsonable_encoder({"error": {"code": code, "message": message, "details": details or []}}),
     )
+
+
+def _http_error_code(status_code: int) -> str:
+    if status_code == status.HTTP_401_UNAUTHORIZED:
+        return "authentication_error"
+    if status_code == status.HTTP_403_FORBIDDEN:
+        return "authorization_error"
+    if status_code == status.HTTP_503_SERVICE_UNAVAILABLE:
+        return "configuration_error"
+    return "http_error"
+
+
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    message = exc.detail if isinstance(exc.detail, str) else "HTTP error"
+    response = error_response(exc.status_code, _http_error_code(exc.status_code), message)
+    for name, value in (exc.headers or {}).items():
+        response.headers[name] = value
+    return response
 
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
@@ -41,6 +59,7 @@ async def database_exception_handler(request: Request, exc: SQLAlchemyError) -> 
 
 
 def register_error_handlers(app: FastAPI) -> None:
+    app.add_exception_handler(HTTPException, http_exception_handler)
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.add_exception_handler(IdentifierConflictError, identifier_conflict_handler)
     app.add_exception_handler(SQLAlchemyError, database_exception_handler)
