@@ -231,6 +231,14 @@ Ha duas autenticacoes separadas:
 
 Nao usar ingestao sem autenticacao como compatibilidade temporaria.
 
+Estado das implementacoes lidas nas branches em 2026-09-17:
+
+- `backend-data` implementa HTTP Basic administrativo em `backend/app/core/security.py`, com configuracao `HARPI_ADMIN_USERNAME` e `HARPI_ADMIN_PASSWORD`.
+- `backend-data` ainda nao possui credencial separada para o gateway em `backend/app/core/config.py` ou dependencia especifica para `POST /api/v1/ingest/network-events`.
+- `edge-security` implementa Bearer opcional em `edge/capture/backend_client.py`, carregado por `--backend-token-env` ou `--backend-token-file`.
+- O Bearer da Edge nao e compativel com o backend atual e nao deve ser usado na integracao da primeira entrega sem contrato novo.
+- A compatibilidade deve ser resolvida com HTTP Basic separado para o gateway, mantendo a ingestao protegida.
+
 ### Administrador unico
 
 Implementacao existente em `backend-data`:
@@ -317,6 +325,15 @@ Alteracoes necessarias por area:
 - `edge-security`: adicionar envio de HTTP Basic com usuario/senha do gateway; manter Bearer apenas como capacidade nao usada nesta integracao; atualizar exemplo de execucao para nao enviar sem credencial.
 - `iot-mqtt`: sem mudanca HTTP; manter credenciais MQTT separadas de qualquer credencial HTTP.
 
+Checklist minimo antes da validacao integrada:
+
+- Backend deve responder `401 Unauthorized` quando `POST /api/v1/ingest/network-events` chegar sem `Authorization`.
+- Backend deve responder `401 Unauthorized` quando o Basic do gateway estiver incorreto.
+- Backend deve responder `503 Service Unavailable` se `HARPI_GATEWAY_PASSWORD` nao estiver configurada.
+- Backend deve responder `202 Accepted` para evento valido com Basic do gateway.
+- Edge deve enviar `Authorization: Basic ...` quando receber usuario/senha do gateway.
+- Edge nao deve enviar `Authorization: Bearer ...` contra o backend atual.
+
 ## Consumidor MQTT para persistencia
 
 A area `backend-data` possui o consumidor responsavel por alimentar o banco a partir do broker:
@@ -339,6 +356,13 @@ Regras de operacao:
 - O consumidor rejeita mensagem cujo topico nao combine com `device_id` e `sensor_type`.
 - O consumidor persiste telemetria diretamente pelo servico backend, sem HTTP.
 - Credenciais MQTT do consumidor devem usar usuario de leitura proprio no Mosquitto; se a ACL atual permitir apenas `mqtt_test_subscriber`, usar esse usuario temporariamente ou criar usuario dedicado `harpisense_backend_consumer`.
+
+Detalhes confirmados na implementacao:
+
+- `backend/app/mqtt/consumer.py` cria cliente com `client_id="harpisense-backend-telemetry"`.
+- Se `HARPI_MQTT_USERNAME` estiver configurado, o worker usa `username_pw_set(settings.mqtt_username, settings.mqtt_password)`.
+- A persistencia chama `ingest_telemetry`, portanto a idempotencia por `message_id` tambem vale para mensagens consumidas do MQTT.
+- A ACL atual de `iot-mqtt` possui `mqtt_test_subscriber` com leitura em `harpisense/v1/telemetry/#`; usuario dedicado ainda nao existe.
 
 ## Consulta minima da primeira entrega
 

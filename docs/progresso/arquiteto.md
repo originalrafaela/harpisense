@@ -1,5 +1,59 @@
 # Progresso - arquiteto
 
+## Atualizacao em 2026-09-17
+
+Rodada de preparacao documental da integracao, sem merge das branches de area e sem validacao real.
+
+Branches lidas sem troca de worktree ocupada:
+
+- `iot-mqtt` em `5cf116fd1d11b290734fc97a1c8fac6088571877`.
+- `edge-security` em `97c4e5a5d1c5d08851e3bb9e8d413fa2312e918d`.
+- `backend-data` em `1607ff89c725ee689666d7e9e7b0614f58ed7ff2`.
+
+Implementacoes conferidas:
+
+- Backend:
+  - `backend/app/core/security.py`: HTTP Basic administrativo com `HARPI_ADMIN_USERNAME` e `HARPI_ADMIN_PASSWORD`.
+  - `backend/app/core/config.py`: ainda sem `HARPI_GATEWAY_USERNAME` e `HARPI_GATEWAY_PASSWORD`.
+  - `backend/app/schemas/telemetry.py`: `measurements` nao pode ser vazio; opcionais aceitam `null`.
+  - `backend/app/schemas/security_event.py`: `network_event` exige `raw_capture` e `unknown`.
+  - `backend/app/services/telemetry.py`: idempotencia por `message_id`.
+  - `backend/app/services/security_events.py`: idempotencia por `event_id`.
+  - `backend/app/mqtt/consumer.py`: consumidor MQTT persiste via `ingest_telemetry` e valida topico contra payload.
+- Edge:
+  - `edge/capture/backend_client.py`: envio HTTP com Bearer opcional, sucesso apenas em `202`.
+  - `edge/capture/scapy_gateway.py`: aceita `--backend-token-env` e `--backend-token-file`, ainda sem Basic do gateway.
+- IoT/MQTT:
+  - `mqtt/docker-compose.yml`: Mosquitto em `1883` e init de password file.
+  - `mqtt/config/aclfile`: `iot_device_lab`, `mqtt_test_subscriber` e `mqtt_auth_exporter`.
+  - `lab/legitimate-traffic/simulate_poste.py`: usa `MQTT_HOST`, `MQTT_PORT`, `MQTT_USERNAME` e `MQTT_PASSWORD`.
+
+Documentos atualizados:
+
+- `docs/CONTRATOS_COMPARTILHADOS.md`: autenticacao HTTP separada entre administrador e gateway, estado real das implementacoes, respostas esperadas, checklist minimo e detalhes do consumidor MQTT.
+- `docs/ROTEIRO_INTEGRACAO_PRIMEIRA_ENTREGA.md`: commits lidos, contrato de autenticacao para integracao, ordem de inicializacao, comandos reais, pendencias e validacoes ainda abertas.
+
+Decisao mantida:
+
+- Nao deixar ingestao HTTP desprotegida como solucao de compatibilidade.
+- Administrador continua usando HTTP Basic administrativo.
+- Gateway deve usar HTTP Basic proprio em `POST /api/v1/ingest/network-events`.
+- Bearer opcional da Edge nao deve ser usado contra o backend atual.
+- BitNet local permanece fora do caminho critico.
+- Administrador unico e modos IDS, IPS supervisionado e IPS autonomo seguem como definidos.
+
+Correcoes pontuais pendentes por area:
+
+- `backend-data`: implementar `HARPI_GATEWAY_USERNAME` e `HARPI_GATEWAY_PASSWORD`; aceitar Basic do gateway somente em `POST /api/v1/ingest/network-events`; manter Basic administrativo nos demais endpoints; retornar `503` se senha de gateway nao estiver configurada; decidir persistencia ou rejeicao explicita de `aggregation`.
+- `edge-security`: implementar envio de `Authorization: Basic ...` a partir de `HARPISENSE_BACKEND_USERNAME` e `HARPISENSE_BACKEND_PASSWORD`; nao usar Bearer no backend atual; manter falha de entrega quando status for diferente de `202`.
+- `iot-mqtt`: decidir se o worker backend usa temporariamente `mqtt_test_subscriber` ou usuario dedicado `harpisense_backend_consumer`; definir sensor/pinagem do ESP32; validar NTP antes de aceitar evidencias reais.
+
+Validacoes ainda pendentes:
+
+- Nenhuma integracao real foi executada nesta rodada.
+- Continuam pendentes PostgreSQL, API, Mosquitto, consumidor MQTT, simulador, ESP32, gateway Edge, envio ao backend e consultas finais.
+- Evidencias em `docs/evidence/` devem ser registradas somente depois da execucao real.
+
 ## Contexto
 
 - Data: 2026-09-16.
@@ -197,4 +251,3 @@ sudo --preserve-env=HARPISENSE_BACKEND_USERNAME,HARPISENSE_BACKEND_PASSWORD .ven
 - `5a05547e58b1f3b4b3d8183e51374b1c4a26beef` - branch `backend-data`, `Implement backend ingestion base`.
 - `dd2f07439ddc03b9fe6c7a39f66b3227a06de4ab` - branch `edge-security`, `Add backend delivery handling for network events`.
 - `c7aa9e0cd759bb9367c948af4651abdf380c6cbf` - branch `iot-mqtt`, `Add IoT MQTT lab delivery`.
-

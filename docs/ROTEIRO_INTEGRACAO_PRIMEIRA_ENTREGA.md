@@ -1,14 +1,20 @@
 # HarpiSense - Roteiro unico de integracao da primeira entrega
 
-Este roteiro consolida as implementacoes encontradas nas branches `iot-mqtt`, `edge-security` e `backend-data` em 2026-09-16. Ele prepara a integracao, mas nao declara validacao real. Nao fazer merge das branches nem editar arquivos das areas durante esta rodada.
+Este roteiro consolida as implementacoes encontradas nas branches `iot-mqtt`, `edge-security` e `backend-data`. Ele prepara a integracao, mas nao declara validacao real. Nao fazer merge das branches nem editar arquivos das areas durante esta rodada.
 
 ## Branches lidas
 
 | Area | Branch | Commit lido | Observacao |
 | --- | --- | --- | --- |
-| `iot-mqtt` | `iot-mqtt` | `c7aa9e0` | Mosquitto, simulador, firmware ESP32 e smoke test MQTT |
-| `edge-security` | `edge-security` | `dd2f074` | Captura Scapy, agregacao e envio HTTP de `network_event` |
-| `backend-data` | `backend-data` | `5a05547` | FastAPI, PostgreSQL, Alembic, schemas, API e consumidor MQTT |
+| `iot-mqtt` | `iot-mqtt` | `5cf116f` | Mosquitto, simulador, firmware ESP32, smoke test MQTT e progresso da area |
+| `edge-security` | `edge-security` | `97c4e5a` | Captura Scapy, agregacao, envio HTTP de `network_event` e progresso da area |
+| `backend-data` | `backend-data` | `1607ff8` | FastAPI, PostgreSQL, Alembic, schemas, API, consumidor MQTT e progresso da area |
+
+Commits de implementacao base lidos:
+
+- `iot-mqtt`: `c7aa9e0 Add IoT MQTT lab delivery`.
+- `edge-security`: `7af8360 Implement edge traffic capture pipeline` e `dd2f074 Add backend delivery handling for network events`.
+- `backend-data`: `5a05547 Implement backend ingestion base`.
 
 ## Premissas mantidas
 
@@ -17,6 +23,62 @@ Este roteiro consolida as implementacoes encontradas nas branches `iot-mqtt`, `e
 - Modos IDS, IPS supervisionado e IPS autonomo continuam definidos em `docs/DECISOES_ARQUITETURAIS.md`.
 - Esta entrega nao valida ML, bloqueio real, dashboard completo, AWS ou BitNet.
 - Ingestao HTTP nao deve ficar sem autenticacao.
+- Telemetria MQTT e eventos de seguranca continuam fluxos separados.
+- `observed_at` vem do produtor ou da observacao; `received_at` vem do backend.
+- `message_id` e chave de idempotencia para telemetria; `event_id` e chave de idempotencia para eventos de rede.
+- Valores desconhecidos podem ser `null` ou omitidos, mas `measurements` nao pode ser objeto vazio.
+
+## Contrato de autenticacao para a integracao
+
+### Administrador
+
+- Uso: consultas operacionais e ingestao administrativa de telemetria por HTTP.
+- Header: `Authorization: Basic <base64(usuario:senha)>`.
+- Backend existente: `backend/app/core/security.py`.
+- Configuracao existente:
+
+```text
+HARPI_ADMIN_USERNAME=admin
+HARPI_ADMIN_PASSWORD=<senha-local-nao-versionada>
+```
+
+- `GET /api/v1/health` permanece publico.
+- Endpoints administrativos continuam exigindo Basic administrativo:
+  - `POST /api/v1/ingest/telemetry`
+  - `GET /api/v1/telemetry`
+  - `GET /api/v1/network-events`
+
+### Gateway
+
+- Uso: ingestao de eventos do gateway em `POST /api/v1/ingest/network-events`.
+- Header contratado: `Authorization: Basic <base64(gateway_id:gateway_secret)>`.
+- Configuracao alvo no backend:
+
+```text
+HARPI_GATEWAY_USERNAME=harpisense.gateway.edge-1
+HARPI_GATEWAY_PASSWORD=<senha-local-nao-versionada>
+```
+
+- Configuracao alvo na Edge:
+
+```text
+HARPISENSE_BACKEND_USERNAME=harpisense.gateway.edge-1
+HARPISENSE_BACKEND_PASSWORD=<senha-local-nao-versionada>
+```
+
+- Respostas esperadas:
+  - Evento valido com Basic do gateway: `202 Accepted`.
+  - Evento repetido por `event_id`: `202 Accepted` com `duplicate: true`.
+  - Credencial ausente ou invalida: `401 Unauthorized`.
+  - Payload invalido: `422 Unprocessable Entity`.
+  - `HARPI_GATEWAY_PASSWORD` ausente: `503 Service Unavailable`.
+
+Estado atual a corrigir antes da validacao:
+
+- `backend-data` ainda aceita apenas Basic administrativo.
+- `edge-security` ainda envia somente Bearer opcional quando configurado.
+- Bearer nao deve ser usado contra o backend atual.
+- A ingestao nao deve ser aberta sem autenticacao para contornar essa incompatibilidade.
 
 ## Ordem de inicializacao
 
@@ -61,6 +123,7 @@ Estado atual:
 - A API existente aceita HTTP Basic administrativo.
 - `HARPI_GATEWAY_USERNAME` e `HARPI_GATEWAY_PASSWORD` ainda precisam ser implementados em `backend-data`.
 - Enquanto isso nao for implementado, Edge nao conseguira autenticar com credencial propria no contrato decidido.
+- Nao usar a senha administrativa como senha do gateway.
 
 Health esperado:
 
@@ -117,6 +180,7 @@ Responsabilidade:
 - Consumir telemetria MQTT.
 - Validar topico contra `device_id` e `sensor_type`.
 - Persistir no banco usando `backend/app/mqtt/consumer.py`.
+- Usar `ingest_telemetry`, mantendo idempotencia por `message_id`.
 
 Pendencia recomendada:
 
@@ -215,6 +279,7 @@ Estado atual:
 - Nao existe opcao atual para HTTP Basic.
 - Nao executar sem credencial contra a API real.
 - Nao usar Bearer contra o backend atual, pois `backend-data` so aceita Basic.
+- Apos a correcao, a Edge deve montar `Authorization: Basic ...` a partir de `HARPISENSE_BACKEND_USERNAME` e `HARPISENSE_BACKEND_PASSWORD`.
 
 Verificacoes locais depois da execucao:
 
@@ -247,6 +312,18 @@ Invoke-RestMethod -Method Get -Uri "http://localhost:8000/api/v1/network-events?
 | `iot-mqtt` | Definir sensor fisico e pinagem do ESP32 para substituir `temperature_c` e `humidity_pct` nulos quando houver hardware. |
 | `iot-mqtt` | Validar sincronizacao de hora do ESP32 antes de aceitar evidencias com `observed_at`. |
 | `edge-security` | Confirmar nomes reais das interfaces e CIDRs; duas interfaces configuradas nao provam travessia se o fluxo nao aparecer em ambas. |
+
+## Validacoes que continuam pendentes
+
+- Subir PostgreSQL e aplicar Alembic em banco real.
+- Subir API backend e verificar Basic administrativo.
+- Validar Basic separado do gateway depois da implementacao nas duas areas.
+- Subir Mosquitto com `mqtt/config/passwords` local gerado.
+- Rodar simulador e confirmar recebimento no broker.
+- Rodar consumidor MQTT do backend e consultar telemetria persistida.
+- Rodar Edge em gateway Linux inline e confirmar eventos em `edge/capture/network-events.jsonl`.
+- Confirmar entrega de eventos da Edge para o backend e consulta em `GET /api/v1/network-events`.
+- Registrar evidencias em `docs/evidence/` somente depois de execucao real.
 
 ## Dependencias ainda ausentes
 
