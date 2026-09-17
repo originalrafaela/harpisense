@@ -1,5 +1,138 @@
 # Progresso - arquiteto
 
+## Encerramento do dia - 2026-09-17
+
+Estado Git confirmado no encerramento:
+
+- Diretorio do projeto: `D:\Projetos\tcc - harpisense`.
+- Branch atual: `main`.
+- Remote `origin`: `https://github.com/originalrafaela/harpisense.git`.
+- `main` estava alinhada com `origin/main` antes desta atualizacao de encerramento.
+- Nenhum merge das branches de area foi feito nesta rodada.
+- Nenhuma implementacao nova foi criada nesta rodada.
+
+Commits documentais da `main` ja publicados antes deste encerramento:
+
+- `332cb600e850e7d4e8b47c0240da8fe4ac0f1321` - `docs: prepare HarpiSense integration auth`.
+- `82481f69f543b5246b571a334815484d89d89b52` - `docs: finalize integration contracts`.
+
+Commits conhecidos das outras areas, lidos sem checkout:
+
+- `backend-data`: `f142aaeb819d80bace6f272b1f157a2e055fba54` - `Harden backend ingestion idempotency`.
+- `edge-security`: `b48c9dc649b85ff782b0fa21f379948e72ad02c6` - `Add offline PCAP export pipeline`.
+- `iot-mqtt`: `d92120c68fda7395ab73b03e8011ac426d3c3ddd` - `Expand synthetic MQTT simulator`.
+
+Trabalho realmente revisado por mim:
+
+- Documentos vigentes em `docs/`, especialmente:
+  - `docs/CONTRATOS_COMPARTILHADOS.md`;
+  - `docs/ROTEIRO_INTEGRACAO_PRIMEIRA_ENTREGA.md`;
+  - `docs/DECISOES_ARQUITETURAIS.md`;
+  - `docs/PLANO_PRIMEIRA_ENTREGA.md`;
+  - `docs/AREAS_DE_TRABALHO.md`.
+- Trechos de implementacao lidos nas branches:
+  - Backend: autenticacao Basic administrativa, configuracao, rotas de ingestao, schemas, servicos de idempotencia, consumidor MQTT e handlers de erro.
+  - Edge: cliente HTTP, captura Scapy, agregador, construcao de `network_event` e exportacao offline de PCAP.
+  - IoT/MQTT: Compose do Mosquitto, ACL, exemplo de usuarios, script de geracao de password file, contrato MQTT e simulador sintetico.
+- Validacoes executadas por mim nesta frente:
+  - `git branch --show-current`;
+  - `git status --short --branch`;
+  - `git remote -v`;
+  - `git diff --check`;
+  - revisao de diff documental antes dos commits;
+  - `git push origin main` apos os commits documentais anteriores.
+
+Trabalho relatado pelos agentes ou branches, mas nao validado por mim ponta a ponta:
+
+- `backend-data` relata FastAPI, PostgreSQL/Alembic, ingestao, consultas, idempotencia e consumidor MQTT.
+- `edge-security` relata captura, agregacao, envio HTTP e processamento offline de PCAP.
+- `iot-mqtt` relata Mosquitto, ACLs, simulador, firmware ESP32 e smoke tests.
+- Nenhum desses fluxos foi executado por mim em ambiente real integrado.
+- Entregas do backend permanecem pendentes ate confirmacao com execucao local ou evidencias:
+  - migracoes Alembic em PostgreSQL real;
+  - API subindo com `.env` local;
+  - Basic administrativo;
+  - Basic separado do gateway;
+  - `409 identifier_conflict`;
+  - validacao e persistencia de `aggregation`;
+  - consumidor MQTT persistindo telemetria vinda do Mosquitto;
+  - consultas reais em `GET /api/v1/telemetry` e `GET /api/v1/network-events`.
+
+Decisoes vigentes e contratos finalizados:
+
+- Administrador unico, sem RBAC, multiplos perfis, cadastro publico ou autoinscricao nesta etapa.
+- BitNet local permanece fora do caminho critico e sera usado apenas para explicar incidentes ja detectados em etapa posterior.
+- Modos mantidos:
+  - IDS: detecta, registra e alerta, sem bloquear.
+  - IPS supervisionado: recomenda bloqueio e exige aprovacao explicita do administrador.
+  - IPS autonomo: resposta automatica futura dentro de limites de politica, whitelist, duracao, escopo e auditoria.
+- Primeira entrega continua limitada a publicacao MQTT, trafego legitimo atravessando o gateway, persistencia e consulta pela API.
+- Fora da primeira entrega: ML treinado, inferencia online, SHAP/XAI, bloqueio real, dashboard completo, AWS e BitNet integrado.
+- Autenticacao HTTP:
+  - Administrador: `HARPI_ADMIN_USERNAME` e `HARPI_ADMIN_PASSWORD`.
+  - Gateway no backend: `HARPI_GATEWAY_USERNAME` e `HARPI_GATEWAY_PASSWORD`.
+  - Cliente Edge: `HARPISENSE_BACKEND_USERNAME` e `HARPISENSE_BACKEND_PASSWORD`.
+  - Gateway so pode acessar `POST /api/v1/ingest/network-events`.
+  - Gateway nao pode consultar endpoints administrativos.
+  - Bearer opcional da Edge nao deve ser usado contra o backend atual.
+  - Ingestao sem autenticacao nao e solucao aceita.
+  - HTTP Basic nao cifra credenciais; fora de laboratorio isolado exige HTTPS/TLS ou tunel equivalente.
+- Idempotencia:
+  - primeira persistencia valida: `202 Accepted`, `duplicate: false`;
+  - reenvio identico: `202 Accepted`, `duplicate: true`;
+  - mesmo identificador com conteudo diferente: `409 Conflict`, `error.code = "identifier_conflict"`;
+  - telemetria compara conteudo canonico de `message_id`, excluindo `id`, `received_at` e metadados de banco;
+  - eventos de rede comparam conteudo canonico de `event_id`, incluindo `aggregation` quando presente e excluindo metadados gerados pelo servidor.
+- `aggregation` produzido pela Edge em `network_event` deve ser aceito, validado e persistido pelo backend.
+- `aggregation` invalido deve retornar `422`; descarte silencioso esta proibido.
+- `network_window` permanece exportacao offline JSONL nesta entrega; nao ha endpoint de ingestao de janelas.
+- MQTT:
+  - consumidor backend deve usar usuario dedicado `harpisense_backend_consumer`;
+  - permissao somente de leitura/assinatura em `harpisense/v1/telemetry/#`;
+  - variaveis do consumidor: `HARPI_MQTT_HOST`, `HARPI_MQTT_PORT`, `HARPI_MQTT_USERNAME`, `HARPI_MQTT_PASSWORD`, `HARPI_MQTT_TELEMETRY_TOPIC`;
+  - provisionamento do broker deve adicionar usuario local e ACL correspondente, sem credenciais reais versionadas.
+- Regras preservadas:
+  - timestamps ISO 8601 UTC com sufixo `Z`;
+  - `observed_at` vem do produtor/observacao;
+  - `received_at` vem do backend;
+  - valores desconhecidos podem ser `null` ou omitidos;
+  - `measurements` nao pode ser objeto vazio;
+  - consumidor MQTT deve validar topico contra `device_id` e `sensor_type`.
+
+Pendencias de integracao para amanha:
+
+- Confirmar se as branches locais de area devem ser publicadas antes da integracao.
+- Integrar ou preparar PRs sem perder os commits locais das areas.
+- Backend:
+  - implementar ou confirmar `HARPI_GATEWAY_USERNAME` e `HARPI_GATEWAY_PASSWORD`;
+  - separar autenticacao de gateway da autenticacao administrativa;
+  - negar consultas administrativas ao gateway;
+  - validar e persistir `aggregation`;
+  - manter e testar `409 identifier_conflict`;
+  - confirmar migracoes, API, ingestao e consultas em execucao real.
+- Edge:
+  - substituir uso real de Bearer/sem credencial por Basic com `HARPISENSE_BACKEND_USERNAME` e `HARPISENSE_BACKEND_PASSWORD`;
+  - manter `network_window` apenas offline;
+  - confirmar interfaces, CIDRs e travessia real do fluxo.
+- IoT/MQTT:
+  - adicionar `harpisense_backend_consumer` ao provisionamento e ACL;
+  - validar broker, simulador e subscriber;
+  - definir sensor fisico e pinagem do ESP32;
+  - validar NTP do ESP32 antes de aceitar evidencias reais.
+- Integracao:
+  - subir PostgreSQL;
+  - subir API;
+  - subir Mosquitto;
+  - iniciar consumidor MQTT;
+  - publicar telemetria simulada e, quando houver hardware, Poste 1;
+  - executar Edge no gateway;
+  - consultar telemetria e eventos persistidos;
+  - registrar evidencias reais em `docs/evidence/` somente depois da execucao.
+
+Primeiro passo recomendado para amanha:
+
+1. Comecar por `backend-data`: aplicar o contrato final de autenticacao do gateway e `aggregation`, rodar testes/unitarios disponiveis e confirmar a API com PostgreSQL local antes de tentar a integracao ponta a ponta.
+
 ## Atualizacao em 2026-09-17 - contratos fechados para implementacao
 
 Rodada documental na `main`, sem merge das branches de area e sem validacao real.
