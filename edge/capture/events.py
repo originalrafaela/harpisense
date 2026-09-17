@@ -24,6 +24,8 @@ MQTT_MESSAGE_TYPES = {
     15: "AUTH",
 }
 
+EDGE_CAPTURE_FORMAT_VERSION = "edge.capture.v1"
+
 
 def utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")

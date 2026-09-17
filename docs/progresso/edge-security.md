@@ -22,12 +22,18 @@ Branch: `edge-security`
 - Atualizado `edge/README.md` com dependencias e comandos para Linux.
 - Registrado status de captura em `docs/evidence/edge-security-capture-status.md`.
 - Criados testes preparados em `tests/security/`.
+- Adicionado processamento offline de PCAP em `edge/capture/offline_pcap.py`.
+- A exportacao offline grava eventos brutos e janelas agregadas em JSONL separados, com `collection_session_id`, `format_version` e `collection_mode`.
+- Eventos brutos usam `record_kind: raw_event`; janelas usam `record_kind: aggregate_window` e `event_type: network_window`.
+- As janelas offline reutilizam `WindowAggregator` e sao baseadas em `observed_at` dos pacotes.
+- Campos de autenticacao indisponiveis permanecem desconhecidos (`auth_result: unknown`, `auth_failure_count: null`).
 
 Arquivos principais:
 
 - `edge/capture/events.py`
 - `edge/capture/aggregator.py`
 - `edge/capture/scapy_gateway.py`
+- `edge/capture/offline_pcap.py`
 - `edge/capture/backend_client.py`
 - `edge/README.md`
 - `edge/requirements.txt`
@@ -35,6 +41,7 @@ Arquivos principais:
 - `docs/evidence/edge-security-capture-status.md`
 - `tests/security/test_capture_aggregation.py`
 - `tests/security/test_backend_delivery.py`
+- `tests/security/test_offline_pcap_export.py`
 
 ## Decisoes e contratos usados
 
@@ -47,6 +54,7 @@ Arquivos principais:
 - Nenhum resultado de autenticacao MQTT foi inferido de pacotes TCP.
 - Eventos `mqtt_auth_event` permanecem dependentes de logs/exportador do Mosquitto.
 - Os contratos vigentes nao definem autenticacao obrigatoria para ingestao de `network_event`; token bearer foi deixado opcional para alinhamento futuro.
+- Nao foi alterado `docs/CONTRATOS_COMPARTILHADOS.md`; se `network_window` ou `format_version` precisarem virar contrato compartilhado, a proposta deve ser levada ao Arquiteto.
 
 ## Validacao realmente executada
 
@@ -59,6 +67,12 @@ $env:PYTHONHOME='C:\Program Files\NVIDIA Corporation\Nsight Systems 2025.5.2\hos
 ```
 
 Resultado: passou sem saida.
+
+Validacao adicional em 2026-09-17:
+
+- `git diff --check`: passou, com avisos esperados de conversao LF/CRLF.
+- Parse sintatico com `ast.parse` para `edge/capture/backend_client.py`, `edge/capture/aggregator.py`, `edge/capture/events.py`, `edge/capture/scapy_gateway.py`, `edge/capture/offline_pcap.py` e testes em `tests/security`: passou.
+- Smoke test direto de `export_offline_observations`: passou, validando ordenacao temporal, contagem de eventos/janelas, campos offline de autenticacao desconhecidos e `traversal_verified: false` quando falta interface esperada.
 
 ## Testes nao executados, bloqueios e dependencias
 

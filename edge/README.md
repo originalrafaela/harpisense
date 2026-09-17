@@ -4,6 +4,8 @@ Primeira entrega da area `edge-security`: captura observacional de metadados de 
 
 Esta etapa nao executa bloqueios, nao aciona firewall, nao treina ML e nao apresenta classificacao alem de `raw_capture` com `label: unknown`.
 
+O processamento offline de PCAP usa o mesmo normalizador de pacotes e a mesma agregacao da captura ao vivo. As janelas sao calculadas pelos timestamps dos pacotes gravados no PCAP, nao pela velocidade de leitura ou reproducao do arquivo.
+
 ## Contrato de backend
 
 O contrato vigente define HTTP `POST /api/v1/ingest/network-events` e sucesso somente com `202 Accepted`. Os documentos em `docs/` nao definem autenticacao obrigatoria para este endpoint. Por isso, o capturador envia sem credencial por padrao e aceita token bearer opcional apenas se isso for acordado com `backend-data`/Arquiteto.
@@ -108,6 +110,34 @@ sudo .venv/bin/python -m edge.capture.scapy_gateway \
 
 Nao configure firewall nem execute bloqueios nesta etapa.
 
+## Processar PCAP offline
+
+Use o processador offline quando a captura ja existir em arquivo `.pcap` ou `.pcapng`. Informe uma interface por PCAP quando o arquivo nao carregar metadado confiavel de interface:
+
+```bash
+.venv/bin/python -m edge.capture.offline_pcap \
+  --pcap captures/iot-side.pcap \
+  --pcap captures/test-side.pcap \
+  --pcap-interface eth-iot \
+  --pcap-interface eth-test \
+  --iface eth-iot \
+  --iface eth-test \
+  --iot-cidr 192.168.20.0/24 \
+  --test-cidr 192.168.30.0/24 \
+  --mqtt-port 1883 \
+  --window-seconds 30 \
+  --collection-session-id lab-pcap-2026-09-17-a \
+  --raw-events-jsonl edge/capture/offline-raw-events.jsonl \
+  --windows-jsonl edge/capture/offline-windows.jsonl
+```
+
+Arquivos exportados:
+
+- `offline-raw-events.jsonl`: um `network_event` por pacote normalizado, com `record_kind: raw_event`.
+- `offline-windows.jsonl`: uma `network_window` por chave de fluxo e janela agregada, com `record_kind: aggregate_window`.
+
+Ambos os arquivos incluem `collection_session_id`, `format_version: edge.capture.v1` e `collection_mode: offline_pcap`. Eventos brutos, janelas agregadas e futuros resultados de ML devem permanecer em registros separados. Esta rodada nao gera resultados de ML, metricas de deteccao, treino de modelo ou bloqueios.
+
 ## Verificar eventos e entrega
 
 Inspecione os eventos capturados:
@@ -141,6 +171,8 @@ Campos vindos dos pacotes capturados:
 - `capture.protocol`, `src_ip`, `dst_ip`, portas, tamanho e `tcp_flags`: cabecalhos IP/TCP/UDP.
 - `mqtt.present`, `mqtt.message_type` e `mqtt.topic`: extraidos do payload MQTT quando trafego nao cifrado estiver visivel.
 - `mqtt.client_id`: extraido apenas de pacotes MQTT `CONNECT` visiveis; em `PUBLISH`, normalmente permanece `null`.
+- No formato offline versionado, `mqtt.auth_result` e sempre `unknown`.
+- No formato offline versionado, `mqtt.auth_failure_count` e sempre `null`; falhas de autenticacao nao sao inferidas como zero.
 
 Campos que dependem de logs do Mosquitto ou exportador do broker:
 
@@ -150,6 +182,30 @@ Campos que dependem de logs do Mosquitto ou exportador do broker:
 - Relacao confiavel entre um `client_id` e sessoes posteriores quando o pacote `CONNECT` nao foi observado na janela.
 
 O capturador nao inventa resultado de autenticacao a partir de pacotes TCP. Eventos `mqtt_auth_event` devem vir do broker/exportador quando essa frente estiver disponivel.
+
+## Features calculadas
+
+Features por evento bruto:
+
+- `observed_at`: timestamp UTC do pacote, em ISO-8601 com milissegundos.
+- `capture.packet_size_bytes`: tamanho do pacote observado, em bytes.
+- `capture.protocol`: protocolo IP/transport visivel (`tcp`, `udp` ou numero de protocolo).
+- `capture.src_port` e `capture.dst_port`: portas TCP/UDP quando presentes, sem unidade.
+- `capture.tcp_flags`: flags TCP visiveis quando o pacote for TCP.
+- `capture.direction`: categoria derivada dos CIDRs configurados (`iot_to_test`, `test_to_iot`, `iot_boundary` ou `unknown`).
+- `mqtt.present`, `mqtt.message_type`, `mqtt.topic`, `mqtt.client_id`: metadados MQTT extraidos apenas quando o payload nao cifrado esta visivel.
+
+Features por janela agregada:
+
+- `aggregation.window_seconds`: duracao configurada da janela, em segundos.
+- `aggregation.window_start` e `aggregation.window_end`: limites UTC da janela, em ISO-8601 com milissegundos.
+- `aggregation.first_observed_at` e `aggregation.last_observed_at`: primeiro e ultimo timestamp de pacote dentro do grupo.
+- `aggregation.packet_count`: quantidade de pacotes no grupo.
+- `aggregation.total_packet_size_bytes`: soma dos tamanhos dos pacotes, em bytes.
+- `aggregation.interfaces_observed`: interfaces em que a chave de fluxo foi observada.
+- `aggregation.expected_interfaces`: interfaces esperadas para comprovar travessia.
+- `aggregation.traversal_verified`: verdadeiro somente quando a evidencia do PCAP contem as interfaces exigidas.
+- `aggregation.traversal_reason` e `aggregation.traversal_evidence`: justificativa e chave de fluxo usada para a decisao de travessia.
 
 ## Agregacao
 
