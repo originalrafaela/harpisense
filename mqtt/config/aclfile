@@ -1,0 +1,16 @@
+# IoT devices publish telemetry only for their own poste id.
+# The client id must be poste-1, poste-2 or poste-3.
+user iot_device_lab
+pattern write harpisense/v1/telemetry/harpisense.poste.%c/#
+
+# Test subscriber can read telemetry but cannot publish.
+user mqtt_test_subscriber
+topic read harpisense/v1/telemetry/#
+
+# Backend consumer can read only telemetry topics for persistence.
+user harpisense_backend_consumer
+topic read harpisense/v1/telemetry/#
+
+# Reserved for a future broker auth event exporter. No password is created by default.
+user mqtt_auth_exporter
+topic write harpisense/v1/security/mqtt-auth-event

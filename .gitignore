@@ -7,6 +7,11 @@
 !.env.example
 *.pem
 *.key
+mqtt/config/passwords
+mqtt/config/lab-users.local
+mqtt/data/
+mqtt/log/
+iot/esp32/poste1/include/config.h
 # Node.js
 node_modules/
 npm-debug.log*

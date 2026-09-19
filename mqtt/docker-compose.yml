@@ -1,0 +1,20 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: harpisense-mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./config:/mosquitto/config:ro
+      - ./data:/mosquitto/data
+      - ./log:/mosquitto/log
+
+  mosquitto-init:
+    image: eclipse-mosquitto:2
+    profiles:
+      - init
+    volumes:
+      - ./config:/mosquitto/config
+    entrypoint: /bin/sh
+    command: /mosquitto/config/create-password-file.sh
