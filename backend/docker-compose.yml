@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: harpisense-postgres
+    environment:
+      POSTGRES_DB: harpisense
+      POSTGRES_USER: harpisense
+      POSTGRES_PASSWORD: harpisense
+    ports:
+      - "5432:5432"
+    volumes:
+      - harpisense-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U harpisense -d harpisense"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  harpisense-postgres-data:
