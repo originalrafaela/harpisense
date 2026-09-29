@@ -1,0 +1,25 @@
+{
+  "id": "A09",
+  "name": "IoT Behavioral/Telemetry Anomaly",
+  "level": "HARD",
+  "category": "IoT / aplicação",
+  "objective": "Comportamento ou frequência de telemetria incompatível com o perfil esperado.",
+  "created_at": "2026-09-23",
+  "hardware_profile": "ESP32 + LDR(GPIO34) + LED(GPIO2) + resistor 1kΩ",
+  "source_features": [
+    "vetor agregado de fluxo/janela",
+    "telemetria contextual"
+  ],
+  "implementation_features": [
+    "telemetry_variance",
+    "sensor_actuator_inconsistency",
+    "reported_vs_physical_delta"
+  ],
+  "operational_modes": {
+    "LOW": "REVIEW_REQUIRED",
+    "MEDIUM": "REVIEW_REQUIRED",
+    "HARD": "AUTO_POLICY"
+  },
+  "mqtt_target": "host.wokwi.internal:1883",
+  "safety_scope": "local_lab_only"
+}

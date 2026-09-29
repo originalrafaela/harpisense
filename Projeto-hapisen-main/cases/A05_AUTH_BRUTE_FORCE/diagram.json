@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "author": "HarpiSense TCC",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": -115.2,
+      "left": 72.04,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr1",
+      "top": -64,
+      "left": -200.8,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led1",
+      "top": 63.6,
+      "left": -44.2,
+      "attrs": {
+        "color": "red"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 129.6,
+      "left": 172.25,
+      "rotate": 90,
+      "attrs": {
+        "value": "1000"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "esp:TX",
+      "$serialMonitor:RX",
+      "",
+      []
+    ],
+    [
+      "esp:RX",
+      "$serialMonitor:TX",
+      "",
+      []
+    ],
+    [
+      "ldr1:VCC",
+      "esp:3V3",
+      "red",
+      [
+        "v-38.4",
+        "h86.25"
+      ]
+    ],
+    [
+      "ldr1:GND",
+      "esp:GND.1",
+      "black",
+      [
+        "v-0.4",
+        "h48",
+        "v76.8"
+      ]
+    ],
+    [
+      "ldr1:AO",
+      "esp:34",
+      "green",
+      [
+        "h67.2",
+        "v-29.5"
+      ]
+    ],
+    [
+      "led1:A",
+      "r1:2",
+      "green",
+      [
+        "v38.4",
+        "h192",
+        "v28.8",
+        "h30"
+      ]
+    ],
+    [
+      "esp:2",
+      "r1:1",
+      "green",
+      [
+        "h28.8",
+        "v76.8"
+      ]
+    ],
+    [
+      "led1:C",
+      "esp:GND.2",
+      "green",
+      [
+        "v76.8",
+        "h326.8",
+        "v-268.8"
+      ]
+    ]
+  ],
+  "serialMonitor": {
+    "display": "always",
+    "newline": "lf"
+  },
+  "dependencies": {}
+}

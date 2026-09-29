@@ -1,0 +1,27 @@
+{
+  "id": "A03",
+  "name": "MQTT Connection Flood",
+  "level": "MEDIUM",
+  "category": "MQTT / disponibilidade",
+  "objective": "Volume anormal de conexões ao broker.",
+  "created_at": "2026-09-23",
+  "hardware_profile": "ESP32 + LDR(GPIO34) + LED(GPIO2) + resistor 1kΩ",
+  "source_features": [
+    "connections_per_second",
+    "packet_count",
+    "bytes_total",
+    "connection_failures"
+  ],
+  "implementation_features": [
+    "mqtt_connect_attempts",
+    "mqtt_connect_successes",
+    "mqtt_connect_failures"
+  ],
+  "operational_modes": {
+    "LOW": "REVIEW_REQUIRED",
+    "MEDIUM": "AUTO_POLICY",
+    "HARD": "AUTO_POLICY"
+  },
+  "mqtt_target": "host.wokwi.internal:1883",
+  "safety_scope": "local_lab_only"
+}

@@ -1,0 +1,14 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: harpisense-mosquitto
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./broker/config:/mosquitto/config:ro
+      - ./broker/data:/mosquitto/data
+      - ./broker/log:/mosquitto/log
+    entrypoint: ["/bin/sh", "/mosquitto/config/init-and-run.sh"]

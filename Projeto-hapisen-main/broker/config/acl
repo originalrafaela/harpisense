@@ -1,0 +1,19 @@
+# HarpiSense ACL de laboratório
+user poste01
+topic write harpisense/city/lights/poste-01/telemetry
+topic write harpisense/city/lights/poste-01/status
+topic read harpisense/city/lights/poste-01/commands
+
+user poste02
+topic write harpisense/city/lights/poste-02/telemetry
+topic write harpisense/city/lights/poste-02/status
+topic read harpisense/city/lights/poste-02/commands
+
+user reader_limited
+topic read harpisense/city/lights/poste-01/status
+
+user test_auth
+topic readwrite harpisense/lab/test_auth/#
+
+user collector
+topic read harpisense/#
