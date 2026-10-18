@@ -15,10 +15,10 @@ test('telemetria preserva unidades e não inventa luz a partir de temperatura',(
 });
 test('Basic usa consulta protegida, sem endpoint de login; logout impede novas chamadas',async()=>{
  const calls:{url:string;init?:RequestInit}[]=[];
- const fetcher=(async(url,init)=>{calls.push({url:String(url),init});return new Response('[]')}) as typeof fetch;
+ const fetcher=(async(url,init)=>{calls.push({url:String(url),init});return new Response(String(url).endsWith('/health')?JSON.stringify({api:'available'}):'[]')}) as typeof fetch;
  const c=new Client('https://example.test','p11',fetcher);
  await c.login(credentials);await c.rows('telemetry');
- assert.match(calls[0].url,/api\/v1\/p11\/telemetry/);
+ assert.match(calls[0].url,/api\/v1\/p11\/health/);
  assert.match(String((calls[0].init?.headers as Record<string,string>).Authorization),/^Basic /);
  c.cancel();await c.rows('asset');c.logout();await assert.rejects(()=>c.rows('telemetry'),/Não autorizado/);
  assert.equal(calls.length,3);
@@ -42,12 +42,12 @@ test('timeout cancela a requisição',async()=>{
 test('histórico P11 preserva revisão e origem e codifica o identificador',async()=>{
  const urls:string[]=[];
  const c=new Client('https://example.test','p11',(async(url)=>{
-  urls.push(String(url));return new Response(JSON.stringify(String(url).endsWith('/history')?[{revision:2,source:'trusted-service',data:{incident_id:'inc-1',text:'Resposta de teste'}}]:[]));
+  urls.push(String(url));return new Response(JSON.stringify(String(url).endsWith('/health')?{api:'available'}:String(url).endsWith('/history')?[{revision:2,source:'trusted-service',data:{incident_id:'inc-1',text:'Resposta de teste'}}]:[]));
  }) as typeof fetch);
  await c.login(credentials);const history=await c.explanationHistory('exp/1');
  assert.match(urls[1],/bitnet\/exp%2F1\/history$/);assert.equal(history[0].revision,2);assert.equal(history[0].data.incident_id,'inc-1');
 });
 test('histórico inválido é rejeitado sem inventar revisões',async()=>{
- const c=new Client('https://example.test','p11',(async(url)=>new Response(JSON.stringify(String(url).endsWith('/history')?[{revision:1,data:{}}]:[]))) as typeof fetch);
+ const c=new Client('https://example.test','p11',(async(url)=>new Response(JSON.stringify(String(url).endsWith('/health')?{api:'available'}:String(url).endsWith('/history')?[{revision:1,data:{}}]:[]))) as typeof fetch);
  await c.login(credentials);await assert.rejects(()=>c.explanationHistory('exp'),/Revisão de explicação inválida/);
 });

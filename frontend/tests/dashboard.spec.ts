@@ -11,11 +11,11 @@ async function login(page: Page, health: Record<string, unknown> = {}, records: 
         {revision: 2, source: 'trusted-service', data: {incident_id: 'foreign', text: 'Não pode aparecer neste histórico'}},
       ])});
     }
-    await route.fulfill({status: kind === 'bitnet' ? bitnetStatus : 200, contentType: 'application/json', body: JSON.stringify(kind === 'health' ? health : records[kind] || [])});
+    await route.fulfill({status: kind === 'bitnet' ? bitnetStatus : 200, contentType: 'application/json', body: JSON.stringify(kind === 'health' ? {api:'available',...health} : records[kind] || [])});
   });
-  await page.goto('http://127.0.0.1:5173');
+  await page.goto('http://127.0.0.1:5174');
   await page.getByText('Conexão da API').click();
-  await page.getByLabel('URL da API').fill('http://127.0.0.1:5173');
+  await page.getByLabel('URL da API').fill('http://127.0.0.1:5174');
   await page.getByRole('button', {name: 'Salvar conexão local'}).click();
   await page.getByLabel('Usuário', {exact: true}).fill('isolated');
   await page.getByLabel('Senha', {exact: true}).fill('isolated');
@@ -27,7 +27,7 @@ async function login(page: Page, health: Record<string, unknown> = {}, records: 
 test('demonstração alterna controles independentes sem nenhuma chamada operacional', async ({page}) => {
   const calls: string[] = [];
   page.on('request', request => {if (request.url().includes('/api/')) calls.push(request.url())});
-  await page.goto('http://127.0.0.1:5173');
+  await page.goto('http://127.0.0.1:5174');
   await page.getByRole('button', {name: 'Abrir prévia visual'}).click();
   for (const label of ['M1 — Supervisionado', 'M2 — Autonomia parcial', 'M3 — Autônomo']) {
     await page.getByRole('button', {name: label, exact: true}).click();

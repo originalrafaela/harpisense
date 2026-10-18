@@ -1,5 +1,9 @@
 # Integração progressiva e divergências
 
+## Rodada atual de integração
+
+Na branch dedicada `integration/frontend-p11`, a preparação restrita Windows → túnel SSH → P11 foi implementada sem alterar a entrega `frontend-v2`. Consulte [matriz atual de compatibilidade, execução e bloqueio real](INTEGRACAO_P11_REAL.md). O escopo padrão consulta somente health/telemetry; as demais telas permanecem presentes e identificadas como não integradas nesta conexão. A matriz abaixo continua catalogando endpoints do P11 de referência, sem declarar disponibilidade na VM.
+
 ## Fontes e precedência
 
 Raiz Git confirmada com `git rev-parse --show-toplevel`. Base `integration/primeira-entrega` em `a7cb501`: inclui `main` e merges de backend-data, edge-security e iot-mqtt. A `main` em `9d58e69` não contém essa integração. Não havia branch frontend nem worktree correspondente antes desta tarefa; foram criadas e depois reconferidas para reutilização. Nenhum AGENTS.md ancestral aplicável foi encontrado; arquivos de papéis em `.maestri/roles` são de outros diretórios.
@@ -16,7 +20,7 @@ Todos os endpoints abaixo são **GET**. Nenhuma integração real com VM foi val
 
 | Tela | Endpoint/recurso | Contrato | Estado |
 |---|---|---|---|
-| Login | `p11/telemetry?limit=1&offset=0` | Basic + lista de projeções | implementado; teste isolado |
+| Login | `p11/health` | HTTP Basic + mapa de saúde protegido | implementado; teste isolado, credenciais de VM não testadas |
 | Dashboard | `p11/{asset,telemetry,incident,decision,execution,bitnet,health}` e `p11/bitnet/{id}/history` sob demanda | projeções P11, histórico por revisão e mapa de saúde | HarpIA vinculado ao incidente; leitura preparada; sem integração real com VM |
 | Postes/telemetria | `p11/{telemetry,asset}` | projeção e payload preservado | telemetry documentado na VM; asset somente referência |
 | Incidentes | `p11/{incident,evidence,decision}` | projeções; canônico P03 ainda requer mapeamento do produtor | consulta e detalhes preparados |
@@ -66,3 +70,9 @@ M1/M2/M3, modo e execução podem ser alternados visualmente apenas na demonstra
 8. Backup: histórico de geração/envio, integridade e evidência de restauração verificada; somente consulta. Auditoria: endpoint paginado com ator, horário, ação, entidade/revisão e resultado.
 9. Ensaios: API de resultados/evidências C01–C09 com ID, execução, horário e conclusão. Não há evidência de ataque nesta entrega.
 10. Explicações: confirmar projeções bitnet na VM. O P11 local também possui `/api/v1/p11/explain/{incident_id}` (não utilizado), cuja resposta usa `source`, `text`, `revision`, `bitnet_status`. Não confundir source da projeção com esse source interno; futura adaptação deve preservar origem real, fallback e indisponibilidade.
+
+## Validação assistida em 18/10/2026 — atualização de estado
+
+As afirmações anteriores de ausência de acesso real descrevem a preparação. Nesta sessão, o operador confirmou serviços, health autenticado, túnel restrito e registro novo coincidente no PostgreSQL e na API, com o mesmo ID/horário/tipo exibidos no dashboard. O payload foi sintético, transportado pelo fluxo real; isso não comprova medição física ou local de execução do publicador. Confira evidências, campos ainda pendentes e limites em [INTEGRACAO_P11_REAL.md](INTEGRACAO_P11_REAL.md).
+
+Checks locais desta rodada: 17 testes Node aprovados, build/tipos aprovados e 3 testes Chromium do fluxo P11 aprovados. Todos os testes automatizados usam respostas isoladas; a evidência da VM foi fornecida pelo operador. A suíte completa Chromium não foi repetida nesta rodada. Nenhum merge ou push foi realizado.

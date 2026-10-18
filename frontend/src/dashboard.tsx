@@ -99,7 +99,8 @@ export function HarpiaCard({incidents, explanations, failure, health, context}: 
       .finally(() => {if (active) setLoading(false)});
     return () => {active = false};
   }, [historyRequested, explanation?.id, selectedId]);
-  const unavailable = Boolean(failure) || ['unavailable', 'not_configured'].includes(String(health?.bitnet));
+  const notIntegrated = failure?.startsWith('Não integrado:') || failure?.startsWith('Não configurado:');
+  const unavailable = Boolean(failure && !notIntegrated) || ['unavailable', 'not_configured'].includes(String(health?.bitnet));
   return <Panel title="HarpIA · explicação do incidente">
     <div className="harpia-card">
       <img className="harpia-avatar" src="/assets/harpy.png" alt="Harpia mecânica · HarpIA"/>
@@ -111,6 +112,7 @@ export function HarpiaCard({incidents, explanations, failure, health, context}: 
           {ordered.map(row => <option key={row.id} value={incidentId(row)}>{incidentId(row)} · {show(row.data.scenario_id)}</option>)}
         </select></label>
         {!selection && selected && <small>Incidente mais recente da página consultada. Sem horário, preservada a ordem da API.</small>}
+        {notIntegrated && <p className="muted">Explicações não integradas nesta conexão. {failure}</p>}
         {unavailable && <p className="error" role="status">Serviço indisponível.{failure ? ` ${failure}` : ' BitNet não está disponível; uma alternativa recebida pode ser exibida abaixo.'}</p>}
         {explanation ? <>
           <div className="explanation-meta"><Badge>{origin(explanation)}</Badge><small>Incidente {selectedId} · revisão da explicação {show(explanation.revision)}</small></div>

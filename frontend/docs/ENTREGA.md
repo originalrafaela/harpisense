@@ -1,5 +1,13 @@
 # Entrega ao Arquiteto
 
+## Preparação de integração em worktree separada
+
+O registro original abaixo foi preservado. A rodada atual está na branch `integration/frontend-p11`, worktree `D:\Projetos\tcc - harpisense\harpisense-worktrees\integration-p11`, derivada do frontend `1d7ed4d`. As adaptações são alterações locais nesta worktree, sem novo commit, merge ou push. A branch/worktree original do Frontend permanece limpa e intacta.
+
+Entregues: transporte local restrito até túnel SSH manual, login P11 pelo health protegido, escopo default health/telemetry, apresentação fiel do payload provisório do Poste 2 e testes de contrato/transporte/navegador. Não há recriação do P11, banco, motores ou autenticação. Build/tipos e 17 + 17 testes passaram. O aceite real segue bloqueado pela falta de acesso confirmado à VM e de fontes atuais da adaptação. Veja [matriz, execução e pendências](INTEGRACAO_P11_REAL.md).
+
+## Registro da entrega original do Frontend
+
 Branch: `frontend/harpisense-v2`.
 
 Worktree: `D:\Projetos\tcc - harpisense\harpisense-worktrees\frontend-v2`.
@@ -31,3 +39,9 @@ O dashboard ganhou HarpIA com seleção de incidente, detalhes e histórico, al�
 ## Destino remoto autorizado
 
 Repositório origin: https://github.com/originalrafaela/harpisense.git. A branch local permanece frontend/harpisense-v2; o destino remoto solicitado é frontend. O envio deve preservar trabalho remoto, sem force push ou merge em main. A confirmação do hash remoto é feita após o push. A integração real com a VM permanece pendente, e os testes de autenticação usaram respostas isoladas.
+
+## Validação assistida em 18/10/2026 — atualização de estado
+
+As afirmações anteriores de ausência de acesso real descrevem a preparação. Nesta sessão, o operador confirmou serviços, health autenticado, túnel restrito e registro novo coincidente no PostgreSQL e na API, com o mesmo ID/horário/tipo exibidos no dashboard. O payload foi sintético, transportado pelo fluxo real; isso não comprova medição física ou local de execução do publicador. Confira evidências, campos ainda pendentes e limites em [INTEGRACAO_P11_REAL.md](INTEGRACAO_P11_REAL.md).
+
+Checks locais desta rodada: 17 testes Node aprovados, build/tipos aprovados e 3 testes Chromium do fluxo P11 aprovados. Todos os testes automatizados usam respostas isoladas; a evidência da VM foi fornecida pelo operador. A suíte completa Chromium não foi repetida nesta rodada. Nenhum merge ou push foi realizado.

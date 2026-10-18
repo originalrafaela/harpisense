@@ -1,5 +1,27 @@
 # Verificação executada — 18/10/2026
 
+## Worktree de integração P11 — rodada atual
+
+Executado em `integration/frontend-p11`, separada da worktree original do Frontend:
+
+| Verificação | Resultado |
+|---|---|
+| `npm.cmd ci --no-audit --no-fund` | dependências instaladas pelo lockfile existente, sem novas dependências |
+| `npm.cmd run build` | TypeScript + Vite passaram; 34 módulos; JS 183,91 kB / gzip 59,24 kB |
+| `npm.cmd test` | 17 testes passaram, incluindo proxy HTTP Vite com servidor de fixture isolado |
+| `npx.cmd playwright test` | 17 testes passaram; regressão das telas, login, vazio, indisponível e correspondência da projeção |
+| Script `open-p11-tunnel.ps1` | sintaxe validada pelo parser PowerShell; não aplicado à VM |
+| `git diff --check` | sem erros de whitespace |
+| Worktree original `frontend-v2` | limpa, HEAD preservado em `1d7ed4d` |
+
+O teste de transporte efetivamente inicia um proxy Vite e um servidor HTTP de fixture locais, confirma preservação de Basic e status, reescrita do prefixo, no-store, remoção de cookies, recusa de POST/recurso fora da lista/origem externa/query não prevista e ausência de credenciais nos logs capturados. Isso comprova o transporte local sob teste, não um túnel SSH ou backend real.
+
+Os testes de navegador usam fixtures isoladas para conferir ID, revisão, source, created_at e payload `poste2/temperatura/tipo`, além de rejeição de credenciais inválidas, rede indisponível, lista vazia, senha fora de localStorage/sessionStorage/cookies/console e demonstração sem requisições operacionais. A captura [dashboard com fixture de contrato](evidence/p11-contract-dashboard-isolated.png) contém aviso explícito de teste isolado e foi aberta para inspeção visual. Capturas de notebook/celular também foram atualizadas nesta worktree.
+
+Na primeira execução, o hook de configuração do proxy retornava incidentalmente o objeto de middleware e impedia o Vite de iniciar; corrigido para não retornar esse objeto. Uma primeira asserção do fluxo visual esperava o caminho após o proxy em vez do prefixo visto pelo navegador; corrigida. Os resultados acima são da rodada final, após essas correções.
+
+**Não foi comprovado o aceite real.** Não houve acesso à VM, autenticação real, publicação MQTT, leitura PostgreSQL ou confirmação visual de uma medição recém-publicada. O procedimento e os arquivos necessários estão em [Integração P11 real](INTEGRACAO_P11_REAL.md). As seções seguintes preservam resultados históricos da entrega original.
+
 ## Rodada posterior — HarpIA no dashboard e controles separados
 
 Na mesma worktree e branch, após o commit inicial, o ajuste passou por `npm.cmd run build` (inclui checagem TypeScript), `npm.cmd test` (**12 testes passaram**) e `npx.cmd playwright test` (**14 testes passaram**). Bundle atual: JS 181,59 kB / gzip 58,62 kB; CSS 9,74 kB. Nenhuma nova dependência.
@@ -49,3 +71,9 @@ O primeiro teste Node revelou sintaxe de parameter properties incompatível com 
 ## Limitações
 
 Não houve conexão real à API Ubuntu nem inspeção remota do servidor. Não foram validadas credenciais administrativas das VMs, conectividade/proxy/CORS/HTTPS, inventário real, modelos, aprovação/execução, ensaios Kali, backup ou restauração. O relatório fornecido é evidência externa do fluxo Poste 2, não uma execução realizada por este agente. Nenhum dado de exemplo foi apresentado como medição real.
+
+## Validação assistida em 18/10/2026 — atualização de estado
+
+As afirmações anteriores de ausência de acesso real descrevem a preparação. Nesta sessão, o operador confirmou serviços, health autenticado, túnel restrito e registro novo coincidente no PostgreSQL e na API, com o mesmo ID/horário/tipo exibidos no dashboard. O payload foi sintético, transportado pelo fluxo real; isso não comprova medição física ou local de execução do publicador. Confira evidências, campos ainda pendentes e limites em [INTEGRACAO_P11_REAL.md](INTEGRACAO_P11_REAL.md).
+
+Checks locais desta rodada: 17 testes Node aprovados, build/tipos aprovados e 3 testes Chromium do fluxo P11 aprovados. Todos os testes automatizados usam respostas isoladas; a evidência da VM foi fornecida pelo operador. A suíte completa Chromium não foi repetida nesta rodada. Nenhum merge ou push foi realizado.

@@ -2,17 +2,19 @@
 
 Interface de consulta em português com login e 14 telas operacionais, demonstração explícita e integração progressiva. React 18, TypeScript e Vite seguem a stack do frontend legado preservado no P11; nenhum backend foi criado. Apenas React/React DOM entram no bundle. Playwright é dependência de desenvolvimento.
 
+Esta worktree usa a branch **integration/frontend-p11**, derivada do commit `1d7ed4d`. A entrega original do Frontend foi preservada. A preparação de acesso SSH, a matriz P11/PostgreSQL e o bloqueio do aceite real estão em [Integração P11 real](docs/INTEGRACAO_P11_REAL.md). A VM não foi acessada nesta sessão.
+
 ## Executar
 
 Requer Node 24 (testes usam remoção nativa de tipos) e npm. Dentro de `frontend/` da worktree:
 
 ```powershell
 npm.cmd ci
-Copy-Item .env.example .env
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
 npm.cmd run dev
 ```
 
-Abra o endereço informado pelo Vite. A entrada **Abrir prévia visual** não exige API e mantém o aviso “Dados de demonstração — sem conexão operacional”. Não é o modo operacional SIMULATION.
+Abra `http://127.0.0.1:5174`. Para operação P11, abra manualmente o túnel SSH conforme o documento de integração. Sem túnel, o login deve falhar; a interface não substitui a API por exemplos. A entrada **Abrir prévia visual** não exige API e mantém o aviso “Dados de demonstração — sem conexão operacional”. Não é o modo operacional SIMULATION.
 
 ```powershell
 npm.cmd run typecheck
@@ -27,9 +29,11 @@ Não há lint configurado. O build também executa a checagem de tipos. `dist/` 
 
 ## Conexão e autenticação
 
-Defina `VITE_API_URL` com a origem/base HTTP(S) acessível ao navegador e `VITE_API_PROFILE=p11` ou `legacy`. Alternativamente, abra **Conexão da API** no login. URL e perfil locais prevalecem sobre o ambiente. Configurações só mudam a interface; aplicar encerra a sessão. Não inclua senha, token ou credenciais na URL ou em variáveis Vite.
+Por padrão, `VITE_API_URL=/p11-api` usa o transporte local de leitura para `HARPI_API_TUNNEL_TARGET=http://127.0.0.1:18000`, que deve apontar para um túnel SSH autorizado. O proxy só aceita GET health/telemetry do P11; não publica API nem altera CORS da VM. `VITE_P11_RESOURCES=telemetry` mantém módulos não confirmados identificados como não integrados, sem inferir que não existem. O valor `all` é usado nas fixtures da suíte visual de regressão; não amplia a guarda do proxy local.
 
-`p11` usa GET `/api/v1/p11/telemetry` para validar HTTP Basic; não cria endpoint de login. `legacy` usa GET `/api/v1/telemetry`. Não há tentativa automática de outro perfil. Usuário e senha começam vazios. A senha e o cabeçalho Basic permanecem somente em memória e são descartados ao sair; navegação cancela consultas sem encerrar a autenticação. Nenhuma mutação operacional é enviada. Não existe aprovação otimista ou repetição de comandos.
+Também é aceita uma origem/base HTTP(S) absoluta já autorizada e compatível, com `VITE_API_PROFILE=p11` ou `legacy`. O transporte `/p11-api` atende apenas P11. Alternativamente, abra **Conexão da API** no login. URL e perfil locais prevalecem sobre o ambiente. Configurações só mudam a interface; aplicar encerra a sessão. Não inclua senha, token ou credenciais na URL ou em variáveis Vite.
+
+`p11` usa GET `/api/v1/p11/health` protegido para validar HTTP Basic, antes de consultar telemetria; não cria endpoint de login. `legacy` continua usando GET `/api/v1/telemetry`, pois seu health é público. Não há tentativa automática de outro perfil. Usuário e senha começam vazios. A senha e o cabeçalho Basic permanecem somente em memória e são descartados ao sair; navegação cancela consultas sem encerrar a autenticação. Nenhuma mutação operacional é enviada. Não existe aprovação otimista ou repetição de comandos.
 
 Para **admin/admin no laboratório isolado**, o responsável pelo backend deverá configurar o mecanismo efetivamente implantado. Variáveis encontradas:
 
@@ -48,6 +52,10 @@ O relatório de 18/10 informa API no loopback do Ubuntu (`127.0.0.1:8000`). `loc
 |---|---|
 | `src/main.tsx` | sessão, navegação, carregamento e coordenação das consultas |
 | `src/api.ts` | cliente HTTP, timeout, cancelamento, autenticação e adaptadores |
+| `src/telemetry.tsx` | identidade e payload da projeção P11/PostgreSQL sem inferir campos ausentes |
+| `src/resources.ts` | escopo explícito dos recursos confirmados para a conexão |
+| `vite.config.ts`, `scripts/p11-proxy.mjs` | transporte restrito até o túnel local, sem lógica de backend |
+| `scripts/open-p11-tunnel.ps1` | aplicação manual do túnel SSH, sem alterar VM |
 | `src/components.tsx` | painéis, tabelas, filtros locais e detalhes |
 | `src/pages.tsx` | conteúdo específico de cada tela |
 | `src/demo.ts` | exemplos isolados; nunca usados como fallback de rede |
