@@ -1,0 +1,105 @@
+{
+  "source": "P03/harpisense_catalog.py",
+  "sha256": "b65e351f97ab008b2022f27eb66bd9b76fa3ac230f31bd9e1e5be857a2fb071b",
+  "rows": [
+    {
+      "id": "C01",
+      "group": "Low",
+      "name": "Varredura TCP",
+      "impact": 30,
+      "evidence": "PORT_SCAN",
+      "actions": [
+        "BLOCK_SOURCE_IP",
+        "LIMIT_SOURCE_RATE"
+      ]
+    },
+    {
+      "id": "C02",
+      "group": "Low",
+      "name": "Assinatura MQTT indevida",
+      "impact": 40,
+      "evidence": "MQTT_SUBSCRIBE_DENIED",
+      "actions": [
+        "SUSPEND_MQTT_IDENTITY",
+        "REVOKE_MQTT_PERMISSION"
+      ]
+    },
+    {
+      "id": "C03",
+      "group": "Low",
+      "name": "Ingestão sem autenticação",
+      "impact": 40,
+      "evidence": "INGEST_AUTH_DENIED",
+      "actions": [
+        "BLOCK_SOURCE_IP",
+        "RATE_LIMIT_API_CLIENT"
+      ]
+    },
+    {
+      "id": "C04",
+      "group": "Medium",
+      "name": "Tentativas contra admin",
+      "impact": 65,
+      "evidence": "ADMIN_AUTH_FAILURES",
+      "actions": [
+        "BLOCK_SOURCE_IP",
+        "RATE_LIMIT_API_CLIENT"
+      ]
+    },
+    {
+      "id": "C05",
+      "group": "Medium",
+      "name": "Tentativas de autenticação MQTT",
+      "impact": 60,
+      "evidence": "MQTT_AUTH_FAILURES",
+      "actions": [
+        "BLOCK_SOURCE_IP",
+        "LIMIT_SOURCE_RATE"
+      ]
+    },
+    {
+      "id": "C06",
+      "group": "Medium",
+      "name": "Publicação MQTT indevida",
+      "impact": 65,
+      "evidence": "MQTT_PUBLISH_DENIED",
+      "actions": [
+        "SUSPEND_MQTT_IDENTITY",
+        "REVOKE_MQTT_PERMISSION"
+      ]
+    },
+    {
+      "id": "C07",
+      "group": "Hard",
+      "name": "Integridade da telemetria",
+      "impact": 85,
+      "evidence": "TELEMETRY_INTEGRITY",
+      "actions": [
+        "QUARANTINE_TELEMETRY",
+        "SUSPEND_MQTT_IDENTITY"
+      ]
+    },
+    {
+      "id": "C08",
+      "group": "Hard",
+      "name": "Excesso de conexões TCP",
+      "impact": 90,
+      "evidence": "TCP_CONNECTION_FLOOD",
+      "actions": [
+        "BLOCK_SOURCE_IP",
+        "LIMIT_SOURCE_RATE"
+      ]
+    },
+    {
+      "id": "C09",
+      "group": "Hard",
+      "name": "Excesso de publicações MQTT",
+      "impact": 85,
+      "evidence": "MQTT_PUBLISH_FLOOD",
+      "actions": [
+        "RATE_LIMIT_MQTT_CLIENT",
+        "SUSPEND_MQTT_IDENTITY"
+      ]
+    }
+  ]
+}
