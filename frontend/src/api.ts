@@ -51,5 +51,14 @@ export class Client {
   finally{clearTimeout(timer);this.active.delete(c)}
  }
  async rows(kind:string,offset=0,limit=50){return adaptRows(await this.get(`${this.path(kind)}?limit=${limit}${this.profile==='p11'?`&offset=${offset}`:''}`),this.profile)}
+ async explanationHistory(id:string):Promise<Row[]>{
+  if(this.profile!=='p11')throw new ApiError('unavailable','Histórico não disponível na API da base Git.');
+  const value=await this.get(`${this.path('bitnet')}/${encodeURIComponent(id)}/history`);
+  if(!Array.isArray(value))throw new ApiError('invalid','Histórico em formato inválido.');
+  return value.map(row=>{
+   if(!object(row)||!Number.isInteger(row.revision)||typeof row.source!=='string'||!object(row.data))throw new ApiError('invalid','Revisão de explicação inválida.');
+   return {id:`${id}@${row.revision}`,revision:row.revision as number,source:row.source,data:row.data};
+  });
+ }
  async health(){const v=await this.get(this.path('health'));if(!object(v))throw new ApiError('invalid','Saúde em formato inválido.');return v}
 }

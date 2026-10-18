@@ -51,6 +51,7 @@ O relatório de 18/10 informa API no loopback do Ubuntu (`127.0.0.1:8000`). `loc
 | `src/components.tsx` | painéis, tabelas, filtros locais e detalhes |
 | `src/pages.tsx` | conteúdo específico de cada tela |
 | `src/demo.ts` | exemplos isolados; nunca usados como fallback de rede |
+| `src/dashboard.tsx` | HarpIA na página inicial e controles independentes de autonomia, modo e execução |
 | `src/catalog.json` | exportação gerada do catálogo oficial P03 |
 | `docs/harpisense_catalog.source.py` | cópia intacta da fonte oficial consultada |
 | `scripts/catalog.mjs` | gera catálogo; falha se a estrutura esperada mudar |
@@ -61,4 +62,4 @@ Para atualizar o catálogo, substituir a cópia da fonte por uma nova entrega ap
 
 ## Limites e entrega
 
-Consulte [matriz e pendências](docs/INTEGRACAO.md), [testes](docs/VERIFICACAO.md) e [entrega ao Arquiteto](docs/ENTREGA.md). Interface preparada e testada com respostas isoladas não significa integração com a VM. Listas são páginas de até 50 registros, com paginação P11; filtros se aplicam à página atual. O perfil legacy tem limite e não anuncia paginação por offset que o servidor não implementa.
+Consulte [matriz e pendências](docs/INTEGRACAO.md), [testes](docs/VERIFICACAO.md), [ajuste do dashboard](docs/AJUSTE_DASHBOARD.md) e [entrega ao Arquiteto](docs/ENTREGA.md). Interface preparada e testada com respostas isoladas não significa integração com a VM. Listas são páginas de até 50 registros, com paginação P11; filtros se aplicam à página atual. O perfil legacy tem limite e não anuncia paginação por offset que o servidor não implementa.

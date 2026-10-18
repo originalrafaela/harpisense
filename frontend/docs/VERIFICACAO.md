@@ -1,5 +1,15 @@
 # Verificação executada — 18/10/2026
 
+## Rodada posterior — HarpIA no dashboard e controles separados
+
+Na mesma worktree e branch, após o commit inicial, o ajuste passou por `npm.cmd run build` (inclui checagem TypeScript), `npm.cmd test` (**12 testes passaram**) e `npx.cmd playwright test` (**14 testes passaram**). Bundle atual: JS 181,59 kB / gzip 58,62 kB; CSS 9,74 kB. Nenhuma nova dependência.
+
+Novos testes: alternância independente de M1/M2/M3, IDS/SIMULATION/REAL e execução na demonstração sem requisições; valores desconhecidos sem seleção ativa; valores explicitamente retornados em fixture de saúde; controles reais desabilitados; explicação ligada ao incidente mais recente e seleção de outro incidente; identificação de alternativa determinística; histórico com revisões e exclusão de outro incidente; serviço de explicações indisponível; histórico inválido e codificação de ID no cliente HTTP. Os fixtures de controles não comprovam existência desses campos na VM.
+
+As capturas de dashboard em notebook e celular foram atualizadas e abertas para inspeção. Os seletores iniciais dos novos testes não localizavam os selects pela correspondência exata do texto do label; a rodada final usa o papel acessível `combobox` e seu nome, e passou integralmente.
+
+Nenhuma alteração de backend/contratos nem comando operacional. A integração real com a VM permanece pendente. Veja [ajuste do dashboard](AJUSTE_DASHBOARD.md). Os resultados abaixo registram a rodada inicial da entrega.
+
 Ambiente: Windows, Node v24.12.0, npm 11.6.2. Execução na worktree `frontend/harpisense-v2`, dentro de `frontend/`. APIs usadas nos testes são respostas simuladas isoladas; não são evidência de conexão à VM.
 
 | Verificação | Resultado |

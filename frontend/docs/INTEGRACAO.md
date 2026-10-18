@@ -17,7 +17,7 @@ Todos os endpoints abaixo são **GET**. Nenhuma integração real com VM foi val
 | Tela | Endpoint/recurso | Contrato | Estado |
 |---|---|---|---|
 | Login | `p11/telemetry?limit=1&offset=0` | Basic + lista de projeções | implementado; teste isolado |
-| Dashboard | `p11/{asset,telemetry,incident,decision,execution,health}` | projeções P11 e mapa de saúde | leitura preparada; contagens da página, não totais globais |
+| Dashboard | `p11/{asset,telemetry,incident,decision,execution,bitnet,health}` e `p11/bitnet/{id}/history` sob demanda | projeções P11, histórico por revisão e mapa de saúde | HarpIA vinculado ao incidente; leitura preparada; sem integração real com VM |
 | Postes/telemetria | `p11/{telemetry,asset}` | projeção e payload preservado | telemetry documentado na VM; asset somente referência |
 | Incidentes | `p11/{incident,evidence,decision}` | projeções; canônico P03 ainda requer mapeamento do produtor | consulta e detalhes preparados |
 | IA/XAI | `p11/{detection,xai,risk}` | projeções; campos semânticos P03 | consulta preparada; sem inferência no navegador |
@@ -42,7 +42,17 @@ Prefixo completo P11: `/api/v1/p11/`. O perfil `legacy`, escolhido explicitament
 - Leitura antiga/desconhecida é indicada; recente tampouco confirma estado atual. Janela de 120 segundos é somente indicação visual, sem critério de saúde ou autorização.
 - RF: classification.attack_probability; IF: anomaly.anomaly_score, nunca probabilidade. Risco não é derivado de RF/IF na interface.
 - SIMULATED fica separado dos demais estados. Os estados oficiais são preservados textualmente. COMMAND_ACCEPTED não é eficácia; verificação e reversão dependem de evidência.
-- Autonomia, operação e execution_enabled ficam não informados: não existe endpoint de controles consultado, e uma decisão histórica não informa configuração atual.
+- Autonomia, operação e execution_enabled permanecem independentes. O P11 fornecido não retorna valores efetivos; nesse caso ficam não informados, sem botão ativo. O adaptador apenas apresenta os campos `autonomy_mode`, `operation` e `execution_enabled` se explicitamente retornados pelo backend no mapa de saúde ou no objeto `operational_controls` desse mapa. Esse suporte condicional não estabelece novo contrato nem afirma que a VM fornece tais campos; o Arquiteto deve confirmar o transporte dos controles efetivos. Decisões históricas nunca alimentam esses valores. Sem endpoint de alteração, controles visíveis ficam desabilitados com “Alteração ainda não integrada”.
+
+## Ajuste do dashboard e HarpIA
+
+O cartão inicial usa o asset existente `harpy.png`, preservando o acesso HarpIA do menu. Consulta `bitnet` e vincula explicações exclusivamente pelo `data.incident_id` ao incidente selecionado. Na entrada, escolhe o incidente de horário mais recente da página; quando faltam horários comparáveis, mantém a ordem da API. Não escolhe outra explicação apenas por ser a primeira da lista. Dados são apresentados como texto React, sem HTML arbitrário.
+
+“Sem explicação disponível” é distinto de “Serviço indisponível” (falha da consulta ou saúde BitNet explicitamente indisponível/não configurada). `data.source=deterministic_fallback` recebe “Alternativa determinística”; `bitnet_unverified_text` é identificado como texto BitNet não verificado. A origem da projeção é mostrada separadamente nos detalhes.
+
+Histórico usa somente o endpoint GET existente no P11 de referência: `/api/v1/p11/bitnet/{id}/history`. Exige lista de `{revision, source, data}` e preserva as revisões; filtra registros de outros incidentes. Falha/404 é indisponibilidade, nunca histórico inventado. Esse endpoint continua sem confirmação na VM. Na demonstração, consulta apenas o exemplo local existente, sem requisições HTTP.
+
+M1/M2/M3, modo e execução podem ser alternados visualmente apenas na demonstração; são mantidos em memória durante a navegação e limpos ao sair. A opção REAL dentro da prévia continua sendo apenas visual, com aviso permanente de demonstração. Nenhuma alteração operacional é enviada ou confirmada. Veja [ajuste e validação](AJUSTE_DASHBOARD.md).
 
 ## Dependências exatas para o Arquiteto
 

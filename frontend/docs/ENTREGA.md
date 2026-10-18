@@ -22,3 +22,12 @@ Para revisar, entrar na worktree e executar o README. Verificar matriz de endpoi
 A integração real com a VM permanece pendente. Os testes de autenticação usaram respostas simuladas isoladas; não validaram credenciais nem acesso ao servidor.
 
 Critério entregue: interface navegável, testes isolados, assets e documentação. Integração real, confirmação de serviços/credenciais atuais, ensaios, aprovação e execução permanecem dependentes de contratos e acesso autorizados, listados em INTEGRACAO.md.
+
+## Ajuste posterior ao commit inicial
+
+O dashboard ganhou HarpIA com seleção de incidente, detalhes e histórico, além de controles de autonomia M1/M2/M3 separados do modo e da execução. Novos arquivos: `src/dashboard.tsx`, `tests/dashboard.spec.ts` e `docs/AJUSTE_DASHBOARD.md`. Também foram atualizados cliente HTTP, coordenação/páginas, estilos, testes do cliente, documentação e capturas do dashboard. Este ajuste é registrado em commit adicional na mesma branch local para envio ao destino remoto autorizado `frontend`. Resultados atuais: build e tipos aprovados; 12 testes unitários e 14 testes Chromium passaram.
+
+
+## Destino remoto autorizado
+
+Repositório origin: https://github.com/originalrafaela/harpisense.git. A branch local permanece frontend/harpisense-v2; o destino remoto solicitado é frontend. O envio deve preservar trabalho remoto, sem force push ou merge em main. A confirmação do hash remoto é feita após o push. A integração real com a VM permanece pendente, e os testes de autenticação usaram respostas isoladas.
