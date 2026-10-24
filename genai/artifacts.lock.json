@@ -1,0 +1,18 @@
+{
+  "runtime": {
+    "url": "https://github.com/microsoft/BitNet.git",
+    "revision": "0b341e582afbf9e1011f24744b554c96a3477eb5",
+    "license": "MIT",
+    "llama_cpp_submodule": "390c307752ab78fd8189f359d6954c9ba1be74af"
+  },
+  "model": {
+    "repository": "https://huggingface.co/microsoft/bitnet-b1.58-2B-4T-gguf",
+    "revision": "a1f2f1c765812aa8af3f6eda4a313707064bba15",
+    "filename": "ggml-model-i2_s.gguf",
+    "bytes": 1187801280,
+    "sha256": "4221b252fdd5fd25e15847adfeb5ee88886506ba50b8a34548374492884c2162",
+    "license": "MIT"
+  },
+  "python": "3.12.13",
+  "service_dependencies": "Python standard library only"
+}

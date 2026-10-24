@@ -1,5 +1,6 @@
 # Maestri
 .maestri/
+.local-harpia/
 
 # Credenciais e vari├íveis
 .env
