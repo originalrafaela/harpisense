@@ -16,6 +16,7 @@ from genai.harpia.client import Client, endpoint_url, post_json
 from genai.harpia.contracts import context_dto, frame, prompt
 from genai.harpia.runtime import Runtime
 from genai.harpia.server import Engine, LocalServer
+from genai.scripts.verify_cli import generated_text_from_cli
 
 
 CONTEXT = {"incident_id": "synthetic-inc-001", "revision": 1,
@@ -189,6 +190,17 @@ class HTTPTests(unittest.TestCase):
 
 
 class UnitTests(unittest.TestCase):
+    def test_cli_banner_is_not_inference(self):
+        self.assertEqual(generated_text_from_cli('Loading model...\nmodel: BitNet\nExiting...', 'teste'), '')
+
+    def test_cli_extracts_only_model_text(self):
+        native = 'banner\r\n> teste\r\n\r\nO poste está offline.\r\n[ Prompt: 15 t/s | Generation: 8 t/s ]\r\nExiting...'
+        self.assertEqual(generated_text_from_cli(native, 'teste'), 'O poste está offline.')
+
+    def test_cli_missing_completion_is_not_inference(self):
+        native = 'banner\n> teste\n\n[ Prompt: 0 t/s | Generation: 0 t/s ]\nExiting...'
+        self.assertEqual(generated_text_from_cli(native, 'teste'), '')
+
     def test_template_matches_official_role_framing(self):
         self.assertTrue(frame("dados").startswith("System: "))
         self.assertTrue(frame("dados").endswith("<|eot_id|>Assistant: "))

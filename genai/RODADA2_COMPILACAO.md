@@ -1,5 +1,8 @@
 # Retomada da compilação — 24/10/2026
 
+Registro histórico: os componentes foram instalados pelo usuário posteriormente.
+Resultado atualizado em [RODADA3_INFERENCIA_REAL.md](RODADA3_INFERENCIA_REAL.md).
+
 Branch `feature/harpia-bitnet`, mesma worktree, iniciada limpa no commit `63f1c18`.
 Esse commit não foi reescrito. README/relatório/código existentes foram conferidos.
 Nenhum download de Python, runtime ou pesos foi repetido. Nenhuma alteração em

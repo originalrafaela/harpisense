@@ -28,7 +28,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Clang indisponível' }
 Write-Output $compilerVersion
 if (($compilerVersion -join ' ') -notmatch 'clang version (\d+)\.' -or [int]$Matches[1] -lt 18) { throw 'BitNet requer Clang >=18' }
 # GGUF I2_S já publicado: não converter pesos, não instalar torch/transformers.
-& $cmake -S $runtime -B (Join-Path $runtime 'build') -G 'Visual Studio 17 2022' -A x64 -T ClangCL "-DCMAKE_GENERATOR_INSTANCE=$VsPath" -DBITNET_X86_TL2=OFF -DLLAMA_BUILD_TOOLS=ON -DLLAMA_BUILD_EXAMPLES=ON -DLLAMA_BUILD_COMMON=ON 2>&1 | Tee-Object -FilePath .local-harpia/results/cmake-configure.txt
+& $cmake -S $runtime -B (Join-Path $runtime 'build') -G 'Visual Studio 17 2022' -A x64 -T ClangCL "-DCMAKE_GENERATOR_INSTANCE=$VsPath" -DBITNET_X86_TL2=OFF -DBUILD_SHARED_LIBS=OFF -DLLAMA_BUILD_UI=OFF -DLLAMA_USE_PREBUILT_UI=OFF -DLLAMA_BUILD_TOOLS=ON -DLLAMA_BUILD_EXAMPLES=ON -DLLAMA_BUILD_COMMON=ON 2>&1 | Tee-Object -FilePath .local-harpia/results/cmake-configure.txt
 if ($LASTEXITCODE -ne 0) { throw 'Configuração CMake falhou; consulte o erro antes de repetir' }
 & $cmake --build (Join-Path $runtime 'build') --config Release --target llama-server llama-cli --parallel $Jobs 2>&1 | Tee-Object -FilePath .local-harpia/results/cmake-build.txt
 if ($LASTEXITCODE -ne 0) { throw 'Build falhou; consulte diagnóstico, não reinstale automaticamente' }

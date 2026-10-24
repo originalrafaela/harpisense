@@ -93,7 +93,7 @@ def main():
         report["runtime_stopped"] = process is None or process.poll() is not None
         output = json.dumps(report, ensure_ascii=False, indent=2)
         (folder / "real-model.json").write_text(output, encoding="utf-8")
-        print(output)
+        print(json.dumps(report, ensure_ascii=True, indent=2))
 
 
 if __name__ == "__main__":

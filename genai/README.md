@@ -5,10 +5,12 @@ Implementação isolada em `feature/harpia-bitnet`, base `9d58e69`, worktree
 Código em `genai/`; runtime, Python/venv, pesos, configuração local e resultados em
 `.local-harpia/`, ignorada pelo Git. Nenhum merge, push ou deploy foi realizado.
 
-**Estado desta entrega:** runtime fonte e pesos íntegros baixados; serviço e cliente
-testados localmente; inferência real bloqueada pela ausência de ClangCL e pela RAM
-disponível baixa. Consulte [RELATORIO.md](RELATORIO.md). Um HTTP 200 de `/health`
-não significa que o modelo esteja carregado.
+**Estado atual:** runtime compilado e inferência real executada no CLI e no fluxo
+serviço → adaptador. A origem no modelo foi comprovada, mas as respostas falharam
+em compreensão/fidelidade e **não estão aprovadas para explicar incidentes**.
+Métricas, textos reais e limitações em [RODADA3_INFERENCIA_REAL.md](RODADA3_INFERENCIA_REAL.md).
+Um HTTP 200 de `/health` não significa que o modelo esteja carregado; prontidão
+também não constitui aprovação de qualidade.
 
 Diagnóstico atualizado da retomada, IDs exatos para instalação e correção da
 medição de memória do wrapper: [RODADA2_COMPILACAO.md](RODADA2_COMPILACAO.md).
@@ -71,7 +73,8 @@ via uv; URL registrada no relatório. Nenhuma venv antiga foi reparada ou altera
 **Build Tools 2022**, em `C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools`,
 adicionando **C++ Clang Compiler for Windows** (Clang >=18) e **MSBuild support for
 LLVM (clang-cl) toolset**, mantendo Desktop development with C++/Windows SDK/CMake.
-Essa alteração pode exigir elevação/UAC; não foi executada. O erro efetivo é MSB8020.
+Essa alteração pode exigir elevação/UAC. O usuário instalou esses componentes antes
+da terceira rodada; Clang 19.1.5 e toolset foram reconhecidos, resolvendo MSB8020.
 Veja [instruções da Microsoft](https://learn.microsoft.com/en-us/cpp/build/clang-support-msbuild?view=msvc-170).
 
 Depois:
@@ -101,9 +104,13 @@ Clang >=18 e toolset; fixa explicitamente a instalação VS2022 no CMake.
 Logs ficam em `.local-harpia/results/cmake-configure.txt` e `cmake-build.txt`.
 O caminho padrão esperado é
 `.local-harpia/runtime/BitNet/build/bin/Release/llama-server.exe`.
-Esse build permanece **não validado** até os pré-requisitos serem instalados.
+Esse build foi validado na terceira rodada com Clang 19.1.5 e AVX2.
+Usa `BUILD_SHARED_LIBS=OFF` para resolver os símbolos I2_S que falharam no link de
+DLLs, e `LLAMA_BUILD_UI=OFF` / `LLAMA_USE_PREBUILT_UI=OFF` para evitar provisionamento
+opcional da UI. A execução do serviço mantém `--no-webui`.
 O I2_S já está convertido; não é necessário baixar BF16 ou instalar PyTorch.
-O bloqueio atual ocorre na configuração do compilador, antes de compilar o C++.
+OpenSSL não foi encontrado, mas não é necessário ao HTTP exclusivo de loopback
+desta entrega. Não habilitar acesso LAN/Internet com essa configuração.
 
 ## Iniciar e encerrar
 
@@ -229,10 +236,14 @@ executor nem ferramentas administrativas.
 
 `verify_cli` faz primeiro uma geração sintética curta diretamente no executável
 oficial, sem serviço ou alternativa; confere SHA-256 e RAM e encerra o processo.
+Na revisão fixada, `llama-cli` usa modo de conversa: o teste passa system/user
+separadamente e usa `--single-turn`. O template embutido do GGUF é aplicado pelo
+runtime; não passar um prompt já formatado como conteúdo de outra mensagem.
 Salva texto nativo, tempo total de carga+geração, memória amostrada e timings nativos
 em stderr. `verify_real` exige esse teste bem-sucedido antes de prosseguir.
 O verificador do serviço também correlaciona SHA-256 dos textos recebidos pelo
 adaptador com retornos diretos do runtime real, sem mock e sem aceitar fallback.
+O sucesso desses verificadores comprova execução/origem, **não fidelidade semântica**.
 
 Testes unitários/HTTP usam respostas **simuladas**. `verify_local` inicia um processo
 real do wrapper sem modelo, testa saúde/prontidão, fallback e encerramento e mede

@@ -6,9 +6,21 @@ from pathlib import Path
 import subprocess
 import time
 
-from genai.harpia.contracts import frame
+from genai.harpia.contracts import SYSTEM
 from genai.harpia.runtime import available_memory
 from .verify_local import cpu_seconds, working_set
+
+
+def generated_text_from_cli(stdout, prompt):
+    """Ignore banner/prompt/timings; absence of native framing is not success."""
+    stdout = stdout.replace('\r\n', '\n')
+    echo = '\n> ' + prompt + '\n'
+    if echo not in stdout:
+        return ''
+    suffix = stdout.split(echo, 1)[1]
+    if '[ Prompt:' not in suffix:
+        return ''
+    return suffix.split('[ Prompt:', 1)[0].strip()
 
 
 def main():
@@ -19,8 +31,8 @@ def main():
     model = Path(config['model_path']).resolve()
     data = {'synthetic': True, 'device': 'poste-2', 'status': 'offline',
             'observed_at': '2026-10-24T14:00:00Z', 'cause': 'unknown'}
-    text = frame('Dados sintéticos de teste: ' + json.dumps(data)
-                 + '. Em uma frase curta em português, descreva o estado e diga que a causa é desconhecida.')
+    text = ('Dados sintéticos de teste: ' + json.dumps(data)
+            + '. Em uma frase curta em português, descreva o estado e diga que a causa é desconhecida.')
     report = {'kind': 'real_native_cli', 'synthetic_input': data,
               'memory_before': available_memory(), 'inference_executed': False,
               'generation': {'max_tokens': 48, 'temperature': 0, 'seed': 42,
@@ -39,9 +51,9 @@ def main():
         if report['model_sha256'] != expected:
             report['blocked_reason'] = 'model_integrity_mismatch'
             return 2
-        command = [str(executable), '-m', str(model), '-p', text, '-n', '48', '-t', '2',
+        command = [str(executable), '-m', str(model), '-sys', SYSTEM, '-p', text, '-n', '48', '-t', '2',
                    '-c', '1024', '-ngl', '0', '--temp', '0', '--seed', '42',
-                   '--no-conversation', '--simple-io', '--no-display-prompt']
+                   '--single-turn', '--simple-io', '--color', 'off', '--show-timings']
         with open(folder / 'cli-stdout.txt', 'wb') as output, open(folder / 'cli-stderr.txt', 'wb') as errors:
             start = time.monotonic()
             environment = {k: v for k, v in os.environ.items() if not k.startswith('LLAMA_')}
@@ -60,8 +72,12 @@ def main():
             report.update(exit_code=process.returncode, load_and_generation_seconds=time.monotonic() - start,
                           sampled_peak_working_set_bytes=peak, cpu_seconds=cpu_seconds(process))
         answer = (folder / 'cli-stdout.txt').read_text(encoding='utf-8', errors='replace').strip()
-        report['generated_text'] = answer
-        report['inference_executed'] = process.returncode == 0 and bool(answer)
+        report['native_stdout'] = answer
+        # The pinned CLI prints a banner and echoes the prompt. Only the text
+        # between that exact echo and its native timings is model output.
+        generated = generated_text_from_cli(answer, text)
+        report['generated_text'] = generated
+        report['inference_executed'] = process.returncode == 0 and bool(generated)
         # Timing breakdown is retained in native stderr; total is not called load time.
         return 0 if report['inference_executed'] else 1
     finally:
@@ -75,7 +91,7 @@ def main():
         report['process_stopped'] = process is None or process.poll() is not None
         output = json.dumps(report, ensure_ascii=False, indent=2)
         (folder / 'real-cli.json').write_text(output, encoding='utf-8')
-        print(output)
+        print(json.dumps(report, ensure_ascii=True, indent=2))
 
 
 if __name__ == '__main__':
