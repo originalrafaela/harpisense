@@ -47,7 +47,12 @@ def main():
     config_path.write_text(json.dumps(config))
     report = {"kind": "real_local_wrapper_without_model", "memory_before": available_memory()}
     with open(folder / "smoke-service.log", "w", encoding="utf-8") as logs:
-        process = subprocess.Popen([sys.executable, "-m", "genai.harpia", "--config", str(config_path), "--no-model", "--stdin-control"],
+        # Windows venv python.exe may be a redirector process. Spawn the dedicated
+        # base interpreter directly (service is stdlib-only), so counters refer
+        # to the interpreter running HarpIA rather than its small launcher.
+        interpreter = getattr(sys, "_base_executable", sys.executable)
+        report["interpreter"] = interpreter
+        process = subprocess.Popen([interpreter, "-m", "genai.harpia", "--config", str(config_path), "--no-model", "--stdin-control"],
                                    stdin=subprocess.PIPE, stdout=logs, stderr=logs, text=True,
                                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         url = f"http://127.0.0.1:{config['port']}"

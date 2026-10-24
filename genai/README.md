@@ -10,6 +10,9 @@ testados localmente; inferência real bloqueada pela ausência de ClangCL e pela
 disponível baixa. Consulte [RELATORIO.md](RELATORIO.md). Um HTTP 200 de `/health`
 não significa que o modelo esteja carregado.
 
+Diagnóstico atualizado da retomada, IDs exatos para instalação e correção da
+medição de memória do wrapper: [RODADA2_COMPILACAO.md](RODADA2_COMPILACAO.md).
+
 ## Referências e escolha
 
 Referências reais disponíveis na pasta principal `referencias/versão_v2/`:
@@ -18,9 +21,10 @@ Referências reais disponíveis na pasta principal `referencias/versão_v2/`:
   sua fonte `base_consolidada_atualizada/harpisense_contracts/schema_source.py` e catálogo.
 - `11_Backend_Dashboard_BitNet/HarpiSense_Pacote11_Backend_Dashboard_BitNet_v2/backend11/bitnet.py`,
   `service.py`, `BITNET_INTEGRACAO_LIMITES_E_FALLBACK.md` e contratos API.
-- Backend/frontend legados estão preservados **dentro do pacote P11**. Não foi necessário
-  recorrer a um pacote ausente. Não foi encontrada uma pasta separada chamada
-  `Versões corretas`; nenhum acesso ao Drive foi usado.
+- Backend/frontend legados estão preservados **dentro do pacote P11**. Na segunda
+  rodada foi confirmada também `D:\Projetos\tcc - harpisense\referencias\Versões corretas`,
+  com os pacotes anteriores. Priorizar sempre `versão_v2`; consultar os anteriores
+  somente quando o componente necessário ainda não estiver atualizado. Nenhum acesso ao Drive foi usado.
 - `docs/DECISOES_ARQUITETURAIS.md` e `docs/CONTRATOS_COMPARTILHADOS.md` da base Git.
 
 O **runtime** escolhido é [microsoft/BitNet](https://github.com/microsoft/BitNet),
@@ -76,8 +80,26 @@ Depois:
 & ./genai/scripts/build.ps1
 ```
 
-O script usa o Developer Shell do VS2022 e compila apenas `llama-server` e
-`llama-cli`, com paralelismo 2. O caminho padrão esperado é
+Para diagnóstico reproduzível, sem modificar Visual Studio:
+
+```powershell
+& ./genai/scripts/install-build-tools.ps1
+```
+
+Alternativa ao Installer gráfico: abrir **PowerShell como administrador**, ir à
+worktree e executar `& ./genai/scripts/install-build-tools.ps1 -Install`. O script
+usa a instalação VS2022 já existente e adiciona somente os dois IDs acima mais
+dependências obrigatórias, com `--quiet --norestart`; sem `--force` ou update.
+Não tenta obter elevação, mudar políticas ou reiniciar. Se sair 3010, a janela de
+reinício deve ser combinada pelo administrador. Não repetir instalação com sucesso:
+o diagnóstico verifica os dois componentes registrados e arquivos esperados.
+
+O build usa o Developer Shell do VS2022 e compila apenas `llama-server` e
+`llama-cli`, com paralelismo **1 por padrão**, ajustável para 2 com `-Jobs 2`.
+Confere RAM novamente (mínimo conservador 1536 MiB livres para iniciar o build),
+Clang >=18 e toolset; fixa explicitamente a instalação VS2022 no CMake.
+Logs ficam em `.local-harpia/results/cmake-configure.txt` e `cmake-build.txt`.
+O caminho padrão esperado é
 `.local-harpia/runtime/BitNet/build/bin/Release/llama-server.exe`.
 Esse build permanece **não validado** até os pré-requisitos serem instalados.
 O I2_S já está convertido; não é necessário baixar BF16 ou instalar PyTorch.
@@ -201,14 +223,24 @@ executor nem ferramentas administrativas.
 & .local-harpia/venv/Scripts/python.exe -m unittest discover -s genai/tests -v
 & .local-harpia/venv/Scripts/python.exe -m genai.scripts.verify_local
 # Depois de compilar e dispor de RAM: inferência real, seguida de encerramento
+& .local-harpia/venv/Scripts/python.exe -m genai.scripts.verify_cli
 & .local-harpia/venv/Scripts/python.exe -m genai.scripts.verify_real
 ```
+
+`verify_cli` faz primeiro uma geração sintética curta diretamente no executável
+oficial, sem serviço ou alternativa; confere SHA-256 e RAM e encerra o processo.
+Salva texto nativo, tempo total de carga+geração, memória amostrada e timings nativos
+em stderr. `verify_real` exige esse teste bem-sucedido antes de prosseguir.
+O verificador do serviço também correlaciona SHA-256 dos textos recebidos pelo
+adaptador com retornos diretos do runtime real, sem mock e sem aceitar fallback.
 
 Testes unitários/HTTP usam respostas **simuladas**. `verify_local` inicia um processo
 real do wrapper sem modelo, testa saúde/prontidão, fallback e encerramento e mede
 memória pontual. `verify_real` tenta carregar pesos reais, consulta simples, três
 casos sintéticos (incluindo dados ausentes e texto malicioso) e repetição; salva
 bloqueio ou respostas reais. Não substitui revisão humana de português/fidelidade.
+O smoke usa diretamente o Python base dedicado para que os contadores Windows
+meçam o interpretador, evitando medir apenas o launcher de uma venv.
 Os cenários de timeout, concorrência, excesso e autenticação são exercitados
 na suíte simulada. Artefatos em `.local-harpia/results/` não vão ao Git.
 

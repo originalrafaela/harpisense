@@ -1,5 +1,10 @@
 # Verificações HarpIA / BitNet — 24/10/2026
 
+**Registro histórico da primeira entrega.** Consulte a atualização
+[RODADA2_COMPILACAO.md](RODADA2_COMPILACAO.md), incluindo a correção da medição
+de memória do wrapper: os 4,22 MiB abaixo mediam o launcher da venv, não o
+interpretador completo. O commit original `63f1c18` permanece preservado.
+
 Entrega independente do P08–P11 em execução com outro agente. Branch
 `feature/harpia-bitnet`, base `9d58e69` (`main`), worktree
 `D:\Projetos\tcc - harpisense\harpisense-worktrees\harpia-bitnet`.
