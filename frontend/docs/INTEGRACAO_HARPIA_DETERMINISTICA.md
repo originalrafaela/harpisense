@@ -51,7 +51,7 @@ O complemento foi adaptado ao bootstrap e à versão P11/FastAPI atualmente inst
 
 - Testes Python do complemento: app fixture com o mesmo protocolo de Store/rotas protegidas P11; cobrem campos completos/ausentes, RF/IF/risco, decisão e execução pendente/confirmada, texto malicioso excluído, 401, 404, revisão e origem. São fixtures, não integração com Postgres/HarpiServer real.
 - Testes automáticos do frontend: autenticação, capability gating, vínculo, resposta antiga, indisponibilidade, texto escapado e fallback sem confusão de origem. Playwright também usa fixtures sintéticas. Build e testes unitários passaram.
-- Compatibilidade PostgreSQL real e preparação dos arquivos no host foram concluídas; faltam reinício do serviço, API autenticada após ativação e observação do estado vazio no navegador.
+- Compatibilidade PostgreSQL, reinício do P11, API autenticada e estado vazio real no navegador foram validados. Uma explicação vinculada a incidente real permanece pendente porque não há incidentes armazenados.
 - A fidelidade textual do BitNet segue reprovada na validação anterior. A comparação histórica apontou resposta falsa sobre M3. Antes de qualquer ativação, reproduzir inferência com casos A/B, revisar entradas/saídas e controles de execução e obter aprovação de fidelidade específica. Nenhuma validação automatizada deste commit substitui essa etapa.
 
 ## Verificação de implantação — 25/10/2026
@@ -66,18 +66,11 @@ Antes da troca do bootstrap, foi guardada uma cópia em `/opt/harpisense/staging
 
 O teste de compatibilidade contra o PostgresStore e a base operacional foi somente de leitura e passou: health sem autenticação 401, health autenticado 200 com `generation_enabled:false`, lista de incidentes vazia, explicação de ID inexistente 404 e telemetria existente (7 projeções). Não houve inferência nem escrita. A base contém 7 projeções de telemetria/janelas e nenhuma projeção de incidente, decisão ou execução; nenhum incidente foi fabricado.
 
-### Estado do serviço e validação pendente
+### Estado do serviço e validação real
 
-O bootstrap novo está instalado no disco, mas **a ativação ainda não foi concluída**: o processo P11 ativo (PID 1850) continua com o módulo que carregou antes da troca. Uma tentativa de reiniciar com `sudo systemctl restart harpisense-p11` foi recusada porque sudo exige autenticação em terminal interativo. A consulta somente leitura confirmou o host/usuário, e as rotas atuais de health e explain continuam respondendo 401 sem autenticação. Portanto, ainda não há evidência de que a instância ativa anuncie o complemento, de consulta autenticada pela API viva ou de visualização real no navegador. Não foi possível confirmar 200/404 autenticados no processo após implantação.
+Após o operador reiniciar `harpisense-p11`, o novo processo (PID 6660 na validação) carregou o bootstrap. A API viva foi consultada diretamente em loopback: health sem autenticação 401; health autenticado 200 com `api=available`, `projection_store=available`, `harpia.mode=deterministic_only`, `generation_enabled=false` e `bitnet=not_verified`; lista autenticada de incidentes 200/vazia; incidente inexistente 404 com `Incidente não encontrado`; telemetria 200 com 7 projeções. Nenhuma inferência ou escrita foi feita.
 
-Para concluir, o operador com sudo deve executar no host:
-
-```sh
-sudo systemctl restart harpisense-p11
-sudo systemctl is-active harpisense-p11
-```
-
-Depois, validar pela API autenticada health com `harpia.mode=deterministic_only` e `generation_enabled=false`, incidente inexistente 404 e lista real vazia; a consulta sem credenciais deve permanecer 401. O frontend local deve passar pelo proxy GET em loopback. Como não existem incidentes reais, a tela deve mostrar estado vazio, não uma explicação sintética. A telemetria deve continuar legível. A autenticação da API e a visualização pelo navegador continuam pendentes até essa reinicialização e validação.
+O fluxo real no navegador também foi observado por Vite local e túnel SSH limitado a `127.0.0.1`. O login autenticado passou; a rota HarpIA buscou health, telemetria, incidentes e projeções BitNet pelo proxy local, todos 200. O cartão mostrou “Sem incidente disponível” e “Sem explicação disponível”; “Gerar explicação” permaneceu desabilitado. Não havia explicação determinística a exibir porque o PostgreSQL não contém incidentes. Nenhuma chamada foi feita pelo navegador ao runtime, e nenhum fixture/demo foi usado nessa sessão. Túnel e Vite temporários foram encerrados após a verificação.
 
 ### Recuperação
 
