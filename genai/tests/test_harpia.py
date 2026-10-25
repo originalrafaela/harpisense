@@ -18,6 +18,7 @@ from genai.harpia.memory import MemoryPolicy, MIB
 from genai.harpia.runtime import Runtime
 from genai.harpia.server import Engine, LocalServer
 from genai.scripts.verify_cli import generated_text_from_cli
+from genai.scripts import patch_runtime
 
 
 CONTEXT = {"incident_id": "synthetic-inc-001", "revision": 1,
@@ -219,6 +220,31 @@ class HTTPTests(unittest.TestCase):
 
 
 class UnitTests(unittest.TestCase):
+    def test_runtime_raw_observation_preserves_stop_metadata_and_strips_only_edges(self):
+        from genai.scripts.diagnose_generation import DiagnosticRuntime
+        runtime = DiagnosticRuntime()
+        raw = {'content': '  Quatro. \n', 'stop_type': 'eos', 'truncated': False,
+               'tokens_predicted': 4, 'generation_settings': {'grammar': ''}}
+        with patch.object(runtime, 'ready', return_value=True), patch.object(
+                runtime, 'count_tokens', return_value=20), patch(
+                'genai.harpia.runtime.post_json', return_value=raw):
+            text = runtime.complete(frame('dois mais dois'), 96)
+        self.assertEqual(text, 'Quatro.')
+        self.assertEqual(runtime.raw_completions[0]['response'], raw)
+        self.assertNotIn('grammar', runtime.raw_completions[0]['request'])
+        self.assertNotIn('json_schema', runtime.raw_completions[0]['request'])
+
+    def test_runtime_activation_patch_is_guarded_and_idempotent(self):
+        import hashlib
+        original = b'fixture\n' + patch_runtime.OLD
+        expected = b'fixture\n' + patch_runtime.NEW
+        with patch.object(patch_runtime, 'SOURCE_SHA', hashlib.sha256(original).hexdigest()), patch.object(
+                patch_runtime, 'PATCHED_SHA', hashlib.sha256(expected).hexdigest()):
+            self.assertEqual(patch_runtime.patched_source(original), expected)
+            self.assertEqual(patch_runtime.patched_source(expected), expected)
+            with self.assertRaises(ValueError):
+                patch_runtime.patched_source(original + b'changed externally')
+
     def test_cli_banner_is_not_inference(self):
         self.assertEqual(generated_text_from_cli('Loading model...\nmodel: BitNet\nExiting...', 'teste'), '')
 

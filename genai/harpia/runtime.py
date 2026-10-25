@@ -152,12 +152,15 @@ class Runtime:
             tokens = min(tokens, MAX_TOKENS, self.output_tokens)
             if self.count_tokens(text) + tokens + 16 > self.context_tokens:
                 raise ContextBudgetExceeded("essential context exceeds token budget")
-            answer = post_json(self.url + "/completion", {
+            payload = {
                 "prompt": text, "n_predict": tokens,
                 "temperature": 0, "seed": 42, "stream": False, "cache_prompt": True,
                 "n_keep": 0,
                 "stop": ["<|eot_id|>", "<|end_of_text|>"],
-            }, max(0.1, self.timeout - (time.monotonic() - started)))
+            }
+            answer = post_json(self.url + "/completion", payload,
+                               max(0.1, self.timeout - (time.monotonic() - started)))
+            self._observe_completion(payload, answer)
             return valid_text(answer.get("content"))
         except ContextBudgetExceeded:
             raise
@@ -170,6 +173,10 @@ class Runtime:
             raise
         finally:
             self._generation.release()
+
+    def _observe_completion(self, payload, response):
+        """Diagnostic subclass hook; production does not retain raw prompts/output."""
+        pass
 
     def _watch_memory(self):
         low_count = 0

@@ -19,6 +19,8 @@ New-Item -ItemType Directory -Force .local-harpia/results | Out-Null
 $memory | ConvertTo-Json | Set-Content -Encoding utf8 .local-harpia/results/memory-before-build.json
 Write-Output ('RAM livre antes do build: {0:N0} MiB; jobs={1}' -f ($memory.available_bytes / 1MB), $Jobs)
 if ($memory.available_bytes -lt 1536MB) { throw 'Build adiado: menos de 1536 MiB livres. Nenhum processo externo foi encerrado.' }
+& $python -m genai.scripts.patch_runtime
+if ($LASTEXITCODE -ne 0) { throw 'Patch FFN recusado; conferir revisão e alterações locais antes de compilar' }
 $devShell = Join-Path $VsPath 'Common7/Tools/Microsoft.VisualStudio.DevShell.dll'
 Import-Module $devShell
 Enter-VsDevShell -VsInstallPath $VsPath -SkipAutomaticLocation -DevCmdArguments '-arch=x64 -host_arch=x64'

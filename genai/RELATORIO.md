@@ -1,4 +1,11 @@
-# Atualização mais recente — rodada 5
+# Atualização mais recente — rodada 6
+
+[RODADA6_DIAGNOSTICO.md](RODADA6_DIAGNOSTICO.md): quatro gerações reais reprovadas
+antes do patch; sem corte de contexto, três términos por limite e um por EOS.
+Identificada divergência SiLU/ReLU² no grafo do runtime, corrigida para 30 camadas
+e compilada. 36 testes aprovados. Inferência após o patch e qualidade seguem pendentes.
+
+## Histórico — rodada 5
 
 [RODADA5_PERFIL_ECONOMICO.md](RODADA5_PERFIL_ECONOMICO.md): orçamento real por
 tokenizer, resumo P11 limitado, proteção de RAM/commit monitorada e duas gerações

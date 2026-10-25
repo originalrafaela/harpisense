@@ -8,6 +8,11 @@ Código em `genai/`; runtime, Python/venv, pesos, configuração local e resulta
 **Estado atual:** runtime compilado e inferência real executada no CLI e no fluxo
 serviço → adaptador. A origem no modelo foi comprovada, mas as respostas falharam
 em compreensão/fidelidade e **não estão aprovadas para explicar incidentes**.
+Diagnóstico mais recente: [RODADA6_DIAGNOSTICO.md](RODADA6_DIAGNOSTICO.md).
+O grafo da FFN usava SiLU onde o modelo de 30 camadas exige ReLU². O build agora
+aplica um patch local mínimo, fixado por hash em `artifacts.lock.json`, antes de
+compilar. Build corrigido aprovado; ainda sem inferência após o patch. Não basta
+conferir `--version`: a revisão upstream permanece a mesma, acrescida do patch.
 Perfil econômico e duas novas respostas reais reprovadas em
 [RODADA5_PERFIL_ECONOMICO.md](RODADA5_PERFIL_ECONOMICO.md); histórico em
 [RODADA3_INFERENCIA_REAL.md](RODADA3_INFERENCIA_REAL.md).
