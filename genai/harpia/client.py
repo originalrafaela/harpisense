@@ -61,7 +61,14 @@ def post_json(url, payload, timeout, token=""):
 
 class Client:
     """Cache limitada 5 min; serializa chamadas deste cliente e evita repetição."""
-    def __init__(self, url=None, token=None, timeout=60, transport=None):
+    def __init__(self, url=None, token=None, timeout=60, transport=None,
+                 expected_model=None, expected_source='bitnet_unverified_text'):
+        if expected_model is not None and (not isinstance(expected_model, str) or not 1 <= len(expected_model) <= 128):
+            raise ValueError('invalid expected model identity')
+        if expected_source not in {'bitnet_unverified_text', 'model_unverified_text'} or (
+                expected_source == 'model_unverified_text' and not expected_model):
+            raise ValueError('generic model source requires explicit expected model')
+        self.expected_model, self.expected_source = expected_model, expected_source
         self.url = endpoint_url(url or os.getenv("HARPIA_URL", "http://127.0.0.1:8091"))
         self.token = token if token is not None else os.getenv("HARPIA_TOKEN", "")
         if not 0 < timeout <= 120:
@@ -88,14 +95,18 @@ class Client:
                 result = self.transport(self.url + "/explain", context, remaining, self.token)
                 if not isinstance(result, dict) or result.get("incident_id") != context["incident_id"] or type(result.get("revision")) is not int or result["revision"] != context["revision"]:
                     raise ValueError("response identity mismatch")
-                if result.get("source") != "bitnet_unverified_text" or result.get("bitnet_status") != "responded_unverified":
+                if result.get("source") != self.expected_source or result.get("bitnet_status") != "responded_unverified":
                     raise ValueError("invalid response source")
+                if self.expected_model is not None and result.get('model_id') != self.expected_model:
+                    raise ValueError('response model mismatch')
                 omitted = result.get('omitted_context_fields', [])
                 if not isinstance(omitted, list) or len(omitted) > 2 or any(k not in OPTIONAL_EVIDENCE for k in omitted):
                     raise ValueError("invalid omission notice")
                 result = {"incident_id": context["incident_id"], "revision": context["revision"],
-                          "source": "bitnet_unverified_text", "bitnet_status": "responded_unverified",
+                          "source": self.expected_source, "bitnet_status": "responded_unverified",
                           "text": valid_text(result.get("text"))}
+                if self.expected_model is not None:
+                    result['model_id'] = self.expected_model
                 if omitted:
                     result['omitted_context_fields'] = list(omitted)
                 self.cache[key] = (now, result)

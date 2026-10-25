@@ -9,7 +9,7 @@ from collections import deque
 import urllib.request
 
 from .client import endpoint_url, post_json
-from .contracts import MAX_TOKENS, DEFAULT_OUTPUT_TOKENS, ContextBudgetExceeded, prepare_prompt, valid_text
+from .contracts import MAX_TOKENS, DEFAULT_OUTPUT_TOKENS, ContextBudgetExceeded, frame, prepare_prompt, valid_text
 from .memory import MemoryPolicy, available_memory, process_memory
 
 
@@ -139,8 +139,16 @@ class Runtime:
                 raise TimeoutError("context preparation deadline")
             return self.count_tokens(text, timeout=remaining)
         text, self.last_budget = prepare_prompt(context, count,
-                                                self.context_tokens, min(tokens, self.output_tokens))
+                                                self.context_tokens, min(tokens, self.output_tokens), self.frame_data)
         return text
+
+    def frame_data(self, data):
+        return frame(data)
+
+    def _completion_payload(self, text, tokens):
+        return {"prompt": text, "n_predict": tokens,
+                "temperature": 0, "seed": 42, "stream": False, "cache_prompt": True,
+                "n_keep": 0, "stop": ["<|eot_id|>", "<|end_of_text|>"]}
 
     def complete(self, text, tokens):
         if not self.ready():
@@ -152,12 +160,7 @@ class Runtime:
             tokens = min(tokens, MAX_TOKENS, self.output_tokens)
             if self.count_tokens(text) + tokens + 16 > self.context_tokens:
                 raise ContextBudgetExceeded("essential context exceeds token budget")
-            payload = {
-                "prompt": text, "n_predict": tokens,
-                "temperature": 0, "seed": 42, "stream": False, "cache_prompt": True,
-                "n_keep": 0,
-                "stop": ["<|eot_id|>", "<|end_of_text|>"],
-            }
+            payload = self._completion_payload(text, tokens)
             answer = post_json(self.url + "/completion", payload,
                                max(0.1, self.timeout - (time.monotonic() - started)))
             self._observe_completion(payload, answer)

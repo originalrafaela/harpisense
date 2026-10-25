@@ -1,5 +1,12 @@
 # HarpIA / BitNet local no Windows
 
+**Branch isolada de comparação:** `experiment/harpia-model-comparison`, baseada em
+650d1cd, sem substituir a entrega BitNet ou a interface. Resultado e reprodução em
+[COMPARACAO_MODELOS.md](COMPARACAO_MODELOS.md): doze inferências reais BitNet/Qwen
+Q4_K_M; ambos reprovam nos casos críticos. Recomenda-se somente fallback no caminho
+operacional enquanto a fidelidade não for suficiente. Artefatos novos são ignorados
+em `.local-harpia/comparison/`; perfil Qwen é explicitamente opt-in.
+
 Implementação isolada em `feature/harpia-bitnet`, base `9d58e69`, worktree
 `D:\Projetos\tcc - harpisense\harpisense-worktrees\harpia-bitnet`.
 Código em `genai/`; runtime, Python/venv, pesos, configuração local e resultados em

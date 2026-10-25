@@ -1,4 +1,11 @@
-# Atualização mais recente — rodada 7
+# Comparação experimental — 25/10/2026
+
+[COMPARACAO_MODELOS.md](COMPARACAO_MODELOS.md): seis casos fixos por modelo, doze
+gerações reais novas, Qwen3-0.6B Q4_K_M em runtime oficial separado. Qwen melhora
+alguns casos e tempos, mas ambos incorporam instruções do log e erram fidelidade
+em casos críticos. Recomendação: somente fallback operacional; sem deploy.
+
+## Histórico da entrega-base — rodada 7
 
 [RODADA7_VALIDACAO_PATCH.md](RODADA7_VALIDACAO_PATCH.md): patch restrito por arquitetura
 e dimensões, CLI/servidor recompilados e identificados por hash, três inferências

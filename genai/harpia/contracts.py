@@ -104,17 +104,15 @@ class ContextBudgetExceeded(ValueError):
     pass
 
 
-def prepare_prompt(context, count_tokens, context_tokens, output_tokens):
+def prepare_prompt(context, count_tokens, context_tokens, output_tokens, framing=None):
     """Count the actual framed input; remove optional summaries, never core facts."""
     safe = context_dto(context)
     omitted = []
     while True:
-        text = prompt(safe)
+        data = "Explique este incidente conforme seus dados:\n" + json.dumps(safe, ensure_ascii=False, sort_keys=True)
         if omitted:
-            # Insert the omission notice in the user data, before its final EOT.
-            text = text.removesuffix("<|eot_id|>Assistant: ") + (
-                "\nResumos opcionais omitidos por orçamento: " + ", ".join(omitted)
-                + "<|eot_id|>Assistant: ")
+            data += "\nResumos opcionais omitidos por orçamento: " + ", ".join(omitted)
+        text = (framing or frame)(data)
         # Reduce optional evidence before applying the smaller model-data cap.
         size = (count_tokens(text) if len(json.dumps(safe, ensure_ascii=False).encode())
                 <= MODEL_DATA_BYTES else None)

@@ -170,7 +170,10 @@ class Handler(BaseHTTPRequestHandler):
                 context = context_dto(value)
                 text = self.server.engine.generate(prompt(context), MAX_TOKENS, context=context)
                 result = {"incident_id": context["incident_id"], "revision": context["revision"],
-                          "source": "bitnet_unverified_text", "bitnet_status": "responded_unverified", "text": text}
+                          "source": getattr(self.server.engine.runtime, 'text_source', 'bitnet_unverified_text'),
+                          "bitnet_status": "responded_unverified", "text": text}
+                if hasattr(self.server.engine.runtime, 'model_id'):
+                    result['model_id'] = self.server.engine.runtime.model_id
                 if self.server.engine.preparation.omitted:
                     result['omitted_context_fields'] = self.server.engine.preparation.omitted
             else:
@@ -182,7 +185,8 @@ class Handler(BaseHTTPRequestHandler):
                     raise ValueError("invalid completion input")
                 # Treat the old prompt as untrusted data, never as a role instruction.
                 safe = supplied.replace("<|", "＜｜").replace("|>", "｜＞")
-                composed = frame("Dados legados P11: " + json.dumps(safe, ensure_ascii=False))
+                framing = getattr(self.server.engine.runtime, 'frame_data', frame)
+                composed = framing("Dados legados P11: " + json.dumps(safe, ensure_ascii=False))
                 result = {"text": self.server.engine.generate(composed, tokens)}
             self.send_json(200, result)
             LOG.info("explanation completed seconds=%.3f", time.monotonic() - started)
