@@ -159,10 +159,18 @@ test('API determinística vincula revisão, origem, horário e renderiza texto c
   await expect(page.getByText('Explicação calculada nesta consulta',{exact:false})).toBeVisible();
 });
 
-test('API autenticada informa não autorizado e indisponível sem substituir por fixture',async({page})=>{
+test('API autenticada informa não autorizado sem substituir por fixture',async({page})=>{
   await login(page,{harpia:{mode:'deterministic_only',contract_version:1,generation_enabled:false}},
     {incident:[projection('synthetic-auth',{incident_id:'synthetic-auth',revision:1})]},200,401);
   await page.getByRole('button',{name:'Consultar explicação determinística',exact:true}).click();
   await expect(page.getByText('Erro ao consultar explicações:',{exact:false})).toBeVisible();
   await expect(page.getByRole('alert').filter({hasText:'Credenciais inválidas ou sessão não autorizada.'})).toBeVisible();
+});
+
+test('indisponibilidade da rota determinística aparece como erro sem fallback fictício',async({page})=>{
+  await login(page,{harpia:{mode:'deterministic_only',contract_version:1,generation_enabled:false}},
+    {incident:[projection('synthetic-offline',{incident_id:'synthetic-offline',revision:1})]},200,503);
+  await page.getByRole('button',{name:'Consultar explicação determinística',exact:true}).click();
+  await expect(page.getByRole('alert').filter({hasText:'API indisponível (HTTP 503)'})).toBeVisible();
+  await expect(page.getByText('Sem explicação disponível para o incidente synthetic-offline.',{exact:false})).toBeVisible();
 });

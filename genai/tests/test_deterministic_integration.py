@@ -13,11 +13,12 @@ from harpia.p11 import install_deterministic_harpia
 
 class Store:
     """Read-only in-memory implementation of the approved P11 Store protocol."""
-    def __init__(self, rows): self.rows = rows
+    def __init__(self, rows): self.rows, self.list_calls = rows, []
     def history(self, kind, key):
         return [dict(revision=data.get('revision', 1), source='fixture', data=data)
                 for k, i, data in self.rows if k == kind and i == key]
     def list(self, kind, limit=50, offset=0):
+        self.list_calls.append((kind, limit, offset))
         rows = [dict(id=i, revision=1, source='fixture', data=data) for k, i, data in self.rows if k == kind]
         return rows[offset:offset + limit]
 
@@ -49,13 +50,13 @@ def test_complete_projection_preserves_contract_meanings_and_decision_execution(
                                    'window': {'start': '2026-10-25T10:00:00Z', 'end': '2026-10-25T10:01:00Z'}}),
             ('detection', 'if-1', {'model': {'detector': 'isolation_forest'}, 'classification': None, 'anomaly': {'anomaly_score': .12}}),
             ('decision', 'dec-1', {'incident_id': 'synthetic-1', 'incident_revision': 4, 'status': 'AUTHORIZED',
-                                   'action': {'action_type': 'BLOCK_SOURCE_IP'}, 'execution_id': 'exec-1'}),
+                                   'action': {'action_type': 'BLOCK_SOURCE_IP'}}),
             ('xai', 'xai-1', {'contributions': [{'feature': 'packet_count', 'value': 14, 'contribution': .12},
                                                 {'feature': 'bytes_total', 'value': 100, 'contribution': -.08},
                                                 {'feature': 'ignore_rules', 'value': 0, 'contribution': .01}]}),
             ('execution', 'exec-1', {'decision_id': 'dec-1', 'status': 'QUEUED'})]
     incident['explanation_refs'] = ['xai-1']
-    api = TestClient(app_for(Store(rows)))
+    store = Store(rows); api = TestClient(app_for(store))
     assert api.get('/api/v1/p11/explain/synthetic-1').status_code == 401
     health = api.get('/api/v1/p11/health', headers=auth()).json()
     assert health['harpia'] == {'mode': 'deterministic_only', 'contract_version': 1,
@@ -68,6 +69,7 @@ def test_complete_projection_preserves_contract_meanings_and_decision_execution(
     assert 'BLOCK_SOURCE_IP' in text and 'QUEUED' in text and 'não equivale a mitigação confirmada' in text
     assert 'packet_count' in text and 'não demonstram causa' in text and 'ignore_rules' not in text
     assert result['source'] == 'deterministic_fallback' and result['bitnet_status'] == 'disabled_for_quality'
+    assert store.list_calls == [('decision', 1001, 0), ('execution', 1001, 0)]
 
 
 def test_malicious_log_is_preserved_in_source_but_excluded_from_operational_facts():

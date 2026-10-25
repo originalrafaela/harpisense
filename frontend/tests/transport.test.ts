@@ -39,8 +39,11 @@ test('proxy real Vite: caminho, Basic, status, leitura restrita e logs sem crede
   const telemetry=await fetch(base+'/telemetry?limit=50&offset=0',{headers});assert.equal(telemetry.status,200);
   assert.equal((await telemetry.json())[0].data.temperatura,28.4);
   assert.equal(calls[2].url,'/api/v1/p11/telemetry?limit=50&offset=0');assert.equal(calls[2].authorization,headers.Authorization);
+  const explanation=await fetch(base+'/explain/synthetic-fixture',{headers});assert.equal(explanation.status,200);
+  assert.equal(calls[3].url,'/api/v1/p11/explain/synthetic-fixture');assert.equal(calls[3].authorization,headers.Authorization);
   const count=calls.length;
   assert.equal((await fetch(base+'/telemetry',{method:'POST',headers})).status,405);
+  assert.equal((await fetch(base+'/explain/synthetic-fixture',{method:'POST',headers})).status,405);
   assert.equal((await fetch(base+'/incident',{headers})).status,200);
   assert.equal((await fetch(base+'/health',{headers:{...headers,Origin:'https://foreign.example'}})).status,403);
   assert.equal((await fetch(base+'/telemetry?password=forbidden',{headers})).status,400);

@@ -90,19 +90,19 @@ def explain(store, incident_id):
     # must match BOTH incident and revision; absence remains unknown, never "none".
     decision_id = identifier(data.get('decision_id'))
     if not decision_id:
-        candidates = []
-        for offset in range(0, 1000, 200):
-            page = store.list('decision', limit=200, offset=offset)
-            candidates.extend(r for r in page if r['data'].get('incident_id') == incident_id and r['data'].get('incident_revision') == revision)
-            if len(page) < 200:
-                break
-        else:
-            candidates = []  # Coverage cap reached: retain unknown rather than assume uniqueness.
+        # The approved PostgreSQL Store paginates after loading the current projection
+        # set. Ask once, with a sentinel row; repeated pages would repeat the full scan.
+        page = store.list('decision', limit=1001, offset=0)
+        candidates = ([] if len(page) > 1000 else
+                      [r for r in page if isinstance(r.get('data'), dict)
+                       and r['data'].get('incident_id') == incident_id
+                       and r['data'].get('incident_revision') == revision])
         if len(candidates) == 1:
             decision_id = identifier(candidates[0]['id'])
     if decision_id:
         rows = store.history('decision', decision_id)
-        matching = [r['data'] for r in rows if r['data'].get('incident_id') == incident_id
+        matching = [r['data'] for r in rows if isinstance(r.get('data'), dict)
+                    and r['data'].get('incident_id') == incident_id
                     and r['data'].get('incident_revision') == revision]
         if len(matching) == 1:
             decision = matching[0]
@@ -112,21 +112,17 @@ def explain(store, incident_id):
                 facts['decision_action'] = action.get('action_type')
             execution_id = identifier(decision.get('execution_id'))
             if not execution_id:
-                candidates = []
-                for offset in range(0, 1000, 200):
-                    page = store.list('execution', limit=200, offset=offset)
-                    candidates.extend(r for r in page if r['data'].get('decision_id') == decision_id)
-                    if len(page) < 200:
-                        break
-                else:
-                    candidates = []
+                page = store.list('execution', limit=1001, offset=0)
+                candidates = ([] if len(page) > 1000 else
+                              [r for r in page if isinstance(r.get('data'), dict)
+                               and r['data'].get('decision_id') == decision_id])
                 if len(candidates) == 1:
                     execution_id = identifier(candidates[0]['id'])
             if execution_id:
                 executions = store.history('execution', execution_id)
                 if executions:
-                    execution = max(executions, key=lambda r: r['revision'])['data']
-                    if execution.get('decision_id') == decision_id:
+                    execution = max(executions, key=lambda r: r['revision']).get('data')
+                    if isinstance(execution, dict) and execution.get('decision_id') == decision_id:
                         facts['execution_status'] = execution.get('status')
                         if isinstance(execution.get('verified_at'), str):
                             facts['execution_verified_at'] = execution['verified_at']
