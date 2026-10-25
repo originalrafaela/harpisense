@@ -245,6 +245,19 @@ class UnitTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 patch_runtime.patched_source(original + b'changed externally')
 
+    def test_activation_patch_matches_architecture_and_full_model_signature(self):
+        expected = (b'LLM_ARCH_BITNET_B158', b'n_layer == 30', b'n_embd == 2560',
+                    b'hparams.n_ff() == 6912', b'hparams.n_head() == 20',
+                    b'hparams.n_head_kv() == 5', b'model.vocab.n_tokens() == 128256')
+        for part in expected:
+            self.assertIn(part, patch_runtime.NEW)
+        source = Path('.local-harpia/runtime/BitNet/3rdparty/llama.cpp/src/models/bitnet.cpp')
+        if source.exists():
+            current = source.read_bytes()
+            self.assertEqual(patch_runtime.patched_source(current), current)
+            previous = current.replace(patch_runtime.NEW, patch_runtime.PREVIOUS)
+            self.assertEqual(patch_runtime.patched_source(previous), current)
+
     def test_cli_banner_is_not_inference(self):
         self.assertEqual(generated_text_from_cli('Loading model...\nmodel: BitNet\nExiting...', 'teste'), '')
 

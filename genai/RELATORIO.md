@@ -1,4 +1,11 @@
-# Atualização mais recente — rodada 6
+# Atualização mais recente — rodada 7
+
+[RODADA7_VALIDACAO_PATCH.md](RODADA7_VALIDACAO_PATCH.md): patch restrito por arquitetura
+e dimensões, CLI/servidor recompilados e identificados por hash, três inferências
+reais após a correção. Saída legível em A/B, mas fidelidade ainda reprovada.
+37 testes aprovados; geração operacional não habilitada.
+
+## Histórico — rodada 6
 
 [RODADA6_DIAGNOSTICO.md](RODADA6_DIAGNOSTICO.md): quatro gerações reais reprovadas
 antes do patch; sem corte de contexto, três términos por limite e um por EOS.

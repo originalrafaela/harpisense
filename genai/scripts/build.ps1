@@ -34,3 +34,5 @@ if (($compilerVersion -join ' ') -notmatch 'clang version (\d+)\.' -or [int]$Mat
 if ($LASTEXITCODE -ne 0) { throw 'Configuração CMake falhou; consulte o erro antes de repetir' }
 & $cmake --build (Join-Path $runtime 'build') --config Release --target llama-server llama-cli --parallel $Jobs 2>&1 | Tee-Object -FilePath .local-harpia/results/cmake-build.txt
 if ($LASTEXITCODE -ne 0) { throw 'Build falhou; consulte diagnóstico, não reinstale automaticamente' }
+& $python -m genai.scripts.patch_runtime --record-build
+if ($LASTEXITCODE -ne 0) { throw 'Manifesto dos binários não corresponde ao patch' }

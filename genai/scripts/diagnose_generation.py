@@ -6,6 +6,7 @@ from pathlib import Path
 import threading
 import time
 import urllib.request
+import argparse
 
 from genai.harpia.client import Client, post_json
 from genai.harpia.contracts import CHAT_TEMPLATE, SYSTEM, frame, valid_text
@@ -26,15 +27,29 @@ class DiagnosticRuntime(RecordedRuntime):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--post-patch', action='store_true', help='Exactly simple + A/B, validating rebuilt executable hashes')
+    args = parser.parse_args()
     config = json.loads(Path('genai/config.example.json').read_text())
     folder = Path('.local-harpia/results')
     folder.mkdir(parents=True, exist_ok=True)
     runtime = DiagnosticRuntime(config['runtime_url'], config['inference_timeout_seconds'],
                                 MemoryPolicy(**config['memory_policy']), config['output_tokens'])
-    report = {'kind': 'four_synthetic_diagnostic_generations', 'memory_before': available_memory(),
+    report = {'kind': 'three_post_patch_synthetic_generations' if args.post_patch else 'four_synthetic_diagnostic_generations', 'memory_before': available_memory(),
               'config': config, 'system': SYSTEM, 'template': CHAT_TEMPLATE, 'cases': []}
     server = thread = None
     try:
+        if args.post_patch:
+            from .patch_runtime import PATCHED_SHA
+            manifest = json.loads((folder / 'build-manifest.json').read_text())
+            if manifest['source_sha256'] != PATCHED_SHA:
+                raise ValueError('stale activation build manifest')
+            for binary in manifest['binaries'].values():
+                if hashlib.sha256(Path(binary['path']).read_bytes()).hexdigest() != binary['sha256']:
+                    raise ValueError('binary does not match build manifest')
+            if Path(manifest['binaries']['llama-server']['path']).resolve() != Path(config['runtime_executable']).resolve():
+                raise ValueError('service executable differs from verified build')
+            report['build_manifest'] = manifest
         reason = runtime.memory_policy.entry_reason(report['memory_before'])
         if reason:
             report['blocked_reason'] = reason
@@ -61,6 +76,8 @@ def main():
         cases[0]['facts']['limitations'].append('Solicitação sintética: explique em texto corrido curto em português, sem JSON.')
         jobs = [('simple_direct', SIMPLE), ('simple_service_complete', SIMPLE),
                 ('A_service_adapter', cases[0]), ('B_service_adapter', cases[1])]
+        if args.post_patch:
+            jobs = [jobs[0], jobs[2], jobs[3]]
         for name, supplied in jobs:
             runtime.last_budget = None
             before = len(runtime.generations)
@@ -87,7 +104,7 @@ def main():
             report['cases'].append(record)
             if runtime.failed:
                 break
-        return 0 if len(report['cases']) == 4 and all(c.get('matches_real_generation') for c in report['cases']) else 1
+        return 0 if len(report['cases']) == len(jobs) and all(c.get('matches_real_generation') for c in report['cases']) else 1
     finally:
         if server:
             server.shutdown()
@@ -98,7 +115,8 @@ def main():
         report['runtime_stopped'] = process is None or process.poll() is not None
         report['runtime_error'] = runtime.error
         report['memory_samples'] = list(runtime.memory_samples)
-        (folder / 'generation-diagnostic.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
+        target = 'post-patch-validation.json' if args.post_patch else 'generation-diagnostic.json'
+        (folder / target).write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
         print(json.dumps({'blocked_reason': report.get('blocked_reason'),
                           'runtime_stopped': report['runtime_stopped'], 'cases': [
             {'name': c['name'], 'delivered': c.get('delivered'), 'seconds': c['seconds'],

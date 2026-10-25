@@ -9,9 +9,12 @@ Código em `genai/`; runtime, Python/venv, pesos, configuração local e resulta
 serviço → adaptador. A origem no modelo foi comprovada, mas as respostas falharam
 em compreensão/fidelidade e **não estão aprovadas para explicar incidentes**.
 Diagnóstico mais recente: [RODADA6_DIAGNOSTICO.md](RODADA6_DIAGNOSTICO.md).
+Validação após o patch: [RODADA7_VALIDACAO_PATCH.md](RODADA7_VALIDACAO_PATCH.md).
+Seletor restrito por arquitetura e dimensões, três inferências reais com EOS;
+fidelidade continua reprovada. Build grava manifesto local com hashes CLI/servidor.
 O grafo da FFN usava SiLU onde o modelo de 30 camadas exige ReLU². O build agora
 aplica um patch local mínimo, fixado por hash em `artifacts.lock.json`, antes de
-compilar. Build corrigido aprovado; ainda sem inferência após o patch. Não basta
+compilar. Build corrigido e inferência após o patch executados; fidelidade reprovada. Não basta
 conferir `--version`: a revisão upstream permanece a mesma, acrescida do patch.
 Perfil econômico e duas novas respostas reais reprovadas em
 [RODADA5_PERFIL_ECONOMICO.md](RODADA5_PERFIL_ECONOMICO.md); histórico em
