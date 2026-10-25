@@ -1,5 +1,41 @@
 # Template explícito e verificação bloqueada por RAM — 24/10/2026
 
+## Nova verificação de disponibilidade — 25/10/2026
+
+Estado inicial conferido: worktree limpa, branch `feature/harpia-bitnet`, HEAD
+`e716f798a335a183341ce013967aa83d24610e23`, acompanhando `origin/bitnet`.
+Relatório lido antes de alterar arquivos. Referências locais e prioridade da v2
+continuam as descritas abaixo; não houve necessidade de reler contratos.
+
+`available_memory()` mediu RAM total de 17.002.713.088 bytes e disponível de
+4.730.277.888 bytes (**4,41 GiB**). O limite preservado é 6.979.321.856 bytes
+(**6,5 GiB**); faltam **2.249.043.968 bytes (2,09 GiB)**.
+
+Maiores working sets individuais observados, sem caminhos ou linhas de comando:
+
+| Processo | Working set (MiB) |
+|---|---:|
+| chrome | 854,60 |
+| chrome | 501,30 |
+| MsMpEng | 390,60 |
+| chrome | 349,50 |
+| explorer | 287,40 |
+| explorer | 262,60 |
+| Memory Compression | 251,50 |
+| Maestri | 241,20 |
+
+São amostras por processo, não totais por aplicativo nem memória recuperável
+garantida. Nenhum programa ou VM foi encerrado. Modelo não carregado; zero
+inferências, zero respostas de modelo ou fallback nesta verificação. Casos A/B
+**não executados e não avaliados**, sem nova aprovação ou reprovação textual.
+Não se repetiram os testes aprovados nem se aguardou liberação de RAM.
+
+Próximo passo: disponibilizar pelo menos 6,5 GiB de RAM e iniciar nova rodada
+curta com A/B sequenciais pelo serviço → adaptador, registrando template,
+parâmetros, entradas/saídas e fidelidade. A qualidade permanece sem aprovação;
+geração continua fora do fluxo operacional. Apenas este relatório foi atualizado,
+sem alterações no código, HarpiServer, frontend, MQTT, PostgreSQL ou VMs.
+
 **Resultado: correção de formatação coberta por testes; qualidade textual ainda
 reprovada pela rodada 3 e não reavaliada com modelo nesta rodada.** Zero novas
 inferências. Não há evidência para atribuir a falha anterior ao template.
