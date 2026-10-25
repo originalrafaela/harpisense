@@ -1,3 +1,10 @@
+# Atualização mais recente — rodada 4
+
+Consulte [RODADA4_TEMPLATE.md](RODADA4_TEMPLATE.md): template explícito preservado,
+24 testes aprovados e smoke sem modelo aprovado. Inferência nova bloqueada pela
+proteção de RAM; qualidade textual continua sem aprovação. Detalhes da diferença
+de templates em [AUDITORIA_PROMPT.md](AUDITORIA_PROMPT.md).
+
 # Verificações HarpIA / BitNet — 24/10/2026
 
 **Registro histórico da primeira entrega.** Consulte a atualização

@@ -5,6 +5,15 @@ import math
 MAX_BODY = 16384
 MAX_TEXT = 3000
 MAX_TOKENS = 160
+# Official tokenizer_config.json of microsoft/bitnet-b1.58-2B-4T. The installed
+# GGUF embeds a different legacy Human/BITNETAssistant template; do not let the
+# CLI silently select that while /completion receives frame() below.
+CHAT_TEMPLATE = (
+    "{% set loop_messages = messages %}{% for message in loop_messages %}"
+    "{% set content = message['role'] | capitalize + ': '+ message['content'] | trim + '<|eot_id|>' %}"
+    "{{ content }}{% endfor %}"
+    "{% if add_generation_prompt %}{{ 'Assistant: ' }}{% endif %}"
+)
 # Projeção mínima do contexto P11. Nomes novos são uma extensão opt-in do DTO,
 # nunca uma segunda definição dos contratos RF/IF/Risk/Policy.
 FIELDS = {

@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import time
 
-from genai.harpia.contracts import SYSTEM
+from genai.harpia.contracts import CHAT_TEMPLATE, SYSTEM
 from genai.harpia.runtime import available_memory
 from .verify_local import cpu_seconds, working_set
 
@@ -34,6 +34,7 @@ def main():
     text = ('Dados sintéticos de teste: ' + json.dumps(data)
             + '. Em uma frase curta em português, descreva o estado e diga que a causa é desconhecida.')
     report = {'kind': 'real_native_cli', 'synthetic_input': data,
+              'chat_template': CHAT_TEMPLATE,
               'memory_before': available_memory(), 'inference_executed': False,
               'generation': {'max_tokens': 48, 'temperature': 0, 'seed': 42,
                              'threads': 2, 'context_tokens': 1024, 'gpu_layers': 0}}
@@ -51,7 +52,8 @@ def main():
         if report['model_sha256'] != expected:
             report['blocked_reason'] = 'model_integrity_mismatch'
             return 2
-        command = [str(executable), '-m', str(model), '-sys', SYSTEM, '-p', text, '-n', '48', '-t', '2',
+        command = [str(executable), '-m', str(model), '--jinja', '--chat-template', CHAT_TEMPLATE,
+                   '-sys', SYSTEM, '-p', text, '-n', '48', '-t', '2',
                    '-c', '1024', '-ngl', '0', '--temp', '0', '--seed', '42',
                    '--single-turn', '--simple-io', '--color', 'off', '--show-timings']
         with open(folder / 'cli-stdout.txt', 'wb') as output, open(folder / 'cli-stderr.txt', 'wb') as errors:

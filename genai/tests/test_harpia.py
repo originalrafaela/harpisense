@@ -13,7 +13,7 @@ from unittest.mock import patch
 import urllib.error
 
 from genai.harpia.client import Client, endpoint_url, post_json
-from genai.harpia.contracts import context_dto, frame, prompt
+from genai.harpia.contracts import SYSTEM, context_dto, frame, prompt
 from genai.harpia.runtime import Runtime
 from genai.harpia.server import Engine, LocalServer
 from genai.scripts.verify_cli import generated_text_from_cli
@@ -91,6 +91,8 @@ class HTTPTests(unittest.TestCase):
         self.assertEqual(result["incident_id"], CONTEXT["incident_id"])
         self.assertEqual(result["revision"], 1)
         self.assertIn("synthetic-inc-001", self.runtime.seen[0][0])
+        self.assertEqual(self.runtime.seen[0][0], prompt(CONTEXT))
+        self.assertEqual(self.runtime.seen[0][0].count("<|eot_id|>"), 2)
 
     def test_missing_facts(self):
         result = self.client.explanation({"incident_id": "missing-fields", "revision": 1})
@@ -205,6 +207,31 @@ class UnitTests(unittest.TestCase):
         self.assertTrue(frame("dados").startswith("System: "))
         self.assertTrue(frame("dados").endswith("<|eot_id|>Assistant: "))
         self.assertNotIn("start_header_id", frame("dados"))
+
+    def test_prompt_preserves_distinct_rf_if_values(self):
+        context = {"incident_id": "synthetic-rf-if", "revision": 1,
+                   "facts": {"rf_attack_probability": 0.82, "if_anomaly_score": 0.12}}
+        text = prompt(context)
+        expected_user = 'Explique este incidente conforme seus dados:\n' + json.dumps(context, ensure_ascii=False, sort_keys=True)
+        self.assertEqual(text, 'System: ' + SYSTEM + '<|eot_id|>User: ' + expected_user + '<|eot_id|>Assistant: ')
+        self.assertNotIn('<|begin_of_text|>', text)  # runtime inserts BOS once
+        self.assertEqual(context_dto(context)["facts"], context["facts"])
+
+    def test_runtime_returns_generated_content_not_prompt_echo(self):
+        runtime = Runtime()
+        supplied = frame('RF=0.82; IF=0.12; dados sintéticos.')
+        result = {"prompt": supplied, "content": "RF e IF são valores distintos."}
+        with patch.object(runtime, "ready", return_value=True), patch('genai.harpia.runtime.post_json', return_value=result) as transport:
+            answer = runtime.complete(supplied, 32)
+        self.assertEqual(answer, result['content'])
+        self.assertNotEqual(answer, supplied)
+        self.assertEqual(transport.call_args.args[1]['prompt'], supplied)
+        payload = transport.call_args.args[1]
+        self.assertTrue(transport.call_args.args[0].endswith('/completion'))
+        self.assertEqual(payload['stop'], ['<|eot_id|>', '<|end_of_text|>'])
+        self.assertEqual(payload['n_predict'], 32)
+        self.assertEqual(payload['temperature'], 0)
+        self.assertEqual(payload['seed'], 42)
 
     def test_loopback_enforcement(self):
         for value in ("http://0.0.0.0:8092", "http://user:secret@127.0.0.1:8092", "http://127.0.0.1:8092/path"):
