@@ -93,3 +93,49 @@ test('falha da API de explicações identifica serviço indisponível', async ({
   await expect(page.getByText('Sem explicação disponível para o incidente new.', {exact: false})).toBeVisible();
   await expect(page.getByText('Dados de demonstração — sem conexão operacional')).toHaveCount(0);
 });
+
+test('HarpIA mostra revisão desatualizada e horário; health disponível não libera geração',async({page})=>{
+  const requests:string[]=[];
+  page.on('request',request=>{if(request.url().includes('/api/'))requests.push(request.url())});
+  await login(page,{bitnet:'available'},{
+    incident:[{...projection('new',{incident_id:'new'}),revision:3}],
+    bitnet:[projection('exp',{incident_id:'new',revision:2,source:'bitnet_unverified_text',text:'Explicação sintética antiga'})]
+  });
+  await expect(page.getByText('Explicação sintética antiga',{exact:true})).toBeVisible();
+  await expect(page.getByText('Explicação desatualizada:',{exact:false})).toBeVisible();
+  await expect(page.getByText('Horário da explicação:',{exact:false})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Gerar explicação',exact:true})).toBeDisabled();
+  expect(requests.every(url=>!url.includes('/explain/')&&!url.includes(':8091')&&!url.includes(':8092'))).toBe(true);
+  await page.screenshot({path:'local-evidence/harpia-stale.png',fullPage:true});
+});
+
+test('consulta registrada exibe carregando e erro sem usar fallback fictício',async({page})=>{
+  await login(page,{}, {incident:[projection('new',{incident_id:'new'})]});
+  const button=page.getByRole('button',{name:'Consultar explicações registradas',exact:true});
+  await expect(button).toBeVisible();
+  let release!:()=>void;
+  const gate=new Promise<void>(resolve=>{release=resolve});
+  await page.route('**/api/v1/p11/bitnet?**',async route=>{await gate;await route.fulfill({status:503,body:'{}'})});
+  await button.click();
+  await expect(page.getByText('Carregando explicações…',{exact:true})).toBeVisible();
+  release();
+  await expect(page.getByText('Erro ao consultar explicações:',{exact:false})).toBeVisible();
+  await expect(page.getByText('Sem explicação disponível para o incidente new.',{exact:false})).toBeVisible();
+  await expect(page.getByText('Dados de demonstração — sem conexão operacional')).toHaveCount(0);
+});
+
+test('resposta atrasada não exibe texto de incidente anteriormente selecionado',async({page})=>{
+  await login(page,{}, {incident:[projection('new',{incident_id:'new'}),projection('old',{incident_id:'old'})],
+    bitnet:[projection('old-exp',{incident_id:'old',revision:1,source:'deterministic_fallback',text:'Texto sintético do antigo'})]});
+  const button=page.getByRole('button',{name:'Consultar explicações registradas',exact:true});
+  await expect(button).toBeVisible();
+  let release!:()=>void;
+  const gate=new Promise<void>(resolve=>{release=resolve});
+  await page.route('**/api/v1/p11/bitnet?**',async route=>{await gate;await route.fulfill({json:[projection('late',{incident_id:'new',text:'Resposta atrasada nova'})]})});
+  await button.click();
+  await expect(page.getByText('Carregando explicações…',{exact:true})).toBeVisible();
+  await page.getByRole('combobox',{name:'Incidente selecionado',exact:true}).selectOption('old');
+  release();
+  await expect(page.getByText('Texto sintético do antigo',{exact:true})).toBeVisible();
+  await expect(page.getByText('Resposta atrasada nova',{exact:true})).toHaveCount(0);
+});

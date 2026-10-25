@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 test('prévia isolada: telas, controles e logout em notebook',async({page})=>{
  const operational:string[]=[];page.on('request',r=>{if(r.url().includes('/api/'))operational.push(r.url())});
  await page.goto('http://127.0.0.1:5174');await page.getByRole('button',{name:'Abrir prévia visual'}).click();
- await page.screenshot({path:'docs/evidence/dashboard-notebook.png',fullPage:true});
+ await page.screenshot({path:'local-evidence/dashboard-notebook.png',fullPage:true});
  await expect(page.getByText('Dados de demonstração — sem conexão operacional')).toBeVisible();
  const links=await page.getByRole('navigation').getByRole('link').all();
  for(const link of links){await link.click();await expect(page.locator('main h1')).toBeVisible();await expect(page.locator('.panel').first()).toBeVisible()}
@@ -25,7 +25,7 @@ for(const status of [401,403,503])test(`login com HTTP ${status} permanece fora 
  await page.goto('http://127.0.0.1:5174');await page.getByText('Conexão da API').click();await page.getByLabel('URL da API').fill('http://127.0.0.1:5174');await page.getByRole('button',{name:'Salvar conexão local'}).click();await page.getByLabel('Usuário',{exact:true}).fill('test');await page.getByLabel('Senha',{exact:true}).fill('test');await page.getByRole('button',{name:'Entrar na central'}).click();await expect(page.getByRole('alert')).toBeVisible();await expect(page.getByRole('heading',{name:'Acesso administrativo'})).toBeVisible();await expect(page.getByText('Dados de demonstração — sem conexão operacional')).toHaveCount(0);
 });
 test('capturas login e mobile',async({page})=>{
- await page.goto('http://127.0.0.1:5174');await page.screenshot({path:'docs/evidence/login-notebook.png',fullPage:true});await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'Abrir prévia visual'}).click();await page.screenshot({path:'docs/evidence/dashboard-mobile.png',fullPage:true});
+ await page.goto('http://127.0.0.1:5174');await page.screenshot({path:'local-evidence/login-notebook.png',fullPage:true});await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'Abrir prévia visual'}).click();await page.screenshot({path:'local-evidence/dashboard-mobile.png',fullPage:true});
 });
 test('resposta inválida após login é erro, não zero registros ou demonstração',async({page})=>{
  let invalid=false;

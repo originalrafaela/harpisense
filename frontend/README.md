@@ -2,7 +2,7 @@
 
 Interface de consulta em português com login e 14 telas operacionais, demonstração explícita e integração progressiva. React 18, TypeScript e Vite seguem a stack do frontend legado preservado no P11; nenhum backend foi criado. Apenas React/React DOM entram no bundle. Playwright é dependência de desenvolvimento.
 
-Esta worktree usa a branch **integration/frontend-p11**, derivada do commit `1d7ed4d`. A entrega original do Frontend foi preservada. A preparação de acesso SSH, a matriz P11/PostgreSQL e o bloqueio do aceite real estão em [Integração P11 real](docs/INTEGRACAO_P11_REAL.md). A VM não foi acessada nesta sessão.
+Esta worktree usa a branch **integration/harpia-ui**, derivada de `integration/frontend-p11` (`280bab4`). A entrega original do frontend e sua worktree foram preservadas. Preparação HarpIA, resultados e pendências em [Integração visual HarpIA](docs/HARPIA_INTEGRACAO_VISUAL.md). Geração permanece desabilitada; consulta somente projeções registradas, com identificação de revisão, origem e atualidade. A preparação anterior de acesso SSH está em [Integração P11](docs/INTEGRACAO_P11_REAL.md). A VM não foi acessada nesta rodada.
 
 ## Executar
 

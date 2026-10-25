@@ -41,7 +41,7 @@ test('health autenticado → telemetria → mesmo registro exibido, sem persisti
     label.style.cssText = 'background:#653300;color:white;padding:14px;text-align:center;font-weight:bold';
     document.body.prepend(label);
   });
-  await page.screenshot({path: 'docs/evidence/p11-contract-dashboard-isolated.png', fullPage: true});
+  await page.screenshot({path: 'local-evidence/p11-contract-dashboard-isolated.png', fullPage: true});
   await page.getByRole('button', {name: 'Sair', exact: true}).click();
   await expect(page.getByLabel('Senha', {exact: true})).toHaveValue('');
 });

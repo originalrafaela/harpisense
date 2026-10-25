@@ -63,5 +63,11 @@ export class Client {
    return {id:`${id}@${row.revision}`,revision:row.revision as number,source:row.source,data:row.data};
   });
  }
+ async incidentExplanations(incidentId:string):Promise<Row[]>{
+  if(this.profile!=='p11')throw new ApiError('unavailable','Explicações não disponíveis nesta API.');
+  // Read persisted projections only. GET /explain invokes inference and is not a read-only lookup.
+  const rows=await this.rows('bitnet',0,50);
+  return rows.filter(row=>row.data.incident_id===incidentId);
+ }
  async health(){const v=await this.get(this.path('health'));if(!object(v)||(this.profile==='p11'&&typeof v.api!=='string'))throw new ApiError('invalid','Saúde em formato inválido.');return v}
 }
