@@ -43,7 +43,7 @@ def main():
         if not executable.is_file() or not model.is_file():
             report['blocked_reason'] = 'native_cli_or_model_missing'
             return 2
-        if report['memory_before'] and report['memory_before']['available_bytes'] < (config['reserve_memory_mb'] + 2560) * 1024**2:
+        if report['memory_before'] and report['memory_before']['available_bytes'] < (config.get('reserve_memory_mb', 4096) + 2560) * 1024**2:
             report['blocked_reason'] = 'insufficient_available_memory'
             return 2
         with model.open('rb') as weights:

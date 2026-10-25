@@ -8,6 +8,7 @@ import sys
 import threading
 
 from .runtime import Runtime, available_memory
+from .memory import MemoryPolicy
 from .server import LocalServer
 
 
@@ -22,10 +23,13 @@ def main():
         print(json.dumps(available_memory()))
         return
     config = json.loads(Path(args.config).read_text(encoding="utf-8"))
-    runtime = Runtime(config["runtime_url"], config["inference_timeout_seconds"])
+    runtime = Runtime(config["runtime_url"], config["inference_timeout_seconds"],
+                      memory_policy=MemoryPolicy(**config.get("memory_policy", {})),
+                      output_tokens=config.get("output_tokens", 96))
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
     # Bind before loading to reject an occupied integration port cheaply.
-    server = LocalServer((config["host"], config["port"]), runtime, os.getenv("HARPIA_TOKEN", ""))
+    server = LocalServer((config["host"], config["port"]), runtime, os.getenv("HARPIA_TOKEN", ""),
+                         config.get("max_waiting", 2), config.get("queue_wait_seconds", 2))
     def stop(*_):
         threading.Thread(target=server.shutdown, daemon=True).start()
     signal.signal(signal.SIGINT, stop)
@@ -40,7 +44,7 @@ def main():
     try:
         if not args.no_model:
             ready = runtime.start(config["runtime_executable"], config["model_path"], config["logs_dir"],
-                                  config["threads"], config["context_tokens"], config["reserve_memory_mb"])
+                                  config["threads"], config["context_tokens"], config.get("reserve_memory_mb"))
             logging.info("runtime ready=%s reason=%s load_seconds=%s", ready, runtime.error, runtime.load_seconds)
         server.serve_forever(poll_interval=0.2)
     finally:

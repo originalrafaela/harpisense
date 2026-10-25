@@ -10,7 +10,7 @@ import urllib.parse
 import urllib.request
 from collections import OrderedDict
 
-from .contracts import context_dto, valid_text
+from .contracts import OPTIONAL_EVIDENCE, context_dto, valid_text
 
 LOG = logging.getLogger("harpia.client")
 
@@ -61,7 +61,7 @@ def post_json(url, payload, timeout, token=""):
 
 class Client:
     """Cache limitada 5 min; serializa chamadas deste cliente e evita repetição."""
-    def __init__(self, url=None, token=None, timeout=50, transport=None):
+    def __init__(self, url=None, token=None, timeout=60, transport=None):
         self.url = endpoint_url(url or os.getenv("HARPIA_URL", "http://127.0.0.1:8091"))
         self.token = token if token is not None else os.getenv("HARPIA_TOKEN", "")
         if not 0 < timeout <= 120:
@@ -90,9 +90,14 @@ class Client:
                     raise ValueError("response identity mismatch")
                 if result.get("source") != "bitnet_unverified_text" or result.get("bitnet_status") != "responded_unverified":
                     raise ValueError("invalid response source")
+                omitted = result.get('omitted_context_fields', [])
+                if not isinstance(omitted, list) or len(omitted) > 2 or any(k not in OPTIONAL_EVIDENCE for k in omitted):
+                    raise ValueError("invalid omission notice")
                 result = {"incident_id": context["incident_id"], "revision": context["revision"],
                           "source": "bitnet_unverified_text", "bitnet_status": "responded_unverified",
                           "text": valid_text(result.get("text"))}
+                if omitted:
+                    result['omitted_context_fields'] = list(omitted)
                 self.cache[key] = (now, result)
                 while len(self.cache) > 64:
                     self.cache.popitem(last=False)

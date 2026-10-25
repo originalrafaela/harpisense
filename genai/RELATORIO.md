@@ -1,4 +1,11 @@
-# Atualização mais recente — rodada 4
+# Atualização mais recente — rodada 5
+
+[RODADA5_PERFIL_ECONOMICO.md](RODADA5_PERFIL_ECONOMICO.md): orçamento real por
+tokenizer, resumo P11 limitado, proteção de RAM/commit monitorada e duas gerações
+reais A/B. Transporte aprovado; ambas as respostas reprovadas em qualidade textual.
+Geração permanece fora do caminho operacional.
+
+## Histórico — rodada 4
 
 Consulte [RODADA4_TEMPLATE.md](RODADA4_TEMPLATE.md): template explícito preservado,
 24 testes aprovados e smoke sem modelo aprovado. Inferência nova bloqueada pela

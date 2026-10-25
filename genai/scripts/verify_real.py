@@ -33,7 +33,7 @@ def main():
     folder.mkdir(parents=True, exist_ok=True)
     report = {"kind": "real_model", "memory_before": available_memory(),
               "model_loaded": False, "inference_executed": False,
-              "generation": {"temperature": 0, "seed": 42, "max_tokens": 160, "threads": config["threads"], "context": config["context_tokens"], "gpu_layers": 0}}
+              "generation": {"temperature": 0, "seed": 42, "max_tokens": config.get("output_tokens", 96), "threads": config["threads"], "context": config["context_tokens"], "gpu_layers": 0}}
     cli_report = folder / "real-cli.json"
     if not cli_report.is_file() or not json.loads(cli_report.read_text(encoding="utf-8")).get("inference_executed"):
         report["blocked_reason"] = "run_successful_verify_cli_first"
@@ -45,7 +45,7 @@ def main():
     thread = None
     try:
         if not runtime.start(config["runtime_executable"], config["model_path"], config["logs_dir"],
-                             config["threads"], config["context_tokens"], config["reserve_memory_mb"]):
+                             config["threads"], config["context_tokens"], config.get("reserve_memory_mb")):
             report["blocked_reason"] = runtime.error
             return 2
         report["model_loaded"] = True

@@ -3,12 +3,14 @@
 Implementação isolada em `feature/harpia-bitnet`, base `9d58e69`, worktree
 `D:\Projetos\tcc - harpisense\harpisense-worktrees\harpia-bitnet`.
 Código em `genai/`; runtime, Python/venv, pesos, configuração local e resultados em
-`.local-harpia/`, ignorada pelo Git. Nenhum merge, push ou deploy foi realizado.
+`.local-harpia/`, ignorada pelo Git. Sem integração ao fluxo operacional.
 
 **Estado atual:** runtime compilado e inferência real executada no CLI e no fluxo
 serviço → adaptador. A origem no modelo foi comprovada, mas as respostas falharam
 em compreensão/fidelidade e **não estão aprovadas para explicar incidentes**.
-Métricas, textos reais e limitações em [RODADA3_INFERENCIA_REAL.md](RODADA3_INFERENCIA_REAL.md).
+Perfil econômico e duas novas respostas reais reprovadas em
+[RODADA5_PERFIL_ECONOMICO.md](RODADA5_PERFIL_ECONOMICO.md); histórico em
+[RODADA3_INFERENCIA_REAL.md](RODADA3_INFERENCIA_REAL.md).
 Um HTTP 200 de `/health` não significa que o modelo esteja carregado; prontidão
 também não constitui aprovação de qualidade.
 
@@ -39,9 +41,9 @@ O **serviço HarpIA** é este código Python, que mantém um `llama-server.exe` 
 e se comunica por HTTP privado em loopback. Não é um modelo e não treina pesos.
 
 CPU x86 é suportada oficialmente; o i7-10750H é compatível com esse perfil, mas a
-compilação/inferência ainda não foi comprovada. Usamos 2 threads, GPU layers 0,
-contexto 2048 (modelo admite até 4096), batch/microbatch 128, uma sequência,
-temperature 0, seed 42 e até 160 tokens gerados. Não usamos Transformers, CUDA ou
+compilação e execução já foram comprovadas, sem aprovação textual. Usamos 2 threads, GPU layers 0,
+contexto 1024, batch/microbatch 128, uma sequência,
+temperature 0, seed 42 e até 96 tokens gerados por padrão. Não usamos Transformers, CUDA ou
 WSL. A ficha do modelo indica inglês; a qualidade em português exige avaliação real.
 Não se extrapolam os números de benchmark publicados para esta máquina.
 
@@ -137,9 +139,17 @@ Verifique RAM antes de iniciar:
 & .local-harpia/venv/Scripts/python.exe -m genai.harpia --inspect
 ```
 
-O carregamento exige RAM livre de pelo menos **reserve_memory_mb + 2560 MiB**;
-reserva padrão 4096 MiB, mínimo total 6656 MiB livres. É uma margem conservadora
-operacional, não uma medição de consumo do modelo. Não desligue VMs automaticamente.
+O perfil experimental exige **3584 MiB (3,5 GiB) disponíveis**, em três amostras,
+e 3072 MiB de margem de memória comprometida do Windows. Durante carga, geração
+e ociosidade, monitora a cada 250 ms: interrompe somente o runtime próprio se RAM
+livre cair abaixo de 768 MiB, ficar abaixo de 1024 MiB por três amostras, a margem
+de commit cair abaixo de 1024 MiB ou working set/memória privada superar 2304 MiB.
+Os limites estão em `memory_policy` no JSON; justificativa e limitações no relatório
+da rodada 5. Não são requisitos oficiais ou máximos garantidos. Não desligue VMs.
+Configuração antiga que informe `reserve_memory_mb` mantém também a proteção
+legada `reserve_memory_mb + 2560 MiB` (mínimo 6,5 GiB); migre explicitamente para
+o novo JSON se desejar o perfil experimental. O verificador CLI histórico mantém
+6,5 GiB e não é o executor do novo perfil monitorado.
 Threads 1–4 e contexto 512–4096 são os limites deste perfil. Se o executável/pesos
 faltarem ou a margem falhar, o serviço continua vivo com prontidão negativa.
 
@@ -194,17 +204,34 @@ rótulo explícito de alternativa e motivo técnico (status HTTP ou classe do er
 O fallback adapta a redação do P11; não mantém um segundo motor de decisão.
 Faltas de formato na entrada levantam erro de validação antes de consultar a LLM.
 
-Corpo JSON até 16 KiB, contexto sanitizado até 6000 bytes, identificador ASCII até
+Corpo JSON até 16 KiB, contexto sanitizado até 12000 bytes, identificador ASCII até
 128 caracteres, revisão inteira positiva, até 64 campos em facts. Campos
 permitidos: [contracts.py](harpia/contracts.py), no máximo 500 caracteres por
-texto, escalares finitos ou null. Campos desconhecidos em `facts` são descartados;
+texto, escalares finitos ou null. `observed_facts`, `evidence_summary`, `xai_summary`,
+`risk_factors` e `limitations` também aceitam até 8 strings de 160 caracteres cada.
+Campos desconhecidos em `facts` são descartados;
 campos desconhecidos no envelope são rejeitados. Nunca envie segredos, PCAPs ou
 logs brutos. O produtor deve minimizar e remover segredos **antes** de montar DTOs,
 inclusive em textos permitidos; uma allowlist não identifica todos os segredos.
+Padrões óbvios de credenciais em texto permitido são rejeitados, sem retornar o valor.
+
+Antes da inferência, o serviço conta o prompt completo pelo `/tokenize` local com
+BOS e tokens especiais, reservando saída e 16 tokens de margem. Limite de dados
+para o modelo: 6000 bytes, além do orçamento de contexto configurado. Se exceder,
+remove primeiro `xai_summary` e depois `evidence_summary` inteiros, em ordem fixa,
+com aviso no prompt e `omitted_context_fields` no resultado do adaptador. Fatos
+essenciais devem estar em `observed_facts`; decisões, RF/IF, fatores Risk e limitações
+nunca são cortados. Se ainda não couber, HTTP 422 e fallback identificado no cliente.
+Não há corte silencioso nem context shift. O backend valida os contratos canônicos
+antes de projetar os resumos; esta camada não recalcula seus resultados.
 
 Até 8 handlers HTTP; 1 geração e 2 lugares de espera; espera até 2 s; excesso
 retorna 429 (503 no limite de conexões); socket de entrada 5 s; geração 45 s por
-padrão; saída até 3000 caracteres/160 tokens. Timeout/falha de inferência termina
+padrão; preparação limitada a 5 s; saída até 3000 caracteres/96 tokens por padrão.
+`output_tokens` aceita 1–160 para manter a compatibilidade P11. `max_waiting` permite
+0–2 esperas e `queue_wait_seconds` permite 0–2 s. Mutex Windows impede duas instâncias
+controladas do runtime na mesma sessão Windows, mesmo em portas diferentes.
+Timeout/falha de inferência termina
 o runtime pertencente ao wrapper, evitando geração abandonada; reiniciar o wrapper
 é necessário para recarregar após essa falha. Falha de carga tem limite de 90 s.
 O HTTP do wrapper começa a atender depois dessa tentativa inicial.
@@ -212,7 +239,7 @@ O HTTP do wrapper começa a atender depois dessa tentativa inicial.
 Cache em memória de até 64 respostas por 5 minutos, hash do contexto sanitizado
 completo (incluindo ID/revisão), por instância; não é persistência de auditoria.
 Não cacheia fallback. Cliente serializa chamadas locais com espera limitada; não
-faz retries. Timeout de cliente padrão 50 s divide orçamento entre espera e chamada
+faz retries. Timeout de cliente padrão 60 s divide orçamento entre espera e chamada
 HTTP (os sockets usam timeout de I/O; não é garantia de deadline contra servidor
 malicioso que envie bytes indefinidamente). Não usa proxies do ambiente nem segue
 redirecionamentos. Logs do wrapper contêm duração/classe de erro, nunca prompt/token.
@@ -257,6 +284,13 @@ na suíte simulada. Artefatos em `.local-harpia/results/` não vão ao Git.
 
 ## Integração posterior
 
+Para repetir somente os dois casos sintéticos com monitoramento e template
+corrigido: `python -m genai.scripts.verify_ab` no Python dedicado da worktree.
+Esse comando salva `.local-harpia/results/economic-ab.json`, incluindo entradas,
+saídas, prompts, orçamentos e amostras Windows/processo. Não execute `verify_real`
+completo para uma rodada limitada a duas gerações. Exit 0 comprova apenas transporte
+e origem; a rodada 5 saiu 0 e **reprovou** na avaliação textual.
+
 Fluxo pretendido: navegador → API HarpiServer → cliente HarpIA → Windows/BitNet → API
 → navegador. O navegador nunca recebe o segredo técnico nem acessa BitNet diretamente.
 Exemplo preparatório de uso do cliente no futuro backend:
@@ -280,14 +314,17 @@ Mapeamento a implementar pelo backend com validadores canônicos existentes:
 | incident_id, revision, scenario_id | `incident` da revisão consultada |
 | rf_attack_probability | `detection.classification.attack_probability`, somente RF |
 | if_anomaly_score | `detection.anomaly.anomaly_score`, score operacional IF |
+| rf_calibrated | informação do produtor RF; null se não comprovada |
+| if_score_meaning | semântica do pacote IF: maior é mais anômalo, não probabilidade |
+| asset_id, window_start, window_end | ativo e intervalo validados pelo backend; null quando ausentes |
 | xai_summary | contribuições do `explanation` XAI vinculado à detecção |
-| risk_score, risk_level, risk_factors | snapshot `incident.risk`, null quando incompleto |
+| risk_status, risk_score, risk_level, risk_factors | snapshot `incident.risk`; preservar nulos e fatores ausentes |
 | decision_id, decision_status, decision_action | `decision` já produzido por Policy |
 | execution_status, verified_at | `execution` real; aceito ≠ mitigação confirmada |
-| observed_at, evidence_summary, limitations | horários/evidências referenciados e cobertura |
+| observed_at, observed_facts, evidence_summary, limitations | horários, fatos essenciais, evidências opcionais e cobertura |
 | operation_mode, execution_enabled, autonomy_mode | controles independentes autenticados |
 
-Esses resumos escalares são projeções auxiliares: não copiam schemas, não validam
+Esses resumos limitados são projeções auxiliares: não copiam schemas, não validam
 relações canônicas e não comprovam autenticidade. O backend deverá verificar links,
 janela/revisão, validação e confiança antes de preencher os campos.
 

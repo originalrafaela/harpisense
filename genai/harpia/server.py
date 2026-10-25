@@ -18,26 +18,35 @@ class Busy(Exception):
 
 
 class Engine:
-    def __init__(self, runtime):
+    def __init__(self, runtime, max_waiting=2, queue_wait_seconds=2):
+        if type(max_waiting) is not int or not 0 <= max_waiting <= 2 or not 0 <= queue_wait_seconds <= 2:
+            raise ValueError("invalid queue limits")
         self.runtime = runtime
-        self.slots = threading.BoundedSemaphore(3)  # 1 active + at most 2 waiting
+        self.slots = threading.BoundedSemaphore(1 + max_waiting)
+        self.queue_wait_seconds = queue_wait_seconds
         self.generation = threading.Lock()
         self.cache = OrderedDict()
+        self.preparation = threading.local()
 
-    def generate(self, text, tokens):
+    def generate(self, text, tokens, context=None):
         if not self.slots.acquire(blocking=False):
             raise Busy()
         locked = False
         try:
-            locked = self.generation.acquire(timeout=2)
+            locked = self.generation.acquire(timeout=self.queue_wait_seconds)
             if not locked:
                 raise Busy()
+            if not self.runtime.ready():
+                raise RuntimeError("model_not_ready")
+            tokens = min(tokens, getattr(self.runtime, 'output_tokens', MAX_TOKENS))
+            self.preparation.omitted = []
+            if context is not None and hasattr(self.runtime, 'prepare_context'):
+                text = self.runtime.prepare_context(context, tokens)
+                self.preparation.omitted = list(self.runtime.last_budget['omitted_fields'])
             key = hashlib.sha256((text + str(tokens)).encode()).hexdigest()
             now = time.monotonic()
             if key in self.cache and now - self.cache[key][0] < 300:
                 return self.cache[key][1]
-            if not self.runtime.ready():
-                raise RuntimeError("model_not_ready")
             result = valid_text(self.runtime.complete(text, tokens))
             self.cache[key] = (time.monotonic(), result)
             while len(self.cache) > 64:
@@ -54,10 +63,10 @@ class LocalServer(ThreadingHTTPServer):
     block_on_close = True
     request_queue_size = 8
 
-    def __init__(self, address, runtime, token=""):
+    def __init__(self, address, runtime, token="", max_waiting=2, queue_wait_seconds=2):
         if address[0] != "127.0.0.1" or not 0 <= address[1] <= 65535:
             raise ValueError("only IPv4 loopback allowed")
-        self.engine = Engine(runtime)
+        self.engine = Engine(runtime, max_waiting, queue_wait_seconds)
         self.token = token
         self.handlers = threading.BoundedSemaphore(8)
         super().__init__(address, Handler)
@@ -159,9 +168,11 @@ class Handler(BaseHTTPRequestHandler):
             value = json.loads(raw, parse_constant=reject_constant)
             if self.path == "/explain":
                 context = context_dto(value)
-                text = self.server.engine.generate(prompt(context), MAX_TOKENS)
+                text = self.server.engine.generate(prompt(context), MAX_TOKENS, context=context)
                 result = {"incident_id": context["incident_id"], "revision": context["revision"],
                           "source": "bitnet_unverified_text", "bitnet_status": "responded_unverified", "text": text}
+                if self.server.engine.preparation.omitted:
+                    result['omitted_context_fields'] = self.server.engine.preparation.omitted
             else:
                 # Existing P11 wire format; preserve compatibility with {prompt,max_tokens}.
                 if not isinstance(value, dict) or set(value) != {"prompt", "max_tokens"}:
