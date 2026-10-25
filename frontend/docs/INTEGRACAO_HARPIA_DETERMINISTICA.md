@@ -6,7 +6,7 @@ Esta branch parte da interface publicada `integration/harpia-ui` (`2fbb15c`) e i
 
 O endpoint P11 existente `GET /api/v1/p11/explain/{incident_id}` e o `GET /api/v1/p11/health` são mantidos. O complemento `genai/harpia/p11.py` substitui, em memória, o handler autenticado da explicação e acrescenta metadados de capacidade ao health. Ele exige as rotas P11 existentes com dependências de autenticação e o mesmo `Store` injetado pelo HarpiServer; falha fechado se não os encontra. Não cria rotas anônimas, tabela, banco, catálogo, gravações ou chamada ao BitNet. A consulta retorna `persisted:false`: calcula a explicação para a revisão atual, sem criar projeção de texto.
 
-Não foi feito deploy nem consulta a serviços/VMs nesta rodada. O acesso real confirmado anteriormente cobriu health e telemetria; não há evidência aqui de incidente real disponível, nem da instalação deste handler no HarpiServer. A integração vista no navegador é validada com fixtures sintéticas de teste, nunca como incidente de laboratório.
+O complemento foi preparado no staging P11/PostgreSQL do HarpiServer e seu bootstrap foi instalado após backup. A ativação aguarda reinício autorizado do serviço, pois o sudo remoto exige autenticação interativa. Não há incidentes reais disponíveis. A API pós-reinício e a exibição real no navegador ainda não foram validadas; fixtures automatizadas não são apresentadas como integração de produção.
 
 ## Auditoria do log que induziu M3
 
@@ -41,26 +41,60 @@ O proxy de desenvolvimento continua preso a `127.0.0.1`, sem credenciais no fron
 ## Instalação assistida e recuperação
 
 1. Na implantação planejada, confirme que o pacote P11 carregado é o aprovado e que o `Store` injetado aponta para o armazenamento `projections` existente. Faça backup normal da configuração/código pelo procedimento operacional atual. Não aplique migração: o endpoint não precisa de tabela nova.
-2. No bootstrap atual do P11, após criar `app` com `create_app(store, ...)`, instale o complemento com `from genai.harpia.p11 import install_deterministic_harpia` e `install_deterministic_harpia(app, store)`. Mantenha o processo local protegido pelo mesmo Basic e o serviço BitNet em loopback.
-3. Reinicie somente durante uma implantação aprovada, valide health autenticado e confirme exatamente `harpia.mode=deterministic_only`, `generation_enabled=false`, GET de incidente autenticado e explicação com ID/revisão/origem esperados. Confira que nenhuma escrita ou chamada ao runtime ocorre. Valide com incidente sintético isolado antes de consultar dados reais.
-4. Para reverter, remova a chamada `install_deterministic_harpia` do bootstrap e reinicie segundo o procedimento do operador. Não remova modelos nem arquivos locais. Sem o complemento, o health não declara a capacidade e o frontend não chama a rota de explicação que poderia invocar inferência na API antiga.
+2. No bootstrap do P11, após criar `app` com `create_app(store=store)`, instale o complemento com `from harpia_deterministic.p11 import install_deterministic_harpia` e `install_deterministic_harpia(app, store)`. O diretório `harpia_deterministic` deve estar no `WorkingDirectory` do serviço. Mantenha o processo local protegido pelo mesmo Basic e o serviço BitNet em loopback.
+3. Após uma implantação aprovada, reinicie somente o P11. Valide health autenticado e confirme `harpia.mode=deterministic_only`, `generation_enabled=false`, GET de incidente autenticado e explicação com ID/revisão/origem esperados. Confira que nenhuma escrita ou chamada ao runtime ocorre. Valide com dados sintéticos isolados em ambiente de teste; não crie incidentes sintéticos no banco operacional.
+4. Para reverter a implantação atual, restaure o backup do bootstrap documentado abaixo e reinicie `harpisense-p11`. Não remova modelos nem arquivos locais. Sem o complemento, o health não declara a capacidade e o frontend não chama a rota de explicação que poderia invocar inferência na API antiga.
 
-Essas instruções são um roteiro; não foram aplicadas à VM e a substituição de `APIRoute.dependant.call` precisa ser repetida contra a versão FastAPI/P11 efetivamente implantada durante homologação. O pacote local usa FastAPI 0.115.0, conforme o ambiente P11 aprovado. Primeiro confirme a versão e teste o complemento em staging.
+O complemento foi adaptado ao bootstrap e à versão P11/FastAPI atualmente instalados no staging. A substituição de `APIRoute.dependant.call` foi exercitada em teste de compatibilidade com FastAPI 0.143.3 e o Store PostgreSQL real. O pacote local usa FastAPI 0.115.0, portanto a verificação remota específica é necessária e não deve ser inferida dos testes locais. A ativação do processo ainda aguarda reinício com sudo.
 
 ## Verificações e pendências
 
 - Testes Python do complemento: app fixture com o mesmo protocolo de Store/rotas protegidas P11; cobrem campos completos/ausentes, RF/IF/risco, decisão e execução pendente/confirmada, texto malicioso excluído, 401, 404, revisão e origem. São fixtures, não integração com Postgres/HarpiServer real.
 - Testes automáticos do frontend: autenticação, capability gating, vínculo, resposta antiga, indisponibilidade, texto escapado e fallback sem confusão de origem. Playwright também usa fixtures sintéticas. Build e testes unitários passaram.
-- Transporte de verdade, banco, consulta de incidentes reais, instalação de rota no HarpiServer, modo com incidentes reais e recuperação ainda precisam de homologação em staging com o operador. Não houve deploy nesta entrega.
+- Compatibilidade PostgreSQL real e preparação dos arquivos no host foram concluídas; faltam reinício do serviço, API autenticada após ativação e observação do estado vazio no navegador.
 - A fidelidade textual do BitNet segue reprovada na validação anterior. A comparação histórica apontou resposta falsa sobre M3. Antes de qualquer ativação, reproduzir inferência com casos A/B, revisar entradas/saídas e controles de execução e obter aprovação de fidelidade específica. Nenhuma validação automatizada deste commit substitui essa etapa.
 
 ## Verificação de implantação — 25/10/2026
 
-O peer Tailscale autenticado para `100.66.89.7` corresponde a `gateway` (Linux, online), e a conta local contém uma impressão SSH previamente confiável para esse IP. A conexão SSH em modo sem prompt foi recusada com `Permission denied (publickey,password)`: nenhuma chave de cliente estava disponível para esta sessão e nenhuma senha foi tentada. O túnel P11 local `127.0.0.1:18000` também não estava aberto. Portanto, não foi possível confirmar a versão/bootstrap em execução, o esquema vivo, autenticar na API, consultar incidentes, criar backup remoto ou implantar. Nenhum comando remoto chegou a executar. O bloqueio é de autorização/autenticação SSH nesta sessão, não uma incompatibilidade demonstrada.
+### Compatibilidade PostgreSQL e preparação
 
-Foi revisada somente a cópia local sanitizada de `PostgresStore` obtida em uma validação anterior. Ela usa `psycopg`, o armazenamento PostgreSQL existente `projections`, a coluna JSONB `data` e implementa `history(kind,id)`/`list(kind,limit,offset)` com o mesmo formato consumido pelo complemento; `history` ordena as revisões e entrega `data` como objeto. O complemento não importa SQLite, abre conexão própria, cria tabelas ou altera o Store. A resolução de decisão/execução usa uma única chamada por tipo, com limite de 1.001 registros e trata cobertura acima de 1.000 como desconhecida. Na implementação Postgres copiada, `list` atualmente carrega todas as projeções do tipo antes de paginar; o impacto desse comportamento precisa ser medido no volume vivo antes de habilitar consultas em produção.
+O host Tailscale `100.66.89.7` foi confirmado como `gateway`; o login autenticado é `harpiserver`. O SSH passou a funcionar depois que a chave dedicada existente foi carregada no `ssh-agent` pelo usuário. Nenhuma chave foi criada ou alterada.
 
-Essa inspeção do código e os testes com a referência SQLite **não comprovam integração com PostgreSQL**. Não foi possível executar uma consulta autenticada na VM nem validar JSONB, latência, volume ou dados reais. A implantação permanece pendente até disponibilizarem a identidade SSH autorizada nesta sessão ou um túnel autorizado. Quando houver acesso: confirmar novamente a chave de host; capturar commit/versão e bootstrap; conferir que o `Store` é o `PostgresStore` e rever as consultas acima; fazer backup dos arquivos de bootstrap a alterar; instalar somente o hook; validar 401/404/200 e health com `generation_enabled:false`; consultar dados apenas se houver incidente real; confirmar telemetria e painel; e testar reversão removendo o hook e reiniciando pelo procedimento operacional. Não aplicar migração.
+O serviço implantado usa `/opt/harpisense/staging/p11-postgresql`, Python 3.14.4, FastAPI 0.143.3, P11 da entrega aprovada e `PostgresStore` via psycopg. A implementação P11 tem SHA-256 `8cb67932cc2f7ef22ed357b0c94f7a8cb416cde164db60866dd6df5cf7fb8698`, igual à referência aprovada local. O Store ativo usa PostgreSQL 18.6, a tabela `projections` e a coluna JSONB `data`; sua implementação tem SHA-256 `cba6be580f72a8e39077ea9e7437cadee04b67effbb618737309f6450d97643c`, igual à cópia local examinada. Não foi instalado SQLite nem alterado esquema.
+
+Antes da troca do bootstrap, foi guardada uma cópia em `/opt/harpisense/staging/p11-postgresql/app.py.bak-harpia-deterministic-20261025T222301Z`; seu hash corresponde ao original `app.py` (`2545e122712be2e331579c2c41b04437738bca974fe42297b0445841ea50e2e4`). Os três módulos `harpia_deterministic` foram instalados no diretório de trabalho do P11, com permissões de leitura para o serviço, e passaram em `py_compile`. O novo `app.py` foi testado com o app P11 e o Store PostgreSQL reais antes de substituir o arquivo; o hash instalado é `52078a449886528569a85645e02df974826dc1a24566c01db6bc5f487f328ef2`.
+
+O teste de compatibilidade contra o PostgresStore e a base operacional foi somente de leitura e passou: health sem autenticação 401, health autenticado 200 com `generation_enabled:false`, lista de incidentes vazia, explicação de ID inexistente 404 e telemetria existente (7 projeções). Não houve inferência nem escrita. A base contém 7 projeções de telemetria/janelas e nenhuma projeção de incidente, decisão ou execução; nenhum incidente foi fabricado.
+
+### Estado do serviço e validação pendente
+
+O bootstrap novo está instalado no disco, mas **a ativação ainda não foi concluída**: o processo P11 ativo (PID 1850) continua com o módulo que carregou antes da troca. Uma tentativa de reiniciar com `sudo systemctl restart harpisense-p11` foi recusada porque sudo exige autenticação em terminal interativo. A consulta somente leitura confirmou o host/usuário, e as rotas atuais de health e explain continuam respondendo 401 sem autenticação. Portanto, ainda não há evidência de que a instância ativa anuncie o complemento, de consulta autenticada pela API viva ou de visualização real no navegador. Não foi possível confirmar 200/404 autenticados no processo após implantação.
+
+Para concluir, o operador com sudo deve executar no host:
+
+```sh
+sudo systemctl restart harpisense-p11
+sudo systemctl is-active harpisense-p11
+```
+
+Depois, validar pela API autenticada health com `harpia.mode=deterministic_only` e `generation_enabled=false`, incidente inexistente 404 e lista real vazia; a consulta sem credenciais deve permanecer 401. O frontend local deve passar pelo proxy GET em loopback. Como não existem incidentes reais, a tela deve mostrar estado vazio, não uma explicação sintética. A telemetria deve continuar legível. A autenticação da API e a visualização pelo navegador continuam pendentes até essa reinicialização e validação.
+
+### Recuperação
+
+Se a unidade não voltar ativa ou as verificações falharem, restaurar o bootstrap guardado e reiniciar somente o P11:
+
+```sh
+cd /opt/harpisense/staging/p11-postgresql
+cp -p app.py.bak-harpia-deterministic-20261025T222301Z app.py
+sudo systemctl restart harpisense-p11
+sudo systemctl is-active harpisense-p11
+```
+
+Não há migração a reverter. Os módulos `harpia_deterministic` podem permanecer no diretório; o bootstrap restaurado não os importa. Não remova pesos, runtime, dados ou arquivos locais. PostgreSQL, MQTT, autenticação, firewall e VMs não foram alterados.
+
+### Observações de volume e segurança
+
+A resolução de decisão/execução usa uma chamada por tipo, com limite de 1.001 registros e trata cobertura acima de 1.000 como desconhecida. Na implementação PostgreSQL examinada, `list` carrega todas as projeções daquele tipo antes de paginar; o custo em maior volume precisa ser medido antes de uso amplo. A resposta não é persistida e não escreve no PostgreSQL. A geração BitNet continua desabilitada.
 
 ## Encerramento do Playwright
 
