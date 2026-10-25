@@ -41,9 +41,9 @@ test('proxy real Vite: caminho, Basic, status, leitura restrita e logs sem crede
   assert.equal(calls[2].url,'/api/v1/p11/telemetry?limit=50&offset=0');assert.equal(calls[2].authorization,headers.Authorization);
   const count=calls.length;
   assert.equal((await fetch(base+'/telemetry',{method:'POST',headers})).status,405);
-  assert.equal((await fetch(base+'/incident',{headers})).status,404);
+  assert.equal((await fetch(base+'/incident',{headers})).status,200);
   assert.equal((await fetch(base+'/health',{headers:{...headers,Origin:'https://foreign.example'}})).status,403);
   assert.equal((await fetch(base+'/telemetry?password=forbidden',{headers})).status,400);
-  assert.equal(calls.length,count);
+  assert.equal(calls.length,count+1);
   assert.ok(!logs.join('').includes('transport-fixture'));assert.ok(!logs.join('').includes(headers.Authorization));
 });

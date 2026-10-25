@@ -19,7 +19,7 @@ export function selectExplanation(rows: Row[], id: string | null): Row | undefin
       (b.revision ?? 0) - (a.revision ?? 0))[0];
 }
 export function originLabel(row: Row): string {
-  if (row.data.source === 'deterministic_fallback') return 'Alternativa determinística';
+  if (row.data.source === 'deterministic_fallback') return 'Explicação determinística';
   if (row.data.source === 'bitnet_unverified_text') return 'BitNet · texto não verificado';
   return 'Origem da explicação não informada';
 }

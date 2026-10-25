@@ -9,7 +9,7 @@ export function tunnelTarget(value = 'http://127.0.0.1:18000') {
 
 export function p11Transport(target) {
   const prefix = '/p11-api';
-  const allowed = new Set(['/api/v1/p11/health', '/api/v1/p11/telemetry']);
+  const allowed = new Set(['/api/v1/p11/health', '/api/v1/p11/telemetry', '/api/v1/p11/incident', '/api/v1/p11/bitnet']);
   const guard = server => {server.middlewares.use((request, response, next) => {
     if (!request.url?.startsWith(prefix)) return next();
     const url = new URL(request.url, 'http://127.0.0.1');
@@ -19,7 +19,7 @@ export function p11Transport(target) {
       response.writeHead(403, {'Content-Type': 'application/json'});
       return response.end('{"detail":"Origem não permitida no transporte local"}');
     }
-    if (request.method !== 'GET' || !allowed.has(path)) {
+    if (request.method !== 'GET' || !(allowed.has(path) || /^\/api\/v1\/p11\/explain\/[A-Za-z0-9_.:@-]{1,128}$/.test(path) || /^\/api\/v1\/p11\/bitnet\/[A-Za-z0-9_.:@-]{1,128}\/history$/.test(path))) {
       response.writeHead(request.method !== 'GET' ? 405 : 404, {'Content-Type': 'application/json'});
       return response.end('{"detail":"Recurso não integrado neste transporte de leitura"}');
     }

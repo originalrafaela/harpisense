@@ -84,6 +84,7 @@ export function HarpiaCard({incidents, explanations, failure, health, context}: 
   const currentConsultation = consultation?.key === selectionKey ? consultation : null;
   const explanation = selectExplanation(currentConsultation?.rows ?? explanations, selectedId);
   const freshness = selected && explanation ? explanationFreshness(selected, explanation) : 'unknown';
+  const deterministicAvailable = object(health?.harpia) && health.harpia.mode === 'deterministic_only' && health.harpia.contract_version === 1 && health.harpia.generation_enabled === false;
   useEffect(() => {
     if (!requested || requested.key !== selectionKey || !context.loadExplanations) return;
     let active = true;
@@ -114,7 +115,7 @@ export function HarpiaCard({incidents, explanations, failure, health, context}: 
     return () => {active = false};
   }, [historyRequested, explanation?.id, selectedId]);
   const notIntegrated = failure?.startsWith('Não integrado:') || failure?.startsWith('Não configurado:');
-  const unavailable = Boolean(failure && !notIntegrated) || ['unavailable', 'not_configured'].includes(String(health?.bitnet));
+  const unavailable = Boolean(failure && !notIntegrated) || (!object(health?.harpia) || health.harpia.mode !== 'deterministic_only') && ['unavailable', 'not_configured'].includes(String(health?.bitnet));
   return <Panel title="HarpIA · explicação do incidente">
     <div className="harpia-card">
       <img className="harpia-avatar" src="/assets/harpy.png" alt="Harpia mecânica · HarpIA"/>
@@ -122,7 +123,7 @@ export function HarpiaCard({incidents, explanations, failure, health, context}: 
         <p className="muted">Explicações com contexto. HarpIA não decide nem executa comandos.</p>
         <p className="muted">Disponibilidade técnica: {show(health?.bitnet)}. Geração operacional não habilitada nesta integração.</p>
         <button disabled title="Habilitação operacional e contrato de geração pelo backend ainda pendentes">Gerar explicação</button>
-        <small>Geração indisponível: health não autoriza uso operacional. Esta tela consulta somente explicações registradas na API do HarpiServer.</small>
+        <small>Geração indisponível: health não autoriza uso operacional. Esta tela consulta a API do HarpiServer; o modo determinístico não chama o BitNet.</small>
         <label>Incidente selecionado<select value={selectedId ?? ''} disabled={!ordered.length}
           onChange={e => setSelection(e.target.value)}>
           {!ordered.length && <option value="">Sem incidente disponível</option>}
@@ -132,8 +133,8 @@ export function HarpiaCard({incidents, explanations, failure, health, context}: 
         {selected && <small>Incidente {selectedId} · revisão do incidente {show(incidentRevision(selected))}</small>}
         {(context.loading || consulting) && <p role="status">Carregando explicações…</p>}
         {selectedId && <button disabled={Boolean(context.loading || consulting || notIntegrated || !context.loadExplanations)}
-          onClick={() => {setConsultation(null);setRequested({key: selectionKey, id: selectedId})}}>Consultar explicações registradas</button>}
-        <small>Consulta à primeira página de até 50 explicações registradas. Ausência nesta página não comprova inexistência de histórico.</small>
+          onClick={() => {setConsultation(null);setRequested({key: selectionKey, id: selectedId})}}>{deterministicAvailable ? 'Consultar explicação determinística' : 'Consultar explicações registradas'}</button>}
+        <small>{deterministicAvailable ? 'A API declarou modo determinístico; a consulta resume os campos estruturados da revisão atual e não chama o BitNet.' : 'Sem capacidade determinística declarada, somente projeções de explicação já registradas são consultadas; o endpoint histórico de geração não é chamado.'}</small>
         {currentConsultation?.error && <p role="alert" className="error">Erro ao consultar explicações: {currentConsultation.error}</p>}
         {notIntegrated && <p className="muted">Explicações não integradas nesta conexão. {failure}</p>}
         {unavailable && <p className="error" role="status">Serviço indisponível.{failure ? ` ${failure}` : ' BitNet não está disponível; uma alternativa recebida pode ser exibida abaixo.'}</p>}
@@ -142,9 +143,10 @@ export function HarpiaCard({incidents, explanations, failure, health, context}: 
           <small>Revisão do incidente explicada: {show(explanationRevision(explanation))} · Horário da explicação: {explanationTime(explanation) ? new Date(explanationTime(explanation)!).toLocaleString('pt-BR') : 'Não informado'}{explanationTime(explanation) && !explanation.data.generated_at ? ' (registro na API; horário de geração não informado)' : ''}</small>
           {freshness === 'stale' && <p role="status" className="error">Explicação desatualizada: pertence a outra revisão do incidente. Não representa a revisão selecionada.</p>}
           {freshness === 'unknown' && <p role="status">Atualidade da explicação não verificada: revisão de vínculo não informada.</p>}
+          {explanation.data.persisted === false && <small>Explicação calculada nesta consulta; não é uma revisão persistida de texto. Evidências originais permanecem no backend.</small>}
           <p className="explanation-text">{String(explanation.data.text)}</p>
           <div className="harpia-actions"><button onClick={() => setDetails(value => !value)} aria-expanded={details}>Detalhes da explicação</button>
-            <button disabled={loading} onClick={() => setHistoryRequested({key: historyKey})}>Histórico da explicação</button></div>
+            <button disabled={loading || explanation.data.persisted === false} onClick={() => setHistoryRequested({key: historyKey})}>Histórico da explicação</button></div>
           {details && <section className="detail" aria-label="Detalhes da explicação"><p>ID: {explanation.id} · origem da projeção: {show(explanation.source)}</p><pre>{JSON.stringify(explanation.data, null, 2)}</pre></section>}
         </> : !context.loading && !consulting && <Empty>Sem explicação disponível{selectedId ? ` para o incidente ${selectedId}` : ''}.</Empty>}
         {loading && <p role="status">Carregando histórico…</p>}

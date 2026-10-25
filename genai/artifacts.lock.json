@@ -1,0 +1,25 @@
+{
+  "runtime": {
+    "url": "https://github.com/microsoft/BitNet.git",
+    "revision": "0b341e582afbf9e1011f24744b554c96a3477eb5",
+    "license": "MIT",
+    "llama_cpp_submodule": "390c307752ab78fd8189f359d6954c9ba1be74af",
+    "local_patch": {
+      "id": "bitnet-2b4t-signature-relu2-v2",
+      "script": "genai/scripts/patch_runtime.py",
+      "original_source_sha256": "d7bf43b007b97c38e7110932846c02361eb15b351850b8c1a5bcdc36e25daea5",
+      "patched_source_sha256": "e0d5113c65d15adc0ed713a43095001c747b9e036db0bd688588415bab0256b8",
+      "previous_source_sha256": "5dfd6758d25c0e632100a305b31297882a817b9c8c33a3226f08141d2fa1a4ec"
+    }
+  },
+  "model": {
+    "repository": "https://huggingface.co/microsoft/bitnet-b1.58-2B-4T-gguf",
+    "revision": "a1f2f1c765812aa8af3f6eda4a313707064bba15",
+    "filename": "ggml-model-i2_s.gguf",
+    "bytes": 1187801280,
+    "sha256": "4221b252fdd5fd25e15847adfeb5ee88886506ba50b8a34548374492884c2162",
+    "license": "MIT"
+  },
+  "python": "3.12.13",
+  "service_dependencies": "Python standard library only"
+}

@@ -65,7 +65,17 @@ export class Client {
  }
  async incidentExplanations(incidentId:string):Promise<Row[]>{
   if(this.profile!=='p11')throw new ApiError('unavailable','Explicações não disponíveis nesta API.');
-  // Read persisted projections only. GET /explain invokes inference and is not a read-only lookup.
+  const health = await this.health();
+  if (object(health.harpia) && health.harpia.mode === 'deterministic_only' &&
+      health.harpia.contract_version === 1 && health.harpia.generation_enabled === false) {
+   const value = await this.get(`${this.path('explain')}/${encodeURIComponent(incidentId)}`);
+   if (!object(value) || value.source !== 'deterministic_fallback' || value.incident_id !== incidentId ||
+       !Number.isInteger(value.revision) || Number(value.revision) < 1 || typeof value.text !== 'string' ||
+       !value.text.trim() || typeof value.generated_at !== 'string' || !Number.isFinite(Date.parse(value.generated_at)))
+    throw new ApiError('invalid','Explicação determinística incompatível ou vinculada a outro incidente.');
+   return [{id:`harpia:${incidentId}`,revision:Number(value.revision),source:'api-derived',data:value}];
+  }
+  // Old P11 /explain may invoke an LLM: never call without the explicit capability.
   const rows=await this.rows('bitnet',0,50);
   return rows.filter(row=>row.data.incident_id===incidentId);
  }

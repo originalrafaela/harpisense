@@ -1,7 +1,7 @@
 import {test, expect, type Page} from '@playwright/test';
 
 const projection = (id: string, data: Record<string, unknown>, created_at = '2026-10-18T12:00:00Z') => ({id, revision: 1, source: 'trusted-service', created_at, data});
-async function login(page: Page, health: Record<string, unknown> = {}, records: Record<string, unknown[]> = {}, bitnetStatus = 200) {
+async function login(page: Page, health: Record<string, unknown> = {}, records: Record<string, unknown[]> = {}, bitnetStatus = 200, explanationStatus = 200) {
   await page.route('**/api/v1/p11/**', async route => {
     const url = new URL(route.request().url());
     const kind = url.pathname.split('/')[4];
@@ -10,6 +10,9 @@ async function login(page: Page, health: Record<string, unknown> = {}, records: 
         {revision: 1, source: 'trusted-service', data: {incident_id: 'new', source: 'deterministic_fallback', text: 'Revisão anterior isolada'}},
         {revision: 2, source: 'trusted-service', data: {incident_id: 'foreign', text: 'Não pode aparecer neste histórico'}},
       ])});
+    }
+    if (url.pathname.includes('/explain/')) {
+      return route.fulfill({status:explanationStatus,contentType:'application/json',body:JSON.stringify(records.explanation || {})});
     }
     await route.fulfill({status: kind === 'bitnet' ? bitnetStatus : 200, contentType: 'application/json', body: JSON.stringify(kind === 'health' ? {api:'available',...health} : records[kind] || [])});
   });
@@ -41,7 +44,7 @@ test('demonstração alterna controles independentes sem nenhuma chamada operaci
   await page.getByRole('button', {name: 'Detalhes da explicação', exact: true}).click();
   await expect(page.getByRole('region', {name: 'Detalhes da explicação'})).toContainText('inc-demo');
   await page.getByRole('button', {name: 'Histórico da explicação', exact: true}).click();
-  await expect(page.getByRole('region', {name: 'Histórico da explicação'})).toContainText('Alternativa determinística');
+  await expect(page.getByRole('region', {name: 'Histórico da explicação'})).toContainText('Explicação determinística');
   await expect(page.getByText('Dados de demonstração — sem conexão operacional')).toBeVisible();
   await page.getByRole('link', {name: 'Configurações', exact: true}).click();
   await expect(page.getByRole('button', {name: 'M3 — Autônomo', exact: true})).toHaveAttribute('aria-pressed', 'true');
@@ -78,7 +81,7 @@ test('HarpIA seleciona incidente mais recente, vincula texto e consulta históri
   });
   await expect(page.getByRole('combobox', {name: 'Incidente selecionado', exact: true})).toHaveValue('new');
   await expect(page.getByText('Explicação isolada do incidente recente', {exact: true})).toBeVisible();
-  await expect(page.getByText('Alternativa determinística', {exact: true})).toBeVisible();
+  await expect(page.getByText('Explicação determinística', {exact: true})).toBeVisible();
   await page.getByRole('button', {name: 'Histórico da explicação', exact: true}).click();
   await expect(page.getByRole('region', {name: 'Histórico da explicação'})).toContainText('Revisão anterior isolada');
   await expect(page.getByText('Não pode aparecer neste histórico')).toHaveCount(0);
@@ -138,4 +141,28 @@ test('resposta atrasada não exibe texto de incidente anteriormente selecionado'
   release();
   await expect(page.getByText('Texto sintético do antigo',{exact:true})).toBeVisible();
   await expect(page.getByText('Resposta atrasada nova',{exact:true})).toHaveCount(0);
+});
+
+test('API determinística vincula revisão, origem, horário e renderiza texto como conteúdo',async({page})=>{
+  const xss='<img src=x onerror="window.pwned=true">';
+  await login(page,{harpia:{mode:'deterministic_only',contract_version:1,generation_enabled:false,model:'bitnet'}},
+    {incident:[projection('synthetic-ui',{incident_id:'synthetic-ui',revision:4})],explanation:{
+      source:'deterministic_fallback',source_label:'Explicação determinística',incident_id:'synthetic-ui',revision:3,
+      generated_at:'2026-10-25T13:00:00Z',persisted:false,text:`Explicação determinística sintética ${xss}`,
+    }});
+  await page.getByRole('button',{name:'Consultar explicação determinística',exact:true}).click();
+  await expect(page.getByText('Explicação determinística',{exact:true})).toBeVisible();
+  await expect(page.getByText('Explicação desatualizada:',{exact:false})).toBeVisible();
+  await expect(page.getByText('Horário da explicação:',{exact:false})).toBeVisible();
+  await expect(page.locator('.explanation-text')).toContainText(xss);
+  await expect(page.locator('.explanation-text img')).toHaveCount(0);
+  await expect(page.getByText('Explicação calculada nesta consulta',{exact:false})).toBeVisible();
+});
+
+test('API autenticada informa não autorizado e indisponível sem substituir por fixture',async({page})=>{
+  await login(page,{harpia:{mode:'deterministic_only',contract_version:1,generation_enabled:false}},
+    {incident:[projection('synthetic-auth',{incident_id:'synthetic-auth',revision:1})]},200,401);
+  await page.getByRole('button',{name:'Consultar explicação determinística',exact:true}).click();
+  await expect(page.getByText('Erro ao consultar explicações:',{exact:false})).toBeVisible();
+  await expect(page.getByRole('alert').filter({hasText:'Credenciais inválidas ou sessão não autorizada.'})).toBeVisible();
 });
