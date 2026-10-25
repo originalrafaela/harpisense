@@ -1,8 +1,11 @@
 # HarpIA: consulta de explicações na interface — 25/10/2026
 
 Worktree `harpia-ui`, branch dedicada `integration/harpia-ui`, criada do commit
-`280bab4` de `integration/frontend-p11`. Essa base já contém a entrega frontend
-`f52d837`; não houve merge na main nem alteração nas worktrees frontend-v2,
+`280bab4` de `integration/frontend-p11`. Essa base contém o cartão de `1d7ed4d`,
+mas não era descendente da correção posterior `f52d837`. Na revisão final foi
+aplicado o CSS aprovado de `f52d837` por cherry-pick sem merge, em commit separado,
+preservando o contraste do wordmark do login e o logo do dashboard. Não houve
+merge na main nem alteração nas worktrees frontend-v2,
 integration-p11 ou harpia-bitnet. A alteração local de CSS existente em
 integration-p11 foi preservada e não foi copiada para esta entrega.
 
@@ -83,6 +86,8 @@ copiados para o demo, nem para registros de incidentes reais.
   health disponível sem liberação, carregamento/erro, resposta atrasada, login,
   navegação e viewport mobile. Um teste adicional direcionado (2,7 s) conferiu o
   rótulo final de horário e gerou captura local.
+  Após incorporar o CSS aprovado, o build e os testes de navegação/login/mobile
+  e do cartão com revisão desatualizada foram verificados novamente.
 - Captura inspecionada: `frontend/local-evidence/harpia-stale.png`, somente fixture
   sintética. Capturas novas ficam ignoradas em local-evidence; imagens já entregues
   em docs/evidence foram preservadas. Testes não reutilizam Vite já em execução
