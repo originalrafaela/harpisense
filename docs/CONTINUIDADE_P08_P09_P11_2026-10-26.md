@@ -1,5 +1,12 @@
 # Continuidade P08/P09/P11 — 26/10/2026
 
+**Estado mais recente, após aplicação pelo usuário:** os dois hashes instalados
+foram confirmados como a candidata 2de050e; permissões adequadas e diretório de
+backup criado. A leitura do conteúdo do backup/recibo e das sessões protegidas
+ainda exige acesso root. Ver `IDENTIFICACAO_SESSAO_P08_APOS_APLICACAO.md` para a
+conferência atual, vínculos necessários e procedimento condicional de nova coleta.
+Os registros abaixo documentam etapas anteriores e não substituem esse estado.
+
 **Atualização posterior ao a7f8ad3:** a seção final deste documento registra a
 primeira entrega de integração, implementada e testada na branch
 `fix/p08-p09-validated-batch`, commit 2de050e. A aplicação em staging continua
