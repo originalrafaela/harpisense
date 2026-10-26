@@ -1,0 +1,68 @@
+{
+  "scope": "read-only journal metadata; messages not exported",
+  "interval_utc": [
+    "2026-10-23T19:17:27Z",
+    "2026-10-23T19:18:29Z"
+  ],
+  "sources": {
+    "harpisense-mqtt.service": {
+      "journalctl_exit": 0,
+      "stderr": "",
+      "interval_records": 0,
+      "record_times": [],
+      "hosts": [],
+      "boot_ids": [],
+      "identifiers": [],
+      "last_available_record_utc": "2026-10-26T15:53:54.807745+00:00",
+      "first_available_record_utc": "2026-10-18T04:09:39.833954+00:00"
+    },
+    "harpisense-p11.service": {
+      "journalctl_exit": 0,
+      "stderr": "",
+      "interval_records": 0,
+      "record_times": [],
+      "hosts": [],
+      "boot_ids": [],
+      "identifiers": [],
+      "last_available_record_utc": "2026-10-26T15:53:55.002858+00:00",
+      "first_available_record_utc": "2026-10-18T04:12:08.998701+00:00"
+    },
+    "mosquitto.service": {
+      "journalctl_exit": 0,
+      "stderr": "",
+      "interval_records": 0,
+      "record_times": [],
+      "hosts": [],
+      "boot_ids": [],
+      "identifiers": [],
+      "last_available_record_utc": null,
+      "first_available_record_utc": null
+    }
+  },
+  "all_journal_interval": {
+    "exit": 0,
+    "records": 4,
+    "units": {
+      "session-3.scope": 2,
+      "kernel": 2
+    },
+    "stderr": ""
+  },
+  "retained_boots": [
+    "IDX BOOT ID                          FIRST ENTRY                 LAST ENTRY",
+    "-13 c3a8754481f24141b72ba25bb50b0a78 Fri 2026-10-16 17:42:01 -03 Fri 2026-10-16 17:46:55 -03",
+    "-12 aaa03a2dbfa040778e3734cb2597ed43 Sat 2026-10-17 13:43:56 -03 Sat 2026-10-17 13:52:41 -03",
+    "-11 85c980731a134627a5620ee935342f11 Sat 2026-10-17 14:00:52 -03 Sat 2026-10-17 18:16:10 -03",
+    "-10 d8ae4e5f3ee5459c9e2dc202f789e4df Sat 2026-10-17 18:16:20 -03 Sat 2026-10-17 20:25:45 -03",
+    " -9 9446cd72f0504e01bf9207c5bd47c494 Sat 2026-10-17 23:42:33 -03 Sun 2026-10-18 01:20:43 -03",
+    " -8 1cf2b46ff36d4252baef23dbd2ba3674 Sun 2026-10-18 14:11:16 -03 Sun 2026-10-18 23:51:51 -03",
+    " -7 b2af4fda83374f4c8cbceec6dba40df2 Wed 2026-10-21 23:32:54 -03 Thu 2026-10-22 03:14:29 -03",
+    " -6 e78bbeaf6fb34204b5a138949ff9cc1e Thu 2026-10-22 23:04:57 -03 Fri 2026-10-23 02:05:08 -03",
+    " -5 91d82a3b9b3f4560b0105de61e49413a Fri 2026-10-23 15:58:04 -03 Fri 2026-10-23 16:31:43 -03",
+    " -4 dadc5f807db34ad2995fc3defe96c7da Sat 2026-10-24 01:47:27 -03 Sat 2026-10-24 02:17:29 -03",
+    " -3 c2e854b9bd3f4019995714f744409445 Sat 2026-10-24 11:13:04 -03 Sat 2026-10-24 13:18:46 -03",
+    " -2 d63f72bceb884e2aafc8a52442e9a120 Sun 2026-10-25 14:46:18 -03 Sun 2026-10-25 22:06:13 -03",
+    " -1 1fff01056cb14c98af8b0840dbf456e3 Mon 2026-10-26 02:26:03 -03 Mon 2026-10-26 04:10:42 -03",
+    "  0 b947172a462a4d4995c4f7a03b035359 Mon 2026-10-26 12:53:43 -03 Mon 2026-10-26 15:12:20 -03"
+  ]
+}

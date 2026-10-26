@@ -1,0 +1,60 @@
+{
+  "scope": "historical metadata and safe event classification only",
+  "records": [
+    {
+      "at_utc": "2026-10-23T19:17:27.340732+00:00",
+      "host": "gateway",
+      "boot_id": "91d82a3b9b3f4560b0105de61e49413a",
+      "unit": "session-3.scope",
+      "identifier": "sudo",
+      "comm": "sudo",
+      "safe_classification": [
+        "pam_session_opened"
+      ],
+      "known_capture_tokens": [],
+      "interface": null
+    },
+    {
+      "at_utc": "2026-10-23T19:17:27.341145+00:00",
+      "host": "gateway",
+      "boot_id": "91d82a3b9b3f4560b0105de61e49413a",
+      "unit": "session-3.scope",
+      "identifier": "sudo",
+      "comm": "sudo",
+      "safe_classification": [
+        "sudo_command_record"
+      ],
+      "known_capture_tokens": [
+        "orquestrar_p08_v4_experimental.py",
+        "p08-v4-persistencia-auto02"
+      ],
+      "interface": null
+    },
+    {
+      "at_utc": "2026-10-23T19:17:27.513357+00:00",
+      "host": "gateway",
+      "boot_id": "91d82a3b9b3f4560b0105de61e49413a",
+      "unit": null,
+      "identifier": "kernel",
+      "comm": null,
+      "safe_classification": [
+        "interface_entered_promiscuous"
+      ],
+      "known_capture_tokens": [],
+      "interface": "ens37:"
+    },
+    {
+      "at_utc": "2026-10-23T19:18:27.468657+00:00",
+      "host": "gateway",
+      "boot_id": "91d82a3b9b3f4560b0105de61e49413a",
+      "unit": null,
+      "identifier": "kernel",
+      "comm": null,
+      "safe_classification": [
+        "interface_left_promiscuous"
+      ],
+      "known_capture_tokens": [],
+      "interface": "ens37:"
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+{
+  "boot_id": "91d82a3b9b3f4560b0105de61e49413a",
+  "source_lifecycle": {
+    "harpisense-mqtt.service": {
+      "exit": 0,
+      "records": [
+        {
+          "at_utc": "2026-10-23T18:58:15.173762+00:00",
+          "host": "gateway",
+          "unit": "init.scope",
+          "identifier": "systemd",
+          "classification": [
+            "started"
+          ]
+        },
+        {
+          "at_utc": "2026-10-23T18:58:16.171444+00:00",
+          "host": "gateway",
+          "unit": "harpisense-mqtt.service",
+          "identifier": "python",
+          "classification": []
+        },
+        {
+          "at_utc": "2026-10-23T18:58:16.174147+00:00",
+          "host": "gateway",
+          "unit": "harpisense-mqtt.service",
+          "identifier": "python",
+          "classification": []
+        },
+        {
+          "at_utc": "2026-10-23T19:14:45.688892+00:00",
+          "host": "gateway",
+          "unit": "harpisense-mqtt.service",
+          "identifier": "python",
+          "classification": []
+        },
+        {
+          "at_utc": "2026-10-23T19:31:39.757055+00:00",
+          "host": "gateway",
+          "unit": "init.scope",
+          "identifier": "systemd",
+          "classification": [
+            "stopping"
+          ]
+        },
+        {
+          "at_utc": "2026-10-23T19:31:40.060419+00:00",
+          "host": "gateway",
+          "unit": "init.scope",
+          "identifier": "systemd",
+          "classification": []
+        },
+        {
+          "at_utc": "2026-10-23T19:31:40.060737+00:00",
+          "host": "gateway",
+          "unit": "init.scope",
+          "identifier": "systemd",
+          "classification": [
+            "stopped"
+          ]
+        }
+      ]
+    },
+    "harpisense-p11.service": {
+      "exit": 0,
+      "records": [
+        {
+          "at_utc": "2026-10-23T18:58:15.177785+00:00",
+          "host": "gateway",
+          "unit": "init.scope",
+          "identifier": "systemd",
+          "classification": [
+            "started"
+          ]
+        },
+        {
+          "at_utc": "2026-10-23T18:58:16.373618+00:00",
+          "host": "gateway",
+          "unit": "harpisense-p11.service",
+          "identifier": "python",
+          "classification": [
+            "started"
+          ]
+        },
+        {
+          "at_utc": "2026-10-23T18:58:16.373982+00:00",
+          "host": "gateway",
+          "unit": "harpisense-p11.service",
+          "identifier": "python",
+          "classification": []
+        },
+        {
+          "at_utc": "2026-10-23T18:58:16.375003+00:00",
+          "host": "gateway",
+          "unit": "harpisense-p11.service",
+          "identifier": "python",
+          "classification": []
+        },
+        {
+          "at_utc": "2026-10-23T18:58:16.378309+00:00",
+          "host": "gateway",
+          "unit": "harpisense-p11.service",
+          "identifier": "python",
+          "classification": []
+        },
+        {
+          "at_utc": "2026-10-23T19:31:39.757532+00:00",
+          "host": "gateway",
+          "unit": "init.scope",
+          "identifier": "systemd",
+          "classification": [
+            "stopping"
+          ]
+        },
+        {
+          "at_utc": "2026-10-23T19:31:40.258220+00:00",
+          "host": "gateway",
+          "unit": "harpisense-p11.service",
+          "identifier": "python",
+          "classification": []
+        },
+        {
+          "at_utc": "2026-10-23T19:31:40.569083+00:00",
+          "host": "gateway",
+          "unit": "harpisense-p11.service",
+          "identifier": "python",
+          "classification": []
+        },
+        {
+          "at_utc": "2026-10-23T19:31:40.730345+00:00",
+          "host": "gateway",
+          "unit": "harpisense-p11.service",
+          "identifier": "python",
+          "classification": []
+        },
+        {
+          "at_utc": "2026-10-23T19:31:40.762938+00:00",
+          "host": "gateway",
+          "unit": "harpisense-p11.service",
+          "identifier": "python",
+          "classification": []
+        },
+        {
+          "at_utc": "2026-10-23T19:31:40.891368+00:00",
+          "host": "gateway",
+          "unit": "init.scope",
+          "identifier": "systemd",
+          "classification": []
+        },
+        {
+          "at_utc": "2026-10-23T19:31:40.906495+00:00",
+          "host": "gateway",
+          "unit": "init.scope",
+          "identifier": "systemd",
+          "classification": [
+            "stopped"
+          ]
+        },
+        {
+          "at_utc": "2026-10-23T19:31:40.907130+00:00",
+          "host": "gateway",
+          "unit": "init.scope",
+          "identifier": "systemd",
+          "classification": []
+        }
+      ]
+    },
+    "mosquitto.service": {
+      "exit": 0,
+      "records": []
+    }
+  },
+  "retained_boot_interval_utc": {
+    "first": "2026-10-23T18:58:04.285103+00:00",
+    "last": "2026-10-23T19:31:43.788077+00:00"
+  }
+}

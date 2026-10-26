@@ -1,5 +1,15 @@
 # Continuidade P08/P09/P11 — 26/10/2026
 
+**Investigação histórica posterior:** journal do boot de 23/10 recuperado;
+rastros sudo/orquestrador e ens37 em modo promíscuo corroboram a sessão auto02.
+As units MQTT/P11 não retornam eventos no intervalo, sem que isso comprove zero
+eventos ou logs completos. A triagem dos demais 19 relatórios e o detalhamento
+do heartbeat/PCAP dependem da saída root de triage_p08_history_readonly.py.
+Decisão provisória: pendência histórica específica recuperável, sem motivo
+demonstrado para exigir nova coleta. Ver P08_TRIAGEM_HISTORICA_2026-10-26.md;
+não apresentar a triagem ainda bloqueada como concluída. Instalação e backup
+não foram novamente verificados nesta investigação.
+
 **Estado mais recente, após inspeção privilegiada fornecida pelo usuário às
 18:01:44 UTC:** candidata 2de050e instalada; hashes dos backups originais e recibo
 confirmados. Sessão existente p08-v4-persistencia-auto02 identificada: PCAP íntegro,
