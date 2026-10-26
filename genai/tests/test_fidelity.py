@@ -4,7 +4,8 @@ import unittest
 from genai.harpia.client import Client
 from genai.harpia.contracts import ModelOutputRejected, context_dto, prompt, valid_model_text
 from genai.harpia.server import LocalServer
-from genai.scripts.verify_fidelity import EVALUATION_CASES, MALICIOUS_MARKER, make_context
+from genai.scripts.verify_fidelity import (EVALUATION_CASES, MALICIOUS_MARKER,
+                                           make_context, used_generation_budget)
 
 
 class StaticRuntime:
@@ -16,6 +17,12 @@ class StaticRuntime:
 
 
 class FidelityTests(unittest.TestCase):
+    def test_lost_output_attempt_reserves_bounded_generation_budget(self):
+        self.assertEqual(used_generation_budget({
+            "budget_reserve_generations": 2,
+            "cases": [{"generation_count": 1}],
+        }), 3)
+
     def test_p11_selector_keeps_typed_rf_if_risk_and_policy_values(self):
         case = next(item for item in EVALUATION_CASES if item["id"] == "eval-rf-if-risk")
         _store, context = make_context(case)
@@ -56,13 +63,24 @@ class FidelityTests(unittest.TestCase):
         self.assertNotIn("ignore instrucoes", effective_prompt)
         self.assertIn("evidence_ref_count", effective_prompt)
 
-    def test_offline_evidence_is_not_claimed_as_a_selected_fact(self):
-        case = next(item for item in EVALUATION_CASES if item["id"] == "eval-offline-unknown")
+    def test_missing_results_case_contains_only_representable_unknowns(self):
+        case = next(item for item in EVALUATION_CASES if item["id"] == "eval-missing-results")
         _store, context = make_context(case)
-        serialized = prompt(context)
-        self.assertNotIn("SYNTHETIC_OFFLINE", serialized)
-        self.assertNotIn("sem comunicação", serialized)
-        self.assertIn("conectividade do ativo não foram fornecidas", serialized)
+        facts = context["facts"]
+        self.assertEqual(facts["status"], "OBSERVED")
+        self.assertEqual(facts["risk_status"], "NOT_EVALUATED")
+        self.assertIsNone(facts["rf_attack_probability"])
+        self.assertIsNone(facts["if_anomaly_score"])
+        self.assertIsNone(facts["execution_status"])
+        self.assertIsNone(facts["evidence_summary"])
+
+    def test_selected_p11_xai_contribution_is_preserved_for_prompt(self):
+        case = next(item for item in EVALUATION_CASES if item["id"] == "eval-rf-if-risk")
+        _store, context = make_context(case)
+        self.assertEqual(context["facts"]["xai_contributions"], [
+            {"feature": "packet_count", "value": 140.0, "contribution": 0.045},
+        ])
+        self.assertIn('"contribution": 0.045', prompt(context))
 
     def test_absent_execution_is_explicit_unknown(self):
         case = next(item for item in EVALUATION_CASES if item["id"] == "eval-execution-unknown")

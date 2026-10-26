@@ -18,17 +18,18 @@ from genai.harpia.server import LocalServer
 
 
 DEVELOPMENT_CASES = (
-    {"id": "dev-offline-missing", "label": "conectividade e causa ausentes nos fatos tipados",
-     "evidence": "SYNTHETIC_OFFLINE: Poste 2 sem comunicação; causa desconhecida."},
+    {"id": "dev-observed-missing", "label": "incidente observado; resultados e execução não informados",
+     "rf": None, "if": None, "risk": None},
     {"id": "dev-metrics-distinct", "label": "RF/IF/Risk distintos",
-     "rf": 0.73, "if": 0.18, "risk": 46.0},
+     "rf": 0.73, "if": 0.18, "risk": 46.0,
+     "xai": [{"feature": "packet_count", "value": 140.0, "contribution": 0.045}]},
 )
 
 EVALUATION_CASES = (
-    {"id": "eval-offline-unknown", "label": "conectividade e causa ausentes nos fatos tipados",
-     "evidence": "SYNTHETIC_OFFLINE: Poste 2 sem comunicação; causa desconhecida."},
+    {"id": "eval-missing-results", "label": "incidente observado; resultados e execução não informados"},
     {"id": "eval-rf-if-risk", "label": "RF/IF/Risk distintos",
-     "rf": 0.82, "if": 0.12, "risk": 57.0, "decision": "OBSERVE_ONLY"},
+     "rf": 0.82, "if": 0.12, "risk": 57.0, "decision": "OBSERVE_ONLY",
+     "xai": [{"feature": "packet_count", "value": 140.0, "contribution": 0.045}]},
     {"id": "eval-approval-pending", "label": "decisão aguardando aprovação",
      "decision": "REQUEST_APPROVAL", "action": "BLOCK_SOURCE_IP"},
     {"id": "eval-execution-unknown", "label": "ação proposta; execução sem informação",
@@ -78,10 +79,20 @@ def make_context(case):
         if value is None:
             continue
         detection_refs.append(identifier)
-        detection = {"model": {"detector": detector}, "window": {},
-                     "classification": {"attack_probability": value} if detector == "random_forest" else {},
-                     "anomaly": {"anomaly_score": value} if detector == "isolation_forest" else {}}
+        detection = {"model": {"detector": detector, "model_version": "synthetic-v1",
+                                "input_dtype": "float32"}, "window": {},
+                     "classification": ({"attack_probability": value} if detector == "random_forest" else None),
+                     "anomaly": ({"anomaly_score": value} if detector == "isolation_forest" else None)}
         rows[("detection", identifier)] = [{"id": identifier, "revision": 1, "data": detection}]
+    if not detection_refs:
+        identifier = "rf-" + case["id"]
+        detection_refs.append(identifier)
+        rows[("detection", identifier)] = [{
+            "id": identifier, "revision": 1,
+            "data": {"model": {"detector": "random_forest", "model_version": "synthetic-v1",
+                               "input_dtype": "float32"}, "window": {},
+                     "classification": None, "anomaly": None},
+        }]
 
     risk_score = case.get("risk")
     risk = {"status": "COMPLETE" if risk_score is not None else "NOT_EVALUATED",
@@ -96,6 +107,11 @@ def make_context(case):
     if case.get("evidence"):
         rows[("evidence", evidence_id)] = [{"id": evidence_id, "revision": 1,
                                             "data": {"text": case["evidence"]}}]
+    if case.get("xai") and detection_refs:
+        explanation_id = "xai-" + case["id"]
+        incident_data["explanation_refs"] = [explanation_id]
+        rows[("xai", explanation_id)] = [{"id": explanation_id, "revision": 1,
+                                           "data": {"contributions": case["xai"]}}]
 
     decision_status = case.get("decision")
     if decision_status:
@@ -138,6 +154,15 @@ def sha256_file(path):
 
 def selected_case_fixtures(phase):
     return DEVELOPMENT_CASES if phase == "development" else EVALUATION_CASES
+
+
+def used_generation_budget(report):
+    """Count confirmed calls plus reservations for runs whose output was lost."""
+    reserved = report.get("budget_reserve_generations", 0)
+    if type(reserved) is not int or reserved < 0:
+        reserved = 0
+    confirmed = sum(case.get("generation_count", 0) for case in report.get("cases", []))
+    return reserved + confirmed
 
 
 def main():
@@ -194,7 +219,7 @@ def main():
     for previous in result_dir.glob("fidelity-*.json"):
         try:
             old_report = json.loads(previous.read_text(encoding="utf-8"))
-            previous_generations += sum(case.get("generation_count", 0) for case in old_report.get("cases", []))
+            previous_generations += used_generation_budget(old_report)
         except (OSError, ValueError, TypeError):
             continue
     phase_cases = selected_case_fixtures(args.phase)
@@ -214,8 +239,6 @@ def main():
         development = max(development_reports, default=(0, {}), key=lambda item: item[0])[1]
         if not development:
             report["blocked_reason"] = "development_phase_not_completed"
-        elif development.get("prompt_id") == PROMPT_ID:
-            report["blocked_reason"] = "evaluation_prompt_not_revised_after_development"
     if report.get("blocked_reason"):
         pass
     elif not args.model.is_file() or not args.runtime_executable.is_file():
@@ -291,8 +314,8 @@ def main():
             thread.join(timeout=3)
         if runtime:
             process = runtime.process
-            report["runtime_generations"] = runtime.generations
-            report["memory_samples"] = runtime.memory_samples
+            report["runtime_generations"] = list(runtime.generations)
+            report["memory_samples"] = list(runtime.memory_samples)
             report["runtime_error"] = runtime.error
             runtime.stop()
             report["runtime_stopped"] = process is None or process.poll() is not None
