@@ -1,0 +1,3 @@
+# Preserve byte-exact baseline hashes across Windows/Linux checkouts.
+tests/fixtures/** -text whitespace=cr-at-eol
+postgres_store.py text eol=lf
