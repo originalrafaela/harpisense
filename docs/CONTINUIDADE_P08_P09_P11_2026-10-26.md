@@ -1,5 +1,11 @@
 # Continuidade P08/P09/P11 — 26/10/2026
 
+**Atualização posterior ao a7f8ad3:** a seção final deste documento registra a
+primeira entrega de integração, implementada e testada na branch
+`fix/p08-p09-validated-batch`, commit 2de050e. A aplicação em staging continua
+pendente de privilégio root. As seções iniciais abaixo são o registro histórico
+da conferência anterior; não interpretá-las como estado atualizado da candidata.
+
 Conferência somente leitura da VM, concluída às 17:02 UTC (14:02 de São Paulo).
 Nenhuma implementação, implantação, reinício, execução de coletor/adaptador,
 consulta ao banco operacional ou avanço de checkpoint foi realizado nesta rodada.
@@ -173,3 +179,97 @@ features e não habilitar inferência/IPS. Preservar os gates de artefatos/cober
 
 Esta rodada termina no registro. Não foram alterados arquivos da VM, MQTT,
 serviços, banco operacional, Risk/Policy/executor, frontend ou geração BitNet.
+
+## Primeira entrega: lote validado ligado ao pipeline (atualização)
+
+Implementação e evidências: branch `fix/p08-p09-validated-batch`, commit
+`2de050e`, enviado ao origin sem force ou merge. Fontes atuais da VM foram
+conferidos contra a7f8ad3 antes da cópia. Apenas dois arquivos de runtime mudam:
+
+| Arquivo | Hash candidato |
+|---|---|
+| auxiliary_audit_adapter.py | 04b58d66d5d6d9cd513bff4b559c187bca4a2d13ea370e80fcbfc97bb9eb5416 |
+| p08_p09_pipeline.py | 4ec9ed8c2fb5b068ebdae4b6cd7643d1aca5a5c0fcc5d9c354e28f5f7f12d8dc |
+
+Selecionar lote com `run_pipeline(base_dir, session_name, None, windows,
+coverage_records, required_sources, batch_path=batch_path)`. A assinatura antiga
+de eventos permanece. Ambos fornecidos (mesmo events=[]) são rejeitados antes de
+I/O, sem combinação nem duplicação. O pipeline chama o validador existente uma
+vez e conserva o retorno auxiliar inteiro. O adapter só acrescenta ao resultado
+os cursores do manifesto já validado e continuity_verified=False.
+
+Novos campos de topo indicam modo de entrada, referência de lote, integridade e
+limitações. Eventos avulsos nunca recebem integridade de lote verificada. Lote
+inválido falha sem publicar evidência parcial. Lote válido não dispensa artefatos,
+vínculo ou cobertura. As evidências auxiliares continuam fora das features,
+UNKNOWN, autorizações False e log_counts={}; os gates existentes são preservados.
+
+Resultados concluídos:
+
+- 58/58 testes locais, Python 3.12.15, contêiner sem rede/banco.
+- 58/58 testes no Python 3.14.4 da VM, em pacote temporário: regressões antigas,
+  adulteração em cópias, erro de manifesto, lote vazio, evento desconhecido,
+  entradas exclusivas, normalização única e gates. Três testes exercitam backup,
+  recusa de alteração inesperada e recuperação em cópias sintéticas.
+- Candidata em `/tmp/harpisense-p08p09-validated-batch.grdSWc/p08_p09` validada
+  contra os dois lotes originais por leitura: 1 e 0 eventos, zero rejeitados,
+  integridade e rastreabilidade preservadas. Seis adulterações de cópias reais
+  temporárias foram rejeitadas. Os originais, manifestos e checkpoint mantiveram
+  hashes e mtimes; as cópias de teste foram removidas.
+- Aplicador em dry-run conferiu hashes esperados dos dois arquivos e dos três
+  gates dependentes, sem aplicar ou criar backup no staging.
+
+**Alcance parcial:** o teste do pipeline real usa um rótulo diagnóstico explícito
+UNBOUND-AUXILIARY-AUDIT, sem fingir vínculo de sessão. O gate real de artefatos
+retorna FileNotFoundError e o gate de cobertura não é alcançado. Não se declara
+fluxo completo ou cobertura real validada. Não foram encontrados session/coverage
+nos diretórios legíveis pesquisados; /opt/harpisense/capturas teve Permission
+denied, logo a existência de sessões nesse local continua não esclarecida.
+
+**Aplicação ainda bloqueada:** staging é root:root (arquivos 0644, diretório
+0755); o usuário harpiserver não pode escrever, e `sudo -n -l` pede autenticação
+interativa. Não se mudou permissão nem se usou outro mecanismo de privilégio.
+O usuário recebeu o comando abaixo para seu próprio terminal:
+
+```sh
+sudo /usr/bin/python3 -B /tmp/harpisense-p08p09-validated-batch.grdSWc/p08_p09/apply_staging.py --apply
+```
+
+O aplicador faz backup somente dos dois arquivos, recusa hashes inesperados,
+preserva metadados, verifica hashes finais e guarda recibo no backup. Não reinicia
+serviços. Após aplicação, falta repetir a validação apontando para o diretório
+instalado, registrar backup/recibo e atualizar o estado — a validação temporária
+não deve ser apresentada como aplicação concluída. Na última conferência, a VM
+ainda tinha os hashes originais do pipeline/adapter, gates e leitor inalterados,
+P11 PID 1787 sem restart e Store antigo cba6be…643c. Paginação não implantada.
+
+Dependências registradas para as próximas entregas, **não executadas**:
+
+1. Identificar sessão P08 real acessível, seus artefatos, janelas e inventário de
+   vínculos; definir evidence_id, collection_session_id, sensor_id e target_ref
+   sem derivá-los de nomes de arquivo ou promover contexto não autenticado.
+2. Comprovar continuidade por fonte: intervalo, retenção/rotação, boot/cursor,
+   lacunas, relógios e verificação independente. Integridade local não substitui
+   cobertura; ausência de evento não vira zero sem prova de completude.
+3. Reconciliar tipos e contagens com o catálogo/feature schema oficial. Os eventos
+   telemetry_validation_failure/telemetry_duplicate não são novas features de
+   contagem previstas. Não inventar colunas nem converter desconhecido para zero.
+4. Validar metadados, hashes e dependências dos bundles RF/IF e os contratos de
+   features, perfil, duração/ordem de janela, antes de qualquer execução futura.
+5. Definir chamador e sessão completa com gates e evidências reais. Modelos,
+   ataques e defesa continuam fora desta rodada.
+
+Máquinas/fontes: para o próximo vínculo offline, HarpiServer com acesso autorizado
+aos artefatos P08 e inventário pode bastar. Para comprovar fontes, disponibilizar
+journal do consumidor de telemetria, logs do broker Mosquitto e da API FastAPI
+conforme required_sources, no intervalo da sessão. Para nova sessão completa
+futura, disponibilizar o host de captura/gateway inline e produtores legítimos
+(ESP32/Poste 02) no percurso validado. Confirmar onde cada papel roda: não supor
+VM separada ou endereço baseado na topologia candidata. Windows/VMware e
+intermediário Tailscale são necessários somente se hospedarem/transportarem esses
+papéis. Não é necessário executar Kali/ataques para o próximo vínculo offline.
+
+Os relatórios, seleção de entrada, procedimento de aplicação/recuperação e
+dependências detalhadas ficam em `backend/p08_p09/README.md` da branch de
+implementação. Nenhum lote original, checkpoint, coletor, PostgreSQL, P11,
+modelo ou ação de defesa foi modificado/executado nesta primeira entrega.
