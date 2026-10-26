@@ -137,12 +137,17 @@ os cinco hashes confirmados antes de testar e termina se divergirem.
 
 ## Aplicação em staging e recuperação
 
-**Situação desta entrega: aplicação pendente de privilégio root.** Os arquivos e
-o diretório pertencem a root (0644/0755); SSH harpiserver não pode substituí-los.
-`sudo -n -l` exige autenticação interativa. Não foram alteradas permissões nem
-tentada obtenção de privilégio por outro caminho. O usuário recebeu o comando
-concreto abaixo para executar no próprio terminal; nenhuma senha é necessária
-no chat. O dry-run na VM aprovou hashes atuais e candidatos, com applied=False.
+**Situação atual: aplicação executada pelo usuário e hashes instalados
+confirmados por SSH.** Os dois arquivos correspondem exatamente à candidata
+testada do commit 2de050e (tabela acima); root:root 0644, diretório 0755.
+`INSTALLED_READONLY_RESULTS.json` registra a verificação e o estado dos originais.
+O backup `.validated-batch-backup-5jgd2gmh` foi criado, root:root 0700. O acesso
+SSH não consegue ler seu conteúdo/receipt.json: sua existência está confirmada,
+mas hashes internos e recibo ainda dependem da inspeção privilegiada solicitada.
+Não interpretar a restrição de acesso como divergência do backup.
+
+O comando abaixo foi executado pelo usuário. Não deve ser repetido: os hashes
+antigos já foram substituídos e o aplicador recusará a nova base.
 
 ```sh
 sudo /usr/bin/python3 -B /tmp/harpisense-p08p09-validated-batch.grdSWc/p08_p09/apply_staging.py --apply
@@ -157,10 +162,22 @@ Uma interrupção irrecuperável do processo/host entre os dois renames pode exi
 recuperação manual; o backup deve ser preservado. Não substitui os demais snapshots
 do pacote, não reinicia serviço e não modifica P11/PostgresStore.
 
-Após aplicação, conferir hashes e repetir `tests/validate_existing_batches.py`
-apontando --adapter-dir para o diretório **instalado**, guardando relatório
-separado. Não confundir o resultado de candidata temporária com validação do
-arquivo instalado. Confirmar novamente hashes/mtimes dos originais/checkpoint.
+A rodada posterior à aplicação limitou-se à identificação e à conferência de
+arquivos. Os hashes/mtimes dos originais/checkpoint permanecem iguais. Não se
+reexecutou pipeline, coletores ou SQL. A igualdade de hashes identifica o código
+instalado como o testado; a validação anterior com lotes reais continua sendo
+da candidata temporária, sem sessão P08 vinculada, não um fluxo completo validado.
+
+Para concluir a leitura do backup e identificar as sessões existentes, o usuário
+recebeu um script somente leitura, preservado na branch de continuidade:
+
+```sh
+sudo /usr/bin/python3 -B /tmp/harpisense-p08p09-validated-batch.grdSWc/p08_p09/inspect_p08_applied_readonly.py
+```
+
+Não é preciso alterar permissões ou fornecer senha no chat. /opt/harpisense/capturas
+continua protegido; sem essa leitura não se afirma qual sessão existe nem que
+seus arquivos estejam ausentes. Os lotes antigos continuam sem vínculo comprovado.
 
 Recuperação, se necessária: com privilégio autorizado, verificar que os arquivos
 instalados ainda têm os hashes candidatos acima, conferir os hashes originais no
@@ -201,10 +218,12 @@ efetiva; não presumir que cada papel exige uma VM separada):
   somente se hospedarem ou transportarem esses papéis. Kali/ataques não são
   necessários para o próximo vínculo offline nem estão autorizados aqui.
 
-Próximo passo imediato: aplicar os dois arquivos com o privilégio adequado e
-confirmar os hashes/resultado instalado. Depois, tratar **uma tarefa por vez**:
-identificar uma sessão P08 real acessível e seu vínculo às evidências, mantendo
-UNKNOWN e ambas as autorizações False enquanto faltarem comprovações.
+Próximo passo imediato: concluir a inspeção somente leitura do backup e de uma
+sessão P08 real com o acesso adequado. Depois, tratar **uma tarefa por vez**:
+demonstrar seus vínculos às janelas/evidências, mantendo UNKNOWN e ambas as
+autorizações False enquanto faltarem comprovações. Uma nova coleta é apenas
+uma alternativa condicional, cujo procedimento está na nota de continuidade;
+não foi iniciada nem se tornou necessária só pela falta de permissão SSH.
 
 Nenhum coletor, checkpoint, lote/manifesto original, PostgreSQL, serviço, modelo,
 ataque ou ação de defesa foi executado/modificado por esta implementação.
