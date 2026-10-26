@@ -142,9 +142,11 @@ confirmados por SSH.** Os dois arquivos correspondem exatamente à candidata
 testada do commit 2de050e (tabela acima); root:root 0644, diretório 0755.
 `INSTALLED_READONLY_RESULTS.json` registra a verificação e o estado dos originais.
 O backup `.validated-batch-backup-5jgd2gmh` foi criado, root:root 0700. O acesso
-SSH não consegue ler seu conteúdo/receipt.json: sua existência está confirmada,
-mas hashes internos e recibo ainda dependem da inspeção privilegiada solicitada.
-Não interpretar a restrição de acesso como divergência do backup.
+SSH comum não consegue ler seu conteúdo, mas a inspeção privilegiada executada
+pelo usuário confirmou os hashes dos dois originais e receipt.json com applied=True
+e os pares before/after corretos. Backup verificado; restauração não executada.
+`PRIVILEGED_INSPECTION_SUMMARY.json` registra a evidência fornecida pelo usuário,
+com data 2026-10-26T18:01:44Z, distinguindo-a da inspeção SSH anterior.
 
 O comando abaixo foi executado pelo usuário. Não deve ser repetido: os hashes
 antigos já foram substituídos e o aplicador recusará a nova base.
@@ -168,16 +170,19 @@ reexecutou pipeline, coletores ou SQL. A igualdade de hashes identifica o códig
 instalado como o testado; a validação anterior com lotes reais continua sendo
 da candidata temporária, sem sessão P08 vinculada, não um fluxo completo validado.
 
-Para concluir a leitura do backup e identificar as sessões existentes, o usuário
-recebeu um script somente leitura, preservado na branch de continuidade:
+Para a leitura do backup e identificação das sessões existentes, o usuário
+executou o script somente leitura preservado na branch de continuidade:
 
 ```sh
 sudo /usr/bin/python3 -B /tmp/harpisense-p08p09-validated-batch.grdSWc/p08_p09/inspect_p08_applied_readonly.py
 ```
 
-Não é preciso alterar permissões ou fornecer senha no chat. /opt/harpisense/capturas
-continua protegido; sem essa leitura não se afirma qual sessão existe nem que
-seus arquivos estejam ausentes. Os lotes antigos continuam sem vínculo comprovado.
+Não foi necessário alterar permissões. Foram listados 20 relatórios de sessão;
+há detalhes suficientes da sessão `p08-v4-persistencia-auto02` para comprovar a
+cadeia local session → PCAP → integração → quatro janelas, mas não cobertura
+completa. As outras 19 sessões foram apenas inventariadas, não avaliadas em detalhe.
+Os lotes antigos continuam sem vínculo comprovado; o evento de 25/10 está fora
+do intervalo da sessão selecionada, de 23/10. Não haverá associação por horário.
 
 Recuperação, se necessária: com privilégio autorizado, verificar que os arquivos
 instalados ainda têm os hashes candidatos acima, conferir os hashes originais no
@@ -218,12 +223,13 @@ efetiva; não presumir que cada papel exige uma VM separada):
   somente se hospedarem ou transportarem esses papéis. Kali/ataques não são
   necessários para o próximo vínculo offline nem estão autorizados aqui.
 
-Próximo passo imediato: concluir a inspeção somente leitura do backup e de uma
-sessão P08 real com o acesso adequado. Depois, tratar **uma tarefa por vez**:
-demonstrar seus vínculos às janelas/evidências, mantendo UNKNOWN e ambas as
-autorizações False enquanto faltarem comprovações. Uma nova coleta é apenas
-uma alternativa condicional, cujo procedimento está na nota de continuidade;
-não foi iniciada nem se tornou necessária só pela falta de permissão SSH.
+Próximo passo mínimo: verificar disponibilidade/proveniência dos logs históricos
+e dos vínculos de contexto da sessão identificada (23/10, 19:17:27–19:18:28 UTC).
+O conjunto existente é aproveitável para análise offline. Ainda faltam cobertura
+por fonte e vínculo confiável com evidência/alvo; manter UNKNOWN e autorizações
+False. Nova coleta não foi demonstrada necessária, nem foi iniciada. Não declarar
+as outras 19 sessões insuficientes sem examiná-las. Ver a nota de continuidade
+para detalhes dos artefatos já presentes, pendências e limites das conclusões.
 
 Nenhum coletor, checkpoint, lote/manifesto original, PostgreSQL, serviço, modelo,
 ataque ou ação de defesa foi executado/modificado por esta implementação.

@@ -1,0 +1,114 @@
+{
+  "evidence_source": "user-supplied stdout of inspect_p08_applied_readonly.py executed with sudo; not independently rerun as root by SSH",
+  "captured_at_utc": "2026-10-26T18:01:44.807708+00:00",
+  "effective_uid": 0,
+  "read_only": true,
+  "installed_code_commit": "2de050e",
+  "files": {
+    "auxiliary_audit_adapter.py": {
+      "before": "a6e2747e9cf857216297db1a9557fa12925e4e1c088b27152a0fcfbea8c827ff",
+      "after": "04b58d66d5d6d9cd513bff4b559c187bca4a2d13ea370e80fcbfc97bb9eb5416",
+      "installed_uid": 0,
+      "installed_gid": 0,
+      "installed_mode": "0644",
+      "backup_sha256": "a6e2747e9cf857216297db1a9557fa12925e4e1c088b27152a0fcfbea8c827ff"
+    },
+    "p08_p09_pipeline.py": {
+      "before": "a43d0db34a5c6bca409248d8b464bdacafa3ed93e7eddd34da0fa2de1f4b85cf",
+      "after": "4ec9ed8c2fb5b068ebdae4b6cd7643d1aca5a5c0fcc5d9c354e28f5f7f12d8dc",
+      "installed_uid": 0,
+      "installed_gid": 0,
+      "installed_mode": "0644",
+      "backup_sha256": "a43d0db34a5c6bca409248d8b464bdacafa3ed93e7eddd34da0fa2de1f4b85cf"
+    }
+  },
+  "backup_directory": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/.validated-batch-backup-5jgd2gmh",
+  "backup_mode": "0700 root:root",
+  "backup_files_mode": "0644 root:root",
+  "backup_hashes_match_originals": true,
+  "receipt": {
+    "applied": true,
+    "before_after_match_expected": true
+  },
+  "restoration_executed": false,
+  "session_reports_listed": 20,
+  "other_session_reports_detailed": false,
+  "selected_session": {
+    "session": "p08-v4-persistencia-auto02",
+    "base_directory": "/opt/harpisense/capturas",
+    "started_at": "2026-10-23T19:17:27.443326+00:00",
+    "finished_at": "2026-10-23T19:18:28.387151+00:00",
+    "session_file_sha256": "74a6a4c4c99cef85fc23c8c5f2625df4879f0999ecbcfe9702f1c9b49d9ff99f",
+    "interface": "ens37",
+    "sensor_id": "harpiserver",
+    "pcap_size_bytes": 1824,
+    "pcap_sha256": "87f05fa8954d5ae648861c609b09942dcfb1cbcbefb05d7228bedb70719cf52c",
+    "actual_pcap_hash_matches_session": true,
+    "integration_pcap_hash_path_size_match_session": true,
+    "integration_file_sha256": "cf285f11dde03104d02a803f28e58ada57ed39ef9ceae2d34ed64cd056df6169",
+    "events_converted": 20,
+    "session_basic_checks_passed": true,
+    "quality_status": "INCOMPLETE",
+    "collection_complete": false,
+    "logs_complete": false,
+    "ready_for_inference": false,
+    "observations_total": 60,
+    "tcpdump_observations_active": 59,
+    "tcpdump_observations_missing": 1,
+    "continuous_capture_proven": false,
+    "feature_schema_version": "harpisense.if.window.v1",
+    "traffic_profile": "tcp-observacao",
+    "window_seconds": 10,
+    "windows": [
+      {
+        "window_id": "b2e8ab0ca0deb31cd12f7a5ee813f925c2bd49fff122c851f25b9da3372ca9b4",
+        "window_start": "2026-10-23T19:17:30Z",
+        "window_end": "2026-10-23T19:17:40Z"
+      },
+      {
+        "window_id": "007a0490117612eb6e108d07b05f72787f115dfe1aaa8fdb0b2df11c6ae23c4e",
+        "window_start": "2026-10-23T19:17:40Z",
+        "window_end": "2026-10-23T19:17:50Z"
+      },
+      {
+        "window_id": "f49015d4f0b62061dc6ea6be31c5a24b60366df9a75b4d3f796d49cd62df4a37",
+        "window_start": "2026-10-23T19:17:50Z",
+        "window_end": "2026-10-23T19:18:00Z"
+      },
+      {
+        "window_id": "55ff0307ccd64508614926d9b77ba465a72ec961d3b22cd8eff7685b0f0f6ac2",
+        "window_start": "2026-10-23T19:18:00Z",
+        "window_end": "2026-10-23T19:18:10Z"
+      }
+    ],
+    "all_window_collection_session_ids_match": true,
+    "all_window_sensor_ids_match": true,
+    "all_window_interfaces_match": true,
+    "target_ref_present_in_window_links": false,
+    "coverage_file_sha256": "9ffc11c3600bbef9441c3e2d69eba83559b829d3566e43142ab811c054cf7ca1",
+    "coverage_schema": "harpisense.p08.coverage.diagnostic.v1",
+    "coverage_session_matches": true,
+    "coverage_intervals_total": 7,
+    "coverage_intervals_with_events": 4,
+    "coverage_intervals_without_aggregated_data": 3,
+    "assessment": "reusable for offline integrity and session-window linkage; not proof of complete capture or log coverage"
+  },
+  "old_batches": {
+    "event_observed_at": "2026-10-25T18:46:20.171871+00:00",
+    "event_outside_selected_session": true,
+    "declared_session_window_target_absent": true,
+    "sensor_id": null,
+    "empty_batch_events": 0,
+    "linked_to_selected_session": false,
+    "coverage": "UNKNOWN"
+  },
+  "original_batches_manifests_checkpoint_unchanged": true,
+  "p11_files": {
+    "postgres_store": "cba6be580f72a8e39077ea9e7437cadee04b67effbb618737309f6450d97643c",
+    "app": "52078a449886528569a85645e02df974826dc1a24566c01db6bc5f487f328ef2"
+  },
+  "new_collection_required_established": false,
+  "full_pipeline_validated": false,
+  "inference_enabled": false,
+  "ips_enabled": false
+}

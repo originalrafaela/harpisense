@@ -1,5 +1,5 @@
 {
-  "captured_at_utc": "2026-10-26T17:56:35.977229+00:00",
+  "captured_at_utc": "2026-10-26T18:01:44.807708+00:00",
   "implementation_commit": "2de050e",
   "applied_to_staging": true,
   "application_executed_by": "user",
@@ -13,11 +13,11 @@
   "backup_created_in_staging": true,
   "backup_directory": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/.validated-batch-backup-5jgd2gmh",
   "backup_directory_mode": "0700 root:root",
-  "backup_contents_verified": null,
-  "backup_receipt_verified": null,
-  "pending_inspection": "root access required to hash protected backup and identify capture sessions",
+  "backup_contents_verified": true,
+  "backup_receipt_verified": true,
+  "pending_inspection": "historical source coverage and trusted evidence/session/target links not demonstrated",
   "installed_permissions": "root:root 0644; parent root:root 0755",
-  "required_user_command": "sudo /usr/bin/python3 -B /tmp/harpisense-p08p09-validated-batch.grdSWc/p08_p09/inspect_p08_applied_readonly.py",
+  "required_user_command": null,
   "checked_sha256": {
     "adaptador_logs_p08_p09/p08_p09_pipeline.py": "4ec9ed8c2fb5b068ebdae4b6cd7643d1aca5a5c0fcc5d9c354e28f5f7f12d8dc",
     "adaptador_logs_p08_p09/auxiliary_audit_adapter.py": "04b58d66d5d6d9cd513bff4b559c187bca4a2d13ea370e80fcbfc97bb9eb5416",
@@ -36,5 +36,12 @@
     "MainPID": 1787,
     "ActiveState": "active",
     "ExecMainStartTimestamp": "2026-10-26T12:53:53-03:00"
-  }
+  },
+  "evidence_source": "privileged inspection stdout supplied by user",
+  "selected_existing_session": "p08-v4-persistencia-auto02",
+  "selected_session_pcap_integrity_verified": true,
+  "selected_session_window_links_verified": true,
+  "selected_session_coverage_proven": false,
+  "old_batches_linked_to_selected_session": false,
+  "new_collection_required_established": false
 }
