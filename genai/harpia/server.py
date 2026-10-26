@@ -8,7 +8,8 @@ import logging
 import threading
 import time
 
-from .contracts import MAX_BODY, MAX_TOKENS, context_dto, frame, prompt, valid_text
+from .contracts import (MAX_BODY, MAX_TOKENS, ModelOutputRejected, context_dto,
+                        frame, prompt, valid_model_text, valid_text)
 
 LOG = logging.getLogger("harpia.server")
 
@@ -169,6 +170,12 @@ class Handler(BaseHTTPRequestHandler):
             if self.path == "/explain":
                 context = context_dto(value)
                 text = self.server.engine.generate(prompt(context), MAX_TOKENS, context=context)
+                try:
+                    text = valid_model_text(text)
+                except ModelOutputRejected as exc:
+                    LOG.warning("model output rejected: %s", exc.reason)
+                    self.send_json(503, {"error": "model_output_rejected", "reason": exc.reason})
+                    return
                 result = {"incident_id": context["incident_id"], "revision": context["revision"],
                           "source": "bitnet_unverified_text", "bitnet_status": "responded_unverified", "text": text}
                 if self.server.engine.preparation.omitted:
