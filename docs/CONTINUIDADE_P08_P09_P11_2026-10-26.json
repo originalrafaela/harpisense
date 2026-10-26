@@ -1,0 +1,170 @@
+{
+  "captured_at_utc": "2026-10-26T17:02:06.607263+00:00",
+  "inspection": "read-only; no application imports or execution",
+  "initial_to_final_sha256_checks": {
+    "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/auxiliary_audit_adapter.py": true,
+    "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/p08_p09_pipeline.py": true,
+    "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_p08_p09/ler_janelas.py": true,
+    "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_collection_checkpoint.json": true,
+    "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_acabf4a909f00b5f68cfa3c906d58cf1483931902f394c58e4ddc9178e1dc9bf.json": true,
+    "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_acabf4a909f00b5f68cfa3c906d58cf1483931902f394c58e4ddc9178e1dc9bf.manifest.json": true,
+    "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_d94cc2181f5932c7876b065ed9d61533d42542342494ae56b03ddb7ce96a41d1.json": true,
+    "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_d94cc2181f5932c7876b065ed9d61533d42542342494ae56b03ddb7ce96a41d1.manifest.json": true,
+    "/opt/harpisense/staging/p11-postgresql/postgres_store.py": true,
+    "/opt/harpisense/staging/p11-postgresql/app.py": true
+  },
+  "all_checked_hashes_unchanged": true,
+  "files": [
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/auxiliary_audit_adapter.py",
+      "size_bytes": 5582,
+      "sha256": "a6e2747e9cf857216297db1a9557fa12925e4e1c088b27152a0fcfbea8c827ff",
+      "mtime_utc": "2026-10-26T16:51:59.656Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/context_adapter.py",
+      "size_bytes": 2282,
+      "sha256": "a41ad56a464247c89a44b1ade89fa5add792c48f9fa12b0d0712f2b897d62d95",
+      "mtime_utc": "2026-10-25T17:50:43.764Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/coverage_gate.py",
+      "size_bytes": 2633,
+      "sha256": "3310a15e11b90ece09c4e8f4ba49b7c0eab7686bafefec19b85447b1693c6109",
+      "mtime_utc": "2026-10-24T16:00:02.943Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/log_coverage_integration.py",
+      "size_bytes": 2002,
+      "sha256": "e0b47ed6124d49a68a6e31d7e829c91847164e8ba85c3bc3ab9768c1ebe24bfa",
+      "mtime_utc": "2026-10-24T16:02:13.612Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/log_window_adapter.py",
+      "size_bytes": 2636,
+      "sha256": "17804b6759c3172fb3cdf3b099ae236baa445a136751bc0c98590ad7a370e7cd",
+      "mtime_utc": "2026-10-24T15:54:53.528Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/p08_artifact_validator.py",
+      "size_bytes": 2267,
+      "sha256": "58868a25ff791139025e10321497bda27fb77e26e5d6f6fc31936eba530c65b7",
+      "mtime_utc": "2026-10-25T17:53:21.554Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/p08_p09_pipeline.py",
+      "size_bytes": 1928,
+      "sha256": "a43d0db34a5c6bca409248d8b464bdacafa3ed93e7eddd34da0fa2de1f4b85cf",
+      "mtime_utc": "2026-10-25T19:15:56.587Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/test_context_adapter.py",
+      "size_bytes": 1498,
+      "sha256": "219bc6e77680551fe1de2501031783cf8a1fb51d99c9d445d6d599a6e6358891",
+      "mtime_utc": "2026-10-25T17:48:07.532Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/test_context_security.py",
+      "size_bytes": 1315,
+      "sha256": "1e6f3497b1d4de8b64a34b6d63bd95aef219b40cf312ee0566325690471f6fbd",
+      "mtime_utc": "2026-10-25T17:50:01.909Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/test_context_window_integration.py",
+      "size_bytes": 1153,
+      "sha256": "0441fb3aab2f683e11873ac6fe0bc8a81f287c6a849118a1a84ec0afc56dac14",
+      "mtime_utc": "2026-10-25T17:49:02.033Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/test_coverage_gate.py",
+      "size_bytes": 5808,
+      "sha256": "8a235e83bd7845849ab79a2fcf91c320a5159ab846aa584373fbbe801c3a0ca5",
+      "mtime_utc": "2026-10-24T16:01:16.738Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/test_log_coverage_integration.py",
+      "size_bytes": 1531,
+      "sha256": "958cbecb5f7b45fb39a24a54b26c05f717d1e981cfec113deae53a537b3de668",
+      "mtime_utc": "2026-10-24T16:01:53.717Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/test_log_window_adapter.py",
+      "size_bytes": 3977,
+      "sha256": "0d8187baf3f4e5b8103306e0d96585cda748236b53c7de3b312ee0cf3bb5fe63",
+      "mtime_utc": "2026-10-24T15:56:10.764Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/test_p08_artifact_validator.py",
+      "size_bytes": 2778,
+      "sha256": "f1caba01bf7fe361081752eb9ac1d84ffc39c41256fd20df68e00a06c2ed7e1a",
+      "mtime_utc": "2026-10-25T17:54:43.260Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_p08_p09/contract_gate.py",
+      "size_bytes": 2699,
+      "sha256": "6e2bc2fa76ef680b784263ebc1e2d089a265a44da6f8c4c57051d70600d8f9ad",
+      "mtime_utc": "2026-10-24T14:31:59.793Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_p08_p09/ler_janelas.py",
+      "size_bytes": 2893,
+      "sha256": "d1b8c80d0252837093247b1fa6e296b6f9b016bf51ce2762c4a64c30386eea8d",
+      "mtime_utc": "2026-10-26T16:27:23.351Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_p08_p09/quality_gate.py",
+      "size_bytes": 857,
+      "sha256": "db7d2b072be8b1e844e74fbdbbc29d2bcb4bac94ae5560d85e263159e1dd8a24",
+      "mtime_utc": "2026-10-24T05:06:18.186Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_p08_p09/test_contract_gate.py",
+      "size_bytes": 4045,
+      "sha256": "efa0912c1afb09dd1064d4d464c87ff701c0d7f542323187df34766ae9f1f4b1",
+      "mtime_utc": "2026-10-24T14:35:53.683Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_acabf4a909f00b5f68cfa3c906d58cf1483931902f394c58e4ddc9178e1dc9bf.json",
+      "size_bytes": 356,
+      "sha256": "cff3245d0be5afb5a792a5d81eed6d721323fd7fb46dfc8f6de5fd1f3b49edae",
+      "mtime_utc": "2026-10-25T18:46:23.230Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_acabf4a909f00b5f68cfa3c906d58cf1483931902f394c58e4ddc9178e1dc9bf.manifest.json",
+      "size_bytes": 547,
+      "sha256": "daf510c455b18483c61ae0d75e529f9bcde89efb9d43e992e836e229223541b9",
+      "mtime_utc": "2026-10-25T18:46:23.232Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_d94cc2181f5932c7876b065ed9d61533d42542342494ae56b03ddb7ce96a41d1.json",
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "mtime_utc": "2026-10-25T18:36:29.164Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_d94cc2181f5932c7876b065ed9d61533d42542342494ae56b03ddb7ce96a41d1.manifest.json",
+      "size_bytes": 547,
+      "sha256": "cf2661162abfe050c97ef1706adc740c84f794025eadcf1f649472fdc2c260d8",
+      "mtime_utc": "2026-10-25T18:36:29.166Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_collection_checkpoint.json",
+      "size_bytes": 579,
+      "sha256": "7ffe3b525549e4610c8c1a5a8b829cdb8ca6f0845388777960c14909d31a0aa0",
+      "mtime_utc": "2026-10-25T18:25:48.598Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p11-postgresql/postgres_store.py",
+      "size_bytes": 4551,
+      "sha256": "cba6be580f72a8e39077ea9e7437cadee04b67effbb618737309f6450d97643c",
+      "mtime_utc": "2026-10-18T02:58:04.901Z"
+    },
+    {
+      "path": "/opt/harpisense/staging/p11-postgresql/app.py",
+      "size_bytes": 586,
+      "sha256": "52078a449886528569a85645e02df974826dc1a24566c01db6bc5f487f328ef2",
+      "mtime_utc": "2026-10-25T22:25:27.882Z"
+    }
+  ],
+  "mtime_resolution": "UTC milliseconds in this local inventory"
+}
