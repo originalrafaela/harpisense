@@ -1,12 +1,15 @@
 """Integration and volume comparison; refuses any database except the test container."""
 import hashlib
 import json
+import platform
+import subprocess
 import sys
 import time
 import tracemalloc
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from importlib.metadata import version
 
 import psycopg
 from psycopg.types.json import Jsonb
@@ -21,6 +24,8 @@ from harpia_deterministic.p11 import install_deterministic_harpia, explain
 
 DSN = 'host=p11-pagination-tests dbname=p11_pagination_test user=p11_test'
 REPORT = {'synthetic_only': True, 'database': 'p11_pagination_test', 'container': 'p11-pagination-tests'}
+REPORT['client_environment'] = dict(python=sys.version, platform=platform.platform(),
+    dependencies={name: version(name) for name in ('psycopg', 'fastapi', 'httpx')})
 
 
 class CountingConnection:
@@ -42,6 +47,48 @@ class CountingConnection:
         return Result()
 
 
+def process_measurement(label):
+    """Fresh Linux process per variant; no tracemalloc in timed/RSS measurement."""
+    store = counted(PreviousStore if label == 'previous' else PostgresStore)
+    timings = {}
+    original_connect = store._connect
+    def connect():
+        connection = original_connect()
+        original_execute = connection.execute
+        def execute(*args):
+            started = time.perf_counter()
+            cursor = original_execute(*args)
+            timings['execute_seconds'] = time.perf_counter() - started
+            original_fetchall = cursor.fetchall
+            def fetchall():
+                started = time.perf_counter()
+                rows = original_fetchall()
+                timings['fetch_decode_seconds'] = time.perf_counter() - started
+                return rows
+            cursor.fetchall = fetchall
+            return cursor
+        connection.execute = execute
+        return connection
+    store._connect = connect
+    def rss(field='VmRSS'):
+        return int(next(line.split()[1] for line in Path('/proc/self/status').read_text().splitlines()
+                        if line.startswith(field + ':'))) * 1024
+    before_rss = rss()
+    # /proc VmHWM belongs to this exec's address space. ru_maxrss may retain
+    # the spawning test process's larger peak across fork/exec on Linux.
+    before_peak = rss('VmHWM')
+    started = time.perf_counter()
+    rows = store.list('incident', 50, 100)
+    elapsed = time.perf_counter() - started
+    after_rss = rss()
+    peak = rss('VmHWM')
+    return dict(timings, list_seconds=elapsed, rss_before_bytes=before_rss,
+                rss_after_bytes=after_rss, process_peak_rss_before_bytes=before_peak,
+                process_peak_rss_bytes=peak, materialized_rows=store.materialized,
+                returned_rows=len(rows),
+                result_sha256=hashlib.sha256(json.dumps(rows, sort_keys=True).encode()).hexdigest())
+
+
 def counted(cls):
     class Counted(cls):
         materialized = 0
@@ -57,6 +104,13 @@ class PostgreSQLTests(unittest.TestCase):
         with psycopg.connect(DSN) as conn:
             assert conn.execute('SELECT current_database()').fetchone()[0] == 'p11_pagination_test'
             REPORT['version'] = conn.execute('SELECT version()').fetchone()[0]
+            REPORT['server_version_num'] = int(conn.execute('SHOW server_version_num').fetchone()[0])
+            if REPORT['server_version_num'] != 180006:
+                raise RuntimeError('This validation requires exactly PostgreSQL 18.6')
+            REPORT['settings'] = dict(conn.execute("SELECT name,setting FROM pg_settings WHERE name IN ('TimeZone','server_encoding','lc_collate','lc_ctype','work_mem','shared_buffers')"))
+            REPORT['database_locale'] = conn.execute('SELECT datcollate,datctype FROM pg_database WHERE datname=current_database()').fetchone()
+            REPORT['code_sha256'] = {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
+                                     for path in [ROOT / 'postgres_store.py', Path(__file__).parent / 'fixtures/previous_store.py']}
             conn.execute('CREATE TABLE projections(kind text NOT NULL,id text NOT NULL,revision integer NOT NULL,source text NOT NULL,data jsonb NOT NULL,created_at timestamptz NOT NULL,PRIMARY KEY(kind,id,revision))')
             conn.execute('CREATE TABLE audit(seq bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,actor text,operation text,entity text,at timestamptz)')
 
@@ -171,6 +225,15 @@ class PostgreSQLTests(unittest.TestCase):
         self.assertEqual(samples['previous']['materialized_rows'], 20000)
         self.assertEqual(samples['new']['materialized_rows'], 50)
         REPORT['volume'] = dict(total_revisions=60000, latest_ids=20000, limit=50, offset=100, samples=samples)
+        # Three fresh processes per variant, alternating order to expose variance.
+        process_samples = {'previous': [], 'new': []}
+        for labels in [('previous', 'new'), ('new', 'previous'), ('previous', 'new')]:
+            for label in labels:
+                sample = json.loads(subprocess.check_output([sys.executable, __file__, '--measure', label], text=True))
+                self.assertEqual(sample['result_sha256'], samples['new']['result_sha256'])
+                self.assertEqual(sample['materialized_rows'], 20000 if label == 'previous' else 50)
+                process_samples[label].append(sample)
+        REPORT['volume']['fresh_process_samples'] = process_samples
         # Capture the actual statement and parameters without a second SQL copy.
         class Capture:
             def __enter__(self): return self
@@ -179,16 +242,23 @@ class PostgreSQLTests(unittest.TestCase):
                 self.sql, self.params = sql, params
                 return self
             def fetchall(self): return []
-        capture = Capture()
-        store = PostgresStore(DSN)
-        store._connect = lambda: capture
-        store.list('incident', 50, 100)
-        with psycopg.connect(DSN) as conn:
-            REPORT['explain_analyze'] = conn.execute('EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ' + capture.sql, capture.params).fetchone()[0]
+        REPORT['explain_analyze'] = {}
+        for label, cls in [('previous', PreviousStore), ('new', PostgresStore)]:
+            capture = Capture()
+            store = cls(DSN)
+            store._connect = lambda: capture
+            store.list('incident', 50, 100)
+            with psycopg.connect(DSN) as conn:
+                REPORT['explain_analyze'][label] = dict(sql=capture.sql, parameters=capture.params,
+                    plan=conn.execute('EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ' + capture.sql, capture.params).fetchone()[0])
 
 
 if __name__ == '__main__':
+    if len(sys.argv) == 3 and sys.argv[1] == '--measure' and sys.argv[2] in ('previous', 'new'):
+        print(json.dumps(process_measurement(sys.argv[2])))
+        sys.exit(0)
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(PostgreSQLTests)
+    REPORT['test_cases'] = [test.id() for test in suite]
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     REPORT.update(tests_run=result.testsRun, failures=len(result.failures), errors=len(result.errors))
     Path(ROOT / 'TEST_RESULTS.json').write_text(json.dumps(REPORT, indent=2) + '\n')

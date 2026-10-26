@@ -1,6 +1,7 @@
 # Paginação do PostgresStore P11 real
 
-Entrega sem implantação, 2026-10-26. Branch `fix/p11-postgres-pagination`, baseada
+Entrega sem implantação, 2026-10-26; validação complementar PostgreSQL 18.6 do
+commit `45603a9`. Branch `fix/p11-postgres-pagination`, baseada
 em `main` 9d58e69; nenhuma substituição pela implementação de `backend-data`.
 O único arquivo destinado à operação é `postgres_store.py`. `tests/fixtures`
 contém cópias de código para comparação e integração, nunca configuração da VM.
@@ -77,14 +78,31 @@ ser corrigidos; nenhum foi identificado nas chamadas inspecionadas.
 
 ## Validação PostgreSQL
 
-`TEST_RESULTS.json` contém métricas, versão exata, índices e EXPLAIN ANALYZE BUFFERS
-da consulta real (capturada do método, sem SQL de teste divergente).
+`TEST_RESULTS.json` contém a validação atual em **PostgreSQL 18.6**, métricas,
+versão exata, hashes do código testado, casos executados, índices e EXPLAIN ANALYZE
+BUFFERS das duas consultas reais (capturadas dos métodos, sem SQL de teste
+divergente). `TEST_RESULTS_PG16.json` preserva o resultado anterior, do commit
+45603a9, em PostgreSQL 16.15; não confundir as duas medições.
+`ENVIRONMENT_PG18.json` registra data, imagens e isolamento do contêiner/rede
+inspecionados nesta rodada; os recursos sintéticos foram removidos ao concluir.
 
 Instância: contêiner local `p11-pagination-tests`, banco `p11_pagination_test`,
-PostgreSQL 16.15, rede exclusiva; sem porta publicada, sem volume operacional.
+PostgreSQL **18.6 (Debian 18.6-1.pgdg13+2)**, `server_version_num=180006`, rede
+interna exclusiva, sem porta publicada e com dados em tmpfs descartável. Nenhum
+acesso à VM ou banco operacional foi necessário nesta rodada. Timezone da sessão
+`America/Sao_Paulo`, encoding UTF8, locale `en_US.utf8`, `work_mem=4 MiB`,
+`shared_buffers=128 MiB`. A suíte recusa outra versão antes de criar tabelas.
 Python 3.12.15, psycopg 3.2.1 e FastAPI 0.115.0 da imagem local
 `harpisense-backend:integration`. Nenhum teste usa SQLite como Store; o import
-sqlite3 da API aprovada não instancia Store SQLite.
+sqlite3 da API aprovada não instancia Store SQLite. Fixtures, dados e cenários da
+suíte anterior foram reutilizados; nenhum índice ou código operacional mudou.
+
+Imagens utilizadas, identificadores imutáveis:
+
+- PostgreSQL `postgres:18.6`, digest
+  `sha256:edb0c08dc33befd0262ab3b5cf1c4f3f8cfd8b09e88c05b45adee29d6761ddb6`.
+- Cliente `harpisense-backend:integration`, ID
+  `sha256:be075ad0fc7764f9367712b7d8ef50ad63828c4cdf4a43c74a86cf6ff06dfa1b`.
 
 Seis testes passaram, zero erros/falhas:
 
@@ -98,19 +116,64 @@ Seis testes passaram, zero erros/falhas:
 - volume: 60.000 revisões, 20.000 IDs, payload sintético com 2 KiB, página 50,
   offset 100, comparação integral dos resultados por SHA256.
 
-| Métrica, uma execução instrumentada | Anterior | Nova |
+| Métrica no cliente | Anterior | Nova |
 |---|---:|---:|
-| Linhas materializadas pelo driver | 20.000 | 50 |
-| Pico Python, bytes (tracemalloc) | 59.017.389 | 137.539 |
-| Tempo, segundos | 1,106780 | 0,071417 |
-| Linhas devolvidas | 50 | 50 |
+| Linhas retornadas pelo SQL/materializadas pelo driver | 20.000 | 50 |
+| Linhas retornadas por list() ao chamador | 50 | 50 |
+| Pico de alocações Python, bytes (tracemalloc, amostra separada) | 59.017.409 | 137.797 |
+| RSS antes de list(), bytes (mediana) | 57.835.520 | 57.581.568 |
+| RSS depois de list(), bytes (mediana) | 140.750.848 | 59.285.504 |
+| Pico RSS do processo, bytes (mediana) | 165.302.272 | 59.285.504 |
+| execute(), segundos (mediana) | 0,281053 | 0,089759 |
+| fetchall()/decodificação, segundos (mediana) | 0,240699 | 0,000440 |
+| list() completa, segundos (mediana) | 0,591067 | 0,096878 |
 
 Resultados idênticos. Redução de 400 vezes nas linhas materializadas no cliente.
-Tempos são uma amostra local com instrumentação, sem garantia de latência na VM.
-O plano novo ainda lê as 60.000 revisões no servidor, seleciona 20.000 últimas e
-faz top-N heapsort (95 KiB no teste), devolvendo apenas 50 linhas; não se alega
-redução equivalente de I/O físico no PostgreSQL. O principal ganho é evitar a
-transferência, decodificação JSON e ordenação em Python de toda a coleção.
+No volume, ambas as variantes e as seis medições em processos novos produziram
+SHA256 `b8f4efebb62bd6c37adaa9da90cf4043d0abafb94fcc46f937f6f78f5d9d0ec1`.
+Esse hash difere do ensaio 16.15 porque agora a sessão usa o timezone da VM;
+a equivalência é comparada entre as duas implementações na mesma sessão/fuso.
+
+Método: três processos Linux novos por variante, ordem alternada (anterior/nova,
+nova/anterior, anterior/nova), sem tracemalloc nas amostras de tempo/RSS. Cada
+processo importa as mesmas dependências, mede `/proc/self/status` (VmRSS e VmHWM)
+antes/depois e executa uma chamada. VmHWM é o pico do espaço de endereçamento do
+processo, incluindo imports/conexão/libpq/objetos Python; não é só heap Python.
+Não se usa ru_maxrss, que pode carregar o pico do processo pai através de
+fork/exec. O pico com tracemalloc é outra medição, somente de alocações rastreadas
+pelo Python, e seus tempos instrumentados não entram nas medianas acima.
+
+`execute()` mede a chamada síncrona no driver: inclui espera no servidor e
+transferência/buffering libpq, sem isolar tempo de rede. `fetchall()` mede
+conversão/decodificação em Python. `list()` inclui conexão, ambas as etapas,
+conversão dos registros e, no código anterior, ordenação e slice. Nenhum desses
+tempos deve ser tratado como tempo puro de execução no PostgreSQL.
+
+| Trabalho no PostgreSQL, EXPLAIN ANALYZE representativo | Anterior | Nova |
+|---|---:|---:|
+| Index Scan, linhas efetivas x loops | 60.000 x 1 | 60.000 x 1 |
+| Unique, últimas revisões emitidas | 20.000 | 20.000 |
+| Ordenação global no servidor | ausente | top-N heapsort, 95 KiB |
+| Saída da ordenação global para OFFSET/LIMIT | — | 150 |
+| Linhas na saída raiz | 20.000 | 50 |
+| Shared hit blocks, nó raiz | 60.580 | 60.583 |
+| Shared read blocks / temp read-write blocks | 0 / 0 | 0 / 0 |
+| Planning Time, ms | 0,377 | 0,589 |
+| Execution Time, ms | 80,347 | 97,134 |
+
+O plano novo **continua percorrendo 60.000 revisões**, seleciona 20.000 últimas
+e alimenta a ordenação global com essas 20.000 linhas; 150 são emitidas para
+consumir offset 100 e devolver 50. As duas variantes usam a PK e incremental
+sort de revisão. A execução no servidor ficou mais cara nesta amostra por fazer
+a ordenação final; não se alega redução do trabalho no servidor. O ganho total
+está na transferência, materialização/decodificação e trabalho evitado no Python.
+
+Os planos foram capturados após os testes de volume, com cache aquecido, sem
+limpeza de caches do host. Shared hit blocks são contagens de acessos, não blocos
+distintos; não somar pais e filhos. Shared read zero não significa que o banco
+leu somente 50 linhas ou que haverá zero I/O na operação. EXPLAIN ANALYZE não
+mede o envio/decodificação do resultado normal no cliente. Todos os tempos são
+amostras locais, sem garantia de latência na VM.
 
 ## Índices e limitações
 
@@ -127,8 +190,10 @@ snapshot compartilhado entre páginas ou garantia contra deslocamento entre
 requisições concorrentes; essas características já existiam. history continua
 sem limite por contrato. A ordenação local herdada pode diferir de ordem temporal
 absoluta durante DST. Datas fora do intervalo representável por datetime Python
-já não eram suportadas. Validação foi em PostgreSQL 16.15, não na versão 18.6 da
-VM; validar novamente em homologação 18.6 antes de operação. Fixtures congeladas
+já não eram suportadas. A validação agora usa a mesma versão de engine 18.6 da
+VM, porém em Debian/Docker, não Ubuntu no HarpiServer; hardware, concorrência,
+volume/distribuição reais e locale da operação não foram reproduzidos integralmente.
+O ensaio em tmpfs/cache quente não é um benchmark de disco. Fixtures congeladas
 permitem comparar o comportamento aprovado sem editar módulos de outros chats.
 
 ## Reprodução isolada
@@ -138,8 +203,9 @@ exclusivos de teste; usar um contêiner novo em cada execução (o teste cria ta
 Não substituir o DSN fixo por uma URL operacional.
 
 ```powershell
-docker network create p11-pagination-tests
-docker run -d --name p11-pagination-tests --network p11-pagination-tests --label purpose=p11-pagination-synthetic-tests -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_USER=p11_test -e POSTGRES_DB=p11_pagination_test postgres:16-alpine
+docker pull postgres:18.6
+docker network create --internal --label purpose=p11-pagination-synthetic-tests p11-pagination-tests
+docker run -d --name p11-pagination-tests --network p11-pagination-tests --label purpose=p11-pagination-synthetic-tests --tmpfs /var/lib/postgresql:rw -e POSTGRES_HOST_AUTH_METHOD=trust -e POSTGRES_USER=p11_test -e POSTGRES_DB=p11_pagination_test postgres:18.6 -c timezone=America/Sao_Paulo
 docker exec p11-pagination-tests pg_isready -U p11_test -d p11_pagination_test
 $testSource = (Get-Location).Path
 docker run --rm --network p11-pagination-tests --mount "type=bind,source=$testSource,target=/work" --workdir /work --entrypoint python harpisense-backend:integration tests/verify_postgres.py
@@ -149,14 +215,22 @@ docker network rm p11-pagination-tests
 
 A autenticação trust é exclusiva da rede descartável sem publicação de porta.
 A imagem Python precisa das dependências em `requirements-test.txt`; a imagem
-local citada já as contém. O relatório é sobrescrito a cada execução. Para testar
-PostgreSQL 18.6 em homologação, usar a imagem dessa versão no mesmo contêiner
-isolado; não reutilizar o serviço/banco operacional.
+local citada já as contém. O relatório atual é sobrescrito a cada execução; o
+arquivo PG16 é histórico. Para reprodução da imagem exata, substituir a tag pelo
+digest acima. A instrumentação RSS requer Linux com `/proc` (fornecido pelo
+contêiner cliente). Aguardar pg_isready confirmar aceitação antes de iniciar.
+Os nomes são exclusivos desta validação: se já existirem, conferir finalidade e
+isolamento antes de reutilizar/remover. Remover somente recursos sintéticos da
+rodada; nunca os contêineres locais `harpisense-postgres`/`harpisense-postgres-test`.
 
 ## Roteiro de implantação e recuperação (não executado)
 
-1. Revisar esta branch e executar os testes em PostgreSQL 18.6 isolado. Confirmar
-   novamente hashes do código ativo, API injetada, esquema, índices e timezone.
+1. Revisar esta branch e as evidências 18.6 (6 testes aprovados), comparando o hash
+   do arquivo candidato com `code_sha256` no relatório. A qualificação de versão
+   isolada foi concluída; ela não autoriza implantação. Em rodada explicitamente
+   autorizada, confirmar novamente hashes do código ativo, API injetada, esquema,
+   índices e timezone. Preservar P08/P09 em andamento e verificar eventual mudança
+   de dependentes desde a inspeção original; a VM não foi consultada nesta rodada.
    Se a base ativa divergir, comparar e reconciliar antes de substituir qualquer
    arquivo. Não enviar fixtures, relatório ou configurações ao diretório ativo.
 2. Em janela autorizada, registrar hash e cópia de recuperação somente do arquivo
@@ -166,7 +240,9 @@ isolado; não reutilizar o serviço/banco operacional.
    consumidores MQTT ou outros módulos. Nenhuma migração é necessária.
 3. Reiniciar somente o backend P11 pelo procedimento operacional autorizado.
    Validar autenticação, listagem/paginação, history e explicação por requisições
-   de leitura; comparar formas/revisões e observar erros, latência e memória.
+   de leitura; comparar formas/revisões, empates, limites HTTP e a sentinela 1001
+   da HarpIA. Observar erros, latência e RSS. Validar com o timezone efetivo do
+   serviço; as medianas locais acima não são limiares de aceitação operacional.
    Não inserir dados sintéticos na operação. Não habilitar geração BitNet.
 4. Se houver regressão, restaurar atomicamente o arquivo salvo, conferir o hash
    original acima, reiniciar somente P11 e repetir as verificações de leitura.

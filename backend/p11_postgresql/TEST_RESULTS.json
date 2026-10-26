@@ -2,7 +2,39 @@
   "synthetic_only": true,
   "database": "p11_pagination_test",
   "container": "p11-pagination-tests",
-  "version": "PostgreSQL 16.15 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit",
+  "client_environment": {
+    "python": "3.12.15 (main, Oct  6 2026, 02:02:22) [GCC 14.2.0]",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+    "dependencies": {
+      "psycopg": "3.2.1",
+      "fastapi": "0.115.0",
+      "httpx": "0.27.2"
+    }
+  },
+  "test_cases": [
+    "__main__.PostgreSQLTests.test_api_and_explanation_filters_after_latest_and_page",
+    "__main__.PostgreSQLTests.test_empty_and_validation",
+    "__main__.PostgreSQLTests.test_insert_unchanged",
+    "__main__.PostgreSQLTests.test_latest_kind_ties_unicode_history_and_pages",
+    "__main__.PostgreSQLTests.test_timezone_and_dst_order",
+    "__main__.PostgreSQLTests.test_volume"
+  ],
+  "version": "PostgreSQL 18.6 (Debian 18.6-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+  "server_version_num": 180006,
+  "settings": {
+    "server_encoding": "UTF8",
+    "shared_buffers": "16384",
+    "TimeZone": "America/Sao_Paulo",
+    "work_mem": "4096"
+  },
+  "database_locale": [
+    "en_US.utf8",
+    "en_US.utf8"
+  ],
+  "code_sha256": {
+    "postgres_store.py": "92b30e1d5cbdbfe10a6b186bbefca46f52096054da37d8de627360134fe28ffc",
+    "tests/fixtures/previous_store.py": "cba6be580f72a8e39077ea9e7437cadee04b67effbb618737309f6450d97643c"
+  },
   "indexes": [
     "CREATE UNIQUE INDEX projections_pkey ON public.projections USING btree (kind, id, revision)"
   ],
@@ -13,67 +45,249 @@
     "offset": 100,
     "samples": {
       "previous": {
-        "seconds": 1.10678,
-        "peak_python_bytes": 59017389,
+        "seconds": 1.172324,
+        "peak_python_bytes": 59017409,
         "materialized_rows": 20000,
         "returned_rows": 50,
-        "result_sha256": "6b7082aa80564ecb994febc2ef16028a67bddd59c2ef807c9233a33295881fbe"
+        "result_sha256": "b8f4efebb62bd6c37adaa9da90cf4043d0abafb94fcc46f937f6f78f5d9d0ec1"
       },
       "new": {
-        "seconds": 0.071417,
-        "peak_python_bytes": 137539,
+        "seconds": 0.092534,
+        "peak_python_bytes": 137797,
         "materialized_rows": 50,
         "returned_rows": 50,
-        "result_sha256": "6b7082aa80564ecb994febc2ef16028a67bddd59c2ef807c9233a33295881fbe"
+        "result_sha256": "b8f4efebb62bd6c37adaa9da90cf4043d0abafb94fcc46f937f6f78f5d9d0ec1"
       }
+    },
+    "fresh_process_samples": {
+      "previous": [
+        {
+          "execute_seconds": 0.30248106500016547,
+          "fetch_decode_seconds": 0.22306495099996937,
+          "list_seconds": 0.5910670980001669,
+          "rss_before_bytes": 57950208,
+          "rss_after_bytes": 140578816,
+          "process_peak_rss_before_bytes": 57950208,
+          "process_peak_rss_bytes": 165036032,
+          "materialized_rows": 20000,
+          "returned_rows": 50,
+          "result_sha256": "b8f4efebb62bd6c37adaa9da90cf4043d0abafb94fcc46f937f6f78f5d9d0ec1"
+        },
+        {
+          "execute_seconds": 0.28105348899998717,
+          "fetch_decode_seconds": 0.29091473800008316,
+          "list_seconds": 0.6368364790000669,
+          "rss_before_bytes": 57561088,
+          "rss_after_bytes": 140750848,
+          "process_peak_rss_before_bytes": 57561088,
+          "process_peak_rss_bytes": 165302272,
+          "materialized_rows": 20000,
+          "returned_rows": 50,
+          "result_sha256": "b8f4efebb62bd6c37adaa9da90cf4043d0abafb94fcc46f937f6f78f5d9d0ec1"
+        },
+        {
+          "execute_seconds": 0.2643467289999535,
+          "fetch_decode_seconds": 0.24069885300013993,
+          "list_seconds": 0.5757703000001584,
+          "rss_before_bytes": 57835520,
+          "rss_after_bytes": 140963840,
+          "process_peak_rss_before_bytes": 57835520,
+          "process_peak_rss_bytes": 165445632,
+          "materialized_rows": 20000,
+          "returned_rows": 50,
+          "result_sha256": "b8f4efebb62bd6c37adaa9da90cf4043d0abafb94fcc46f937f6f78f5d9d0ec1"
+        }
+      ],
+      "new": [
+        {
+          "execute_seconds": 0.09169817299994065,
+          "fetch_decode_seconds": 0.0005525250001028326,
+          "list_seconds": 0.09983014299996285,
+          "rss_before_bytes": 57581568,
+          "rss_after_bytes": 59285504,
+          "process_peak_rss_before_bytes": 57581568,
+          "process_peak_rss_bytes": 59285504,
+          "materialized_rows": 50,
+          "returned_rows": 50,
+          "result_sha256": "b8f4efebb62bd6c37adaa9da90cf4043d0abafb94fcc46f937f6f78f5d9d0ec1"
+        },
+        {
+          "execute_seconds": 0.08975898500011681,
+          "fetch_decode_seconds": 0.0004399199999625125,
+          "list_seconds": 0.09687760800011347,
+          "rss_before_bytes": 57671680,
+          "rss_after_bytes": 59375616,
+          "process_peak_rss_before_bytes": 57671680,
+          "process_peak_rss_bytes": 59375616,
+          "materialized_rows": 50,
+          "returned_rows": 50,
+          "result_sha256": "b8f4efebb62bd6c37adaa9da90cf4043d0abafb94fcc46f937f6f78f5d9d0ec1"
+        },
+        {
+          "execute_seconds": 0.08473595600003136,
+          "fetch_decode_seconds": 0.00042491899989727244,
+          "list_seconds": 0.09142865999979222,
+          "rss_before_bytes": 57212928,
+          "rss_after_bytes": 58916864,
+          "process_peak_rss_before_bytes": 57212928,
+          "process_peak_rss_bytes": 58916864,
+          "materialized_rows": 50,
+          "returned_rows": 50,
+          "result_sha256": "b8f4efebb62bd6c37adaa9da90cf4043d0abafb94fcc46f937f6f78f5d9d0ec1"
+        }
+      ]
     }
   },
-  "explain_analyze": [
-    {
-      "Plan": {
-        "Node Type": "Limit",
-        "Parallel Aware": false,
-        "Async Capable": false,
-        "Startup Cost": 9073.36,
-        "Total Cost": 9073.49,
-        "Plan Rows": 50,
-        "Plan Width": 196,
-        "Actual Startup Time": 68.055,
-        "Actual Total Time": 68.061,
-        "Actual Rows": 50,
-        "Actual Loops": 1,
-        "Shared Hit Blocks": 60583,
-        "Shared Read Blocks": 0,
-        "Shared Dirtied Blocks": 0,
-        "Shared Written Blocks": 0,
-        "Local Hit Blocks": 0,
-        "Local Read Blocks": 0,
-        "Local Dirtied Blocks": 0,
-        "Local Written Blocks": 0,
-        "Temp Read Blocks": 0,
-        "Temp Written Blocks": 0,
-        "Plans": [
-          {
-            "Node Type": "Sort",
-            "Parent Relationship": "Outer",
+  "explain_analyze": {
+    "previous": {
+      "sql": "\n                SELECT DISTINCT ON (id)\n                    id, revision, source, data, created_at\n                FROM projections\n                WHERE kind = %s\n                ORDER BY id, revision DESC\n                ",
+      "parameters": [
+        "incident"
+      ],
+      "plan": [
+        {
+          "Plan": {
+            "Node Type": "Unique",
             "Parallel Aware": false,
             "Async Capable": false,
-            "Startup Cost": 9073.11,
-            "Total Cost": 9123.09,
-            "Plan Rows": 19991,
-            "Plan Width": 196,
-            "Actual Startup Time": 68.048,
-            "Actual Total Time": 68.054,
-            "Actual Rows": 150,
+            "Startup Cost": 0.75,
+            "Total Cost": 8100.5,
+            "Plan Rows": 20096,
+            "Plan Width": 124,
+            "Actual Startup Time": 0.112,
+            "Actual Total Time": 79.642,
+            "Actual Rows": 20000.0,
             "Actual Loops": 1,
-            "Sort Key": [
-              "((latest.created_at AT TIME ZONE current_setting('TimeZone'::text))) DESC",
-              "((to_char(latest.created_at, 'TZH:TZM'::text))::text) COLLATE \"C\" DESC",
-              "latest.id COLLATE \"C\" DESC"
-            ],
-            "Sort Method": "top-N heapsort",
-            "Sort Space Used": 95,
-            "Sort Space Type": "Memory",
+            "Disabled": false,
+            "Shared Hit Blocks": 60580,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Incremental Sort",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Startup Cost": 0.75,
+                "Total Cost": 7950.5,
+                "Plan Rows": 60000,
+                "Plan Width": 124,
+                "Actual Startup Time": 0.112,
+                "Actual Total Time": 73.802,
+                "Actual Rows": 60000.0,
+                "Actual Loops": 1,
+                "Disabled": false,
+                "Sort Key": [
+                  "id",
+                  "revision DESC"
+                ],
+                "Presorted Key": [
+                  "id"
+                ],
+                "Full-sort Groups": {
+                  "Group Count": 1819,
+                  "Sort Methods Used": [
+                    "quicksort"
+                  ],
+                  "Sort Space Memory": {
+                    "Average Sort Space Used": 29,
+                    "Peak Sort Space Used": 29
+                  }
+                },
+                "Shared Hit Blocks": 60580,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0,
+                "Plans": [
+                  {
+                    "Node Type": "Index Scan",
+                    "Parent Relationship": "Outer",
+                    "Parallel Aware": false,
+                    "Async Capable": false,
+                    "Scan Direction": "Forward",
+                    "Index Name": "projections_pkey",
+                    "Relation Name": "projections",
+                    "Alias": "projections",
+                    "Startup Cost": 0.41,
+                    "Total Cost": 6325.16,
+                    "Plan Rows": 60000,
+                    "Plan Width": 124,
+                    "Actual Startup Time": 0.021,
+                    "Actual Total Time": 21.524,
+                    "Actual Rows": 60000.0,
+                    "Actual Loops": 1,
+                    "Disabled": false,
+                    "Index Cond": "(kind = 'incident'::text)",
+                    "Rows Removed by Index Recheck": 0,
+                    "Index Searches": 1,
+                    "Shared Hit Blocks": 60574,
+                    "Shared Read Blocks": 0,
+                    "Shared Dirtied Blocks": 0,
+                    "Shared Written Blocks": 0,
+                    "Local Hit Blocks": 0,
+                    "Local Read Blocks": 0,
+                    "Local Dirtied Blocks": 0,
+                    "Local Written Blocks": 0,
+                    "Temp Read Blocks": 0,
+                    "Temp Written Blocks": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "Planning": {
+            "Shared Hit Blocks": 105,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.377,
+          "Triggers": [],
+          "Execution Time": 80.347
+        }
+      ]
+    },
+    "new": {
+      "sql": "\n                SELECT id, revision, source, data, created_at\n                FROM (\n                    SELECT DISTINCT ON (id)\n                        id, revision, source, data, created_at\n                    FROM projections\n                    WHERE kind = %s\n                    ORDER BY id, revision DESC\n                ) AS latest\n                -- Match datetime.isoformat() sorting in the session timezone,\n                -- including repeated local times at DST transitions. C collation\n                -- matches Python's Unicode ID ordering rather than DB locale.\n                ORDER BY created_at AT TIME ZONE current_setting('TimeZone') DESC,\n                         to_char(created_at, 'TZH:TZM') COLLATE \"C\" DESC,\n                         id COLLATE \"C\" DESC\n                LIMIT %s OFFSET %s\n                ",
+      "parameters": [
+        "incident",
+        50,
+        100
+      ],
+      "plan": [
+        {
+          "Plan": {
+            "Node Type": "Limit",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 9078.3,
+            "Total Cost": 9078.43,
+            "Plan Rows": 50,
+            "Plan Width": 196,
+            "Actual Startup Time": 97.066,
+            "Actual Total Time": 97.072,
+            "Actual Rows": 50.0,
+            "Actual Loops": 1,
+            "Disabled": false,
             "Shared Hit Blocks": 60583,
             "Shared Read Blocks": 0,
             "Shared Dirtied Blocks": 0,
@@ -86,20 +300,28 @@
             "Temp Written Blocks": 0,
             "Plans": [
               {
-                "Node Type": "Subquery Scan",
+                "Node Type": "Sort",
                 "Parent Relationship": "Outer",
                 "Parallel Aware": false,
                 "Async Capable": false,
-                "Alias": "latest",
-                "Startup Cost": 0.76,
-                "Total Cost": 8250.6,
-                "Plan Rows": 19991,
+                "Startup Cost": 9078.05,
+                "Total Cost": 9128.29,
+                "Plan Rows": 20096,
                 "Plan Width": 196,
-                "Actual Startup Time": 0.107,
-                "Actual Total Time": 61.912,
-                "Actual Rows": 20000,
+                "Actual Startup Time": 97.058,
+                "Actual Total Time": 97.065,
+                "Actual Rows": 150.0,
                 "Actual Loops": 1,
-                "Shared Hit Blocks": 60577,
+                "Disabled": false,
+                "Sort Key": [
+                  "((latest.created_at AT TIME ZONE current_setting('TimeZone'::text))) DESC",
+                  "((to_char(latest.created_at, 'TZH:TZM'::text))::text) COLLATE \"C\" DESC",
+                  "latest.id COLLATE \"C\" DESC"
+                ],
+                "Sort Method": "top-N heapsort",
+                "Sort Space Used": 95,
+                "Sort Space Type": "Memory",
+                "Shared Hit Blocks": 60583,
                 "Shared Read Blocks": 0,
                 "Shared Dirtied Blocks": 0,
                 "Shared Written Blocks": 0,
@@ -111,18 +333,20 @@
                 "Temp Written Blocks": 0,
                 "Plans": [
                   {
-                    "Node Type": "Unique",
-                    "Parent Relationship": "Subquery",
+                    "Node Type": "Subquery Scan",
+                    "Parent Relationship": "Outer",
                     "Parallel Aware": false,
                     "Async Capable": false,
-                    "Startup Cost": 0.76,
-                    "Total Cost": 8100.67,
-                    "Plan Rows": 19991,
-                    "Plan Width": 124,
-                    "Actual Startup Time": 0.081,
-                    "Actual Total Time": 51.84,
-                    "Actual Rows": 20000,
+                    "Alias": "latest",
+                    "Startup Cost": 0.75,
+                    "Total Cost": 8251.22,
+                    "Plan Rows": 20096,
+                    "Plan Width": 196,
+                    "Actual Startup Time": 0.237,
+                    "Actual Total Time": 91.572,
+                    "Actual Rows": 20000.0,
                     "Actual Loops": 1,
+                    "Disabled": false,
                     "Shared Hit Blocks": 60577,
                     "Shared Read Blocks": 0,
                     "Shared Dirtied Blocks": 0,
@@ -135,35 +359,19 @@
                     "Temp Written Blocks": 0,
                     "Plans": [
                       {
-                        "Node Type": "Incremental Sort",
-                        "Parent Relationship": "Outer",
+                        "Node Type": "Unique",
+                        "Parent Relationship": "Subquery",
                         "Parallel Aware": false,
                         "Async Capable": false,
-                        "Startup Cost": 0.76,
-                        "Total Cost": 7950.67,
-                        "Plan Rows": 60000,
+                        "Startup Cost": 0.75,
+                        "Total Cost": 8100.5,
+                        "Plan Rows": 20096,
                         "Plan Width": 124,
-                        "Actual Startup Time": 0.08,
-                        "Actual Total Time": 45.964,
-                        "Actual Rows": 60000,
+                        "Actual Startup Time": 0.134,
+                        "Actual Total Time": 76.667,
+                        "Actual Rows": 20000.0,
                         "Actual Loops": 1,
-                        "Sort Key": [
-                          "projections.id",
-                          "projections.revision DESC"
-                        ],
-                        "Presorted Key": [
-                          "projections.id"
-                        ],
-                        "Full-sort Groups": {
-                          "Group Count": 1819,
-                          "Sort Methods Used": [
-                            "quicksort"
-                          ],
-                          "Sort Space Memory": {
-                            "Average Sort Space Used": 29,
-                            "Peak Sort Space Used": 29
-                          }
-                        },
+                        "Disabled": false,
                         "Shared Hit Blocks": 60577,
                         "Shared Read Blocks": 0,
                         "Shared Dirtied Blocks": 0,
@@ -176,25 +384,37 @@
                         "Temp Written Blocks": 0,
                         "Plans": [
                           {
-                            "Node Type": "Index Scan",
+                            "Node Type": "Incremental Sort",
                             "Parent Relationship": "Outer",
                             "Parallel Aware": false,
                             "Async Capable": false,
-                            "Scan Direction": "Forward",
-                            "Index Name": "projections_pkey",
-                            "Relation Name": "projections",
-                            "Alias": "projections",
-                            "Startup Cost": 0.41,
-                            "Total Cost": 6325.16,
+                            "Startup Cost": 0.75,
+                            "Total Cost": 7950.5,
                             "Plan Rows": 60000,
                             "Plan Width": 124,
-                            "Actual Startup Time": 0.022,
-                            "Actual Total Time": 19.335,
-                            "Actual Rows": 60000,
+                            "Actual Startup Time": 0.133,
+                            "Actual Total Time": 71.19,
+                            "Actual Rows": 60000.0,
                             "Actual Loops": 1,
-                            "Index Cond": "(kind = 'incident'::text)",
-                            "Rows Removed by Index Recheck": 0,
-                            "Shared Hit Blocks": 60574,
+                            "Disabled": false,
+                            "Sort Key": [
+                              "projections.id",
+                              "projections.revision DESC"
+                            ],
+                            "Presorted Key": [
+                              "projections.id"
+                            ],
+                            "Full-sort Groups": {
+                              "Group Count": 1819,
+                              "Sort Methods Used": [
+                                "quicksort"
+                              ],
+                              "Sort Space Memory": {
+                                "Average Sort Space Used": 29,
+                                "Peak Sort Space Used": 29
+                              }
+                            },
+                            "Shared Hit Blocks": 60577,
                             "Shared Read Blocks": 0,
                             "Shared Dirtied Blocks": 0,
                             "Shared Written Blocks": 0,
@@ -203,7 +423,41 @@
                             "Local Dirtied Blocks": 0,
                             "Local Written Blocks": 0,
                             "Temp Read Blocks": 0,
-                            "Temp Written Blocks": 0
+                            "Temp Written Blocks": 0,
+                            "Plans": [
+                              {
+                                "Node Type": "Index Scan",
+                                "Parent Relationship": "Outer",
+                                "Parallel Aware": false,
+                                "Async Capable": false,
+                                "Scan Direction": "Forward",
+                                "Index Name": "projections_pkey",
+                                "Relation Name": "projections",
+                                "Alias": "projections",
+                                "Startup Cost": 0.41,
+                                "Total Cost": 6325.16,
+                                "Plan Rows": 60000,
+                                "Plan Width": 124,
+                                "Actual Startup Time": 0.028,
+                                "Actual Total Time": 21.875,
+                                "Actual Rows": 60000.0,
+                                "Actual Loops": 1,
+                                "Disabled": false,
+                                "Index Cond": "(kind = 'incident'::text)",
+                                "Rows Removed by Index Recheck": 0,
+                                "Index Searches": 1,
+                                "Shared Hit Blocks": 60574,
+                                "Shared Read Blocks": 0,
+                                "Shared Dirtied Blocks": 0,
+                                "Shared Written Blocks": 0,
+                                "Local Hit Blocks": 0,
+                                "Local Read Blocks": 0,
+                                "Local Dirtied Blocks": 0,
+                                "Local Written Blocks": 0,
+                                "Temp Read Blocks": 0,
+                                "Temp Written Blocks": 0
+                              }
+                            ]
                           }
                         ]
                       }
@@ -212,26 +466,26 @@
                 ]
               }
             ]
-          }
-        ]
-      },
-      "Planning": {
-        "Shared Hit Blocks": 116,
-        "Shared Read Blocks": 0,
-        "Shared Dirtied Blocks": 0,
-        "Shared Written Blocks": 0,
-        "Local Hit Blocks": 0,
-        "Local Read Blocks": 0,
-        "Local Dirtied Blocks": 0,
-        "Local Written Blocks": 0,
-        "Temp Read Blocks": 0,
-        "Temp Written Blocks": 0
-      },
-      "Planning Time": 0.697,
-      "Triggers": [],
-      "Execution Time": 68.169
+          },
+          "Planning": {
+            "Shared Hit Blocks": 123,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          },
+          "Planning Time": 0.589,
+          "Triggers": [],
+          "Execution Time": 97.134
+        }
+      ]
     }
-  ],
+  },
   "tests_run": 6,
   "failures": 0,
   "errors": 0
