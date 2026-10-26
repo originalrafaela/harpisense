@@ -1,10 +1,14 @@
 # Continuidade P08/P09/P11 — 26/10/2026
 
-**Estado mais recente, após aplicação pelo usuário:** os dois hashes instalados
-foram confirmados como a candidata 2de050e; permissões adequadas e diretório de
-backup criado. A leitura do conteúdo do backup/recibo e das sessões protegidas
-ainda exige acesso root. Ver `IDENTIFICACAO_SESSAO_P08_APOS_APLICACAO.md` para a
-conferência atual, vínculos necessários e procedimento condicional de nova coleta.
+**Estado mais recente, após inspeção privilegiada fornecida pelo usuário às
+18:01:44 UTC:** candidata 2de050e instalada; hashes dos backups originais e recibo
+confirmados. Sessão existente p08-v4-persistencia-auto02 identificada: PCAP íntegro,
+integração correspondente e quatro janelas vinculadas por session/sensor/interface.
+Ela é aproveitável offline, mas permanece INCOMPLETE, sem comprovação de cobertura
+ou vínculo com os lotes de 25/10 (sessão de 23/10). Foram listadas 20 sessões;
+as demais não foram avaliadas em detalhe. Não se demonstrou necessidade de nova
+coleta. Ver `IDENTIFICACAO_SESSAO_P08_APOS_APLICACAO.md` para os artefatos presentes
+e a próxima pendência: logs históricos e contexto confiável do intervalo de 23/10.
 Os registros abaixo documentam etapas anteriores e não substituem esse estado.
 
 **Atualização posterior ao a7f8ad3:** a seção final deste documento registra a

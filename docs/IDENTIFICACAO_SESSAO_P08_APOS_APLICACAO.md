@@ -3,6 +3,8 @@
 Rodada de conferência e identificação somente leitura, posterior à aplicação
 executada pelo usuário. Nenhuma coleta, execução de pipeline/modelo, consulta SQL,
 associação de lote, alteração de checkpoint ou serviço foi realizada.
+Atualizado com a saída privilegiada fornecida pelo usuário, capturada em
+2026-10-26T18:01:44.807708Z. Não se afirma nova execução SSH como root.
 
 ## Código efetivamente instalado
 
@@ -19,11 +21,15 @@ Ambos root:root 0644, diretório root:root 0755: adequados para código legível
 pelo usuário do processo sem conceder escrita a grupo/outros. Os gates, leitor
 de janelas e demais fontes conferidos permanecem com hashes anteriores.
 
-Backup encontrado: `.validated-batch-backup-5jgd2gmh`, root:root 0700. A existência
-e proteção estão confirmadas. O acesso SSH harpiserver não pode ler os arquivos
-internos nem receipt.json. **Conferência dos hashes de backup e do recibo ainda
-pendente de leitura privilegiada**, sem inferir que houve divergência ou afirmar
-que a restauração foi integralmente verificada.
+Backup confirmado: `.validated-batch-backup-5jgd2gmh`, root:root 0700. A saída
+privilegiada confirma ambos os arquivos originais, root:root 0644:
+
+- auxiliary_audit_adapter.py: a6e2747e9cf857216297db1a9557fa12925e4e1c088b27152a0fcfbea8c827ff.
+- p08_p09_pipeline.py: a43d0db34a5c6bca409248d8b464bdacafa3ed93e7eddd34da0fa2de1f4b85cf.
+
+Ambos correspondem à base anterior. O recibo tem applied=True, diretório alvo e
+backup corretos e pares before/after iguais à base e à candidata 2de050e.
+Conferência do backup/recibo concluída; não foi executada restauração real.
 
 Lotes, manifestos e checkpoint: os cinco hashes continuam iguais aos da base
 confirmada. A inspeção sanitizada também comparou metadados/hashes antes e depois,
@@ -33,35 +39,46 @@ P11 ativo, PID 1787, início 26/10/2026 12:53:53 -03, sem reinício. A paginaç�
 não foi instalada. `INSTALLED_READONLY_RESULTS.json` e `STAGING_STATUS.json`, na
 branch de implementação, registram o estado aplicado e os limites da conferência.
 
-## Sessão: identificação pendente de acesso, não de uma nova coleta
+## Sessão existente aproveitável para análise offline
 
-Os scripts P08 atuais apontam para `/opt/harpisense/capturas`, mas esse diretório
-nega leitura ao usuário SSH. Não é possível afirmar quais sessões estão nele.
-O ID `p08-v4-persistencia-auto02` aparece como padrão do leitor existente;
-isso é **uma referência candidata**, não prova de que seus arquivos existem ou
-de que os lotes de auditoria pertençam a essa sessão.
+A inspeção privilegiada listou 20 relatórios .session.json em
+`/opt/harpisense/capturas`. A sessão detalhada é **p08-v4-persistencia-auto02**,
+agora comprovadamente existente, não apenas um default do leitor. As outras 19
+foram somente inventariadas; não há base para concluir que todas são insuficientes.
 
-Foi preparado `inspect_p08_applied_readonly.py`, que usa apenas biblioteca padrão,
-leitura de arquivos e stdout. Não importa módulos do projeto, não acessa SQL,
-não executa subprocessos e não grava arquivos. Ele verifica os backups, lista
-relatórios .session.json e identifica uma candidata com seus artefatos/janelas,
-expondo somente campos de metadados permitidos, sem payloads ou credenciais.
-O script já foi exercitado com o acesso comum: confirma os hashes instalados e
-reporta PermissionError nos dois locais protegidos. Para concluir esta tarefa,
-foi solicitado ao usuário executar em seu terminal da VM:
+Intervalo: 23/10/2026 19:17:27.443326–19:18:28.387151 UTC. Interface ens37,
+sensor harpiserver; verificação básica da sessão aprovada. Arquivos presentes:
 
-```sh
-sudo /usr/bin/python3 -B /tmp/harpisense-p08p09-validated-batch.grdSWc/p08_p09/inspect_p08_applied_readonly.py
-```
+| Artefato, todos com prefixo p08-v4-persistencia-auto02 | Evidência |
+|---|---|
+| .session.json | SHA256 74a6a4c4c99cef85fc23c8c5f2625df4879f0999ecbcfe9702f1c9b49d9ff99f; registra caminho, tamanho e hash do PCAP. |
+| .pcap | 1.824 bytes, SHA256 87f05fa8954d5ae648861c609b09942dcfb1cbcbefb05d7228bedb70719cf52c; hash calculado confere com a sessão. |
+| .p08.json | SHA256 cf285f11dde03104d02a803f28e58ada57ed39ef9ceae2d34ed64cd056df6169; referencia mesmo caminho/tamanho/hash de PCAP, interface e sessão; 20 eventos convertidos e quatro janelas. |
+| .coverage.json | SHA256 9ffc11c3600bbef9441c3e2d69eba83559b829d3566e43142ab811c054cf7ca1; diagnóstico da mesma sessão, não certificado de cobertura. |
 
-Não mudar permissões dos backups/capturas. Não enviar senha. A saída privilegiada
-ainda não foi recebida neste registro. Sem ela, não se marca backup como
-integralmente verificado nem sessão como identificada. A impossibilidade de ler
-um diretório não demonstra ausência de dados ou necessidade de nova coleta.
+As quatro janelas são únicas, de 10 segundos, com collection_session_id explícito
+igual à sessão, sensor harpiserver e interface ens37. Intervalos UTC:
+19:17:30–40, 19:17:40–50, 19:17:50–19:18:00 e 19:18:00–10. Todas estão dentro
+do intervalo da sessão. Declaram schema harpisense.if.window.v1 e perfil
+tcp-observacao. Isso identifica a cadeia local sessão → PCAP → integração →
+janelas; não é validação numérica completa das features nem compatibilidade RF/IF.
+Os window_links fornecidos não trazem target_ref; não foi comprovado contexto de
+alvo autenticado para correlação. Integridade local não atesta autoria independente.
+
+Portanto, **a sessão é aproveitável para integridade, rastreabilidade e análise
+offline**. Não está apta a comprovar captura/logs completos: quality=INCOMPLETE,
+collection_complete=False, logs_complete=False e ready_for_inference=False.
+Há 60 observações de heartbeat, 59 com tcpdump ativo e uma sem detecção;
+continuous_capture_proven=False. Essa observação não prova perda de pacote,
+mas não permite certificar continuidade. O diagnóstico tem sete intervalos,
+quatro com eventos e três sem dados agregados. Ausência de agregado não prova
+ausência de tráfego nem equivale a zero numa feature.
 
 ## Vínculos a demonstrar, sem criá-los nesta rodada
 
-Conforme o código atual do P08 e as referências aprovadas V2:
+Conforme o código atual do P08 e as referências aprovadas V2, os três primeiros
+vínculos abaixo estão demonstrados por consistência dos artefatos fornecidos;
+os vínculos com evidências/logs, alvo e cobertura permanecem pendentes:
 
 | Relação | Evidência necessária |
 |---|---|
@@ -82,16 +99,31 @@ Os dois lotes antigos **continuam sem associação**. A leitura permitida mostro
   não declaram os vínculos de sessão/janela/alvo. Cursores delimitam uma leitura,
   mas não provam cobertura ou pertinência a uma sessão.
 
-Mesmo uma coincidência futura de horário com uma sessão não basta para autenticar
-o vínculo. Não preencher contexto por proximidade temporal ou pelo nome dos lotes.
+O evento é de **25/10**, enquanto a sessão detalhada ocorreu em **23/10**: está
+fora tanto da sessão quanto das quatro janelas. Não é candidato temporal para
+esse conjunto. O lote vazio tampouco prova cobertura de intervalo algum.
+Mesmo coincidência de horário não autenticaria o vínculo. Não preencher contexto
+por proximidade temporal ou pelo nome dos lotes; nenhuma associação foi criada.
 
 ## Artefatos e fontes ainda necessários para validar cobertura
 
-Primeiro, concluir acesso aos artefatos existentes; sua ausência ainda não está
-demonstrada. Depois, verificar PCAP, session, integração/janelas e diagnóstico
-coverage do mesmo conjunto, além de registros de cobertura **por fonte** e
-inventário/vínculos confiáveis. O produtor atual de `<session>.coverage.json`
-é um diagnóstico conservador: seus intervalos têm cobertura_comprovada=False.
+PCAP, session, integração/janelas e diagnóstico coverage da sessão selecionada
+**já existem**. O que não está comprovado/fornecido é:
+
+- Logs históricos das fontes obrigatórias cobrindo o intervalo dessa sessão em
+  23/10, com identificação da origem, hashes, cursores/boot quando aplicáveis e
+  informação de retenção/rotação/lacunas/relógio.
+- coverage_records verificáveis por fonte, contexto e intervalo. O diagnóstico
+  .coverage.json presente não os substitui; seus intervalos não atestam completude.
+- Vínculo confiável entre evidence_id, collection_session_id, sensor_id,
+  target_ref e scope_ref onde exigido. Os lotes fornecidos não entregam esse vínculo.
+- Eventual evidência independente que esclareça o intervalo sem processo observado
+  e a abrangência real das interfaces/fontes, sem alterar retrospectivamente os
+  flags conservadores ou fabricar contagens.
+
+Essas são pendências de evidência, não uma afirmação de que os arquivos históricos
+foram perdidos ou de que não possam estar disponíveis em outra fonte. O produtor
+atual de `<session>.coverage.json` é um diagnóstico conservador.
 Heartbeat ativo e zero perdas do kernel, isoladamente, não comprovam captura
 integral nem logs completos, conforme o próprio código P08.
 
@@ -110,8 +142,14 @@ não existir revisão individual V2. Nenhum componente foi substituído nesta ro
 
 ## Se uma coleta nova se mostrar necessária: procedimento proposto, não executado
 
-Uma nova sessão só deve ser proposta após verificar se a sessão e os logs antigos
-permitem o vínculo/intervalo exigidos. Se não houver evidência recuperável, manter
+**Não há justificativa demonstrada para exigir nova coleta agora.** A sessão
+selecionada é útil; sua insuficiência é específica para certificar cobertura e
+vínculo com os lotes antigos. Os outros 19 relatórios não foram avaliados em
+detalhe. O próximo passo mínimo é localizar/verificar os logs históricos e o
+inventário de contexto de 23/10, não executar um novo ensaio.
+
+Uma nova sessão só deve ser proposta após verificar se os artefatos e os logs
+antigos permitem o vínculo/intervalo exigidos. Se não houver evidência recuperável, manter
 os lotes antigos sem vínculo e produzir um conjunto novo, sem reinterpretar os
 antigos como evidência da nova sessão.
 
@@ -140,6 +178,7 @@ antigos como evidência da nova sessão.
 7. Guardar o conjunto novo com provenance/manifestos sem tocar lotes/checkpoint
    antigos. Permanecer UNKNOWN quando houver lacuna, com inferência e IPS False.
 
-Próximo passo mínimo desta rodada: receber o resultado da inspeção privilegiada,
-concluir a conferência de backup e identificar uma sessão real com seus vínculos
-comprováveis. Não implementar associação, coletor ou promoção de cobertura.
+Conferência de backup e identificação de sessão concluídas com a evidência
+privilegiada fornecida. Próximo passo mínimo: identificar a disponibilidade dos
+logs históricos/fontes obrigatórias e do inventário confiável para o intervalo
+da sessão selecionada. Não implementar associação, coletor ou promoção de cobertura.
