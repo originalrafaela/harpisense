@@ -7,7 +7,8 @@ from coverage_gate import validate_coverage
 
 
 def prepare_verified_log_counts(
-    events, windows, coverage_records, required_sources
+    events, windows, coverage_records, required_sources,
+    *, coverage_provenance_verified=False
 ):
     """Avalia cobertura sem liberar contagens não certificadas."""
 
@@ -15,6 +16,7 @@ def prepare_verified_log_counts(
         "authorized_for_inference": False,
         "log_counts": {},
         "reasons": [],
+        "coverage_provenance_verified": coverage_provenance_verified is True,
     }
 
     if not isinstance(events, list):
@@ -32,6 +34,29 @@ def prepare_verified_log_counts(
     if not isinstance(required_sources, (list, tuple)) or not required_sources:
         result["reasons"].append("Fontes obrigatórias não definidas")
         return result
+
+    proof_sources = {
+        record.get("source")
+        for record in coverage_records
+        if isinstance(record, dict)
+        and isinstance(record.get("source"), str)
+        and record.get("verified") is True
+        and record.get("verification_method") == "ed25519_signed_manifest_and_interval_chain"
+        and isinstance(record.get("evidence_refs"), list)
+        and record["evidence_refs"]
+        and all(
+            isinstance(ref, dict)
+            and ref.get("signature_verified") is True
+            and isinstance(ref.get("manifest_sha256"), str)
+            and len(ref["manifest_sha256"]) == 64
+            for ref in record["evidence_refs"]
+        )
+    }
+    provenance_verified = (
+        coverage_provenance_verified is True
+        and set(required_sources) <= proof_sources
+    )
+    result["coverage_provenance_verified"] = provenance_verified
 
     for window in windows:
         if not isinstance(window, dict):
@@ -57,6 +82,8 @@ def prepare_verified_log_counts(
     # Não liberar contagens até existir certificação confiável.
     result["reasons"].append(
         "Procedência independente da cobertura não comprovada"
+        if not provenance_verified
+        else "Contagens permanecem bloqueadas nesta entrega, mesmo com a procedência verificada"
     )
 
     return result

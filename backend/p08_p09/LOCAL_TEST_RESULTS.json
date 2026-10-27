@@ -1,5 +1,5 @@
 {
-  "captured_at_utc": "2026-10-26T17:29:00.185600+00:00",
+  "captured_at_utc": "2026-10-27T05:45:05.314572+00:00",
   "synthetic_only": true,
   "python": "3.12.15 (main, Oct  6 2026, 02:02:22) [GCC 14.2.0]",
   "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
@@ -26,6 +26,7 @@
     "test_coverage_gate.TestCoverageIntervals.test_full_coverage_accepted",
     "test_coverage_gate.TestCoverageIntervals.test_missing_required_source_rejected",
     "test_coverage_gate.TestCoverageIntervals.test_temporal_gap_rejected",
+    "test_log_coverage_integration.TestLogCoverageIntegration.test_signed_coverage_proof_is_recorded_but_counts_stay_blocked",
     "test_log_coverage_integration.TestLogCoverageIntegration.test_untrusted_coverage_must_not_release_counts",
     "test_log_window_adapter.TestAdditionalIsolation.test_different_sensor",
     "test_log_window_adapter.TestAdditionalIsolation.test_different_target",
@@ -48,6 +49,7 @@
     "test_p08_artifact_validator.TestP08ArtifactValidator.test_invalid_session_name",
     "test_p08_artifact_validator.TestP08ArtifactValidator.test_modified_pcap",
     "test_p08_artifact_validator.TestP08ArtifactValidator.test_wrong_session",
+    "test_signed_coverage_pipeline.SignedCoveragePipelineTests.test_signed_source_records_reach_p09_gate_without_releasing_counts",
     "test_batch_pipeline.TestBatchPipeline.test_artifact_and_coverage_gates_not_bypassed",
     "test_batch_pipeline.TestBatchPipeline.test_both_inputs_rejected_before_io_even_empty_events",
     "test_batch_pipeline.TestBatchPipeline.test_empty_batch_retains_manifest_provenance",
@@ -63,23 +65,24 @@
     "test_staging_update.TestStagingUpdate.test_dry_run_and_refuse_unexpected_changes",
     "test_staging_update.TestStagingUpdate.test_failure_restores_both_files"
   ],
-  "tests_run": 58,
+  "tests_run": 60,
   "failures": 0,
   "errors": 0,
   "code_sha256": {
     "auxiliary_audit_adapter.py": "04b58d66d5d6d9cd513bff4b559c187bca4a2d13ea370e80fcbfc97bb9eb5416",
     "context_adapter.py": "a41ad56a464247c89a44b1ade89fa5add792c48f9fa12b0d0712f2b897d62d95",
     "coverage_gate.py": "3310a15e11b90ece09c4e8f4ba49b7c0eab7686bafefec19b85447b1693c6109",
-    "log_coverage_integration.py": "e0b47ed6124d49a68a6e31d7e829c91847164e8ba85c3bc3ab9768c1ebe24bfa",
+    "log_coverage_integration.py": "63a9b6f31c6e644e9f343a429d805a117b904f5ca9fff9f28c994babe4ff5756",
     "log_window_adapter.py": "17804b6759c3172fb3cdf3b099ae236baa445a136751bc0c98590ad7a370e7cd",
     "p08_artifact_validator.py": "58868a25ff791139025e10321497bda27fb77e26e5d6f6fc31936eba530c65b7",
-    "p08_p09_pipeline.py": "4ec9ed8c2fb5b068ebdae4b6cd7643d1aca5a5c0fcc5d9c354e28f5f7f12d8dc",
+    "p08_p09_pipeline.py": "b4534c3cfeb240d22d1dfbf274c1efd2409adac9774ca028a38636beb150e0ce",
     "test_context_adapter.py": "219bc6e77680551fe1de2501031783cf8a1fb51d99c9d445d6d599a6e6358891",
     "test_context_security.py": "1e6f3497b1d4de8b64a34b6d63bd95aef219b40cf312ee0566325690471f6fbd",
     "test_context_window_integration.py": "0441fb3aab2f683e11873ac6fe0bc8a81f287c6a849118a1a84ec0afc56dac14",
     "test_coverage_gate.py": "8a235e83bd7845849ab79a2fcf91c320a5159ab846aa584373fbbe801c3a0ca5",
-    "test_log_coverage_integration.py": "958cbecb5f7b45fb39a24a54b26c05f717d1e981cfec113deae53a537b3de668",
+    "test_log_coverage_integration.py": "c30db8817d0b4e9ffd0a6f9ea6419003dc2ff79a0aabf96edc16c69355b896bf",
     "test_log_window_adapter.py": "0d8187baf3f4e5b8103306e0d96585cda748236b53c7de3b312ee0cf3bb5fe63",
-    "test_p08_artifact_validator.py": "f1caba01bf7fe361081752eb9ac1d84ffc39c41256fd20df68e00a06c2ed7e1a"
+    "test_p08_artifact_validator.py": "f1caba01bf7fe361081752eb9ac1d84ffc39c41256fd20df68e00a06c2ed7e1a",
+    "test_signed_coverage_pipeline.py": "bd4c0c5876677623b2b267ded3c4fc628d5db54450728bf27e40518805de0e2d"
   }
 }

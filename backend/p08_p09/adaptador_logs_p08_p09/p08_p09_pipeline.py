@@ -18,6 +18,7 @@ def run_pipeline(
     required_sources,
     *,
     batch_path=None,
+    coverage_provenance_verified=False,
 ):
     """Select exactly one input: events list, or events=None with batch_path.
 
@@ -36,6 +37,7 @@ def run_pipeline(
         "input_mode": "batch" if batch_path is not None else "events",
         "batch_reference": str(batch_path) if batch_path is not None else None,
         "batch_integrity_verified": False,
+        "coverage_provenance_verified": False,
         "limitations": [
             "Integridade local não comprova autenticidade, continuidade ou cobertura.",
             "Evidências auxiliares não habilitam contagens, inferência ou IPS.",
@@ -92,9 +94,11 @@ def run_pipeline(
         windows=windows,
         coverage_records=coverage_records,
         required_sources=required_sources,
+        coverage_provenance_verified=coverage_provenance_verified,
     )
 
     result["coverage_diagnostic"] = coverage
+    result["coverage_provenance_verified"] = coverage["coverage_provenance_verified"]
     result["reasons"].extend(coverage["reasons"])
 
     return result

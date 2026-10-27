@@ -46,6 +46,35 @@ class TestLogCoverageIntegration(unittest.TestCase):
         self.assertEqual(result["log_counts"], {})
         self.assertTrue(result["reasons"])
 
+    def test_signed_coverage_proof_is_recorded_but_counts_stay_blocked(self):
+        window = {
+            "window_id": "w1",
+            "window_start": "2026-10-15T12:00:00Z",
+            "window_end": "2026-10-15T12:00:10Z",
+            "collection_session_id": "session-A",
+            "sensor_id": "sensor-A",
+            "target_ref": "device-A",
+        }
+        proof = [{
+            "source": "mosquitto",
+            "start": window["window_start"],
+            "end": window["window_end"],
+            "collection_session_id": "session-A",
+            "sensor_id": "sensor-A",
+            "target_ref": "device-A",
+            "verified": True,
+            "verification_method": "ed25519_signed_manifest_and_interval_chain",
+            "evidence_refs": [{"manifest_sha256": "a" * 64, "signature_verified": True}],
+        }]
+        result = prepare_verified_log_counts(
+            events=[], windows=[window], coverage_records=proof,
+            required_sources=["mosquitto"], coverage_provenance_verified=True,
+        )
+        self.assertTrue(result["coverage_provenance_verified"])
+        self.assertFalse(result["authorized_for_inference"])
+        self.assertEqual(result["log_counts"], {})
+        self.assertIn("Contagens permanecem bloqueadas", result["reasons"][-1])
+
 
 if __name__ == "__main__":
     unittest.main()

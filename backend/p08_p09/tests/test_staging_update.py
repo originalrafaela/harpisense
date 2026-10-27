@@ -14,10 +14,25 @@ class TestStagingUpdate(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='SYNTHETIC-staging-update-')
         self.addCleanup(self.temp.cleanup)
-        self.target = Path(self.temp.name)
-        self.candidates = ROOT / 'adaptador_logs_p08_p09'
+        self.target = Path(self.temp.name) / 'target'
+        self.candidates = Path(self.temp.name) / 'candidates'
+        self.target.mkdir()
+        self.candidates.mkdir()
+        # Exercise the pinned updater from the validated-batch release, whose
+        # candidate hashes are deliberately stable while this branch evolves.
+        for name in apply_staging.EXPECTED:
+            source = (ROOT / 'tests/fixtures/pinned_staging_pipeline.py'
+                      if name == 'p08_p09_pipeline.py'
+                      else ROOT / 'adaptador_logs_p08_p09' / name)
+            shutil.copy2(source, self.candidates / name)
         for name in apply_staging.DEPENDENCIES:
-            shutil.copy2(self.candidates / name, self.target / name)
+            # This regression exercises the historical exact-hash updater.
+            # Its pinned dependency is intentionally the pre-coverage version.
+            source = (ROOT / 'tests/fixtures/previous_log_coverage_integration.py'
+                      if name == 'log_coverage_integration.py'
+                      else ROOT / 'adaptador_logs_p08_p09' / name)
+            shutil.copy2(source, self.target / name)
+            shutil.copy2(source, self.candidates / name)
         shutil.copy2(ROOT / 'tests/fixtures/previous_pipeline.py', self.target / 'p08_p09_pipeline.py')
         shutil.copy2(ROOT / 'tests/fixtures/previous_auxiliary_audit_adapter.py', self.target / 'auxiliary_audit_adapter.py')
 

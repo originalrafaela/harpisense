@@ -1,0 +1,42 @@
+{
+  "schema_version": "harpisense.p08.capture-profile.v1",
+  "profile_id": "tcp-observacao-coverage-v1",
+  "traffic_profile": "tcp-observacao",
+  "sensor_id": "harpiserver",
+  "target_ref": "REPLACE_WITH_APPROVED_TARGET_REFERENCE",
+  "interface": "REPLACE_WITH_VERIFIED_CAPTURE_INTERFACE",
+  "source_ip": "REPLACE_WITH_VERIFIED_SOURCE_IPV4",
+  "destination_ip": "REPLACE_WITH_VERIFIED_DESTINATION_IPV4",
+  "required_sources": [
+    {
+      "source": "gateway_capture",
+      "kind": "gateway_capture",
+      "host_id": "gateway",
+      "public_key": "/etc/harpisense/p08/trust/gateway-capture-ed25519.pub",
+      "public_key_sha256": "REPLACE_WITH_64_HEX_DER_FINGERPRINT"
+    },
+    {
+      "source": "mqtt_broker",
+      "kind": "signed_log_bundle",
+      "host_id": "REPLACE_AFTER_BROKER_HOST_INVENTORY",
+      "auxiliary_mqtt": true,
+      "public_key": "/etc/harpisense/p08/trust/mqtt-broker-ed25519.pub",
+      "public_key_sha256": "REPLACE_WITH_64_HEX_DER_FINGERPRINT"
+    },
+    {
+      "source": "mqtt_consumer",
+      "kind": "signed_log_bundle",
+      "host_id": "gateway",
+      "auxiliary_mqtt": true,
+      "public_key": "/etc/harpisense/p08/trust/mqtt-consumer-ed25519.pub",
+      "public_key_sha256": "REPLACE_WITH_64_HEX_DER_FINGERPRINT"
+    },
+    {
+      "source": "api_fastapi",
+      "kind": "signed_log_bundle",
+      "host_id": "gateway",
+      "public_key": "/etc/harpisense/p08/trust/api-fastapi-ed25519.pub",
+      "public_key_sha256": "REPLACE_WITH_64_HEX_DER_FINGERPRINT"
+    }
+  ]
+}
