@@ -2,7 +2,7 @@ import {useState} from 'react';
 import {telemetry, stale, type Row} from './api';
 import {Badge, Empty, Panel, Records, show} from './components';
 
-export function Telemetry({rows, assets}: {rows: Row[]; assets: Row[]}) {
+export function Telemetry({rows, assets, compact=false}: {rows: Row[]; assets: Row[]; compact?:boolean}) {
   const [device, setDevice] = useState('');
   const list = rows.filter(row => !device || telemetry(row).device === device);
   const devices = [...new Set(list.map(row => telemetry(row).device))];
@@ -42,10 +42,10 @@ export function Telemetry({rows, assets}: {rows: Row[]; assets: Row[]}) {
       {!list.length && <Empty/>}
       <p className="muted">LDR bruto não é lux. Temperatura provisória não representa luminosidade. Identificadores são preservados como recebidos, sem renomear poste2.</p>
     </Panel>
-    <Panel title="Histórico de telemetria"><Records rows={list} columns={[
+    {!compact&&<Panel title="Histórico de telemetria"><Records rows={list} columns={[
       ['id', 'ID do registro'], ['device_id', 'Dispositivo'], ['created_at', 'Registrado na projeção'],
       ['observed_at', 'Observado em'], ['temperatura', 'Temperatura provisória · unidade não informada'],
       ['tipo', 'Tipo do payload'], ['measurements', 'Medições originais'], ['status', 'Estado na leitura'],
-    ]}/></Panel>
+    ]}/></Panel>}
   </>;
 }

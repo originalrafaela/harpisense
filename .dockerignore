@@ -1,0 +1,12 @@
+**
+!backend/
+!backend/domain/
+!backend/domain/**
+!backend/delivery/
+!backend/delivery/**
+!genai/
+!genai/harpia/
+!genai/harpia/**
+**/__pycache__/
+**/*.pyc
+**/.env*

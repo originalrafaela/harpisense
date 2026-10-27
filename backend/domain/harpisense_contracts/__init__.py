@@ -1,0 +1,11 @@
+"""Contratos compartilhados HarpiSense v1.0.0."""
+from .validation import ContractError,validate,validate_links,execution_precheck,fingerprint,input_fingerprint
+from .adapters import detection_from_legacy,rf_explanation_from_legacy,unresolved_incident
+from .schema_source import VERSION,SCENARIOS,ACTIONS
+
+from .canonical import canonical_json,action_fingerprint,context_fingerprint,legacy_manager_ascii_fingerprint
+from .window_identity import window_identity,legacy_aggregate_window_id,legacy_edge_window_id
+from .execution import project_execution_row,validate_execution_links
+from .compatibility import canonical_operation,normalize_application_status,validate_record_compat,normalized_evidence_to_risk_stub
+
+from .auxiliary import validate_aux,AUX_SCHEMAS

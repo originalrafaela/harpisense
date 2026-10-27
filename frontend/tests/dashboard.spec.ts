@@ -24,54 +24,31 @@ async function login(page: Page, health: Record<string, unknown> = {}, records: 
   await page.getByLabel('Senha', {exact: true}).fill('isolated');
   await page.getByRole('button', {name: 'Entrar na central'}).click();
   await expect(page.getByText('Consulta autenticada')).toBeVisible();
-  await expect(page.getByRole('button', {name: 'M1 — Supervisionado', exact: true})).toBeVisible();
+  await expect(page.getByRole('heading', {name: 'Estado operacional efetivo', exact: true})).toBeVisible();
 }
 
-test('demonstração alterna controles independentes sem nenhuma chamada operacional', async ({page}) => {
-  const calls: string[] = [];
-  page.on('request', request => {if (request.url().includes('/api/')) calls.push(request.url())});
-  await page.goto('http://127.0.0.1:5174');
-  await page.getByRole('button', {name: 'Abrir prévia visual'}).click();
-  for (const label of ['M1 — Supervisionado', 'M2 — Autonomia parcial', 'M3 — Autônomo']) {
-    await page.getByRole('button', {name: label, exact: true}).click();
-    await expect(page.getByRole('button', {name: label, exact: true})).toHaveAttribute('aria-pressed', 'true');
-  }
-  await page.getByRole('combobox', {name: 'Modo IDS / SIMULATION / REAL', exact: true}).selectOption('REAL');
-  await page.getByRole('combobox', {name: 'execution_enabled', exact: true}).selectOption('false');
-  await expect(page.getByRole('button', {name: 'M3 — Autônomo', exact: true})).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByRole('combobox', {name: 'Modo IDS / SIMULATION / REAL', exact: true})).toHaveValue('REAL');
-  await expect(page.getByRole('combobox', {name: 'execution_enabled', exact: true})).toHaveValue('false');
-  await page.getByRole('button', {name: 'Detalhes da explicação', exact: true}).click();
-  await expect(page.getByRole('region', {name: 'Detalhes da explicação'})).toContainText('inc-demo');
-  await page.getByRole('button', {name: 'Histórico da explicação', exact: true}).click();
-  await expect(page.getByRole('region', {name: 'Histórico da explicação'})).toContainText('Explicação determinística');
-  await expect(page.getByText('Dados de demonstração — sem conexão operacional')).toBeVisible();
-  await page.getByRole('link', {name: 'Configurações', exact: true}).click();
-  await expect(page.getByRole('button', {name: 'M3 — Autônomo', exact: true})).toHaveAttribute('aria-pressed', 'true');
-  expect(calls).toEqual([]);
+test('prévia não apresenta comandos operacionais e preserva HarpIA',async({page})=>{
+ const calls:string[]=[];page.on('request',r=>{if(r.url().includes('/api/'))calls.push(r.url())});
+ await page.goto('http://127.0.0.1:5174');await page.getByRole('button',{name:'Abrir prévia visual'}).click();
+ await expect(page.getByRole('button',{name:'Parada de emergência',exact:true})).toBeDisabled();
+ await expect(page.getByRole('combobox',{name:'Modo operacional',exact:true})).toHaveCount(0);
+ await page.getByRole('button',{name:'Detalhes da explicação',exact:true}).click();
+ await expect(page.getByRole('region',{name:'Detalhes da explicação'})).toContainText('inc-demo');
+ await page.getByRole('link',{name:'Configurações',exact:true}).click();
+ await expect(page.getByText('prévia visual sem comandos ao servidor.',{exact:false})).toBeVisible();
+ expect(calls).toEqual([]);
 });
-
-test('operação desconhecida mantém botões visíveis e sem ativo; não inventa explicações', async ({page}) => {
-  await login(page);
-  for (const label of ['M1 — Supervisionado', 'M2 — Autonomia parcial', 'M3 — Autônomo']) {
-    const button = page.getByRole('button', {name: label, exact: true});
-    await expect(button).toBeDisabled(); await expect(button).toHaveAttribute('aria-pressed', 'false');
-  }
-  await expect(page.getByRole('combobox', {name: 'Modo IDS / SIMULATION / REAL', exact: true})).toHaveValue('');
-  await expect(page.getByRole('combobox', {name: 'execution_enabled', exact: true})).toHaveValue('');
-  await expect(page.getByText('Alteração ainda não integrada.', {exact: false})).toBeVisible();
-  await expect(page.getByText('Sem explicação disponível.', {exact: false})).toBeVisible();
+test('operação desconhecida permanece explícita e não inventa explicações',async({page})=>{
+ await login(page);await expect(page.getByText('Autonomia não informada',{exact:true})).toBeVisible();
+ await expect(page.getByText('Sem explicação disponível.',{exact:false})).toBeVisible();
+ await page.getByRole('link',{name:'Configurações',exact:true}).click();
+ await expect(page.getByText('API de controles não declarada nesta conexão.',{exact:false})).toBeVisible();
 });
-
-test('valores explícitos do backend são apresentados sem habilitar mudanças', async ({page}) => {
-  const writes: string[] = [];
-  page.on('request', request => {if (request.url().includes('/api/') && request.method() !== 'GET') writes.push(request.method())});
-  await login(page, {operational_controls: {operation: 'IDS', autonomy_mode: 2, execution_enabled: false}});
-  await expect(page.getByRole('button', {name: 'M2 — Autonomia parcial', exact: true})).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByRole('button', {name: 'M2 — Autonomia parcial', exact: true})).toBeDisabled();
-  await expect(page.getByRole('combobox', {name: 'Modo IDS / SIMULATION / REAL', exact: true})).toHaveValue('IDS');
-  await expect(page.getByRole('combobox', {name: 'execution_enabled', exact: true})).toHaveValue('false');
-  expect(writes).toEqual([]);
+test('valores do backend são compactos e não habilitam controles sem API',async({page})=>{
+ const writes:string[]=[];page.on('request',r=>{if(r.url().includes('/api/')&&r.method()!=='GET')writes.push(r.method())});
+ await login(page,{operational_controls:{operation:'IDS',autonomy_mode:2,execution_enabled:false}});
+ await expect(page.getByText('M2',{exact:true})).toBeVisible();await expect(page.getByText('IDS',{exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Parada de emergência',exact:true})).toBeDisabled();expect(writes).toEqual([]);
 });
 
 test('HarpIA seleciona incidente mais recente, vincula texto e consulta histórico', async ({page}) => {

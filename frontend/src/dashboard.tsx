@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {object, type Row} from './api';
+import {object, type Row, type ControlState} from './api';
 import {Badge, Empty, Panel, show} from './components';
 import {selectExplanation, originLabel as origin, incidentRevision, explanationRevision, explanationTime, explanationFreshness} from './harpia';
 
@@ -16,6 +16,10 @@ export type DashboardContext = {
   loadHistory: (id: string) => Promise<Row[]>;
   loadExplanations?: (id: string) => Promise<Row[]>;
   loading?: boolean;
+  loadControls?:()=>Promise<ControlState>;
+  changeControls?:(value:ControlState['value'],revision:number,reason:string)=>Promise<ControlState>;
+  stopControls?:(reason:string)=>Promise<ControlState>;
+  onControls?:(state:ControlState|null)=>void;
 };
 
 // Optional values explicitly supplied by the backend. Never read historical decisions as controls.
@@ -28,38 +32,6 @@ export function backendControls(health: Record<string, unknown> | null): Control
     operation: operation === 'IDS' || operation === 'SIMULATION' || operation === 'REAL' ? operation : null,
     execution: typeof values?.execution_enabled === 'boolean' ? values.execution_enabled : null,
   };
-}
-
-export function OperationalControls({context, health}: {context: DashboardContext; health: Record<string, unknown> | null}) {
-  const values = context.demonstration ? context.demoControls : backendControls(health);
-  const update = (patch: Partial<ControlValues>) => {
-    if (context.demonstration) context.onDemoControls({...values, ...patch});
-  };
-  return <Panel title="Controles operacionais">
-    <div className="operational-controls">
-      <fieldset><legend>Autonomia</legend><div className="autonomy-buttons">
-        {([[1, 'M1 — Supervisionado'], [2, 'M2 — Autonomia parcial'], [3, 'M3 — Autônomo']] as const).map(([value, label]) =>
-          <button key={value} type="button" aria-pressed={values.autonomy === value}
-            aria-describedby="controls-integration" disabled={!context.demonstration}
-            onClick={() => update({autonomy: value})}>{label}</button>)}
-      </div><p className="control-value">{values.autonomy === null ? 'Autonomia: não informado' : `Autonomia: M${values.autonomy}`}</p></fieldset>
-      <fieldset><legend>Modo operacional</legend>
-        <label>Modo IDS / SIMULATION / REAL<select value={values.operation ?? ''} disabled={!context.demonstration}
-          aria-describedby="controls-integration" onChange={e => update({operation: e.target.value as ControlValues['operation']})}>
-          <option value="" disabled>Não informado</option>{['IDS', 'SIMULATION', 'REAL'].map(mode => <option key={mode}>{mode}</option>)}
-        </select></label>
-      </fieldset>
-      <fieldset><legend>Execução</legend>
-        <label>execution_enabled<select value={values.execution === null ? '' : String(values.execution)} disabled={!context.demonstration}
-          aria-describedby="controls-integration" onChange={e => update({execution: e.target.value === 'true'})}>
-          <option value="" disabled>Não informado</option><option value="false">Desabilitada</option><option value="true">Habilitada</option>
-        </select></label>
-      </fieldset>
-    </div>
-    <p id="controls-integration" className="muted">{context.demonstration
-      ? 'Prévia visual: alterações somente nesta demonstração, sem comandos ao backend. Não representam autorização de execução.'
-      : 'Alteração ainda não integrada. Não há endpoint de alteração disponível; valores ausentes não são presumidos.'}</p>
-  </Panel>;
 }
 
 export const incidentId = (row: Row) => typeof row.data.incident_id === 'string' ? row.data.incident_id : row.id;

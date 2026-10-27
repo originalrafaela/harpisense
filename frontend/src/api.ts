@@ -41,19 +41,24 @@ export class Client {
   try{if(this.profile==='p11')await this.health();else await this.rows('telemetry',0,1)}catch(e){this.logout();throw e}
  }
  path(kind:string){return this.profile==='p11'?`/api/v1/p11/${kind}`:`/api/v1/${kind==='network_event'?'network-events':kind}`}
- async get(path:string):Promise<unknown>{
+ async get(path:string,method='GET',body?:unknown):Promise<unknown>{
   if(!this.base)throw new ApiError('config','API não configurada. Informe a URL acessível ao navegador.');
   if(!this.credentials)throw new ApiError('unauthorized','Não autorizado. Entre novamente.');
   const c=new AbortController();this.active.add(c);const timer=setTimeout(()=>c.abort(),this.timeout);
   try{
    const bytes=new TextEncoder().encode(`${this.credentials.username}:${this.credentials.password}`);
-   const response=await this.fetcher(this.base.replace(/\/$/,'')+path,{headers:{Authorization:`Basic ${btoa(String.fromCharCode(...bytes))}`},signal:c.signal,cache:'no-store',credentials:'omit',redirect:'error'});
+   const response=await this.fetcher(this.base.replace(/\/$/,'')+path,{method,body:body===undefined?undefined:JSON.stringify(body),headers:{Authorization:`Basic ${btoa(String.fromCharCode(...bytes))}`,...(body===undefined?{}:{'Content-Type':'application/json'})},signal:c.signal,cache:'no-store',credentials:'omit',redirect:'error'});
+   if(response.status===409){let message='Alteração recusada pelo servidor. Consulte novamente.';try{const v=await response.json();if(object(v)&&object(v.detail)&&typeof v.detail.message==='string')message=v.detail.message}catch{}throw new ApiError('conflict',message)}
    if(!response.ok){const kind=response.status===401?'unauthorized':response.status===403?'forbidden':response.status===404?'unavailable':'error';throw new ApiError(kind, response.status===401?'Credenciais inválidas ou sessão não autorizada.':response.status===403?'Acesso negado.':response.status===404?'Endpoint indisponível nesta API.':`API indisponível (HTTP ${response.status}).`)}
    try{return await response.json()}catch{throw new ApiError('invalid','A API retornou JSON inválido.')}
   }catch(e){if(e instanceof ApiError)throw e;throw new ApiError('network',c.signal.aborted?'Consulta cancelada ou tempo limite excedido.':'Falha de rede/configuração. Verifique URL, proxy, HTTPS e CORS. Não foi possível consultar a API.');}
   finally{clearTimeout(timer);this.active.delete(c)}
  }
  async rows(kind:string,offset=0,limit=50){return adaptRows(await this.get(`${this.path(kind)}?limit=${limit}${this.profile==='p11'?`&offset=${offset}`:''}`),this.profile)}
+ async controls(){return controlState(await this.get('/api/v1/security/settings/mode/default'))}
+ async changeControls(value:ControlState['value'],revision:number,reason:string){return controlState(await this.get('/api/v1/security/settings/mode/default','PUT',{value,expected_revision:revision,reason}))}
+ async emergencyStop(reason:string){return controlState(await this.get('/api/v1/security/emergency-stop','POST',{reason}))}
+ async audit(offset=0){return adaptRows(await this.get(`/api/v1/security/audit?limit=50&offset=${offset}`),'p11')}
  async explanationHistory(id:string):Promise<Row[]>{
   if(this.profile!=='p11')throw new ApiError('unavailable','Histórico não disponível na API da base Git.');
   const value=await this.get(`${this.path('bitnet')}/${encodeURIComponent(id)}/history`);
@@ -80,4 +85,10 @@ export class Client {
   return rows.filter(row=>row.data.incident_id===incidentId);
  }
  async health(){const v=await this.get(this.path('health'));if(!object(v)||(this.profile==='p11'&&typeof v.api!=='string'))throw new ApiError('invalid','Saúde em formato inválido.');return v}
+}
+
+export type ControlState={value:{autonomy_mode:1|2|3;operation:'IDS'|'SIMULATION'|'REAL';execution_enabled:boolean};revision:number;emergency_stopped:boolean;updated_at:string;observed_at:string;real_execution_blocked:true;pending:{reliable:boolean;blockers:{id:string;state:string}[];dependency?:string};change_allowed:boolean};
+export function controlState(v:unknown):ControlState{
+ if(!object(v)||!object(v.value)||![1,2,3].includes(Number(v.value.autonomy_mode))||typeof v.value.autonomy_mode!=='number'||!['IDS','SIMULATION','REAL'].includes(String(v.value.operation))||typeof v.value.execution_enabled!=='boolean'||!Number.isInteger(v.revision)||Number(v.revision)<1||typeof v.emergency_stopped!=='boolean'||typeof v.updated_at!=='string'||!Number.isFinite(Date.parse(v.updated_at))||typeof v.observed_at!=='string'||!Number.isFinite(Date.parse(v.observed_at))||v.real_execution_blocked!==true||typeof v.change_allowed!=='boolean'||!object(v.pending)||typeof v.pending.reliable!=='boolean'||!Array.isArray(v.pending.blockers)||v.pending.blockers.some(b=>!object(b)||typeof b.id!=='string'||typeof b.state!=='string'))throw new ApiError('invalid','Estado operacional incompatível; alteração não confirmada.');
+ return v as ControlState;
 }

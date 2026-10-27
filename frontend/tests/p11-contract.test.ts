@@ -13,7 +13,8 @@ test('projeção PostgreSQL descrita no relatório mantém identidade, timestamp
   assert.deepEqual(adaptRows([],'p11'),[]);assert.throws(()=>adaptRows([{...record,revision:0}],'p11'));
 });
 test('escopo padrão de integração limita consultas aos recursos confirmados',()=>{
-  assert.deepEqual([...configuredResources(undefined)!],['telemetry']);
+  assert.ok(configuredResources(undefined)!.has('detection'));
+  assert.deepEqual([...configuredResources('telemetry')!],['telemetry']);
   assert.equal(configuredResources('all'),null);
 });
 test('P11 autentica no health protegido; legacy continua autenticando em telemetria',async()=>{

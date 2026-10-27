@@ -1,5 +1,5 @@
 """Fonte única compartilhada pelos contratos, Risk e Policy. Valores iniciais de laboratório."""
-CATALOG_VERSION='harpisense.catalog.v1'
+CATALOG_VERSION='harpisense.catalog.v2.2026-10-27'
 ACTION_SPECS={
  'BLOCK_SOURCE_IP':('SOURCE_IP',()),'LIMIT_SOURCE_RATE':('SOURCE_IP',('rate_profile_ref',)),
  'SUSPEND_MQTT_IDENTITY':('MQTT_IDENTITY',()),'REVOKE_MQTT_PERMISSION':('MQTT_IDENTITY',('topic_ref','permission')),
@@ -22,13 +22,13 @@ SCENARIOS={k:v['group'] for k,v in CATALOG.items()}
 SCENARIO_ACTIONS={k:v['actions'] for k,v in CATALOG.items()}
 ACTIONS=list(ACTION_SPECS)
 AUTONOMY={1:{'Low':'MANUAL','Medium':'MANUAL','Hard':'MANUAL'},
-          2:{'Low':'AUTO','Medium':'AUTO','Hard':'MANUAL'},
+          2:{'Low':'AUTO','Medium':'MANUAL','Hard':'MANUAL'},
           3:{'Low':'AUTO','Medium':'AUTO','Hard':'AUTO'}}
 DEFAULT_CONFIG=dict(version='harpisense.risk-policy.v1',weights=dict(detection=35,corroboration=20,impact=20,anomaly=15,criticality=10),
  min_action_score=60,min_rf_confidence=.9,min_independent_sources=1,max_evidence_age_seconds=60,
  decision_seconds=120,min_ttl_seconds=30,max_ttl_seconds=600,default_ttl_seconds=120)
 
-# Campos auxiliares centralizados; matriz e pesos v1 permanecem intocados.
+# Campos auxiliares centralizados; pesos preservados. Matriz M2 corrigida pelo acordo de 27/10/2026.
 OPERATION_MODES=('IDS','SIMULATION','REAL')
 TARGET_TYPES=tuple(sorted({target for target,_ in ACTION_SPECS.values()}))
 ACTION_PARAMETER_KEYS=('rate_profile_ref','topic_ref','permission','message_id')

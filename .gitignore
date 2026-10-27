@@ -208,3 +208,9 @@ marimo/_lsp/
 __marimo__/
 # Streamlit
 .streamlit/secrets.toml
+
+# Isolated review dependencies / local PostgreSQL
+.local-review/
+.local-postgres/
+
+.npm-cache/

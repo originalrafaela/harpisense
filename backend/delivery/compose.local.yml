@@ -1,0 +1,31 @@
+name: harpisense-delivery-local
+services:
+  db:
+    image: postgres:18.6
+    environment:
+      POSTGRES_DB: harpisense_delivery
+      POSTGRES_USER: harpisense_delivery
+      POSTGRES_PASSWORD: ${HARPISENSE_LOCAL_DB_PASSWORD:?Defina a senha do banco local}
+    volumes:
+      - delivery_pg:/var/lib/postgresql
+      - ./001_local.sql:/docker-entrypoint-initdb.d/001_local.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U harpisense_delivery -d harpisense_delivery"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  api:
+    build:
+      context: ../..
+      dockerfile: backend/delivery/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://harpisense_delivery:${HARPISENSE_LOCAL_DB_PASSWORD}@db:5432/harpisense_delivery
+      HARPISENSE_ADMIN_USER: ${HARPISENSE_ADMIN_USER:?Defina o administrador local}
+      HARPISENSE_ADMIN_PASSWORD: ${HARPISENSE_ADMIN_PASSWORD:?Defina a senha administrativa local}
+    ports:
+      - "127.0.0.1:18010:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  delivery_pg:

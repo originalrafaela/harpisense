@@ -1,3 +1,6 @@
+> Entrega atual de frontend/backend e autonomia: [relatório, matriz e execução local](../docs/ENTREGA_FRONTEND_BACKEND_AUTONOMIA.md).
+> A composição local nova fica em `backend/delivery`; a documentação abaixo descreve a base anterior.
+
 # HarpiSense V2 — frontend
 
 Interface de consulta em português com login e 14 telas operacionais, demonstração explícita e integração progressiva. React 18, TypeScript e Vite seguem a stack do frontend legado preservado no P11; nenhum backend foi criado. Apenas React/React DOM entram no bundle. Playwright é dependência de desenvolvimento.

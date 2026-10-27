@@ -1,3 +1,6 @@
+> Entrega atual de frontend/backend e autonomia: [relatório, matriz e execução local](../docs/ENTREGA_FRONTEND_BACKEND_AUTONOMIA.md).
+> A composição local nova fica em `backend/delivery`; a documentação abaixo descreve a base anterior.
+
 # HarpiSense Backend
 
 Base local para a API FastAPI, PostgreSQL, SQLAlchemy, Alembic e ingestao de telemetria MQTT.

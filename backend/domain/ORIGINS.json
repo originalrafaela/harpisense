@@ -1,0 +1,82 @@
+[
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_catalog.py",
+    "destination": "backend/domain/harpisense_catalog.py",
+    "sha256": "b65e351f97ab008b2022f27eb66bd9b76fa3ac230f31bd9e1e5be857a2fb071b"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_contracts/adapters.py",
+    "destination": "backend/domain/harpisense_contracts/adapters.py",
+    "sha256": "dc2a1c83c6108e7e71d8c4670f514c875d804c28ba8ec8b960328e715d626711"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_contracts/auxiliary.py",
+    "destination": "backend/domain/harpisense_contracts/auxiliary.py",
+    "sha256": "37dde5cb23e34062d4a9c4b5e02c14fa48df11c3d340b3be7762c14e82d52aa5"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_contracts/canonical.py",
+    "destination": "backend/domain/harpisense_contracts/canonical.py",
+    "sha256": "f98ed7ac09a4df4ae03cae9e928a25b5bee93e14c4f6d4f1cd78bf0abc7570a6"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_contracts/compatibility.py",
+    "destination": "backend/domain/harpisense_contracts/compatibility.py",
+    "sha256": "6f56c2d595e76d83345ad5219e0f06ab189d330db9373f2fea71649d9ed02c8f"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_contracts/execution.py",
+    "destination": "backend/domain/harpisense_contracts/execution.py",
+    "sha256": "081eb8b85d477d47e860b18c1d51ee1c99a6a25c7fe45c8bee45d228c1ac1d42"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_contracts/schema_source.py",
+    "destination": "backend/domain/harpisense_contracts/schema_source.py",
+    "sha256": "58205bf7b159700e36e54697eb6b142db86540153307607cead24f6343695cc6"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_contracts/validation.py",
+    "destination": "backend/domain/harpisense_contracts/validation.py",
+    "sha256": "26a9f15295b8994ad6c59927ce42d78b602072507be2ba18655c6282b6c49e1a"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_contracts/window_identity.py",
+    "destination": "backend/domain/harpisense_contracts/window_identity.py",
+    "sha256": "0081e35d53795a9054e6965e6c4882eb7a30cd6ac1989b7e541faa7daf80c72e"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_contracts/__init__.py",
+    "destination": "backend/domain/harpisense_contracts/__init__.py",
+    "sha256": "971d12420626bf6944edbcb29eea1c718ca97aad39a3da0454bd6f4eb4ec043c"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_contracts/__main__.py",
+    "destination": "backend/domain/harpisense_contracts/__main__.py",
+    "sha256": "15b95db066ebbb2d2325be46b23b199501d96a0f3989b8aa2623c7cf9c2107a3"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_engines/approval.py",
+    "destination": "backend/domain/harpisense_engines/approval.py",
+    "sha256": "1bd4273a68906513f2b56146d0cc1ccac0d054a21f26075081715e5d914c76fc"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_engines/core.py",
+    "destination": "backend/domain/harpisense_engines/core.py",
+    "sha256": "8bc0c7b9ea5f86bff1794ba137ddf9bd6e6f7ecf52a34e483a855be9c0b11298"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_engines/routing.py",
+    "destination": "backend/domain/harpisense_engines/routing.py",
+    "sha256": "6453fadd8335ed04f72530e297ab484a6dfd0dd522638052ca5d54b2ca237723"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_engines/__init__.py",
+    "destination": "backend/domain/harpisense_engines/__init__.py",
+    "sha256": "40df6bb739e576837b1f86ba4012a040e2153578484b8155774b93b16badf5ba"
+  },
+  {
+    "source": "versão_v2/03_Contratos/HarpiSense_Etapa03_Contratos_Catalogo_V2/03_Contratos/base_consolidada_atualizada/harpisense_engines/__main__.py",
+    "destination": "backend/domain/harpisense_engines/__main__.py",
+    "sha256": "0d8cd54a22d628c29695c62bcfd5462836c2011c22f8459535a81594aafcb88a"
+  }
+]
