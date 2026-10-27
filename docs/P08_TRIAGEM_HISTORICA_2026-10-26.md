@@ -1,5 +1,13 @@
 # Evidências históricas P08 — resultado parcial e decisão de continuidade
 
+> **Atualização:** a triagem root foi concluída em 27/10/2026. As seções que
+> descrevem a triagem pendente e decisão provisória abaixo são o registro do
+> estado anterior e foram substituídas por
+> [`P08_DECISAO_COBERTURA_2026-10-27.md`](P08_DECISAO_COBERTURA_2026-10-27.md).
+> Resultado atual: auto02 é candidata ao validador de artefatos, nenhuma das 20
+> sessões comprova cobertura completa e uma coleta nova será necessária para
+> obter as evidências faltantes. Inferência/IPS continuam bloqueados.
+
 Escopo: sessão p08-v4-persistencia-auto02, 23/10/2026,
 19:17:27.443326–19:18:28.387151 UTC, e triagem das demais sessões existentes.
 Não se repetiram verificações de instalação ou da integridade do backup aplicado.
