@@ -17,7 +17,7 @@ if (!(Test-Path .env)) { Copy-Item .env.example .env }
 npm.cmd run dev
 ```
 
-Abra `http://127.0.0.1:5174`. Para operação P11, abra manualmente o túnel SSH conforme o documento de integração. Sem túnel, o login deve falhar; a interface não substitui a API por exemplos. A entrada **Abrir prévia visual** não exige API e mantém o aviso “Dados de demonstração — sem conexão operacional”. Não é o modo operacional SIMULATION.
+Abra `http://127.0.0.1:5174`. Para operação P11, abra manualmente o túnel SSH conforme o documento de integração. Sem túnel, o login deve falhar; a interface não substitui a API por exemplos. A entrada **Explorar demonstração visual** não exige API e mantém o aviso “Prévia visual — dados de demonstração, sem ações reais.” Não é o modo operacional SIMULATION. Consulte [instruções, telas e pendências da prévia](docs/PREVIA_VISUAL.md).
 
 ```powershell
 npm.cmd run typecheck

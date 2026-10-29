@@ -13,6 +13,8 @@ export type DashboardContext = {
   demonstration: boolean;
   demoControls: ControlValues;
   onDemoControls: (values: ControlValues) => void;
+  demoEmergencyStopped:boolean;
+  onDemoEmergencyStopped:(value:boolean)=>void;
   loadHistory: (id: string) => Promise<Row[]>;
   loadExplanations?: (id: string) => Promise<Row[]>;
   loading?: boolean;
@@ -95,7 +97,7 @@ export function HarpiaCard({incidents, explanations, failure, health, context}: 
         <p className="muted">Explicações com contexto. HarpIA não decide nem executa comandos.</p>
         <p className="muted">Disponibilidade técnica: {show(health?.bitnet)}. Geração operacional não habilitada nesta integração.</p>
         <button disabled title="Habilitação operacional e contrato de geração pelo backend ainda pendentes">Gerar explicação</button>
-        <small>Geração indisponível: health não autoriza uso operacional. Esta tela consulta a API do HarpiServer; o modo determinístico não chama o BitNet.</small>
+        <small>{context.demonstration?'A explicação abaixo é um exemplo fictício identificado como demonstração; nenhuma consulta foi enviada. BitNet não é indicado como habilitado.':'Geração indisponível: health não autoriza uso operacional. Esta tela consulta a API do HarpiServer; o modo determinístico não chama o BitNet.'}</small>
         <label>Incidente selecionado<select value={selectedId ?? ''} disabled={!ordered.length}
           onChange={e => setSelection(e.target.value)}>
           {!ordered.length && <option value="">Sem incidente disponível</option>}

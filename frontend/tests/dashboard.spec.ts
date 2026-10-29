@@ -29,13 +29,13 @@ async function login(page: Page, health: Record<string, unknown> = {}, records: 
 
 test('prévia não apresenta comandos operacionais e preserva HarpIA',async({page})=>{
  const calls:string[]=[];page.on('request',r=>{if(r.url().includes('/api/'))calls.push(r.url())});
- await page.goto('http://127.0.0.1:5174');await page.getByRole('button',{name:'Abrir prévia visual'}).click();
- await expect(page.getByRole('button',{name:'Parada de emergência',exact:true})).toBeDisabled();
+ await page.goto('http://127.0.0.1:5174');await page.getByRole('button',{name:'Explorar demonstração visual'}).click();
+ await expect(page.getByRole('button',{name:/Parada de emergência/})).toBeEnabled();await page.getByRole('button',{name:/Parada de emergência/}).click();await expect(page.getByText('Parada apenas visual; nenhum executor foi acionado.')).toBeVisible();
  await expect(page.getByRole('combobox',{name:'Modo operacional',exact:true})).toHaveCount(0);
  await page.getByRole('button',{name:'Detalhes da explicação',exact:true}).click();
  await expect(page.getByRole('region',{name:'Detalhes da explicação'})).toContainText('inc-demo');
  await page.getByRole('link',{name:'Configurações',exact:true}).click();
- await expect(page.getByText('prévia visual sem comandos ao servidor.',{exact:false})).toBeVisible();
+ await expect(page.getByText('muda apenas o estado visual local',{exact:false})).toBeVisible();
  expect(calls).toEqual([]);
 });
 test('operação desconhecida permanece explícita e não inventa explicações',async({page})=>{
@@ -47,7 +47,7 @@ test('operação desconhecida permanece explícita e não inventa explicações'
 test('valores do backend são compactos e não habilitam controles sem API',async({page})=>{
  const writes:string[]=[];page.on('request',r=>{if(r.url().includes('/api/')&&r.method()!=='GET')writes.push(r.method())});
  await login(page,{operational_controls:{operation:'IDS',autonomy_mode:2,execution_enabled:false}});
- await expect(page.getByText('M2',{exact:true})).toBeVisible();await expect(page.getByText('IDS',{exact:true})).toBeVisible();
+ await expect(page.getByText('M2',{exact:true}).first()).toBeVisible();await expect(page.getByText('IDS',{exact:true}).first()).toBeVisible();
  await expect(page.getByRole('button',{name:'Parada de emergência',exact:true})).toBeDisabled();expect(writes).toEqual([]);
 });
 
