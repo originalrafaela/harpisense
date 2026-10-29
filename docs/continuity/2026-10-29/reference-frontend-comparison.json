@@ -1,0 +1,17 @@
+{
+  "reference": "referencias\\vers\u00e3o_v2\\frontend-v2\\frontend",
+  "integration": "harpisense-worktrees\\frontend-backend-autonomia\\frontend",
+  "different_source_files": [
+    "src/api.ts",
+    "src/catalog.json",
+    "src/components.tsx",
+    "src/controls.tsx",
+    "src/dashboard.tsx",
+    "src/harpia.ts",
+    "src/main.tsx",
+    "src/pages.tsx",
+    "src/resources.ts",
+    "src/style.css",
+    "src/telemetry.tsx"
+  ]
+}

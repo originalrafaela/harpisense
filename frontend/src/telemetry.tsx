@@ -40,12 +40,12 @@ export function Telemetry({rows, assets, compact=false}: {rows: Row[]; assets: R
         </article>;
       })}</div>
       {!list.length && <Empty/>}
-      <p className="muted">LDR bruto não é lux. Temperatura provisória não representa luminosidade. Identificadores são preservados como recebidos, sem renomear poste2.</p>
+      <p className="muted">LDR bruto não é lux. O campo luminosity sem unidade é exibido como recebido, sem conversão. Temperatura provisória não representa luminosidade. Identificadores são preservados como recebidos, sem renomear poste2.</p>
     </Panel>
     {!compact&&<Panel title="Histórico de telemetria"><Records rows={list} columns={[
       ['id', 'ID do registro'], ['device_id', 'Dispositivo'], ['created_at', 'Registrado na projeção'],
       ['observed_at', 'Observado em'], ['temperatura', 'Temperatura provisória · unidade não informada'],
-      ['tipo', 'Tipo do payload'], ['measurements', 'Medições originais'], ['status', 'Estado na leitura'],
+      ['tipo', 'Tipo do payload'], ['luminosity', 'Luminosidade · unidade não informada'], ['led_state', 'LED informado no payload'], ['measurements', 'Medições originais'], ['status', 'Estado na leitura'],
     ]}/></Panel>}
   </>;
 }

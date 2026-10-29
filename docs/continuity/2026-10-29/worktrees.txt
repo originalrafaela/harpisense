@@ -1,0 +1,17 @@
+D:/Projetos/tcc - harpisense                                                  9d58e69 [main]
+D:/Projetos/harpisense-worktrees/backend-data                                 60e803a [backend-data] prunable
+D:/Projetos/harpisense-worktrees/edge-security                                bd56afe [edge-security] prunable
+D:/Projetos/harpisense-worktrees/integracao                                   a7cb501 [integration/primeira-entrega] prunable
+D:/Projetos/harpisense-worktrees/iot-mqtt                                     30132e7 [iot-mqtt] prunable
+D:/Projetos/tcc - harpisense/harpisense-worktrees/continuidade-p08-p09        3e72720 [docs/continuidade-p08-p09]
+D:/Projetos/tcc - harpisense/harpisense-worktrees/frontend-backend-autonomia  901053e [feat/frontend-backend-autonomia]
+D:/Projetos/tcc - harpisense/harpisense-worktrees/frontend-v2                 f52d837 [frontend/harpisense-v2]
+D:/Projetos/tcc - harpisense/harpisense-worktrees/harpia-bitnet               650d1cd [feature/harpia-bitnet]
+D:/Projetos/tcc - harpisense/harpisense-worktrees/harpia-bitnet-fidelity      b9826a4 [experiment/harpia-bitnet-fidelity]
+D:/Projetos/tcc - harpisense/harpisense-worktrees/harpia-deterministic        c2eaed6 [integration/harpia-deterministic]
+D:/Projetos/tcc - harpisense/harpisense-worktrees/harpia-model-comparison     4e5156d [experiment/harpia-model-comparison]
+D:/Projetos/tcc - harpisense/harpisense-worktrees/harpia-ui                   2fbb15c [integration/harpia-ui]
+D:/Projetos/tcc - harpisense/harpisense-worktrees/integration-p11             280bab4 [integration/frontend-p11]
+D:/Projetos/tcc - harpisense/harpisense-worktrees/p08-evidence-coverage       c314ca5 [feat/p08-evidence-coverage]
+D:/Projetos/tcc - harpisense/harpisense-worktrees/p08-p09-batch               b85d262 [fix/p08-p09-validated-batch]
+D:/Projetos/tcc - harpisense/harpisense-worktrees/p11-postgres-pagination     70ab079 [fix/p11-postgres-pagination]

@@ -13,6 +13,17 @@ test('telemetria preserva unidades e não inventa luz a partir de temperatura',(
  assert.equal(stale('2020-01-01'),true);
  assert.equal(stale(new Date().toISOString()),false);
 });
+test('payload ativo do Poste 2 mantém luminosity sem unidade e led_state sem alterar dados',()=>{
+ const data={device_id:'poste2',source:'ubuntu',status:'online',luminosity:900,led_state:'OFF'};
+ const row={id:'poste2-active',data};
+ assert.equal(telemetry(row).light,'900 (luminosity · unidade não informada)');
+ assert.equal(telemetry(row).led,'OFF (led_state do payload)');
+ assert.equal(telemetry(row).observed,null);
+ assert.equal(row.data,data);
+ assert.equal(telemetry({id:'bad',data:{luminosity:NaN,led_state:'unknown'}}).light,'Não informada');
+ assert.equal(telemetry({id:'bad',data:{led_state:'unknown'}}).led,'Não informado');
+});
+
 test('Basic usa consulta protegida, sem endpoint de login; logout impede novas chamadas',async()=>{
  const calls:{url:string;init?:RequestInit}[]=[];
  const fetcher=(async(url,init)=>{calls.push({url:String(url),init});return new Response(String(url).endsWith('/health')?JSON.stringify({api:'available'}):'[]')}) as typeof fetch;

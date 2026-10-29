@@ -27,7 +27,40 @@ async function login(page: Page, health: Record<string, unknown> = {}, records: 
   await expect(page.getByRole('heading', {name: 'Estado operacional efetivo', exact: true})).toBeVisible();
 }
 
+test('telemetria atualiza após dez segundos e encerra consultas ao sair', async ({page}) => {
+  await page.clock.install();
+  const records: Record<string, unknown[]> = {telemetry: []};
+  let reads = 0;
+  page.on('request', request => {if (new URL(request.url()).pathname === '/api/v1/p11/telemetry') reads++});
+  await login(page, {}, records);
+  await expect(page.getByRole('button', {name: '↻ Atualizar consulta'})).toBeEnabled();
+  const initial = reads;
+  records.telemetry = [projection('poste2-poll-controlled', {device_id:'poste2', tipo:'teste_atualizacao_controlada'})];
+  await page.clock.runFor(10050);
+  await expect.poll(() => reads).toBeGreaterThan(initial);
+  await expect(page.getByRole('article', {name: 'Telemetria de poste2'})).toContainText('poste2-poll-controlled');
+  await page.getByRole('button', {name:'Sair', exact:true}).click();
+  const stopped = reads;
+  await page.clock.runFor(20050);
+  expect(reads).toBe(stopped);
+});
+
+test('falha na atualização mostra erro sem substituir por demonstração e pode recuperar', async ({page}) => {
+  await page.clock.install();
+  await login(page, {}, {telemetry:[projection('poste2-before-failure', {device_id:'poste2'})]});
+  await expect(page.getByRole('article', {name:'Telemetria de poste2'})).toBeVisible();
+  await page.route('**/api/v1/p11/telemetry?*', route => route.abort('connectionrefused'));
+  await page.clock.runFor(10050);
+  await expect(page.getByRole('alert').filter({hasText:'telemetry:'})).toBeVisible();
+  await expect(page.getByRole('article', {name:'Telemetria de poste2'})).toHaveCount(0);
+  await expect(page.locator('.demo-banner')).toHaveCount(0);
+  await page.route('**/api/v1/p11/telemetry?*', route => route.fulfill({json:[projection('poste2-after-recovery', {device_id:'poste2'})]}));
+  await page.clock.runFor(10050);
+  await expect(page.getByRole('article', {name:'Telemetria de poste2'})).toContainText('poste2-after-recovery');
+});
+
 test('prévia não apresenta comandos operacionais e preserva HarpIA',async({page})=>{
+ await page.clock.install();
  const calls:string[]=[];page.on('request',r=>{if(r.url().includes('/api/'))calls.push(r.url())});
  await page.goto('http://127.0.0.1:5174');await page.getByRole('button',{name:'Explorar demonstração visual'}).click();
  await expect(page.getByRole('button',{name:/Parada de emergência/})).toBeEnabled();await page.getByRole('button',{name:/Parada de emergência/}).click();await expect(page.getByText('Parada apenas visual; nenhum executor foi acionado.')).toBeVisible();
@@ -36,7 +69,7 @@ test('prévia não apresenta comandos operacionais e preserva HarpIA',async({pag
  await expect(page.getByRole('region',{name:'Detalhes da explicação'})).toContainText('inc-demo');
  await page.getByRole('link',{name:'Configurações',exact:true}).click();
  await expect(page.getByText('muda apenas o estado visual local',{exact:false})).toBeVisible();
- expect(calls).toEqual([]);
+ await page.clock.runFor(30050);expect(calls).toEqual([]);
 });
 test('operação desconhecida permanece explícita e não inventa explicações',async({page})=>{
  await login(page);await expect(page.getByText('Autonomia não informada',{exact:true})).toBeVisible();

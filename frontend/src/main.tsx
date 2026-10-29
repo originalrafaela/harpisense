@@ -22,7 +22,9 @@ function App(){
   const load=async()=>{const result:Record<string,Row[]>={};const errors:Record<string,string>={};let unauthorized=false;
    await Promise.all([...needs.map(async k=>{if(client.current.profile==='p11'&&k!=='audit'&&resources&&!resources.has(k)){errors[k]='Não integrado: recurso fora do escopo confirmado desta conexão P11.';return}if(client.current.profile==='legacy'&&!['telemetry','network_event'].includes(k)){errors[k]='Não configurado: este recurso não existe na API da base Git.';return}try{result[k]=k==='audit'?await client.current.audit(offset):await client.current.rows(k,offset)}catch(e){errors[k]=(e as Error).message;if(e instanceof ApiError&&['unauthorized','forbidden'].includes(e.kind))unauthorized=true}}), (async()=>{try{const h=await client.current.health();if(!disposed&&epoch===generation.current)setHealth(h)}catch(e){errors.health=(e as Error).message;if(e instanceof ApiError&&['unauthorized','forbidden'].includes(e.kind))unauthorized=true}})()]);
    if(disposed||epoch!==generation.current)return;if(unauthorized){logout();setError('Não autorizado ou acesso negado. Autentique novamente.');setBusy(false);return}setData(result);setFailures(errors);setUpdated(new Date().toISOString());setBusy(false);
-  };void load();return()=>{disposed=true;client.current.cancel();};
+  };let poll:ReturnType<typeof setTimeout>|undefined;
+  void load().then(()=>{if(!disposed&&epoch===generation.current)poll=setTimeout(()=>setRefresh(x=>x+1),10000)});
+  return()=>{disposed=true;clearTimeout(poll);client.current.cancel();};
  },[mode,page,refresh,offset]);
  const navigate=(id:string)=>{setPage(id);setOffset(0);setMenu(false);location.hash=id;document.getElementById('content')?.focus();};
  const save=(base:string,profile:string)=>{try{const next=new Client(base,profile as Profile);logout();client.current=next;setConfig({base,profile:profile as Profile});try{localStorage.setItem('harpi-api',base);localStorage.setItem('harpi-profile',profile)}catch{setError('Configuração aplicada apenas nesta sessão; armazenamento local indisponível.')}}catch(e){setError((e as Error).message)}};

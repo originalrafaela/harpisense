@@ -18,8 +18,8 @@ export function telemetry(row:Row){
  const d=row.data;const m=object(d.measurements)?d.measurements:{};
  // Somente campos conhecidos são apresentados com unidade. Payload original continua acessível.
  return {device:typeof d.device_id==='string'?d.device_id:'Não informado',observed:typeof d.observed_at==='string'?d.observed_at:null,
- light:typeof m.ldr_raw==='number'?`${m.ldr_raw} (LDR bruto)`:typeof m.luminosity_lux==='number'?`${m.luminosity_lux} lux`:'Não informada',
- led:object(d.status)&&typeof d.status.led==='boolean'?(d.status.led?'Ligado':'Desligado'):'Não informado',
+ light:typeof m.ldr_raw==='number'?`${m.ldr_raw} (LDR bruto)`:typeof m.luminosity_lux==='number'?`${m.luminosity_lux} lux`:typeof d.luminosity==='number'&&Number.isFinite(d.luminosity)?`${d.luminosity} (luminosity · unidade não informada)`:'Não informada',
+ led:object(d.status)&&typeof d.status.led==='boolean'?(d.status.led?'Ligado':'Desligado'):['ON','OFF'].includes(String(d.led_state))?`${d.led_state} (led_state do payload)`:'Não informado',
  provisionalTemperature:typeof d.temperatura==='number'&&Number.isFinite(d.temperatura)?String(d.temperatura):null,
  recorded:typeof row.created_at==='string'?row.created_at:null,
  received:typeof d.received_at==='string'?d.received_at:null};

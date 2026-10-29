@@ -1,0 +1,126 @@
+{
+  "observed_at": "2026-10-29T16:45:13.021746+00:00",
+  "base": "/opt/harpisense/staging/p11-postgresql",
+  "environment_keys": [
+    "HARPISENSE_ADMIN_PASSWORD",
+    "HARPISENSE_ADMIN_USER",
+    "HARPISENSE_DATABASE_URL",
+    "HARPISENSE_PROJECTION_SERVICE_TOKEN"
+  ],
+  "files": {
+    "/opt/harpisense/staging/p11-postgresql/app.py": "52078a449886528569a85645e02df974826dc1a24566c01db6bc5f487f328ef2",
+    "/opt/harpisense/staging/p11-postgresql/postgres_store.py": "cba6be580f72a8e39077ea9e7437cadee04b67effbb618737309f6450d97643c",
+    "/opt/harpisense/staging/p11-postgresql/mqtt_consumer.py": "188490130d89a3eebe6370bd23e645cd5089ef18f80364624b3f3e0ce0da8f30",
+    "/opt/harpisense/integration-v2/HarpiSense_Pacote13_Integracao_Testes_v2/componentes/p11/backend11/service.py": "8cb67932cc2f7ef22ed357b0c94f7a8cb416cde164db60866dd6df5cf7fb8698",
+    "/opt/harpisense/staging/p11-postgresql/harpia_deterministic/__init__.py": "b44e59affc93e3f533417a223d36f49371137c297d0aa7d8ed4c9fdaeb368a5b",
+    "/opt/harpisense/staging/p11-postgresql/harpia_deterministic/deterministic.py": "372660d795c0cd27c6cf43e2afde0085f57113e292a46209e3312ae5f7f13e57",
+    "/opt/harpisense/staging/p11-postgresql/harpia_deterministic/p11.py": "2eecc6ffc53a1ddc236e16202ddc2f62d4a8c8371e6386f1fd1df705a62e8297"
+  },
+  "database": [
+    "harpisense",
+    "harpisense_app"
+  ],
+  "counts": {
+    "telemetry": 11,
+    "window": 7
+  },
+  "latest_telemetry": [
+    {
+      "id": "poste2-fc723b0cd9ef53c2f3fbfed76841288cb29c7ab8e2b3bec99fb2e78b9e3983c8",
+      "revision": 1,
+      "source": "trusted-service",
+      "data": {
+        "tipo": "teste_comunicacao",
+        "device_id": "poste2",
+        "temperatura": 26.3
+      },
+      "created_at": "2026-10-28T02:39:32.675522-03:00"
+    },
+    {
+      "id": "poste2-6e293f4483b5a2d3cd8ae02705417ef9dfb136561885f96ab2b6a19ffabf38b9",
+      "revision": 1,
+      "source": "trusted-service",
+      "data": {
+        "source": "ubuntu",
+        "status": "online",
+        "device_id": "poste2",
+        "led_state": "OFF",
+        "luminosity": 900
+      },
+      "created_at": "2026-10-28T02:33:41.412323-03:00"
+    },
+    {
+      "id": "poste2-447ad11bb8137229e5044751c205bb1ef15ac9984f3f2b7660dd68c55166d00e",
+      "revision": 1,
+      "source": "trusted-service",
+      "data": {
+        "source": "ubuntu",
+        "status": "online",
+        "device_id": "poste2",
+        "led_state": "ON",
+        "luminosity": 100
+      },
+      "created_at": "2026-10-28T02:33:31.365831-03:00"
+    }
+  ],
+  "health": {
+    "status": 200,
+    "body": {
+      "api": "available",
+      "projection_store": "available",
+      "rf": "unknown",
+      "if": "unknown",
+      "broker": "unknown",
+      "executor": "unknown",
+      "bitnet": "not_verified",
+      "harpia": {
+        "mode": "deterministic_only",
+        "contract_version": 1,
+        "generation_enabled": false,
+        "model": "bitnet"
+      }
+    }
+  },
+  "telemetry?limit=3&offset=0": {
+    "status": 200,
+    "body": [
+      {
+        "id": "poste2-fc723b0cd9ef53c2f3fbfed76841288cb29c7ab8e2b3bec99fb2e78b9e3983c8",
+        "revision": 1,
+        "source": "trusted-service",
+        "data": {
+          "tipo": "teste_comunicacao",
+          "device_id": "poste2",
+          "temperatura": 26.3
+        },
+        "created_at": "2026-10-28T02:39:32.675522-03:00"
+      },
+      {
+        "id": "poste2-6e293f4483b5a2d3cd8ae02705417ef9dfb136561885f96ab2b6a19ffabf38b9",
+        "revision": 1,
+        "source": "trusted-service",
+        "data": {
+          "source": "ubuntu",
+          "status": "online",
+          "device_id": "poste2",
+          "led_state": "OFF",
+          "luminosity": 900
+        },
+        "created_at": "2026-10-28T02:33:41.412323-03:00"
+      },
+      {
+        "id": "poste2-447ad11bb8137229e5044751c205bb1ef15ac9984f3f2b7660dd68c55166d00e",
+        "revision": 1,
+        "source": "trusted-service",
+        "data": {
+          "source": "ubuntu",
+          "status": "online",
+          "device_id": "poste2",
+          "led_state": "ON",
+          "luminosity": 100
+        },
+        "created_at": "2026-10-28T02:33:31.365831-03:00"
+      }
+    ]
+  }
+}

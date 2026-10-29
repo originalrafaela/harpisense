@@ -1,0 +1,17 @@
++ backend-data                       60e803a (D:/Projetos/harpisense-worktrees/backend-data) [origin/backend-data] Document backend-data handoff status
++ docs/continuidade-p08-p09          3e72720 (D:/Projetos/tcc - harpisense/harpisense-worktrees/continuidade-p08-p09) [origin/docs/continuidade-p08-p09] docs(p08): complete historical session triage
++ edge-security                      bd56afe (D:/Projetos/harpisense-worktrees/edge-security) [origin/edge-security] Use gateway Basic auth for network event delivery
++ experiment/harpia-bitnet-fidelity  b9826a4 (D:/Projetos/tcc - harpisense/harpisense-worktrees/harpia-bitnet-fidelity) [origin/experiment/harpia-bitnet-fidelity] experiment(genai): record BitNet typed-facts evaluation
++ experiment/harpia-model-comparison 4e5156d (D:/Projetos/tcc - harpisense/harpisense-worktrees/harpia-model-comparison) [origin/experiment/harpia-model-comparison] experiment(genai): compare BitNet and Qwen3 Q4 on fixed synthetic cases
++ feat/frontend-backend-autonomia    901053e (D:/Projetos/tcc - harpisense/harpisense-worktrees/frontend-backend-autonomia) [origin/feat/frontend-backend-autonomia] feat(frontend): expand isolated visual preview flows
++ feat/p08-evidence-coverage         c314ca5 (D:/Projetos/tcc - harpisense/harpisense-worktrees/p08-evidence-coverage) feat(p08): record verifiable source coverage per session
++ feature/harpia-bitnet              650d1cd (D:/Projetos/tcc - harpisense/harpisense-worktrees/harpia-bitnet) [origin/bitnet] fix(genai): scope activation patch and validate rebuilt runtime
++ fix/p08-p09-validated-batch        b85d262 (D:/Projetos/tcc - harpisense/harpisense-worktrees/p08-p09-batch) [origin/fix/p08-p09-validated-batch] docs(p08-p09): verify backup receipt and existing session evidence
++ fix/p11-postgres-pagination        70ab079 (D:/Projetos/tcc - harpisense/harpisense-worktrees/p11-postgres-pagination) [origin/fix/p11-postgres-pagination] test(p11): validate pagination on isolated PostgreSQL 18.6
++ frontend/harpisense-v2             f52d837 (D:/Projetos/tcc - harpisense/harpisense-worktrees/frontend-v2) [origin/frontend] fix(frontend): preserve dashboard logo and improve login wordmark contrast
++ integration/frontend-p11           280bab4 (D:/Projetos/tcc - harpisense/harpisense-worktrees/integration-p11) [origin/integration/frontend-p11] feat(frontend): integrate P11 transport and record assisted validation
++ integration/harpia-deterministic   c2eaed6 (D:/Projetos/tcc - harpisense/harpisense-worktrees/harpia-deterministic) [origin/integration/harpia-deterministic] Record live HarpiServer and frontend validation
++ integration/harpia-ui              2fbb15c (D:/Projetos/tcc - harpisense/harpisense-worktrees/harpia-ui) [origin/integration/harpia-ui] fix(frontend): preserve approved logo contrast in HarpIA integration
++ integration/primeira-entrega       a7cb501 (D:/Projetos/harpisense-worktrees/integracao) [origin/integration/primeira-entrega] docs: prepare first delivery VM validation
++ iot-mqtt                           30132e7 (D:/Projetos/harpisense-worktrees/iot-mqtt) [origin/iot-mqtt] Add backend MQTT consumer credentials and ACL
+* main                               9d58e69 [origin/main: behind 1] docs: record architect handoff

@@ -1,0 +1,26 @@
+[
+  {
+    "worktree": "frontend-v2",
+    "head": "f52d8373d83c724f023a17365423bbe75145fcee",
+    "files": [
+      {
+        "path": "frontend/src/main.tsx",
+        "sha256": "ebf728b5b266525d9a1e8d17463ed7e5c44db169b72acfc862fc7b0c5a6b846a"
+      },
+      {
+        "path": "frontend/tests/dashboard.spec.ts",
+        "sha256": "f071d1890ae95d7b6d3acbef0d45be62446f42affdbd2bb98c2b0ded2fb6b8c3"
+      }
+    ]
+  },
+  {
+    "worktree": "integration-p11",
+    "head": "280bab48ed9aa099b088e22bc5999189787ca200",
+    "files": [
+      {
+        "path": "frontend/src/style.css",
+        "sha256": "142bb820d91bd8a0e2ad7dac58a5a99f464201b2a02138b27ae960afc2f0ecb5"
+      }
+    ]
+  }
+]
