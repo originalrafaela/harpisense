@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './session-fixture';
 
 async function enterPreview(page:import('@playwright/test').Page){
  await page.goto('http://127.0.0.1:5174');

@@ -1,4 +1,5 @@
-import {test,expect,type Page} from '@playwright/test';
+import {test,expect} from './session-fixture';
+import type {Page} from '@playwright/test';
 
 const initial={value:{operation:'IDS',execution_enabled:false,autonomy_mode:1},revision:1,emergency_stopped:false,updated_at:'2026-10-27T12:00:00Z',observed_at:'2026-10-27T12:01:00Z',real_execution_blocked:true,pending:{reliable:true,blockers:[]},change_allowed:true};
 async function enter(page:Page){
@@ -9,7 +10,7 @@ test('confirma perfil só após servidor; recusa, parada e logs fora da home',as
  let release:()=>void=()=>{};const delayed=new Promise<void>(resolve=>{release=resolve});
  await page.route('**/api/v1/p11/**',route=>route.fulfill({contentType:'application/json',body:JSON.stringify(route.request().url().endsWith('/health')?{api:'available',operational_controls:{...state.value,updated_at:state.updated_at},control_api:{version:1}}:[])}));
  await page.route('**/api/v1/security/**',async route=>{
-  const request=route.request();expect(request.headers().authorization).toBe('Basic '+btoa('fixture:fixture'));
+  const request=route.request();expect(request.headers().authorization).toBe('Bearer '+'a'.repeat(43));
   if(request.method()==='PUT'){
    bodies.push(request.postDataJSON());if(reject)return route.fulfill({status:409,contentType:'application/json',body:JSON.stringify({detail:{message:'Há pendências operacionais que impedem a transição.'}})});
    await delayed;state={...state,value:request.postDataJSON().value,revision:2};

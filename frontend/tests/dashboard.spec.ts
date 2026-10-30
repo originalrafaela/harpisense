@@ -1,4 +1,5 @@
-import {test, expect, type Page} from '@playwright/test';
+import {test, expect} from './session-fixture';
+import type {Page} from '@playwright/test';
 
 const projection = (id: string, data: Record<string, unknown>, created_at = '2026-10-18T12:00:00Z') => ({id, revision: 1, source: 'trusted-service', created_at, data});
 async function login(page: Page, health: Record<string, unknown> = {}, records: Record<string, unknown[]> = {}, bitnetStatus = 200, explanationStatus = 200) {
@@ -78,7 +79,7 @@ test('operação desconhecida permanece explícita e não inventa explicações'
  await expect(page.getByText('API de controles não declarada nesta conexão.',{exact:false})).toBeVisible();
 });
 test('valores do backend são compactos e não habilitam controles sem API',async({page})=>{
- const writes:string[]=[];page.on('request',r=>{if(r.url().includes('/api/')&&r.method()!=='GET')writes.push(r.method())});
+ const writes:string[]=[];page.on('request',r=>{if(r.url().includes('/api/')&&!r.url().includes('/admin-auth/')&&r.method()!=='GET')writes.push(r.method())});
  await login(page,{operational_controls:{operation:'IDS',autonomy_mode:2,execution_enabled:false}});
  await expect(page.getByText('M2',{exact:true}).first()).toBeVisible();await expect(page.getByText('IDS',{exact:true}).first()).toBeVisible();
  await expect(page.getByRole('button',{name:'Parada de emergência',exact:true})).toBeDisabled();expect(writes).toEqual([]);

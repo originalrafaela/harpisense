@@ -1,4 +1,5 @@
-import {test, expect, type Page} from '@playwright/test';
+import {test, expect} from './session-fixture';
+import type {Page} from '@playwright/test';
 
 // Isolated browser fixtures based on the documented P11/PostgreSQL shape, never a VM receipt.
 const record = {
@@ -13,13 +14,13 @@ async function enter(page: Page, password = 'contract-fixture') {
   await page.getByRole('button', {name: 'Entrar na central'}).click();
 }
 
-test('health autenticado → telemetria → mesmo registro exibido, sem persistir credenciais (isolado)', async ({page}) => {
+test('sessão administrativa → telemetria → mesmo registro exibido, sem persistir credenciais (isolado)', async ({page}) => {
   const paths: string[] = []; const logs: string[] = [];
   page.on('console', message => logs.push(message.text()));
   await page.route('**/p11-api/api/v1/p11/**', route => {
     const url = new URL(route.request().url()); paths.push(url.pathname);
     expect(url.search).not.toContain('contract-fixture');
-    if (route.request().headers().authorization !== 'Basic ' + btoa('contract-operator:contract-fixture'))
+    if (route.request().headers().authorization !== 'Bearer ' + 'a'.repeat(43))
       return route.fulfill({status: 401, body: '{"detail":"Unauthorized"}'});
     if (url.pathname.endsWith('/health')) return route.fulfill({contentType: 'application/json', body: JSON.stringify({api: 'available', projection_store: 'available', broker: 'unknown'})});
     if (url.pathname.endsWith('/telemetry')) return route.fulfill({contentType: 'application/json', body: JSON.stringify([record])});
@@ -31,7 +32,7 @@ test('health autenticado → telemetria → mesmo registro exibido, sem persisti
   for (const value of [record.id, record.created_at, 'trusted-service', '28.4', 'teste_systemd']) await expect(card).toContainText(value);
   await expect(card).toContainText('unidade não informada');
   await expect(card).toContainText('Não informada');
-  expect(paths[0]).toBe('/p11-api/api/v1/p11/health');expect(paths.findIndex(path => path.endsWith('/telemetry'))).toBeGreaterThan(0);
+  expect(paths).toContain('/p11-api/api/v1/p11/health');expect(paths).toContain('/p11-api/api/v1/p11/telemetry');
   const stored = await page.evaluate(() => JSON.stringify({local: {...localStorage}, session: {...sessionStorage}, cookie: document.cookie}));
   expect(stored).not.toContain('contract-fixture');expect(stored).not.toContain('contract-operator');
   expect(logs.join(' ')).not.toContain('contract-fixture');expect(logs.join(' ')).not.toContain('Basic ');
@@ -54,10 +55,11 @@ test('consulta vazia não inventa dispositivo ou medição (isolado)', async ({p
 });
 
 test('credencial inválida e rede indisponível não abrem operação nem demonstração (isolado)', async ({page}) => {
-  await page.route('**/p11-api/api/v1/p11/**', route => route.fulfill({status: 401, body: '{}'}));
+  await page.route('**/api/v1/admin-auth/login', route => route.fulfill({status:401,json:{error:{code:'INVALID_CREDENTIALS'}}}));
   await enter(page, 'invalid-fixture');await expect(page.getByRole('alert')).toContainText('Credenciais inválidas');
-  await page.unroute('**/p11-api/api/v1/p11/**');
-  await page.route('**/p11-api/api/v1/p11/**', route => route.abort('connectionrefused'));
+  await page.unroute('**/api/v1/admin-auth/login');
+  await page.route('**/api/v1/admin-auth/login', route => route.abort('connectionrefused'));
+  await page.getByLabel('Senha',{exact:true}).fill('invalid-fixture');
   await page.getByRole('button', {name: 'Entrar na central'}).click();
   await expect(page.getByRole('alert')).toContainText('Falha de rede/configuração');
   await expect(page.getByText('Consulta autenticada')).toHaveCount(0);

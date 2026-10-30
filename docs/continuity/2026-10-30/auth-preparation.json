@@ -1,0 +1,44 @@
+{
+  "release": "admin-session-20261030-r1",
+  "candidate_commit": "460c8a3c0d7821950f3a89a938d2fb3c03c62b14",
+  "state": "prepared_schema_applied_account_and_activation_pending",
+  "tests": {
+    "isolated_postgresql_auth": 21,
+    "node_client_transport": 35,
+    "chromium_passed": 37,
+    "chromium_optional_skipped": 1,
+    "vm_runtime_asgi": 3,
+    "restored_database_operator_workflow": 1,
+    "typecheck_build": "passed",
+    "vm_runtime_scrypt": "passed"
+  },
+  "backup": {
+    "release": "admin-session-20261030-r1",
+    "dump_sha256": "b671c30fb9368ed843bdf11834a93effd8fa7c0001c56920f0c002ff8651ebed",
+    "projection_count": 22,
+    "projection_digest": "1daf4e5b481d6f666b887a531454bc55",
+    "verified_at": "2026-10-30T05:43:45.1365229Z",
+    "environment": "local disposable PostgreSQL 18.6, no external network",
+    "method": "pg_restore --no-owner --no-privileges --exit-on-error; ordered projection digest in UTC"
+  },
+  "vm": {
+    "release": "admin-session-20261030-r1",
+    "schema_version": 1,
+    "account_count": 0,
+    "runtime_scrypt_verified": true,
+    "invalid_session_probe": "SESSION_INVALID",
+    "projection_count": 22,
+    "projection_digest": "1daf4e5b481d6f666b887a531454bc55",
+    "bootstrap_sha256": "52078a449886528569a85645e02df974826dc1a24566c01db6bc5f487f328ef2",
+    "migration": {
+      "version": 1,
+      "projection_count": 22,
+      "projection_digest": "1daf4e5b481d6f666b887a531454bc55",
+      "applied_at": "2026-10-30T05:43:46.795815+00:00"
+    },
+    "services": [
+      "active",
+      "active"
+    ]
+  }
+}

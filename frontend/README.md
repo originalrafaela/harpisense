@@ -1,4 +1,5 @@
-> Entrega atual de frontend/backend e autonomia: [relatório, matriz e execução local](../docs/ENTREGA_FRONTEND_BACKEND_AUTONOMIA.md).
+> Conta administrativa e sessão (30/10): [integração, estado e procedimento de implantação](../docs/INTEGRACAO_CONTA_ADMINISTRATIVA_20261030.md). Essa integração substitui o login Basic descrito nos registros históricos.
+> Entrega de frontend/backend e autonomia: [relatório, matriz e execução local](../docs/ENTREGA_FRONTEND_BACKEND_AUTONOMIA.md).
 > A composição local nova fica em `backend/delivery`; a documentação abaixo descreve a base anterior.
 
 # HarpiSense V2 — frontend
@@ -28,26 +29,37 @@ npx.cmd playwright test
 npm.cmd run preview
 ```
 
-Não há lint configurado. O build também executa a checagem de tipos. `dist/` é o artefato de empacotamento posterior, ignorado no Git. Nenhum Docker, publicação ou alteração de VM faz parte desta entrega.
+Não há lint configurado. O build também executa a checagem de tipos. `dist/` é o artefato de empacotamento posterior, ignorado no Git. O relatório de integração administrativa distingue testes locais, preparação e ativação na VM.
 
 ## Conexão e autenticação
 
-Por padrão, `VITE_API_URL=/p11-api` usa o transporte local de leitura para `HARPI_API_TUNNEL_TARGET=http://127.0.0.1:18000`, que deve apontar para um túnel SSH autorizado. O proxy só aceita GET health/telemetry do P11; não publica API nem altera CORS da VM. `VITE_P11_RESOURCES=telemetry` mantém módulos não confirmados identificados como não integrados, sem inferir que não existem. O valor `all` é usado nas fixtures da suíte visual de regressão; não amplia a guarda do proxy local.
+A integração administrativa usa `POST /api/v1/admin-auth/login`, valida a sessão em
+`GET /api/v1/admin-auth/session` e envia `Authorization: Bearer` nas consultas.
+A senha é enviada somente no login, removida do formulário e não é persistida.
+O token fica apenas em memória; recarregar a página exige novo login. Logout chama
+a API para revogar a sessão e encerra o estado local mesmo se a rede falhar,
+exibindo quando a revogação remota não pôde ser confirmada. Expiração ou sessão
+recusada exigem novo login, sem fallback para Basic ou contrato legado.
 
-Também é aceita uma origem/base HTTP(S) absoluta já autorizada e compatível, com `VITE_API_PROFILE=p11` ou `legacy`. O transporte `/p11-api` atende apenas P11. Alternativamente, abra **Conexão da API** no login. URL e perfil locais prevalecem sobre o ambiente. Configurações só mudam a interface; aplicar encerra a sessão. Não inclua senha, token ou credenciais na URL ou em variáveis Vite.
+Use `/p11-api`, perfil P11, em `http://127.0.0.1:4174`, com o túnel SSH autorizado
+para `127.0.0.1:18000`. O trecho entre Windows e HarpiServer trafega por SSH;
+frontend, proxy e API escutam somente no loopback. Uma publicação fora desse fluxo
+exige HTTPS de mesma origem e revisão das origens permitidas; não usar HTTP na LAN.
+O proxy permite explicitamente as rotas de autenticação e consultas administrativas,
+recusa Basic e ingestão técnica, não injeta credenciais, remove cookies e conserva
+`Cache-Control: no-store`. A página aplica CSP, no-referrer e nosniff.
 
-`p11` usa GET `/api/v1/p11/health` protegido para validar HTTP Basic, antes de consultar telemetria; não cria endpoint de login. `legacy` continua usando GET `/api/v1/telemetry`, pois seu health é público. Não há tentativa automática de outro perfil. Usuário e senha começam vazios. A senha e o cabeçalho Basic permanecem somente em memória e são descartados ao sair; navegação cancela consultas sem encerrar a autenticação. Nenhuma mutação operacional é enviada. Não existe aprovação otimista ou repetição de comandos.
+Apenas URL e perfil são preferências persistidas no navegador. Nunca colocar senha,
+token ou credenciais técnicas em `VITE_*`, URLs, bundle, localStorage ou
+sessionStorage. Credenciais de PostgreSQL, MQTT e ingestão continuam somente no host.
+O contrato legado foi preservado como referência, mas não oferece login administrativo.
 
-Para **admin/admin no laboratório isolado**, o responsável pelo backend deverá configurar o mecanismo efetivamente implantado. Variáveis encontradas:
+MFA e recuperação por e-mail **não implementados**. Os exemplos visuais continuam
+identificados como demonstração, sem efeitos sobre contas reais.
 
-| Implementação inspecionada | Usuário | Senha |
-|---|---|---|
-| P11 local `backend11/service.py` | `HARPISENSE_ADMIN_USER` | `HARPISENSE_ADMIN_PASSWORD` |
-| Base Git `backend/app/core/config.py` | `HARPI_ADMIN_USERNAME` | `HARPI_ADMIN_PASSWORD` |
-
-Configurar ambos como `admin` somente no laboratório isolado. Nenhuma credencial de VM foi alterada ou validada nesta entrega. Confirmar os nomes em `/opt/harpisense/staging/p11-postgresql/app.py` antes de ajustar o serviço: esse código atual não foi disponibilizado como arquivo-fonte inspecionável. Trocar a senha antes de disponibilizar fora do laboratório; usar HTTPS ou túnel equivalente.
-
-O relatório de 18/10 informa API no loopback do Ubuntu (`127.0.0.1:8000`). `localhost` no Windows não alcança esse serviço. O Arquiteto deve definir proxy/túnel autorizado e HTTPS, preferencialmente com mesma origem do frontend; se usar origens diferentes, permitir apenas a origem exata e o cabeçalho Authorization. Não foi alterado bind, porta, CORS, firewall ou encaminhamento. Um proxy deve preservar respostas 401/403 e não registrar Authorization.
+Implantação, backup, provisionamento local e recuperação estão em
+[Integração administrativa](../docs/INTEGRACAO_CONTA_ADMINISTRATIVA_20261030.md).
+Não substituir o bootstrap P11 ativo por `backend/delivery`.
 
 ## Estrutura
 

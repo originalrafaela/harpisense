@@ -1,4 +1,4 @@
-import {test,expect} from '@playwright/test';
+import {test,expect} from './session-fixture';
 test('prévia isolada: telas, controles e logout em notebook',async({page})=>{
  const operational:string[]=[];page.on('request',r=>{if(r.url().includes('/api/'))operational.push(r.url())});
  await page.goto('http://127.0.0.1:5174');await page.getByRole('button',{name:'Explorar demonstração visual'}).click();
@@ -21,7 +21,7 @@ test('mobile: navegação não causa overflow global',async({page})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('http://127.0.0.1:5174');await page.getByRole('button',{name:'Explorar demonstração visual'}).click();await page.getByRole('button',{name:'☰ Menu'}).click();await page.getByRole('link',{name:'Laboratório C01–C09'}).click();await expect(page.getByRole('heading',{name:'Laboratório C01–C09',exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
 });
 for(const status of [401,403,503])test(`login com HTTP ${status} permanece fora da operação`,async({page})=>{
- await page.route('**/api/v1/p11/**',route=>route.fulfill({status,contentType:'application/json',body:'{}'}));
+ await page.route('**/api/v1/admin-auth/login',route=>route.fulfill({status,contentType:'application/json',body:'{}'}));
  await page.goto('http://127.0.0.1:5174');await page.getByText('Conexão da API').click();await page.getByLabel('URL da API').fill('http://127.0.0.1:5174');await page.getByRole('button',{name:'Salvar conexão local'}).click();await page.getByLabel('Usuário',{exact:true}).fill('test');await page.getByLabel('Senha',{exact:true}).fill('test');await page.getByRole('button',{name:'Entrar na central'}).click();await expect(page.getByRole('alert')).toBeVisible();await expect(page.getByRole('heading',{name:'Acesso administrativo'})).toBeVisible();await expect(page.getByText('Dados de demonstração — sem conexão operacional')).toHaveCount(0);
 });
 test('capturas login e mobile',async({page})=>{

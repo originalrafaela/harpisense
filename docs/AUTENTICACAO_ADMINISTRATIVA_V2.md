@@ -1,5 +1,9 @@
 # Conta administrativa e sessão — candidata aditiva, 29/10/2026
 
+> Registro histórico da candidata `460c8a3`. A integração e as verificações de
+> 30/10 estão em [Integração de conta administrativa](INTEGRACAO_CONTA_ADMINISTRATIVA_20261030.md).
+> O estado de implantação atual deve ser consultado nesse relatório.
+
 ## Base, responsabilidade e limites desta rodada
 
 Base confirmada pelo arquiteto: branch `feat/frontend-backend-autonomia`, worktree

@@ -10,13 +10,13 @@ test('transporte só aceita destino loopback sem credenciais',()=>{
   for(const target of ['http://192.0.2.1:8000','https://127.0.0.1:18000','http://user:secret@127.0.0.1:18000','http://127.0.0.1:18000/path'])assert.throws(()=>tunnelTarget(target));
 });
 
-test('proxy real Vite: caminho, Basic, status, leitura restrita e logs sem credenciais (fixture isolada)',async t=>{
+test('proxy real Vite: caminho, Bearer, status, leitura restrita e logs sem credenciais (fixture isolada)',async t=>{
   const calls:{url:string;authorization:string|undefined}[]=[];
   const fixture=httpServer((request,response)=>{
     calls.push({url:request.url||'',authorization:request.headers.authorization});
     response.setHeader('content-type','application/json');
     response.setHeader('set-cookie','session=should-not-be-forwarded');
-    if(request.headers.authorization!=='Basic '+btoa('isolated:transport-fixture')){
+    if(request.headers.authorization!=='Bearer '+'a'.repeat(43)){
       response.writeHead(401,{'www-authenticate':'Basic'});return response.end('{"detail":"Unauthorized"}');
     }
     if(request.url?.includes('/health'))return response.end('{"api":"available","projection_store":"available"}');
@@ -32,7 +32,7 @@ test('proxy real Vite: caminho, Basic, status, leitura restrita e logs sem crede
   t.after(()=>server.close());await server.listen();
   const local=server.httpServer?.address();assert.ok(local&&typeof local!=='string');
   const base=`http://127.0.0.1:${local.port}/p11-api/api/v1/p11`;
-  const headers={Authorization:'Basic '+btoa('isolated:transport-fixture')};
+  const headers={Authorization:'Bearer '+'a'.repeat(43)};
   const denied=await fetch(base+'/health');assert.equal(denied.status,401);
   const health=await fetch(base+'/health',{headers});assert.equal((await health.json()).api,'available');
   assert.equal(health.headers.get('set-cookie'),null);assert.equal(health.headers.get('cache-control'),'no-store');
@@ -42,6 +42,8 @@ test('proxy real Vite: caminho, Basic, status, leitura restrita e logs sem crede
   const explanation=await fetch(base+'/explain/synthetic-fixture',{headers});assert.equal(explanation.status,200);
   assert.equal(calls[3].url,'/api/v1/p11/explain/synthetic-fixture');assert.equal(calls[3].authorization,headers.Authorization);
   const count=calls.length;
+  assert.equal((await fetch(base+'/health',{headers:{Authorization:'Basic '+btoa('technical:fixture')}})).status,401);
+  assert.equal((await fetch(base+'/ingest/telemetry',{method:'POST',headers})).status,405);
   assert.equal((await fetch(base+'/telemetry',{method:'POST',headers})).status,405);
   assert.equal((await fetch(base+'/explain/synthetic-fixture',{method:'POST',headers})).status,405);
   assert.equal((await fetch(base+'/incident',{headers})).status,200);

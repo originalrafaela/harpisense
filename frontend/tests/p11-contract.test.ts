@@ -17,14 +17,9 @@ test('escopo padrão de integração limita consultas aos recursos confirmados',
   assert.deepEqual([...configuredResources('telemetry')!],['telemetry']);
   assert.equal(configuredResources('all'),null);
 });
-test('P11 autentica no health protegido; legacy continua autenticando em telemetria',async()=>{
-  for(const profile of ['p11','legacy'] as const){
-    const paths:string[]=[];
-    const client=new Client('/p11-api',profile,(async url=>{
-      paths.push(String(url));return new Response(String(url).endsWith('/health')?' {"api":"available"}':'[]');
-    }) as typeof fetch);
-    await client.login({username:'isolated',password:'fixture'});
-    assert.match(paths[0],profile==='p11'?/p11\/health$/:/v1\/telemetry\?/);
-    client.logout();await assert.rejects(()=>client.rows('telemetry'),/Não autorizado/);
-  }
+test('contrato legado não oferece atalho de autenticação administrativa',async()=>{
+ const paths:string[]=[];
+ const client=new Client('/p11-api','legacy',(async url=>{paths.push(String(url));return new Response('{}')}) as typeof fetch);
+ await assert.rejects(()=>client.login({username:'isolated',password:'fixture'}),/conta e sessão/);
+ assert.deepEqual(paths,[]);
 });

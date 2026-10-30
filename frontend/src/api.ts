@@ -27,33 +27,50 @@ export function telemetry(row:Row){
 export function stale(date:string|null,now=Date.now()){return !date||!Number.isFinite(Date.parse(date))||now-Date.parse(date)>120_000}
 export class Client {
  public base:string; public profile:Profile; private fetcher:typeof fetch; public timeout:number;
- private credentials:Credentials|null=null;
+ private token:string|null=null;
+ private expiresAt=0;
+ private epoch=0;
  private active=new Set<AbortController>();
  constructor(base:string,profile:Profile,fetcher:typeof fetch=fetch,timeout=10000){
   this.base=base;this.profile=profile;this.fetcher=fetcher.bind(globalThis);this.timeout=timeout;
-  if(base&&base!=='/p11-api'){let u:URL;try{u=new URL(base)}catch{throw new ApiError('config','Use /p11-api para o túnel local ou uma URL HTTP(S) absoluta.')}if(!['http:','https:'].includes(u.protocol)||u.username||u.password||u.search||u.hash)throw new ApiError('config','URL inválida; use HTTP(S), sem credenciais, query ou fragmento.');}
+  if(base&&base!=='/p11-api'){let u:URL;try{u=new URL(base)}catch{throw new ApiError('config','Use /p11-api para o túnel local ou uma URL HTTPS absoluta.')}if(!['http:','https:'].includes(u.protocol)||u.username||u.password||u.search||u.hash||(u.protocol==='http:'&&!['localhost','127.0.0.1','[::1]'].includes(u.hostname)))throw new ApiError('config','Use HTTPS ou HTTP no loopback, sem credenciais, query ou fragmento.');}
  }
  cancel(){this.active.forEach(c=>c.abort());this.active.clear()}
- logout(){this.credentials=null;this.cancel()}
+ forgetSession(){this.epoch++;this.token=null;this.expiresAt=0;this.cancel()}
+ remainingSessionMs(){return Math.max(0,this.expiresAt-Date.now())}
+ async logout(){const token=this.token;this.forgetSession();if(token)await this.request('/api/v1/admin-auth/logout','POST',undefined,token,true)}
  async login(credentials:Credentials){
-  if(!credentials.username||!credentials.password||credentials.username.includes(':'))throw new ApiError('config','Informe usuário e senha válidos.');
-  this.logout();this.credentials={...credentials};
-  try{if(this.profile==='p11')await this.health();else await this.rows('telemetry',0,1)}catch(e){this.logout();throw e}
+  this.forgetSession();const epoch=this.epoch;
+  if(this.profile!=='p11')throw new ApiError('config','O acesso administrativo exige P11 com conta e sessão. O contrato legado não oferece esse login.');
+  if(!credentials.username||!credentials.password)throw new ApiError('config','Informe usuário e senha válidos.');
+  const value=await this.request('/api/v1/admin-auth/login','POST',credentials);
+  if(epoch!==this.epoch)throw new ApiError('cancelled','Login cancelado; entre novamente.');
+  if(!object(value)||typeof value.access_token!=='string'||!/^[-_A-Za-z0-9]{43}$/.test(value.access_token)||value.token_type!=='Bearer'||typeof value.expires_at!=='string'||!Number.isFinite(Date.parse(value.expires_at))||Date.parse(value.expires_at)<=Date.now()||value.idle_timeout_seconds!==1800)throw new ApiError('invalid','Resposta de sessão inválida.');
+  this.token=value.access_token;this.expiresAt=Date.parse(value.expires_at);
+  try{await this.session()}catch(e){if(epoch===this.epoch)this.forgetSession();throw e}
  }
  path(kind:string){return this.profile==='p11'?`/api/v1/p11/${kind}`:`/api/v1/${kind==='network_event'?'network-events':kind}`}
  async get(path:string,method='GET',body?:unknown):Promise<unknown>{
+  if(!this.token)throw new ApiError('unauthorized','Não autorizado. Entre novamente.');
+  if(this.expiresAt<=Date.now()){this.forgetSession();throw new ApiError('unauthorized','Sessão expirada. Entre novamente.');}
+  return this.request(path,method,body,this.token);
+ }
+ private async request(path:string,method='GET',body?:unknown,token?:string,detached=false):Promise<unknown>{
   if(!this.base)throw new ApiError('config','API não configurada. Informe a URL acessível ao navegador.');
-  if(!this.credentials)throw new ApiError('unauthorized','Não autorizado. Entre novamente.');
-  const c=new AbortController();this.active.add(c);const timer=setTimeout(()=>c.abort(),this.timeout);
+  const c=new AbortController();if(!detached)this.active.add(c);const timer=setTimeout(()=>c.abort(),this.timeout);
   try{
-   const bytes=new TextEncoder().encode(`${this.credentials.username}:${this.credentials.password}`);
-   const response=await this.fetcher(this.base.replace(/\/$/,'')+path,{method,body:body===undefined?undefined:JSON.stringify(body),headers:{Authorization:`Basic ${btoa(String.fromCharCode(...bytes))}`,...(body===undefined?{}:{'Content-Type':'application/json'})},signal:c.signal,cache:'no-store',credentials:'omit',redirect:'error'});
+   const response=await this.fetcher(this.base.replace(/\/$/,'')+path,{method,body:body===undefined?undefined:JSON.stringify(body),headers:{...(token?{Authorization:`Bearer ${token}`} : {}),...(body===undefined?{}:{'Content-Type':'application/json'})},signal:c.signal,cache:'no-store',credentials:'omit',redirect:'error'});
    if(response.status===409){let message='Alteração recusada pelo servidor. Consulte novamente.';try{const v=await response.json();if(object(v)&&object(v.detail)&&typeof v.detail.message==='string')message=v.detail.message}catch{}throw new ApiError('conflict',message)}
-   if(!response.ok){const kind=response.status===401?'unauthorized':response.status===403?'forbidden':response.status===404?'unavailable':'error';throw new ApiError(kind, response.status===401?'Credenciais inválidas ou sessão não autorizada.':response.status===403?'Acesso negado.':response.status===404?'Endpoint indisponível nesta API.':`API indisponível (HTTP ${response.status}).`)}
+   if(!response.ok){let code='';try{const value=await response.json();if(object(value)&&object(value.error)&&typeof value.error.code==='string')code=value.error.code}catch{}
+    if(response.status===401&&token===this.token)this.forgetSession();
+    const kind=response.status===401?'unauthorized':response.status===403?'forbidden':response.status===404?'unavailable':response.status===429?'throttled':'error';
+    throw new ApiError(kind,response.status===401?(code==='SESSION_EXPIRED'?'Sessão expirada. Entre novamente.':code==='SESSION_REVOKED'||code==='SESSION_INVALID'||code==='AUTH_REQUIRED'?'Sessão inválida ou encerrada. Entre novamente.':'Credenciais inválidas ou sessão não autorizada.'):response.status===403?'Acesso negado.':response.status===404?'Endpoint indisponível nesta API.':response.status===429?'Muitas tentativas. Aguarde antes de entrar novamente.':`API indisponível (HTTP ${response.status}).`)}
+   if(response.status===204)return null;
    try{return await response.json()}catch{throw new ApiError('invalid','A API retornou JSON inválido.')}
   }catch(e){if(e instanceof ApiError)throw e;throw new ApiError('network',c.signal.aborted?'Consulta cancelada ou tempo limite excedido.':'Falha de rede/configuração. Verifique URL, proxy, HTTPS e CORS. Não foi possível consultar a API.');}
   finally{clearTimeout(timer);this.active.delete(c)}
  }
+ async session(){const value=await this.get('/api/v1/admin-auth/session');if(!object(value)||value.authenticated!==true||typeof value.username!=='string'||value.mfa_available!==false||value.email_recovery_available!==false)throw new ApiError('invalid','Estado de sessão incompatível.');return value}
  async rows(kind:string,offset=0,limit=50){return adaptRows(await this.get(`${this.path(kind)}?limit=${limit}${this.profile==='p11'?`&offset=${offset}`:''}`),this.profile)}
  async controls(){return controlState(await this.get('/api/v1/security/settings/mode/default'))}
  async changeControls(value:ControlState['value'],revision:number,reason:string){return controlState(await this.get('/api/v1/security/settings/mode/default','PUT',{value,expected_revision:revision,reason}))}

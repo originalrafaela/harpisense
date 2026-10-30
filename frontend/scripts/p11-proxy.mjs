@@ -15,19 +15,27 @@ export function p11Transport(target) {
     if (!request.url?.startsWith(prefix)) return next();
     const url = new URL(request.url, 'http://127.0.0.1');
     const path = url.pathname.slice(prefix.length);
+    response.setHeader('Cache-Control', 'no-store');
     const origin = request.headers.origin;
     if (origin && origin !== `http://${request.headers.host}`) {
       response.writeHead(403, {'Content-Type': 'application/json'});
       return response.end('{"detail":"Origem não permitida no transporte local"}');
     }
+    const authRoutes = new Map([['/api/v1/admin-auth/login','POST'],['/api/v1/admin-auth/session','GET'],['/api/v1/admin-auth/logout','POST'],['/api/v1/admin-auth/password','PUT'],['/api/v1/admin-auth/username','PUT']]);
+    const auth = authRoutes.get(path) === request.method;
+    // The browser transport has no technical Basic or service-ingestion path.
+    if (request.headers.authorization && !/^Bearer [A-Za-z0-9_-]{43}$/.test(request.headers.authorization)) {
+      response.writeHead(401, {'Content-Type':'application/json','WWW-Authenticate':'Bearer'});
+      return response.end('{"error":{"code":"AUTH_REQUIRED"}}');
+    }
     const read=request.method==='GET'&&(allowed.has(path)||/^\/api\/v1\/p11\/explain\/[A-Za-z0-9_.:@-]{1,128}$/.test(path)||/^\/api\/v1\/p11\/bitnet\/[A-Za-z0-9_.:@-]{1,128}\/history$/.test(path));
     const write=(request.method==='PUT'&&path==='/api/v1/security/settings/mode/default')||(request.method==='POST'&&path==='/api/v1/security/emergency-stop');
-    if (!read&&!write) {
+    if (!read&&!write&&!auth) {
       response.writeHead(request.method !== 'GET' ? 405 : 404, {'Content-Type': 'application/json'});
       return response.end('{"detail":"Recurso não integrado neste transporte restrito"}');
     }
     // Only pagination fields documented by P11; reject arbitrary URL parameters.
-    if ((write&&url.search)||[...url.searchParams.keys()].some(key => !['limit', 'offset'].includes(key))) {
+    if (((write||auth)&&url.search)||[...url.searchParams.keys()].some(key => !['limit', 'offset'].includes(key))) {
       response.writeHead(400, {'Content-Type': 'application/json'});
       return response.end('{"detail":"Parâmetro não permitido"}');
     }
@@ -41,8 +49,15 @@ export function p11Transport(target) {
       configure(proxy) {
         proxy.on('proxyRes', response => {
           response.headers['cache-control'] = 'no-store';
-          // Explicit frontend Basic auth; do not let the transport create browser cookies.
+          // Session is explicit Bearer in memory; never create browser cookies.
           delete response.headers['set-cookie'];
+        });
+        proxy.on('proxyReq', request => {request.removeHeader('cookie')});
+        proxy.on('error', (_error, _request, response) => {
+          if (!response.headersSent && typeof response.writeHead === 'function') {
+            response.writeHead(503, {'Content-Type':'application/json','Cache-Control':'no-store'});
+            response.end('{"error":{"code":"TRANSPORT_UNAVAILABLE"}}');
+          }
         });
       },
     }},
