@@ -12,7 +12,7 @@ def main():
     if not sys.stdin.isatty():
         raise SystemExit('Interactive operator terminal required')
     username = input('HarpiSense administrator username: ')
-    password = getpass.getpass('New HarpiSense password (15-128 characters): ')
+    password = getpass.getpass('New HarpiSense password (8-128 characters): ')
     confirm = getpass.getpass('Confirm password: ')
     if password != confirm:
         raise SystemExit('Passwords do not match')

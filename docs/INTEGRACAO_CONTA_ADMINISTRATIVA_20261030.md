@@ -1,5 +1,15 @@
 # Integração de conta administrativa — 30/10/2026
 
+Atualização de 30/10/2026 às 21:14 UTC: por solicitação do operador, o mínimo
+da senha própria passou de 15 para 8 caracteres; máximo de 128 preservado.
+Validação do serviço, troca de senha na API e prompts de provisionamento foram
+atualizados no código local e na release preparada `admin-session-20261030-r1`.
+Testes de limites 7/8/128/129 aprovados localmente e no runtime da VM;
+manifesto da release atualizado e conferido. Fontes e manifesto anteriores
+preservados no backup `password-min8-20261030T211418Z` dentro do diretório de
+backup da release. Antes da alteração, consulta somente de leitura confirmou
+esquema 1 e zero contas. Não houve migração, ativação ou reinício de serviço.
+
 Branch `feat/frontend-backend-autonomia`, candidata original `460c8a3`.
 Não houve merge na main. A referência mais recente é `referencias/versão_v2`,
 incluindo P11/P13 e o consolidado de 27/10. Os módulos anteriores de

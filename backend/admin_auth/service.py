@@ -30,7 +30,7 @@ def valid_username(value):
 
 
 def valid_password(value):
-    if not 15 <= len(value) <= 128 or len(value.encode('utf-8')) > 512:
+    if not 8 <= len(value) <= 128 or len(value.encode('utf-8')) > 512:
         raise AuthError(422, 'INVALID_PASSWORD')
     return value
 

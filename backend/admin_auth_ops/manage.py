@@ -162,7 +162,7 @@ def provision(config):
     if not sys.stdin.isatty():
         raise RuntimeError('Interactive operator terminal required')
     username = input('Novo usuário administrativo HarpiSense: ')
-    password = getpass.getpass('Nova senha própria (15–128 caracteres): ')
+    password = getpass.getpass('Nova senha própria (8–128 caracteres): ')
     confirm = getpass.getpass('Confirme a nova senha: ')
     if password != confirm:
         raise RuntimeError('Passwords do not match')

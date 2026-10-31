@@ -29,6 +29,20 @@ PREFIX = '/api/v1/admin-auth'
 
 
 class PasswordTests(unittest.TestCase):
+    def test_password_length_boundaries_in_service_and_api(self):
+        from admin_auth.service import valid_password
+        from admin_auth.api import PasswordChange
+        from pydantic import ValidationError
+        for size in (8, 128):
+            value = 'x' * size
+            self.assertEqual(valid_password(value), value)
+            self.assertEqual(PasswordChange(current_password='existing', new_password=value).new_password.get_secret_value(), value)
+        for size in (7, 129):
+            with self.assertRaises(AuthError):
+                valid_password('x' * size)
+            with self.assertRaises(ValidationError):
+                PasswordChange(current_password='existing', new_password='x' * size)
+
     def test_scrypt_salt_unicode_and_wrong_password(self):
         first, second = password_hash(PASSWORD+'ç'), password_hash(PASSWORD+'ç')
         self.assertNotEqual(first, second)
