@@ -1,150 +1,81 @@
 #include <Arduino.h>
-#include <ArduinoJson.h>
-#include <PubSubClient.h>
-#include <WiFi.h>
-
-#include "config.h"
-
-static const char *DEVICE_KEY = "poste-1";
-static const char *DEVICE_ID = "harpisense.poste.poste-1";
-static const char *TELEMETRY_TOPIC = "harpisense/v1/telemetry/harpisense.poste.poste-1/environment";
-static const unsigned long PUBLISH_INTERVAL_MS = 10000;
-
-WiFiClient wifiClient;
-PubSubClient mqttClient(wifiClient);
-
-unsigned long lastPublishAt = 0;
-uint32_t sequenceNumber = 1;
-
-struct EnvironmentReading {
-  bool hasTemperature;
-  bool hasHumidity;
-  float temperatureC;
-  float humidityPct;
-};
-
-EnvironmentReading readEnvironment() {
-  // Sensor model and ESP32 pin mapping are not defined in the shared contracts yet.
-  // Keep the payload contract active without inventing hardware details.
-  return {false, false, 0.0, 0.0};
+#include <esp_system.h>
+#include <bootloader_random.h>
+#include "poste_core.h"
+#include "settings.h"
+#include "hardware.h"
+#include "trusted_clock.h"
+#include "communication.h"
+namespace {
+poste::Queue samples;
+poste::Identity identity;
+poste::Hysteresis led(HS_DARK_THRESHOLD,HS_BRIGHT_THRESHOLD,HS_ADC_DARK_IS_LOW);
+SemaphoreHandle_t queueMutex=nullptr;
+bool hardwareReady=false;
+bool rotateBoot() {
+  // At startup only, before ADC/Wi-Fi use. Activate ESP32's entropy source.
+  char boot[17]; uint32_t random[2];
+  bootloader_random_enable();
+  esp_fill_random(random,sizeof(random));
+  bootloader_random_disable();
+  snprintf(boot,sizeof(boot),"%08lx%08lx",static_cast<unsigned long>(random[0]),static_cast<unsigned long>(random[1]));
+  return identity.reset(boot);
 }
-
-String observedAtUtc() {
-  struct tm timeinfo;
-  if (!getLocalTime(&timeinfo, 1000)) {
-    return "1970-01-01T00:00:00.000Z";
-  }
-
-  char buffer[25];
-  strftime(buffer, sizeof(buffer), "%Y-%m-%dT%H:%M:%S.000Z", &timeinfo);
-  return String(buffer);
-}
-
-String messageId() {
-  char buffer[33];
-  snprintf(buffer, sizeof(buffer), "%08lx%08lx%08lx%08lx",
-           static_cast<unsigned long>(esp_random()),
-           static_cast<unsigned long>(esp_random()),
-           static_cast<unsigned long>(millis()),
-           static_cast<unsigned long>(sequenceNumber));
-  return String(buffer);
-}
-
-void connectWifi() {
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println();
-  Serial.print("WiFi connected: ");
-  Serial.println(WiFi.localIP());
-}
-
-void connectMqtt() {
-  while (!mqttClient.connected()) {
-    Serial.print("Connecting MQTT as ");
-    Serial.println(DEVICE_KEY);
-
-    if (mqttClient.connect(DEVICE_KEY, MQTT_USERNAME, MQTT_PASSWORD)) {
-      Serial.println("MQTT connected");
-      return;
+void networkTask(void*) {
+  if (!communication::begin()) { Serial.println("network_closed: configuration/acceptance gates"); vTaskDelete(nullptr); return; }
+  poste::Entry candidate; uint32_t lastAttempt=0;
+  for (;;) {
+    bool connected=communication::poll(); uint32_t now=millis();
+    xSemaphoreTake(queueMutex,portMAX_DELAY);
+    bool pending=samples.peek(now,candidate);
+    xSemaphoreGive(queueMutex);
+    if (connected && pending && static_cast<uint32_t>(now-lastAttempt)>=settings::PUBLISH_MS) {
+      lastAttempt=now;
+      for (size_t attempt=0; attempt<poste::CAPACITY && pending; ++attempt) {
+        if (!communication::publish(candidate)) break;
+        xSemaphoreTake(queueMutex,portMAX_DELAY);
+        samples.acceptIfHead(candidate);
+        pending=samples.peek(millis(),candidate);
+        xSemaphoreGive(queueMutex);
+      }
     }
-
-    Serial.print("MQTT connect failed, state=");
-    Serial.println(mqttClient.state());
-    delay(3000);
+    vTaskDelay(pdMS_TO_TICKS(20));
   }
 }
-
-void publishEnvironment() {
-  EnvironmentReading reading = readEnvironment();
-
-  StaticJsonDocument<512> doc;
-  doc["schema_version"] = "1.0";
-  doc["message_id"] = messageId();
-  doc["device_id"] = DEVICE_ID;
-  doc["observed_at"] = observedAtUtc();
-  doc["sensor_type"] = "environment";
-  doc["sequence"] = sequenceNumber;
-
-  JsonObject measurements = doc["measurements"].to<JsonObject>();
-  if (reading.hasTemperature) {
-    measurements["temperature_c"] = reading.temperatureC;
-  } else {
-    measurements["temperature_c"] = nullptr;
-  }
-  if (reading.hasHumidity) {
-    measurements["humidity_pct"] = reading.humidityPct;
-  } else {
-    measurements["humidity_pct"] = nullptr;
-  }
-
-  JsonObject status = doc["status"].to<JsonObject>();
-  status["battery_pct"] = nullptr;
-  status["rssi_dbm"] = WiFi.RSSI();
-
-  char payload[512];
-  size_t payloadSize = serializeJson(doc, payload, sizeof(payload));
-  bool ok = mqttClient.publish(TELEMETRY_TOPIC, reinterpret_cast<const uint8_t *>(payload), payloadSize, false);
-
-  Serial.print("Published sequence=");
-  Serial.print(sequenceNumber);
-  Serial.print(" ok=");
-  Serial.println(ok ? "true" : "false");
-
-  sequenceNumber++;
 }
-
 void setup() {
   Serial.begin(115200);
-  delay(1000);
-
-  connectWifi();
-  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
-
-  mqttClient.setServer(MQTT_HOST, MQTT_PORT);
-  mqttClient.setKeepAlive(30);
-  connectMqtt();
+  queueMutex=xSemaphoreCreateMutex();
+  if (!queueMutex || !rotateBoot()) { Serial.println("startup_failed"); return; }
+  hardwareReady=hardware::begin();
+  if (!hardwareReady) { Serial.println("hardware_closed: confirm wiring/thresholds; GPIO untouched"); return; }
+  if (xTaskCreate(networkTask,"poste1-net",8192,nullptr,1,nullptr)!=pdPASS) Serial.println("network_task_failed: offline only");
 }
-
 void loop() {
-  if (WiFi.status() != WL_CONNECTED) {
-    connectWifi();
+  static uint32_t lastSample=0,lastReport=0;
+  if (!hardwareReady) { delay(1000); return; }
+  uint32_t now=millis();
+  if (static_cast<uint32_t>(now-lastSample)>=settings::SAMPLE_MS) {
+    lastSample=now;
+    poste::Reading reading=hardware::readLdr(); char utc[21];
+    bool trusted=clock_source::utc(utc);
+    hardware::commandLed(led.update(reading));
+    Serial.printf("ldr_adc_raw=%d quality=%u led_commanded=%u utc_valid=%u\n",
+      reading.quality==poste::Quality::Raw?reading.raw:-1,static_cast<unsigned>(reading.quality),led.state(),trusted);
+    if (identity.exhausted()) { Serial.println("sequence_exhausted: reboot/new boot ID; RAM queue lost"); ESP.restart(); return; }
+    xSemaphoreTake(queueMutex,portMAX_DELAY);
+    poste::capture(identity,samples,trusted?utc:nullptr,reading,led.state(),now);
+    xSemaphoreGive(queueMutex);
   }
-
-  if (!mqttClient.connected()) {
-    connectMqtt();
+  if (static_cast<uint32_t>(now-lastReport)>=30000) {
+    lastReport=now;
+    xSemaphoreTake(queueMutex,portMAX_DELAY);
+    poste::Entry ignored; samples.peek(now,ignored);
+    auto c=samples.counters; size_t pending=samples.size();
+    xSemaphoreGive(queueMutex);
+    Serial.printf("queue=%u no_utc=%lu invalid=%lu overflow=%lu expired=%lu accepted_local=%lu\n",
+      static_cast<unsigned>(pending),static_cast<unsigned long>(c.noUtc),static_cast<unsigned long>(c.invalid),
+      static_cast<unsigned long>(c.overflow),static_cast<unsigned long>(c.expired),static_cast<unsigned long>(c.acceptedLocal));
   }
-
-  mqttClient.loop();
-
-  unsigned long now = millis();
-  if (now - lastPublishAt >= PUBLISH_INTERVAL_MS || lastPublishAt == 0) {
-    lastPublishAt = now;
-    publishEnvironment();
-  }
+  delay(5);
 }

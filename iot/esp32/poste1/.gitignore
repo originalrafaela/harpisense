@@ -1,0 +1,9 @@
+.tools/
+.pio/
+include/config_local.h
+include/config.h
+*.pem
+*.key
+test-results/
+# Repository Python defaults ignore lib/; this is a source library.
+!lib/
