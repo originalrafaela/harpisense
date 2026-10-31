@@ -1,0 +1,280 @@
+{
+  "candidate_commit": "1cf058e1b1ffbf08a954d56ee082759be2eae49e",
+  "vm_observed_at": "2026-10-31T01:39:20.083591-03:00",
+  "hash_basis": "Git blob bytes; exact VM bytes",
+  "manifest_checks": [
+    {
+      "file": "p08_captura/capture_session_v4.py",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/examples/esp32-mqtt-percurso.profile.example.json",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/examples/poste2-mqtt-nat.profile.example.json",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/examples/tcp-observacao.profile.example.json",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/integracao/audit_feature_contract.py",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/integracao/build_source_manifest.py",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/integracao/coverage_evidence.py",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/integracao/diagnosticar_cobertura.py",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/integracao/integrar_p08_v2.py",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/integracao/orquestrar_p08_v4_experimental.py",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/integracao/validar_sessao.py",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/LINUX_VALIDATION_RESULTS.json",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/LOCAL_P08_TEST_RESULTS.json",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/monitorar_tcpdump_v1.py",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/PROCEDIMENTO_ARQUITETO_2026-10-31.md",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/README.md",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/tests/run_linux_validation.py",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/tests/test_capture_session.py",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/tests/test_coverage_evidence.py",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/tests/test_feature_contract.py",
+      "manifest_matches_git_blob": true
+    },
+    {
+      "file": "p08_captura/WINDOWS_REGRESSION_RESULTS.json",
+      "manifest_matches_git_blob": true
+    }
+  ],
+  "comparison": [
+    {
+      "file": "p08_captura/capture_session_v3.py",
+      "vm_sha256": "0b3d5f831e5163944d15d52b569b62f039ad82bc2fbb5112d65e9eb17639049c",
+      "comparison": "VM_ONLY_IN_COMPARISON"
+    },
+    {
+      "file": "p08_captura/capture_session_v2.py",
+      "vm_sha256": "30c7128cb5417ba47b25a5774183d04d78c40b503314775399dd39bd43b78bf3",
+      "comparison": "VM_ONLY_IN_COMPARISON"
+    },
+    {
+      "file": "p08_captura/capture_session_v4.py",
+      "candidate_git_sha256": "85432f7166e653a2c2ad98f793c58e542b9516fca43e720910cda61c82dad1fd",
+      "vm_sha256": "0dc0c3e5a12d54ae6a26010e853dfab99380a08ed5f4cba718bc7ecabfe51efc",
+      "comparison": "DIFFERENT"
+    },
+    {
+      "file": "p08_captura/pcap_to_events.py",
+      "vm_sha256": "6a923456b580b15f0dafcc477192267dd35e355b603b52b732700b2ef9b10152",
+      "comparison": "VM_ONLY_IN_COMPARISON"
+    },
+    {
+      "file": "p08_captura/capture_session_backup.py",
+      "vm_sha256": "011c1a5b88a748737df19abd079181a0fad96c680d78423e8b49a8829c4ccbf0",
+      "comparison": "VM_ONLY_IN_COMPARISON"
+    },
+    {
+      "file": "p08_captura/monitorar_tcpdump_v1.py",
+      "candidate_git_sha256": "7ae589f050e145f78e5f732ad6ab8ec71b18608005713b10651cf33dc4a95861",
+      "vm_sha256": "b575272754e443c596ae60c070727967c24054a8adfca40d1ee7648656fa9638",
+      "comparison": "DIFFERENT"
+    },
+    {
+      "file": "p08_captura/capture_session.py",
+      "vm_sha256": "0e2ed0b159e0e2b24b86f84808c59b9b3a6515a90721e440543e81e4b264e23c",
+      "comparison": "VM_ONLY_IN_COMPARISON"
+    },
+    {
+      "file": "p08_captura/integracao/validar_sessao.py",
+      "candidate_git_sha256": "60631bee025d43e43f09e2177ab9a773e5e7fe42061fb3aa35c2ca430b90bd12",
+      "vm_sha256": "fa5a0ebc47d31ca8a49fa6ab44c04db955f79ae96c74c387e8c83f1e65248ffa",
+      "comparison": "DIFFERENT"
+    },
+    {
+      "file": "p08_captura/integracao/orquestrar_p08_v2.py",
+      "vm_sha256": "a41f4d98e316ed543f28c275e5f0f24bb01ff553a727e66384db9ad751046a60",
+      "comparison": "VM_ONLY_IN_COMPARISON"
+    },
+    {
+      "file": "p08_captura/integracao/integrar_p08_v2.py",
+      "candidate_git_sha256": "652a0d2a6ea4c7fb0256b16a4ec449eb17a67565af04ec724684739b3f2acfd9",
+      "vm_sha256": "040143d349f82ba8b6579a87476bb73b575584a44ed5ac35edf613b7a331a021",
+      "comparison": "DIFFERENT"
+    },
+    {
+      "file": "p08_captura/integracao/integrar_p08.py",
+      "vm_sha256": "f1537b54ba721153b3daf8a09a09ba1e7aef24aee4a513828302ca237e5f06a5",
+      "comparison": "VM_ONLY_IN_COMPARISON"
+    },
+    {
+      "file": "p08_captura/integracao/orquestrar_p08.py",
+      "vm_sha256": "1d18adc3ebd38f4482cd43602652e587eb7fdd41c78327799e6ad249e4462b54",
+      "comparison": "VM_ONLY_IN_COMPARISON"
+    },
+    {
+      "file": "p08_captura/integracao/orquestrar_p08_v4_experimental.py",
+      "candidate_git_sha256": "418b79ba6c96c77798fcb9ab1fcf97e393fefa07bb01a6a6c8614aa0e510df67",
+      "vm_sha256": "be7312e712c95b212b11f5a9ab359b409edddbd16a475e3346fd1a73b4331b00",
+      "comparison": "DIFFERENT"
+    },
+    {
+      "file": "p08_captura/integracao/persistir_janelas_p08.py",
+      "vm_sha256": "16f9cfc33256f71087f564934894708f2d392d447d74fbbc6f3c6fe237bb12ce",
+      "comparison": "VM_ONLY_IN_COMPARISON"
+    },
+    {
+      "file": "p08_captura/integracao/diagnosticar_cobertura.py",
+      "candidate_git_sha256": "5fcdeca94f86ca84daaed3c5f34dabc9736b6fbb75f5c5ab2ae9ee86fa3e2586",
+      "vm_sha256": "2c3afb289133138597f2a20f454705d3093ce96c47936a13d4aa3645201d3c76",
+      "comparison": "DIFFERENT"
+    },
+    {
+      "file": "p08_captura/integracao/orquestrar_p08_v3.py",
+      "vm_sha256": "6ca9861bf32cb21578b018b21469e2b38daf368cc61c67153057de216660ea6b",
+      "comparison": "VM_ONLY_IN_COMPARISON"
+    },
+    {
+      "file": "p08_captura/tests/test_pcap_to_events.py",
+      "vm_sha256": "90fb30b04bc21a5edf49aee5c500e467134f4c753d143b565f83c072dd1363d8",
+      "comparison": "VM_ONLY_IN_COMPARISON"
+    },
+    {
+      "file": "backend/p08_p09/adaptador_logs_p08_p09/test_p08_artifact_validator.py",
+      "candidate_git_sha256": "f1caba01bf7fe361081752eb9ac1d84ffc39c41256fd20df68e00a06c2ed7e1a",
+      "vm_sha256": "f1caba01bf7fe361081752eb9ac1d84ffc39c41256fd20df68e00a06c2ed7e1a",
+      "comparison": "IDENTICAL"
+    },
+    {
+      "file": "backend/p08_p09/adaptador_logs_p08_p09/log_window_adapter.py",
+      "candidate_git_sha256": "17804b6759c3172fb3cdf3b099ae236baa445a136751bc0c98590ad7a370e7cd",
+      "vm_sha256": "17804b6759c3172fb3cdf3b099ae236baa445a136751bc0c98590ad7a370e7cd",
+      "comparison": "IDENTICAL"
+    },
+    {
+      "file": "backend/p08_p09/adaptador_logs_p08_p09/p08_artifact_validator.py",
+      "candidate_git_sha256": "58868a25ff791139025e10321497bda27fb77e26e5d6f6fc31936eba530c65b7",
+      "vm_sha256": "58868a25ff791139025e10321497bda27fb77e26e5d6f6fc31936eba530c65b7",
+      "comparison": "IDENTICAL"
+    },
+    {
+      "file": "backend/p08_p09/adaptador_logs_p08_p09/test_coverage_gate.py",
+      "candidate_git_sha256": "8a235e83bd7845849ab79a2fcf91c320a5159ab846aa584373fbbe801c3a0ca5",
+      "vm_sha256": "8a235e83bd7845849ab79a2fcf91c320a5159ab846aa584373fbbe801c3a0ca5",
+      "comparison": "IDENTICAL"
+    },
+    {
+      "file": "backend/p08_p09/adaptador_logs_p08_p09/context_adapter.py",
+      "candidate_git_sha256": "a41ad56a464247c89a44b1ade89fa5add792c48f9fa12b0d0712f2b897d62d95",
+      "vm_sha256": "a41ad56a464247c89a44b1ade89fa5add792c48f9fa12b0d0712f2b897d62d95",
+      "comparison": "IDENTICAL"
+    },
+    {
+      "file": "backend/p08_p09/adaptador_logs_p08_p09/test_context_window_integration.py",
+      "candidate_git_sha256": "0441fb3aab2f683e11873ac6fe0bc8a81f287c6a849118a1a84ec0afc56dac14",
+      "vm_sha256": "0441fb3aab2f683e11873ac6fe0bc8a81f287c6a849118a1a84ec0afc56dac14",
+      "comparison": "IDENTICAL"
+    },
+    {
+      "file": "backend/p08_p09/adaptador_logs_p08_p09/test_context_security.py",
+      "candidate_git_sha256": "1e6f3497b1d4de8b64a34b6d63bd95aef219b40cf312ee0566325690471f6fbd",
+      "vm_sha256": "1e6f3497b1d4de8b64a34b6d63bd95aef219b40cf312ee0566325690471f6fbd",
+      "comparison": "IDENTICAL"
+    },
+    {
+      "file": "backend/p08_p09/adaptador_logs_p08_p09/auxiliary_audit_adapter.py",
+      "candidate_git_sha256": "04b58d66d5d6d9cd513bff4b559c187bca4a2d13ea370e80fcbfc97bb9eb5416",
+      "vm_sha256": "04b58d66d5d6d9cd513bff4b559c187bca4a2d13ea370e80fcbfc97bb9eb5416",
+      "comparison": "IDENTICAL"
+    },
+    {
+      "file": "backend/p08_p09/adaptador_logs_p08_p09/p08_p09_pipeline.py",
+      "candidate_git_sha256": "b4534c3cfeb240d22d1dfbf274c1efd2409adac9774ca028a38636beb150e0ce",
+      "vm_sha256": "4ec9ed8c2fb5b068ebdae4b6cd7643d1aca5a5c0fcc5d9c354e28f5f7f12d8dc",
+      "comparison": "DIFFERENT"
+    },
+    {
+      "file": "backend/p08_p09/adaptador_logs_p08_p09/test_log_window_adapter.py",
+      "candidate_git_sha256": "0d8187baf3f4e5b8103306e0d96585cda748236b53c7de3b312ee0cf3bb5fe63",
+      "vm_sha256": "0d8187baf3f4e5b8103306e0d96585cda748236b53c7de3b312ee0cf3bb5fe63",
+      "comparison": "IDENTICAL"
+    },
+    {
+      "file": "backend/p08_p09/adaptador_logs_p08_p09/test_log_coverage_integration.py",
+      "candidate_git_sha256": "c30db8817d0b4e9ffd0a6f9ea6419003dc2ff79a0aabf96edc16c69355b896bf",
+      "vm_sha256": "958cbecb5f7b45fb39a24a54b26c05f717d1e981cfec113deae53a537b3de668",
+      "comparison": "DIFFERENT"
+    },
+    {
+      "file": "backend/p08_p09/adaptador_logs_p08_p09/test_context_adapter.py",
+      "candidate_git_sha256": "219bc6e77680551fe1de2501031783cf8a1fb51d99c9d445d6d599a6e6358891",
+      "vm_sha256": "219bc6e77680551fe1de2501031783cf8a1fb51d99c9d445d6d599a6e6358891",
+      "comparison": "IDENTICAL"
+    },
+    {
+      "file": "backend/p08_p09/adaptador_logs_p08_p09/coverage_gate.py",
+      "candidate_git_sha256": "3310a15e11b90ece09c4e8f4ba49b7c0eab7686bafefec19b85447b1693c6109",
+      "vm_sha256": "3310a15e11b90ece09c4e8f4ba49b7c0eab7686bafefec19b85447b1693c6109",
+      "comparison": "IDENTICAL"
+    },
+    {
+      "file": "backend/p08_p09/adaptador_logs_p08_p09/log_coverage_integration.py",
+      "candidate_git_sha256": "63a9b6f31c6e644e9f343a429d805a117b904f5ca9fff9f28c994babe4ff5756",
+      "vm_sha256": "e0b47ed6124d49a68a6e31d7e829c91847164e8ba85c3bc3ab9768c1ebe24bfa",
+      "comparison": "DIFFERENT"
+    },
+    {
+      "file": "p08_captura/integracao/audit_feature_contract.py",
+      "comparison": "ABSENT_VM"
+    },
+    {
+      "file": "p08_captura/integracao/build_source_manifest.py",
+      "comparison": "ABSENT_VM"
+    },
+    {
+      "file": "p08_captura/integracao/coverage_evidence.py",
+      "comparison": "ABSENT_VM"
+    }
+  ]
+}

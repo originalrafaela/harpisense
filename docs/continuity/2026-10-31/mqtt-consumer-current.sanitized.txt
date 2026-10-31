@@ -1,0 +1,87 @@
+import getpass
+import hashlib
+import json
+import os
+import sys
+from pathlib import Path
+
+import paho.mqtt.client as mqtt
+
+BASE = Path(__file__).resolve().parent
+PACKAGE_ROOT = "/opt/harpisense/integration-v2/HarpiSense_Pacote13_Integracao_Testes_v2"
+sys.path.insert(0, PACKAGE_ROOT)
+
+from componentes.p11.backend11.service import Record
+from postgres_store import PostgresStore
+
+env = dict(
+    line.split("=", 1)
+    for line in (BASE / ".env").read_text().splitlines()
+    if "=" in line and not line.lstrip().startswith("#")
+)
+
+store = PostgresStore(env["HARPISENSE_DATABASE_URL"])
+
+def on_connect(client, userdata, flags, reason_code, properties):
+    if reason_code.is_failure:
+        print(f"Falha MQTT: {reason_code}", flush=True)
+        return
+    print("MQTT conectado e autenticado", flush=True)
+    client.subscribe("harpisense/poste2/telemetry", qos=1)
+
+def emit_audit_safely(event_type):
+    try:
+        from auditoria_p08 import serialize_audit_event
+        print(serialize_audit_event(event_type), flush=True)
+    except Exception as exc:
+        print(
+            f"Falha na auditoria P08: {type(exc).__name__}",
+            flush=True,
+        )
+
+
+def on_message(client, userdata, message):
+
+    try:
+        data = json.loads(message.payload.decode("utf-8"))
+        if not isinstance(data, dict) or data.get("device_id") != "poste2":
+            raise ValueError("telemetria invalida")
+    except (ValueError, UnicodeDecodeError):
+        emit_audit_safely("validation_failure")
+        return
+
+    try:
+        digest = hashlib.sha256(
+            message.topic.encode() + b"\0" + message.payload
+        ).hexdigest()
+
+        record = Record(
+            id=f"poste2-{digest}",
+            revision=1,
+            source="trusted-service",
+            data=data,
+        )
+
+        inserted = store.insert("telemetry", record)
+        if not inserted:
+            emit_audit_safely("duplicate_message")
+
+        print(
+            f"PostgreSQL: {'gravado' if inserted else 'duplicado'} | {record.id}",
+            flush=True,
+        )
+    except Exception as exc:
+        print(
+            f"Erro operacional ao processar mensagem: {type(exc).__name__}",
+            flush=True,
+        )
+
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+client.username_pw_set("harpisense_mqtt", (BASE / ".mqtt_password").read_text().strip())
+client.on_connect = on_connect
+client.on_message = on_message
+client.connect("192.168.155.1", 1883, 60)
+
+print("Consumidor MQTT iniciado", flush=True)
+client.loop_forever()
+
