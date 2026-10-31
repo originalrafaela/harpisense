@@ -9,6 +9,7 @@ import argparse
 import hashlib
 import importlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -37,7 +38,7 @@ DEFAULT_P09 = BASE / "staging/p09-deteccao-decisao/adaptador_logs_p08_p09"
 
 def write_json_exclusive(path: Path, document: dict) -> None:
     payload = json.dumps(document, indent=2, ensure_ascii=False).encode("utf-8") + b"\n"
-    flags = 0xC1  # O_WRONLY | O_CREAT | O_EXCL; Linux deployment.
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
     if hasattr(__import__("os"), "O_NOFOLLOW"):
         flags |= __import__("os").O_NOFOLLOW
     fd = __import__("os").open(path, flags, 0o600)
@@ -245,7 +246,7 @@ def main():
         coverage["integration_status"] = "INCOMPLETE"
         coverage.setdefault("limitations", []).append("Integração de janelas: " + integration_error)
     coverage_payload = json.dumps(coverage, indent=2, ensure_ascii=False).encode("utf-8") + b"\n"
-    fd_flags = 0xC1 | getattr(__import__("os"), "O_NOFOLLOW", 0)
+    fd_flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
     fd = __import__("os").open(paths["coverage"], fd_flags, 0o600)
     with __import__("os").fdopen(fd, "wb") as stream:
         stream.write(coverage_payload)

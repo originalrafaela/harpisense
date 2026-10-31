@@ -1,0 +1,12 @@
+{
+  "synthetic_only": true,
+  "platform": "Windows-11-10.0.26300-SP0",
+  "python": "3.12.13 (main, Jun  2 2026, 22:47:20) [MSC v.1944 64 bit (AMD64)]",
+  "tests_run": 21,
+  "failures": 0,
+  "errors": 0,
+  "vm_tests_run": false,
+  "capture_started": false,
+  "inference_executed": false,
+  "ips_executed": false
+}

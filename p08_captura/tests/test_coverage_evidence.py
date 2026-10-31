@@ -91,6 +91,7 @@ class SignedCoverageTests(unittest.TestCase):
             "target_ref": self.profile["target_ref"],
             "interface": self.profile["interface"],
             "source_ip": self.profile["source_ip"],
+            "destination_ip": self.profile["destination_ip"],
             "required_sources": ["gateway_capture", "mqtt_broker"],
             "started_at": utc(-2),
             "capture_effective_started_at": utc(0),
@@ -188,7 +189,39 @@ class SignedCoverageTests(unittest.TestCase):
         self.assertEqual(report["source_coverage"]["mqtt_broker"]["status"], "UNKNOWN")
         self.assertEqual(report["source_coverage_status"], "UNKNOWN")
         self.assertTrue(all(item["observation_status"] == "UNKNOWN" for item in report["intervals"]))
-        self.assertEqual(report["coverage_records"], [])
+        self.assertEqual([r["source"] for r in report["coverage_records"]], ["gateway_capture"])
+
+    def test_record_from_another_boot_is_rejected(self):
+        self.write_broker_bundle([{"event_id": "e1", "observed_at": utc(5), "journal_boot_id": "other-boot"}])
+        self.assertEqual(self.build()["source_coverage"]["mqtt_broker"]["status"], "INCOMPLETE")
+
+    def test_kernel_drops_block_local_coverage(self):
+        self.session["tcpdump_stats"]["packets_dropped_by_kernel"] = 1
+        self.signature_path.write_text(sign_payload(canonical_json(self.session), self.private["gateway"]), encoding="ascii")
+        self.assertEqual(self.build()["source_coverage"]["gateway_capture"]["status"], "INCOMPLETE")
+
+    def test_heartbeat_gap_blocks_local_coverage(self):
+        self.session["process_monitoring"]["observations"] = self.session["process_monitoring"]["observations"][:3]
+        self.signature_path.write_text(sign_payload(canonical_json(self.session), self.private["gateway"]), encoding="ascii")
+        self.assertEqual(self.build()["source_coverage"]["gateway_capture"]["status"], "INCOMPLETE")
+
+    def test_integration_from_another_session_is_not_linked(self):
+        with self.assertRaisesRegex(ValueError, "collection_session_id"):
+            build_coverage_report(
+                self.session, self.session_path, self.signature_path,
+                {"aggregation": {"windows": [{"collection_session_id": "other-session"}]}},
+                self.profile, self.evidence_dir, self.pcap)
+
+    def test_signed_destination_must_match_profile(self):
+        self.session["destination_ip"] = "192.0.2.99"
+        self.signature_path.write_text(sign_payload(canonical_json(self.session), self.private["gateway"]), encoding="ascii")
+        self.assertEqual(self.build()["source_coverage"]["gateway_capture"]["status"], "INCOMPLETE")
+
+    def test_source_identifier_cannot_escape_evidence_directory(self):
+        self.profile["required_sources"][1]["source"] = "../broker"
+        self.profile_path.write_text(json.dumps(self.profile), encoding="utf-8")
+        with self.assertRaises(ValueError):
+            load_profile(self.profile_path)
 
     def test_signed_source_event_is_observed_in_its_window(self):
         self.write_broker_bundle([{"event_id": "e1", "observed_at": utc(5), "journal_cursor": "j-5", "journal_boot_id": "broker-boot-synthetic"}])

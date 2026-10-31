@@ -1,0 +1,40 @@
+{
+  "base_commit": "c314ca5282fe282dc6455e83d74e949c98fa4676",
+  "branch": "feat/p08-evidence-coverage",
+  "status": "REVIEW_CANDIDATE_NOT_DEPLOYED",
+  "publication_evidence": "Confirm branch SHA with git ls-remote after push; Git publication is not deployment",
+  "remote_base_verified": "c314ca5282fe282dc6455e83d74e949c98fa4676",
+  "deployed_state": "NOT_REVERIFIED_THIS_ROUND",
+  "files_sha256": {
+    "p08_captura/capture_session_v4.py": "85432f7166e653a2c2ad98f793c58e542b9516fca43e720910cda61c82dad1fd",
+    "p08_captura/examples/esp32-mqtt-percurso.profile.example.json": "3004e876cc0bd90ddf030c8084af27a40629d83759fb067ed6917d702fbe497e",
+    "p08_captura/examples/poste2-mqtt-nat.profile.example.json": "4fb5a267f4d27939cb14450c6a17ca51b5b0b59c8163b23ba42999c7cbaf8309",
+    "p08_captura/examples/tcp-observacao.profile.example.json": "a11bc6ba54c89314451877f3c243ffd7d0c2ea160c661cf1fe0adbaa05e19d3e",
+    "p08_captura/integracao/audit_feature_contract.py": "54763ed18e82ef7c5acac94ae9c01e889b84d8fe16db8345bff7614941374d38",
+    "p08_captura/integracao/build_source_manifest.py": "479f26bd715980498e25f29c083a56e97426b1da7f4a608c901bb1553716e614",
+    "p08_captura/integracao/coverage_evidence.py": "d60403122e36ce5391089eafe9f11aa42f4f0e5098e2cc0a525397c528256a8c",
+    "p08_captura/integracao/diagnosticar_cobertura.py": "5fcdeca94f86ca84daaed3c5f34dabc9736b6fbb75f5c5ab2ae9ee86fa3e2586",
+    "p08_captura/integracao/integrar_p08_v2.py": "652a0d2a6ea4c7fb0256b16a4ec449eb17a67565af04ec724684739b3f2acfd9",
+    "p08_captura/integracao/orquestrar_p08_v4_experimental.py": "418b79ba6c96c77798fcb9ab1fcf97e393fefa07bb01a6a6c8614aa0e510df67",
+    "p08_captura/integracao/validar_sessao.py": "60631bee025d43e43f09e2177ab9a773e5e7fe42061fb3aa35c2ca430b90bd12",
+    "p08_captura/LINUX_VALIDATION_RESULTS.json": "d7a5103506fb07150052c101863ae11766c14be88c0800e469cfc48276787c16",
+    "p08_captura/LOCAL_P08_TEST_RESULTS.json": "0f1fc237f574650d013e6964d9a4574de642b984be73349f102878803dbe1d1c",
+    "p08_captura/monitorar_tcpdump_v1.py": "7ae589f050e145f78e5f732ad6ab8ec71b18608005713b10651cf33dc4a95861",
+    "p08_captura/PROCEDIMENTO_ARQUITETO_2026-10-31.md": "5cfd9fe2dd14b74326e688329b4cc74a07714c21b1a4f6c3ae68d60ccae0c9cd",
+    "p08_captura/README.md": "6b96c3cc6128df518d589a1b8ed785755ec123605fd6f2aa64b05ebe31e9b784",
+    "p08_captura/tests/run_linux_validation.py": "79172cf34f6384aa1bf07dbd84986153b414011fbde01654846ff04a530a0c31",
+    "p08_captura/tests/test_capture_session.py": "4e7c39ad9e8c706e4cffab799d6675c50979fb5e4957819927ade7d35b5f2ee5",
+    "p08_captura/tests/test_coverage_evidence.py": "d69c409731b405ba4ee3a864f8402105b70d61c67412556a3c2704e599264f51",
+    "p08_captura/tests/test_feature_contract.py": "efb75b5a00cf568bc81465620b9613b9b120deeea522454fb0aa173291b2bb99",
+    "p08_captura/WINDOWS_REGRESSION_RESULTS.json": "a55d6a13f5660f7ca6ed54cfca1b9c7e20917adbc28586d4d57b350d1ba41884"
+  },
+  "reference_contracts_sha256": {
+    "versão_v2\\09_Deteccao_Decisao\\HarpiSense_Pacote09_Deteccao_Decisao_v2\\schemas\\feature_schema.json": "405f4c9b409685cd23554941547435156ed88749820a148837ff886a42e76d14",
+    "Versões corretas\\Random Forest\\HarpiSense_Random_Forest_Completo\\feature_schema.json": "5208fb7424520e248115ee1b51fc919333091dee7ca64cee80ae3b07551142c9"
+  },
+  "linux_regression_pending": false,
+  "linux_tests_passed": 81,
+  "container_image_id": "sha256:be075ad0fc7764f9367712b7d8ef50ad63828c4cdf4a43c74a86cf6ff06dfa1b",
+  "vm_actions_executed": false,
+  "hash_basis": "Git blob bytes (repository LF normalization); worktree CRLF may differ"
+}

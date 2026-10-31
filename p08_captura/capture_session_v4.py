@@ -65,16 +65,18 @@ def write_exclusive(path, payload, mode=0o600):
         fd, temp_name = tempfile.mkstemp(prefix=".harpisense-p08-", suffix=".tmp", dir=str(path.parent))
         temp_path = Path(temp_name)
         with os.fdopen(fd, "wb") as stream:
-            os.fchmod(stream.fileno(), mode)
+            if os.name == "posix":
+                os.fchmod(stream.fileno(), mode)
             stream.write(payload)
             stream.flush()
             os.fsync(stream.fileno())
         os.link(temp_path, path, follow_symlinks=False)
-        dir_fd = os.open(path.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
-        try:
-            os.fsync(dir_fd)
-        finally:
-            os.close(dir_fd)
+        if os.name == "posix":
+            dir_fd = os.open(path.parent, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+            try:
+                os.fsync(dir_fd)
+            finally:
+                os.close(dir_fd)
     finally:
         if temp_path is not None:
             temp_path.unlink(missing_ok=True)
@@ -227,6 +229,7 @@ def run_capture(*, session_id, interface, source_ip, duration, heartbeat_seconds
         process = popen_factory(
             command, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
             text=True, start_new_session=True,
+            env={**os.environ, "LC_ALL": "C"},
         )
         subprocess_started_at = now()
         startup_deadline = monotonic() + startup_timeout

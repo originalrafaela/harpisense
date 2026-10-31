@@ -27,6 +27,14 @@ def main():
     args = parser.parse_args()
 
     session = validar_sessao(args.session_report, args.profile_config)
+    if args.profile_config:
+        from coverage_evidence import load_profile
+        profile = load_profile(args.profile_config)
+        signed = json.loads(args.session_report.read_text(encoding="utf-8"))
+        expected = {"sensor_id": args.sensor_id, "destination_ip": args.destination,
+                    "session_id": args.session, "traffic_profile": args.profile}
+        if any(signed.get(key) != value for key, value in expected.items()):
+            raise ValueError("Argumentos da integração divergem da sessão assinada")
 
     if args.output.exists():
         parser.error("Relatorio de saida ja existe")

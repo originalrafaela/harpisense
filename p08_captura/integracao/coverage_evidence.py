@@ -11,6 +11,8 @@ import hashlib
 import json
 import math
 import os
+import ipaddress
+import re
 import struct
 import subprocess
 import tempfile
@@ -60,6 +62,9 @@ def load_profile(path: Path) -> dict:
         if not isinstance(profile.get(key), str) or not profile[key].strip():
             raise ValueError(f"Perfil sem {key}")
     sources = profile.get("required_sources")
+    for key in ("source_ip", "destination_ip"):
+        if ipaddress.ip_address(profile[key]).version != 4:
+            raise ValueError("Perfil exige IPv4")
     if not isinstance(sources, list) or not sources:
         raise ValueError("Perfil sem fontes obrigatórias")
     seen = set()
@@ -67,7 +72,7 @@ def load_profile(path: Path) -> dict:
         if not isinstance(source, dict):
             raise ValueError("Fonte obrigatória inválida")
         source_id = source.get("source")
-        if not isinstance(source_id, str) or not source_id.strip() or source_id in seen:
+        if not isinstance(source_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", source_id) or source_id in seen:
             raise ValueError("Identificador de fonte ausente ou duplicado")
         seen.add(source_id)
         if source.get("kind") not in ("gateway_capture", "signed_log_bundle"):
@@ -76,7 +81,7 @@ def load_profile(path: Path) -> dict:
             raise ValueError(f"Host esperado não definido para {source_id}")
         if not isinstance(source.get("public_key"), str) or not source["public_key"].strip():
             raise ValueError(f"Chave pública não definida para {source_id}")
-        if not isinstance(source.get("public_key_sha256"), str) or len(source["public_key_sha256"]) != 64:
+        if not isinstance(source.get("public_key_sha256"), str) or not re.fullmatch(r"[0-9a-fA-F]{64}", source["public_key_sha256"]):
             raise ValueError(f"Fingerprint SHA-256 ausente para {source_id}")
     gateway = [s for s in sources if s["source"] == GATEWAY_SOURCE]
     if len(gateway) != 1 or gateway[0]["kind"] != "gateway_capture":
@@ -174,6 +179,8 @@ def verify_signed_session(session: dict, signature_path: Path, profile: dict) ->
     for field, value in expected.items():
         if session.get(field) != value:
             raise ValueError(f"Sessão diverge do perfil em {field}")
+    if session.get("destination_ip") != profile["destination_ip"]:
+        raise ValueError("Sessão diverge do perfil em destination_ip")
     required = [s["source"] for s in profile["required_sources"]]
     if session.get("required_sources") != required:
         raise ValueError("Fontes obrigatórias da sessão divergem do perfil")
@@ -247,6 +254,8 @@ def _read_signed_manifest(manifest_path: Path, source_config: dict, identity: di
                 raise ValueError("Registro de fonte fora do intervalo assinado")
             if not identity["start"] <= observed < identity["end"]:
                 raise ValueError("Evidência de fonte fora do período efetivo da sessão")
+            if row.get("journal_boot_id") is not None and row["journal_boot_id"] != manifest["boot_id"]:
+                raise ValueError("Boot do registro diverge do manifesto")
             records.append({
                 "event_id": event_id,
                 "observed_at": observed,
@@ -485,8 +494,26 @@ def build_coverage_report(session: dict, session_path: Path, signature_path: Pat
     )
     integration_windows = integration.get("aggregation", {}).get("windows", [])
     feature_by_start = {}
+    window_ids = set()
     for window in integration_windows:
-        feature_by_start[int(parse_time(window["window_start"]).timestamp() // 10)] = window
+        for field, expected in (("collection_session_id", session["session_id"]),
+                                ("sensor_id", profile["sensor_id"]),
+                                ("traffic_profile", profile["traffic_profile"]),
+                                ("src_ip", profile["source_ip"]),
+                                ("dst_ip", profile["destination_ip"])):
+            if window.get(field) != expected:
+                raise ValueError(f"Janela da integração diverge em {field}")
+        wid = window.get("window_id")
+        if not isinstance(wid, str) or not wid or wid in window_ids:
+            raise ValueError("ID de janela ausente ou duplicado")
+        window_ids.add(wid)
+        left, right = parse_time(window["window_start"]), parse_time(window["window_end"])
+        if not start <= left < right <= end or (right-left).total_seconds() != 10:
+            raise ValueError("Janela da integração parcial ou fora do período efetivo")
+        bucket_id = int(left.timestamp() // 10)
+        if left.timestamp() % 10 or bucket_id in feature_by_start:
+            raise ValueError("Janela desalinhada ou ambígua no intervalo de cobertura")
+        feature_by_start[bucket_id] = window
 
     first_bucket = math.floor(start.timestamp() / 10)
     last_bucket = math.ceil(end.timestamp() / 10)
@@ -551,8 +578,8 @@ def build_coverage_report(session: dict, session_path: Path, signature_path: Pat
         })
 
     coverage_records = []
-    if complete:
-        for source_config in profile["required_sources"]:
+    for source_config in profile["required_sources"]:
+        if statuses.get(source_config["source"], {}).get("status") == "COMPLETE":
             source_id = source_config["source"]
             source_bundles = [item for item in all_bundles if item.get("source") == source_id]
             coverage_records.append({

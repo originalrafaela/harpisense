@@ -1,5 +1,7 @@
 # P08: evidências de cobertura por fonte
 
+Retomada de 31/10: [procedimento e entrega ao arquiteto](PROCEDIMENTO_ARQUITETO_2026-10-31.md), com perfis separados Poste 2/ESP32, estado publicado versus implantado, percurso NAT documentado, auditoria offline RF/IF e pendências operacionais. As notas abaixo descrevem a base `c314ca5`; o procedimento novo prevalece sobre hipóteses antigas de host do broker/interface e sobre o aceite da retomada.
+
 Esta branch acrescenta proveniência verificável à captura/orquestração P08 existente. A captura mantém o esquema `harpisense.capture.session.v1`; a integração mantém `harpisense.p08.integration.v1` e as janelas `harpisense.if.window.v1`. A identidade de janela continua sendo produzida pelo integrador existente. O perfil descreve fontes obrigatórias por sessão, sem criar catálogo alternativo.
 
 As referências normativas usadas foram as entregas aprovadas de `referencias/versão_v2/08_Coleta_Evidencias` (mapa de fontes, identidade/janelas e limitações de visibilidade) e os contratos P08/P09 já usados em `backend/p08_p09`. Onde a V2 ainda não atualiza o coletor experimental, foram preservados os arquivos e interfaces da cópia correspondente ao staging. Não foram alterados P11, PostgresStore, frontend, serviços ou arquivos da VM.
