@@ -188,7 +188,7 @@ Pendencias mantidas:
 
 ## Proximos passos sugeridos
 
-1. Ativar Docker Desktop ou Mosquitto local.
+1. Amanha: ativar Docker Desktop ou disponibilizar Mosquitto local e validar as ACLs reais do broker com o usuario `harpisense_backend_consumer`.
 2. Instalar Python e criar ambiente virtual:
 
    ```powershell
@@ -200,17 +200,25 @@ Pendencias mantidas:
 
    ```powershell
    cd mqtt
-   docker compose --profile init run --rm mosquitto-init
+   $env:HARPISENSE_BACKEND_CONSUMER_PASSWORD="<senha-mqtt-backend-consumer>"
+   docker compose --profile init run --rm -e HARPISENSE_BACKEND_CONSUMER_PASSWORD mosquitto-init
    docker compose up -d mosquitto
+   Remove-Item Env:\HARPISENSE_BACKEND_CONSUMER_PASSWORD
    ```
 
-4. Rodar smoke test simulado:
+4. Validar ACLs do consumidor backend contra broker real:
 
    ```powershell
-   .\tests\integration\run_mqtt_smoke.ps1 -Python .\.venv\Scripts\python
+   .\tests\integration\test_mqtt_backend_consumer_acl.ps1 -BackendConsumerPassword "<senha-mqtt-backend-consumer>"
    ```
 
-5. Alternativa manual para teste simulado:
+5. Rodar smoke test simulado:
+
+   ```powershell
+   .\tests\integration\run_mqtt_smoke.ps1 -Python .\.venv\Scripts\python -BackendConsumerPassword "<senha-mqtt-backend-consumer>"
+   ```
+
+6. Alternativa manual para teste simulado:
 
    ```powershell
    $env:MQTT_PASSWORD="<definir fora do Git>"
@@ -224,8 +232,8 @@ Pendencias mantidas:
    .\.venv\Scripts\python lab\legitimate-traffic\simulate_poste.py --device poste-2 --count 2 --interval 1 --exercise-reconnect
    ```
 
-6. Depois de aprovar sensor/pinagem do Poste 1, implementar leitura real em `readEnvironment()`.
-7. Instalar PlatformIO e validar firmware:
+7. Depois de aprovar sensor/pinagem do Poste 1, implementar leitura real em `readEnvironment()`.
+8. Instalar PlatformIO e validar firmware:
 
    ```powershell
    cd iot\esp32\poste1
@@ -242,5 +250,88 @@ Pendencias mantidas:
 
 ## Commits relevantes
 
+- `30132e7 Add backend MQTT consumer credentials and ACL`
+- `d92120c Expand synthetic MQTT simulator`
+- `e72790f Merge branch 'main' into iot-mqtt`
 - `c7aa9e0 Add IoT MQTT lab delivery`
 - `b87f592 docs: prepare first delivery contracts`
+
+## Encerramento em 2026-09-17
+
+Estado final da area `iot-mqtt`:
+
+- Worktree usada: `D:\Projetos\harpisense-worktrees\iot-mqtt`.
+- Branch confirmada: `iot-mqtt`.
+- Remoto confirmado: `origin` aponta para `https://github.com/originalrafaela/harpisense.git`.
+- Implementacao existente preservada: simulador, firmware ESP32 e configuracao do broker foram mantidos.
+- Nao houve alteracao em `main`, contratos compartilhados ou arquivos de `backend-data`.
+
+Resumo implementado:
+
+- Simulador sintetico configuravel preserva o contrato MQTT, suporta multiplos postes, IDs configuraveis, intervalo, duracao, semente, reconexao e geracao JSONL local com metadados sinteticos fora do payload compartilhado.
+- Firmware do Poste 1 permanece publicando no topico contratado de ambiente, sem inventar sensor, pinagem ou leitura fisica.
+- Broker Mosquitto permanece com autenticacao obrigatoria, password file local ignorado pelo Git e ACLs separadas.
+- Usuario `harpisense_backend_consumer` foi adicionado como consumidor MQTT dedicado do backend.
+- ACL do `harpisense_backend_consumer`: somente leitura em `harpisense/v1/telemetry/#`; sem publicacao e sem acesso a `harpisense/v1/security/#`.
+- Provisionamento de credenciais exige `HARPISENSE_BACKEND_CONSUMER_PASSWORD`, nao versiona senha do consumidor backend e nao sobrescreve `mqtt/config/passwords` sem `--force`.
+- Credenciais seguem separadas entre publicador IoT, subscriber de teste e consumidor backend.
+
+Testes e verificacoes realmente executados nesta rodada:
+
+- `git branch --show-current`
+  - Resultado: `iot-mqtt`.
+- `git remote -v`
+  - Resultado: `origin` em `https://github.com/originalrafaela/harpisense.git` para fetch e push.
+- `git status --short`
+  - Resultado antes do resumo: limpo.
+- `git diff --check`
+  - Resultado: sem erros; apenas avisos esperados de CRLF do Windows.
+- Parser PowerShell de `tests\integration\run_mqtt_smoke.ps1`
+  - Resultado: `run_mqtt_smoke.ps1 parse OK`.
+- Parser PowerShell de `tests\integration\test_mqtt_backend_consumer_acl.ps1`
+  - Resultado: `test_mqtt_backend_consumer_acl.ps1 parse OK`.
+- `docker compose -f mqtt\docker-compose.yml --profile init config`
+  - Resultado: Compose renderizado com sucesso; houve aviso de acesso ao `C:\Users\amara\.docker\config.json`, mas codigo de saida foi 0.
+- `docker ps`
+  - Resultado: falhou porque o daemon Docker nao estava ativo em `npipe:////./pipe/docker_engine`.
+
+Testes preparados, mas nao executados:
+
+- `.\tests\integration\test_mqtt_backend_consumer_acl.ps1 -BackendConsumerPassword "<senha-mqtt-backend-consumer>"`
+- `.\tests\integration\run_mqtt_smoke.ps1 -Python .\.venv\Scripts\python -BackendConsumerPassword "<senha-mqtt-backend-consumer>"`
+- `.\.venv\Scripts\python -m pytest tests\integration\test_mqtt_contract.py`
+- Build e upload do firmware com PlatformIO.
+- Validacao fisica com ESP32 e broker real.
+
+Pendencias separadas:
+
+- Broker real: validar publicacao/assinatura MQTT fim a fim e validar ACLs reais do `harpisense_backend_consumer` contra Mosquitto.
+- Docker: iniciar Docker Desktop ou disponibilizar alternativa local; no ambiente atual `docker ps` nao conecta ao daemon.
+- Python: instalar Python e criar `.venv`; `py --version` retornou `No installed Python found!` e `python` nao estava no PATH.
+- ESP32: conectar hardware fisico para build/upload/monitoramento e teste real.
+- Sensores: definir sensor fisico aprovado para temperatura/umidade antes de implementar leitura real.
+- Pinagem: aprovar pinagem do Poste 1 antes de alterar firmware.
+- NTP: validar sincronizacao/estrategia de tempo no dispositivo fisico antes de tratar timestamps de hardware como leitura final.
+
+Proximo passo para amanha:
+
+1. Ativar Docker Desktop.
+2. Provisionar o password file com senha local nao versionada do consumidor backend.
+3. Subir Mosquitto.
+4. Executar `test_mqtt_backend_consumer_acl.ps1`.
+5. Instalar Python e executar os testes do simulador/contrato.
+
+## Retomada auditada em 2026-10-31
+
+- Entrada da sessão: raiz D:\Projetos\tcc - harpisense, branch main em 9d58e69. Nenhum commit feito na main. Após fetch, main está 3 commits atrás de origin/main (39720e4); nenhuma integração realizada.
+- Worktree IoT real: D:\Projetos\tcc - harpisense\harpisense-worktrees\iot-mqtt; branch iot-mqtt em 30132e7787a1f481db576f2386cd2b09d9d31912. Consulta GitHub confirmou esse mesmo SHA remoto antes deste registro.
+- Cadastro da worktree ainda aponta ao caminho antigo e aparece prunable. Nenhum reparo, prune, reset, remoção ou recriação realizado. Git -C consegue ler a worktree.
+- Inventário IoT: somente este documento estava modificado, já staged; nenhum arquivo não rastreado ou ignorado listado. A raiz contém documentos, referencias/ e outras worktrees não rastreados, preservados integralmente.
+- Implementação já salva: c7aa9e0 (entrega inicial), d92120c (simulador sintético) e 30132e7 (credenciais externas e ACL de consumidor). Não havia implementação adicional pendente no índice ou na árvore IoT.
+- Lido o trecho IoT/MQTT de docs/ENCAMINHAMENTOS_CONSOLIDADOS_20261031.md na worktree frontend-backend-autonomia. Base exata da próxima integração isolada: 9e4467ea6d57726a9fc65ab88e5f414f9a69c7cb, branch feat/frontend-backend-autonomia, resolvida localmente. Os três arquivos de iot/esp32/poste1 são idênticos entre essa base e iot-mqtt (diff vazio). Este commit documental não inicia essa integração.
+- Precedência: entregas aprovadas em referencias/versão_v2; componentes sem atualização continuam em referencias/Versões corretas. P05 proposal.v2 e P06 candidate.v2 foram lidos e continuam propostas, não contratos homologados.
+- Preservar Poste 2: harpisense/poste2/telemetry, device_id=poste2, assinatura QoS 1 e ID poste2- + SHA-256(tópico UTF-8 + byte nulo + payload bruto). Poste 1 mantém identidade harpisense.poste.poste-1 e tópico histórico environment, com credencial/ACL/client ID próprios; não habilitar publicação operacional.
+- Interrupção funcional: reconciliação de sensor/envelope e matriz de campos, tipos, unidades, identidade, tópico, ACL, tempo e deduplicação ainda não entregues. Adaptador adicional do Poste 1, rejeição de identidade trocada e regressão do Poste 2 permanecem pendentes. O firmware histórico ainda usa timestamp 1970 sem NTP e gera novo ID por publicação; não está pronto para habilitação. Nenhuma correção de código realizada nesta retomada.
+- Evidências históricas disponíveis neste documento: renderização Compose, parser dos scripts PowerShell e diff --check concluíram; MQTT/ACL real, smoke, pytest e build PlatformIO não têm aprovação registrada. Não repetir instruções operacionais antigas de setembro como próximo passo autorizado.
+- Nesta retomada: inspeção Git, leitura dos contratos e diff --cached --check sem erros; nenhum teste funcional ou compilação executado. Revisado todo o delta documental: apenas placeholders e senha explicitamente demonstrativa de laboratório, sem credenciais operacionais no delta.
+- Próxima tarefa: preparar, em integração isolada baseada no SHA aprovado, a matriz de compatibilidade para decisão de contrato, reutilizando o firmware existente. VMs, broker, consumidor e placa não foram alterados nesta rodada.
