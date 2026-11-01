@@ -1,0 +1,221 @@
+{
+  "capabilities_revision": "browser-fixture-only-1",
+  "capabilities_are_test_only": true,
+  "installation": [
+    {
+      "installation_id": "browser-local-20261101",
+      "desired_revision": 3,
+      "effective_revision": null,
+      "fence": 0,
+      "active_operation": null
+    }
+  ],
+  "operations": [
+    {
+      "operation_id": "f45619fd-4016-464b-b868-c1dbe54447b2",
+      "installation_id": "browser-local-20261101",
+      "revision": 1,
+      "status": "VALIDATED"
+    },
+    {
+      "operation_id": "826f5894-b8e6-4821-a24c-89ca4edf1de2",
+      "installation_id": "browser-local-20261101",
+      "revision": 2,
+      "status": "DRAFT"
+    },
+    {
+      "operation_id": "5c68b45b-c092-4596-80a9-e20c916a24e8",
+      "installation_id": "browser-local-20261101",
+      "revision": 3,
+      "status": "VALIDATED"
+    }
+  ],
+  "progress": [
+    {
+      "installation_id": "browser-local-20261101",
+      "version": 5,
+      "document": {
+        "step": "review",
+        "parameters": {
+          "timezone": "America/Sao_Paulo",
+          "display_name": "Laboratorio navegador isolado"
+        }
+      },
+      "updated_at": "2026-11-01 22:25:02.532991+00:00"
+    }
+  ],
+  "configuration_audit": [
+    {
+      "id": 1,
+      "installation_id": "browser-local-20261101",
+      "operation_id": "f45619fd-4016-464b-b868-c1dbe54447b2",
+      "revision": 1,
+      "actor": "admin-account-1",
+      "event": "PROPOSED",
+      "result_code": "OK",
+      "at": "2026-11-01 22:23:59.610700+00:00"
+    },
+    {
+      "id": 2,
+      "installation_id": "browser-local-20261101",
+      "operation_id": "f45619fd-4016-464b-b868-c1dbe54447b2",
+      "revision": 1,
+      "actor": "admin-account-1",
+      "event": "VALIDATED",
+      "result_code": "SCHEMA_AND_REFERENCES_ONLY",
+      "at": "2026-11-01 22:24:06.125651+00:00"
+    },
+    {
+      "id": 3,
+      "installation_id": "browser-local-20261101",
+      "operation_id": "826f5894-b8e6-4821-a24c-89ca4edf1de2",
+      "revision": 2,
+      "actor": "admin-account-1",
+      "event": "PROPOSED",
+      "result_code": "OK",
+      "at": "2026-11-01 22:27:30.109632+00:00"
+    },
+    {
+      "id": 4,
+      "installation_id": "browser-local-20261101",
+      "operation_id": "5c68b45b-c092-4596-80a9-e20c916a24e8",
+      "revision": 3,
+      "actor": "admin-account-1",
+      "event": "PROPOSED",
+      "result_code": "OK",
+      "at": "2026-11-01 22:27:42.091416+00:00"
+    },
+    {
+      "id": 5,
+      "installation_id": "browser-local-20261101",
+      "operation_id": "5c68b45b-c092-4596-80a9-e20c916a24e8",
+      "revision": 3,
+      "actor": "admin-account-1",
+      "event": "VALIDATED",
+      "result_code": "SCHEMA_AND_REFERENCES_ONLY",
+      "at": "2026-11-01 22:27:48.831581+00:00"
+    }
+  ],
+  "setup_audit": [
+    {
+      "id": 1,
+      "installation_id": "browser-local-20261101",
+      "actor": "admin-account-1",
+      "version": 1,
+      "event": "SETUP_SAVED",
+      "at": "2026-11-01 22:23:13.762581+00:00"
+    },
+    {
+      "id": 2,
+      "installation_id": "browser-local-20261101",
+      "actor": "admin-account-1",
+      "version": 2,
+      "event": "SETUP_SAVED",
+      "at": "2026-11-01 22:23:55.163204+00:00"
+    },
+    {
+      "id": 3,
+      "installation_id": "browser-local-20261101",
+      "actor": "admin-account-1",
+      "version": 3,
+      "event": "SETUP_SAVED",
+      "at": "2026-11-01 22:24:17.733848+00:00"
+    },
+    {
+      "id": 4,
+      "installation_id": "browser-local-20261101",
+      "actor": "admin-account-1",
+      "version": 4,
+      "event": "SETUP_SAVED",
+      "at": "2026-11-01 22:24:47.799111+00:00"
+    },
+    {
+      "id": 5,
+      "installation_id": "browser-local-20261101",
+      "actor": "admin-account-1",
+      "version": 5,
+      "event": "SETUP_SAVED",
+      "at": "2026-11-01 22:25:02.535393+00:00"
+    }
+  ],
+  "admin_audit": [
+    {
+      "id": 1,
+      "event": "PROVISION",
+      "at": "2026-11-01 22:22:07.241993+00:00",
+      "result": "OK"
+    },
+    {
+      "id": 2,
+      "event": "LOGIN",
+      "at": "2026-11-01 22:22:50.729297+00:00",
+      "result": "OK"
+    },
+    {
+      "id": 3,
+      "event": "LOGIN",
+      "at": "2026-11-01 22:23:47.540006+00:00",
+      "result": "OK"
+    },
+    {
+      "id": 4,
+      "event": "LOGIN",
+      "at": "2026-11-01 22:25:02.434559+00:00",
+      "result": "OK"
+    },
+    {
+      "id": 5,
+      "event": "LOGOUT",
+      "at": "2026-11-01 22:25:02.583079+00:00",
+      "result": "OK"
+    },
+    {
+      "id": 6,
+      "event": "LOGIN",
+      "at": "2026-11-01 22:25:52.283723+00:00",
+      "result": "OK"
+    },
+    {
+      "id": 7,
+      "event": "LOGOUT",
+      "at": "2026-11-01 22:26:20.184894+00:00",
+      "result": "OK"
+    },
+    {
+      "id": 8,
+      "event": "LOGIN",
+      "at": "2026-11-01 22:27:18.473519+00:00",
+      "result": "OK"
+    },
+    {
+      "id": 9,
+      "event": "LOGIN",
+      "at": "2026-11-01 22:27:30.037237+00:00",
+      "result": "OK"
+    },
+    {
+      "id": 10,
+      "event": "LOGOUT",
+      "at": "2026-11-01 22:27:30.136106+00:00",
+      "result": "OK"
+    },
+    {
+      "id": 11,
+      "event": "LOGOUT",
+      "at": "2026-11-01 22:27:55.063154+00:00",
+      "result": "OK"
+    }
+  ],
+  "sessions": [
+    {
+      "total": 6,
+      "revoked": 4
+    }
+  ],
+  "projections": [
+    {
+      "count": 0
+    }
+  ],
+  "utc": "2026-11-01 22:28:06.927079+00:00"
+}
