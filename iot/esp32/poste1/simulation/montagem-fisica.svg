@@ -21,4 +21,3 @@
 <text x="570" y="387">A (+) LED C (−)</text><text x="770" y="465">GND comum</text>
 <text x="40" y="490">USB alimenta a placa. Divisor em 3,3 V. Nunca conectar o nó ADC ao VIN/5V.</text>
 </g></svg>
-
