@@ -11,15 +11,23 @@ test('transporte só aceita destino loopback sem credenciais',()=>{
 });
 
 test('proxy real Vite: caminho, Bearer, status, leitura restrita e logs sem credenciais (fixture isolada)',async t=>{
-  const calls:{url:string;authorization:string|undefined}[]=[];
+  const calls:{url:string;method:string;authorization:string|undefined}[]=[];
   const fixture=httpServer((request,response)=>{
-    calls.push({url:request.url||'',authorization:request.headers.authorization});
+    calls.push({url:request.url||'',method:request.method||'GET',authorization:request.headers.authorization});
     response.setHeader('content-type','application/json');
     response.setHeader('set-cookie','session=should-not-be-forwarded');
     if(request.headers.authorization!=='Bearer '+'a'.repeat(43)){
       response.writeHead(401,{'www-authenticate':'Basic'});return response.end('{"detail":"Unauthorized"}');
     }
     if(request.url?.includes('/health'))return response.end('{"api":"available","projection_store":"available"}');
+    if(request.url?.startsWith('/api/v1/config/current'))return response.end('{"desired_revision":0,"effective_revision":null,"operational":false}');
+    if(request.url?.startsWith('/api/v1/config/setup')&&request.method==='GET')return response.end('{"version":0,"document":null,"state":"not_started","operational":false,"pending":[]}');
+    if(request.url?.startsWith('/api/v1/config/setup')&&request.method==='PUT')return response.end('{"version":1,"state":"draft_saved","operational":false,"pending":[]}');
+    if(request.url?.startsWith('/api/v1/config/catalog'))return response.end('{"firmware_profiles":[],"deployment_profiles":[],"applicators":[]}');
+    if(request.url?.startsWith('/api/v1/config/history'))return response.end('[]');
+    if(request.url?.startsWith('/api/v1/config/proposals/')&&request.url.endsWith('/validate'))return response.end('{"status":"VALIDATED"}');
+    if(request.url?.startsWith('/api/v1/config/proposals/'))return response.end('{"status":"DRAFT"}');
+    if(request.url==='/api/v1/config/proposals')return response.end('{"operation_id":"123e4567-e89b-12d3-a456-426614174000","revision":1,"status":"DRAFT"}');
     response.end('[{"id":"fixture-record","revision":1,"source":"trusted-service","created_at":"2026-10-18T01:14:12.498058-03:00","data":{"device_id":"poste2","temperatura":28.4,"tipo":"teste_systemd"}}]');
   });
   await new Promise<void>(resolve=>fixture.listen(0,'127.0.0.1',resolve));
@@ -51,4 +59,13 @@ test('proxy real Vite: caminho, Bearer, status, leitura restrita e logs sem cred
   assert.equal((await fetch(base+'/telemetry?password=forbidden',{headers})).status,400);
   assert.equal(calls.length,count+1);
   assert.ok(!logs.join('').includes('transport-fixture'));assert.ok(!logs.join('').includes(headers.Authorization));
+  const config=`http://127.0.0.1:${local.port}/p11-api/api/v1/config`;const operation='123e4567-e89b-12d3-a456-426614174000';const start=calls.length;
+  for(const [path,method,body] of [['/setup','GET',undefined],['/current','GET',undefined],['/catalog','GET',undefined],['/history?after=0&limit=100','GET',undefined],['/setup','PUT',{expected_version:0}],['/proposals','POST',{schema_version:'1.0.0'}],[`/proposals/${operation}`,'GET',undefined],[`/proposals/${operation}/validate`,'POST',{expected_revision:1}] ] as const){
+    const response=await fetch(config+path,{method,headers:{...headers,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});assert.equal(response.status,200,`${method} ${path}`);
+  }
+  assert.deepEqual(calls.slice(start).map(call=>call.method),['GET','GET','GET','GET','PUT','POST','GET','POST']);
+  assert.ok(calls.slice(start).every(call=>call.url.startsWith('/api/v1/config/')&&call.authorization===headers.Authorization));
+  assert.ok(calls.slice(start).some(call=>call.url==='/api/v1/config/history?after=0&limit=100'));
+  assert.equal((await fetch(config+'/apply',{method:'POST',headers})).status,405);
+  assert.equal((await fetch(config+'/history?after=0&secret=no',{headers})).status,400);
 });

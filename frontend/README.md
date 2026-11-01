@@ -85,4 +85,4 @@ Para atualizar o catálogo, substituir a cópia da fonte por uma nova entrega ap
 
 ## Limites e entrega
 
-Consulte [matriz e pendências](docs/INTEGRACAO.md), [testes](docs/VERIFICACAO.md), [ajuste do dashboard](docs/AJUSTE_DASHBOARD.md) e [entrega ao Arquiteto](docs/ENTREGA.md). Interface preparada e testada com respostas isoladas não significa integração com a VM. Listas são páginas de até 50 registros, com paginação P11; filtros se aplicam à página atual. O perfil legacy tem limite e não anuncia paginação por offset que o servidor não implementa.
+Consulte [matriz e pendências](docs/INTEGRACAO.md), [integração do assistente com o gerenciador](docs/INTEGRACAO_GERENCIADOR.md), [testes](docs/VERIFICACAO.md), [ajuste do dashboard](docs/AJUSTE_DASHBOARD.md) e [entrega ao Arquiteto](docs/ENTREGA.md). Interface preparada e testada com respostas isoladas não significa integração com a VM. Listas são páginas de até 50 registros, com paginação P11; filtros se aplicam à página atual. O perfil legacy tem limite e não anuncia paginação por offset que o servidor não implementa.
