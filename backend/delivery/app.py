@@ -35,3 +35,26 @@ def build_app():
     install_deterministic_harpia(app, store)
     install_controls(app, Controls(PostgresControls(dsn)))
     return app
+
+
+def build_candidate_app(*, installation_id, capabilities, allowed_origins,
+                        technical_credentials=()):
+    """Installer-supplied scope and trusted manifest; no migrations or seeds.
+
+    Explicit candidate factory: existing build_app callers remain compatible.
+    Authentication and configuration share the existing PostgreSQL connection.
+    """
+    from admin_auth import AdminAuth, install_admin_auth
+    from config_manager.store import ConfigStore
+    from config_manager.api import install_config_api
+
+    if not installation_id:
+        raise ValueError('Installer installation identity required')
+    app = build_app()
+    dsn = os.environ['DATABASE_URL']
+    store = PostgresStore(dsn)
+    install_admin_auth(app, AdminAuth(dsn, technical_credentials=technical_credentials),
+                       allowed_origins=allowed_origins)
+    config = ConfigStore(store._connect, capabilities)
+    install_config_api(app, config, installation_id=installation_id)
+    return app
