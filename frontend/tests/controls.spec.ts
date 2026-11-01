@@ -18,6 +18,7 @@ test('confirma perfil só após servidor; recusa, parada e logs fora da home',as
   if(request.method()==='POST')state={...state,emergency_stopped:true,revision:3};
   return route.fulfill({contentType:'application/json',body:JSON.stringify(request.url().includes('/audit')?[]:state)});
  });
+ await page.route('**/api/v1/config/**',route=>{const path=new URL(route.request().url()).pathname;if(path.endsWith('/setup'))return route.fulfill({json:{version:0,document:null,state:'not_started',operational:false,pending:[]}});if(path.endsWith('/current'))return route.fulfill({json:{desired_revision:0,effective_revision:null,proposed:null,effective:null,state:'not_started',operational:false}});if(path.endsWith('/catalog'))return route.fulfill({json:{firmware_profiles:[],deployment_profiles:[],applicators:[]}});if(path.endsWith('/history'))return route.fulfill({json:[]});return route.fulfill({status:404,json:{}})});
  await enter(page);await expect(page.getByRole('heading',{name:'Logs e auditoria de controles'})).toHaveCount(0);
  await page.getByRole('link',{name:'Configurações',exact:true}).click();await expect(page.getByText('Último estado confirmado: M1',{exact:false})).toBeVisible();
  await page.getByLabel('Justificativa da alteração').fill('Teste isolado de mudança');await page.getByRole('button',{name:'Solicitar M3',exact:true}).click();

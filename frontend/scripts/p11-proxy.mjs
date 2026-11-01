@@ -11,6 +11,10 @@ export function p11Transport(target) {
   const prefix = '/p11-api';
   const allowed = new Set(['health','asset','telemetry','network_event','window','detection','xai','evidence','incident','risk','decision','approval','execution','verification','bitnet'].map(kind=>`/api/v1/p11/${kind}`));
   allowed.add('/api/v1/security/settings/mode/default');allowed.add('/api/v1/security/audit');
+  const configReads=new Set(['/api/v1/config/current','/api/v1/config/setup','/api/v1/config/catalog','/api/v1/config/history']);
+  const configWrite=(path,method)=>method==='PUT'&&path==='/api/v1/config/setup'||method==='POST'&&path==='/api/v1/config/proposals';
+  const configOperation=path=>/^\/api\/v1\/config\/proposals\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(path);
+  const configValidation=path=>/^\/api\/v1\/config\/proposals\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/validate$/.test(path);
   const guard = server => {server.middlewares.use((request, response, next) => {
     if (!request.url?.startsWith(prefix)) return next();
     const url = new URL(request.url, 'http://127.0.0.1');
@@ -28,14 +32,15 @@ export function p11Transport(target) {
       response.writeHead(401, {'Content-Type':'application/json','WWW-Authenticate':'Bearer'});
       return response.end('{"error":{"code":"AUTH_REQUIRED"}}');
     }
-    const read=request.method==='GET'&&(allowed.has(path)||/^\/api\/v1\/p11\/explain\/[A-Za-z0-9_.:@-]{1,128}$/.test(path)||/^\/api\/v1\/p11\/bitnet\/[A-Za-z0-9_.:@-]{1,128}\/history$/.test(path));
-    const write=(request.method==='PUT'&&path==='/api/v1/security/settings/mode/default')||(request.method==='POST'&&path==='/api/v1/security/emergency-stop');
+    const read=request.method==='GET'&&(allowed.has(path)||configReads.has(path)||configOperation(path)||/^\/api\/v1\/p11\/explain\/[A-Za-z0-9_.:@-]{1,128}$/.test(path)||/^\/api\/v1\/p11\/bitnet\/[A-Za-z0-9_.:@-]{1,128}\/history$/.test(path));
+    const write=(request.method==='PUT'&&path==='/api/v1/security/settings/mode/default')||(request.method==='POST'&&path==='/api/v1/security/emergency-stop')||configWrite(path,request.method)||request.method==='POST'&&configValidation(path);
     if (!read&&!write&&!auth) {
       response.writeHead(request.method !== 'GET' ? 405 : 404, {'Content-Type': 'application/json'});
       return response.end('{"detail":"Recurso não integrado neste transporte restrito"}');
     }
     // Only pagination fields documented by P11; reject arbitrary URL parameters.
-    if (((write||auth)&&url.search)||[...url.searchParams.keys()].some(key => !['limit', 'offset'].includes(key))) {
+    const allowedQuery=path==='/api/v1/config/history'?['after','limit']:['limit','offset'];
+    if (((write||auth)&&url.search)||[...url.searchParams.keys()].some(key => !allowedQuery.includes(key))) {
       response.writeHead(400, {'Content-Type': 'application/json'});
       return response.end('{"detail":"Parâmetro não permitido"}');
     }

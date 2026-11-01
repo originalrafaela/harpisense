@@ -1,7 +1,7 @@
 export type Profile = 'p11' | 'legacy';
 export type Row = {id:string; revision?:number; source?:string; created_at?:string; data:Record<string,unknown>};
 export type Credentials = {username:string;password:string};
-export class ApiError extends Error { kind:string; constructor(kind:string,message:string){super(message);this.kind=kind} }
+export class ApiError extends Error { kind:string; fields:{field:string;code:string}[]; currentRevision:number|null; constructor(kind:string,message:string,fields:{field:string;code:string}[]=[],currentRevision:number|null=null){super(message);this.kind=kind;this.fields=fields;this.currentRevision=currentRevision} }
 export const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object' && v!==null && !Array.isArray(v);
 export function adaptRows(value:unknown,profile:Profile):Row[]{
  if(!Array.isArray(value))throw new ApiError('invalid','Resposta inválida: esperada uma lista.');
@@ -31,12 +31,14 @@ export class Client {
  private expiresAt=0;
  private epoch=0;
  private active=new Set<AbortController>();
+ private configActive=new Set<AbortController>();
  constructor(base:string,profile:Profile,fetcher:typeof fetch=fetch,timeout=10000){
   this.base=base;this.profile=profile;this.fetcher=fetcher.bind(globalThis);this.timeout=timeout;
   if(base&&base!=='/p11-api'){let u:URL;try{u=new URL(base)}catch{throw new ApiError('config','Use /p11-api para o túnel local ou uma URL HTTPS absoluta.')}if(!['http:','https:'].includes(u.protocol)||u.username||u.password||u.search||u.hash||(u.protocol==='http:'&&!['localhost','127.0.0.1','[::1]'].includes(u.hostname)))throw new ApiError('config','Use HTTPS ou HTTP no loopback, sem credenciais, query ou fragmento.');}
  }
  cancel(){this.active.forEach(c=>c.abort());this.active.clear()}
- forgetSession(){this.epoch++;this.token=null;this.expiresAt=0;this.cancel()}
+ private cancelSessionRequests(){this.cancel();this.configActive.forEach(c=>c.abort());this.configActive.clear()}
+ forgetSession(){this.epoch++;this.token=null;this.expiresAt=0;this.cancelSessionRequests()}
  remainingSessionMs(){return Math.max(0,this.expiresAt-Date.now())}
  async logout(){const token=this.token;this.forgetSession();if(token)await this.request('/api/v1/admin-auth/logout','POST',undefined,token,true)}
  async login(credentials:Credentials){
@@ -57,18 +59,18 @@ export class Client {
  }
  private async request(path:string,method='GET',body?:unknown,token?:string,detached=false):Promise<unknown>{
   if(!this.base)throw new ApiError('config','API não configurada. Informe a URL acessível ao navegador.');
-  const c=new AbortController();if(!detached)this.active.add(c);const timer=setTimeout(()=>c.abort(),this.timeout);
+  const c=new AbortController();if(!detached){if(path.startsWith('/api/v1/config/'))this.configActive.add(c);else this.active.add(c)}const timer=setTimeout(()=>c.abort(),this.timeout);
   try{
    const response=await this.fetcher(this.base.replace(/\/$/,'')+path,{method,body:body===undefined?undefined:JSON.stringify(body),headers:{...(token?{Authorization:`Bearer ${token}`} : {}),...(body===undefined?{}:{'Content-Type':'application/json'})},signal:c.signal,cache:'no-store',credentials:'omit',redirect:'error'});
-   if(response.status===409){let message='Alteração recusada pelo servidor. Consulte novamente.';try{const v=await response.json();if(object(v)&&object(v.detail)&&typeof v.detail.message==='string')message=v.detail.message}catch{}throw new ApiError('conflict',message)}
-   if(!response.ok){let code='';try{const value=await response.json();if(object(value)&&object(value.error)&&typeof value.error.code==='string')code=value.error.code}catch{}
+   if(response.status===409){let message='Conflito de revisão. O estado salvo mudou; consulte a versão atual antes de tentar novamente.';let currentRevision:number|null=null;try{const v=await response.json();if(object(v)&&object(v.detail)&&typeof v.detail.message==='string')message=v.detail.message;if(object(v)&&object(v.error)){if(typeof v.error.current_revision==='number')currentRevision=v.error.current_revision;if(typeof v.error.code==='string')message=`Conflito informado pela API (${v.error.code}). Consulte a versão atual antes de reapresentar a alteração.`}}catch{}throw new ApiError('conflict',message,[],currentRevision)}
+   if(!response.ok){let code='';let fields:{field:string;code:string}[]=[];try{const value=await response.json();if(object(value)&&object(value.error)){if(typeof value.error.code==='string')code=value.error.code;if(Array.isArray(value.error.fields))fields=value.error.fields.filter((f):f is {field:string;code:string}=>object(f)&&typeof f.field==='string'&&typeof f.code==='string')}}catch{}
     if(response.status===401&&token===this.token)this.forgetSession();
     const kind=response.status===401?'unauthorized':response.status===403?'forbidden':response.status===404?'unavailable':response.status===429?'throttled':'error';
-    throw new ApiError(kind,response.status===401?(code==='SESSION_EXPIRED'?'Sessão expirada. Entre novamente.':code==='SESSION_REVOKED'||code==='SESSION_INVALID'||code==='AUTH_REQUIRED'?'Sessão inválida ou encerrada. Entre novamente.':'Credenciais inválidas ou sessão não autorizada.'):response.status===403?'Acesso negado.':response.status===404?'Endpoint indisponível nesta API.':response.status===429?'Muitas tentativas. Aguarde antes de entrar novamente.':`API indisponível (HTTP ${response.status}).`)}
+    throw new ApiError(kind,response.status===401?(code==='SESSION_EXPIRED'?'Sessão expirada. Entre novamente.':code==='SESSION_REVOKED'||code==='SESSION_INVALID'||code==='AUTH_REQUIRED'?'Sessão inválida ou encerrada. Entre novamente.':'Credenciais inválidas ou sessão não autorizada.'):response.status===403?'Acesso negado pela política de origem da API.':response.status===404?'Endpoint indisponível nesta API, ou recurso ausente.':response.status===413?'Documento acima do limite de 64 KiB.':response.status===422?'A API recusou campos da configuração; revise os campos destacados.':response.status===429?'Muitas tentativas. Aguarde antes de entrar novamente.':`API indisponível (HTTP ${response.status}).`,fields)}
    if(response.status===204)return null;
    try{return await response.json()}catch{throw new ApiError('invalid','A API retornou JSON inválido.')}
   }catch(e){if(e instanceof ApiError)throw e;throw new ApiError('network',c.signal.aborted?'Consulta cancelada ou tempo limite excedido.':'Falha de rede/configuração. Verifique URL, proxy, HTTPS e CORS. Não foi possível consultar a API.');}
-  finally{clearTimeout(timer);this.active.delete(c)}
+  finally{clearTimeout(timer);this.active.delete(c);this.configActive.delete(c)}
  }
  async session(){const value=await this.get('/api/v1/admin-auth/session');if(!object(value)||value.authenticated!==true||typeof value.username!=='string'||value.mfa_available!==false||value.email_recovery_available!==false)throw new ApiError('invalid','Estado de sessão incompatível.');return value}
  async rows(kind:string,offset=0,limit=50){return adaptRows(await this.get(`${this.path(kind)}?limit=${limit}${this.profile==='p11'?`&offset=${offset}`:''}`),this.profile)}

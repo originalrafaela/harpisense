@@ -34,7 +34,7 @@ Todos os endpoints abaixo são **GET**. Nenhuma integração real com VM foi val
 | Laboratório | catálogo P03 local gerado | C01–C09 oficial + ações | sem API de ensaios; não executado |
 | Backup | nenhum | contrato de histórico não fornecido | estados e evidências não informados |
 | Auditoria | nenhum | contrato de leitura não fornecido | estrutura própria; sem histórico fictício |
-| Configurações | somente preferências locais | URL/perfil | sem controle operacional remoto |
+| Configurações e assistente | `/api/v1/config/{setup,current,catalog,history,proposals}`; consulta `GET /proposals/{id}` e validação `POST /proposals/{id}/validate` | contrato confirmado em `docs/CONTRATO_FRONTEND_GERENCIADOR_20261101.md` e `backend/config_manager/API.md` | conectado à sessão administrativa; proposta/validação não aplicam; `operational=false`, sem endpoint de aplicação. Matriz detalhada em [INTEGRACAO_GERENCIADOR.md](INTEGRACAO_GERENCIADOR.md) |
 
 Prefixo completo P11: `/api/v1/p11/`. O perfil `legacy`, escolhido explicitamente, consulta `/api/v1/telemetry`, `/api/v1/network-events`, `/api/v1/health`, encontrados no código Git. Outros recursos ficam não configurados. Não há detecção automática de versão ou fallback.
 
