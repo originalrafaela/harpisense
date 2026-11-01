@@ -1,0 +1,6 @@
+synthetic_adc=500 GPIO34_read=34 GPIO25_command=0
+synthetic_adc=2000 GPIO34_read=34 GPIO25_command=0
+synthetic_adc=3000 GPIO34_read=34 GPIO25_command=1
+synthetic_adc=2000 GPIO34_read=34 GPIO25_command=1
+synthetic_adc=500 GPIO34_read=34 GPIO25_command=0
+PASS: real hardware.cpp and hysteresis; synthetic ADC; MQTT closed

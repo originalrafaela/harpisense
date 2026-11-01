@@ -1,0 +1,26 @@
+[
+  {
+    "environment": "esp32dev",
+    "file": "firmware.bin",
+    "bytes": 917392,
+    "sha256": "1E398A3EBA9917B8A17081047F6C6B6D15F0E1C632C20B1E8821EC9E07CFEE4E"
+  },
+  {
+    "environment": "esp32dev",
+    "file": "firmware.elf",
+    "bytes": 13842036,
+    "sha256": "AD042D79766377D8E5835363632ED3973A1D21376DFE484B5A85E1D99BE8B063"
+  },
+  {
+    "environment": "wokwi",
+    "file": "firmware.bin",
+    "bytes": 917648,
+    "sha256": "A01327F11AC8102E3B1D138B71B105EFC112040162AB0B0383D26EA51D6D33F6"
+  },
+  {
+    "environment": "wokwi",
+    "file": "firmware.elf",
+    "bytes": 13842820,
+    "sha256": "C982E7AFB5B06AD59DA1014D84BCD9D5CFFCBA7C70BC5609F5395A5A0D97AFF2"
+  }
+]

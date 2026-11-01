@@ -1,0 +1,8 @@
+{
+  "version": "0.29.1",
+  "source": "https://github.com/wokwi/wokwi-cli/releases/download/v0.29.1/wokwi-cli-win-x64.exe",
+  "sha256": "45292E3C4F32BA4CFBCC7A457A6DF48AAD95FDB3269A218CB83423DA9DC483B2",
+  "lint_exit": 0,
+  "simulation_attempt_exit": 1,
+  "reason": "Missing WOKWI_CLI_TOKEN; simulation did not start"
+}

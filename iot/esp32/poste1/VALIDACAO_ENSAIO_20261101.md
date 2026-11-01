@@ -1,5 +1,9 @@
 # Registro desta entrega — 01/11/2026
 
+Atualização posterior: o bloqueio de compilação foi resolvido na continuação
+de `fdfd27e`. Resultados atuais em [VALIDACAO_BUILD_20261101.md](VALIDACAO_BUILD_20261101.md).
+O texto abaixo preserva o registro histórico da primeira rodada.
+
 Branch feat/poste1-ensaio-wokwi, base exata 49d2eac. Nenhuma alteração em src/, include/ ou lib/PosteCore/; fontes de leitura, histerese, identidade, fila e comunicação preservadas. Perfil wokwi herda o perfil esp32dev e somente injeta simulation/config.h, sem credenciais e com publicação fechada. Configuração física de exemplo continua em include/config.example.h.
 
 ## Executado

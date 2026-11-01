@@ -7,3 +7,5 @@ include/config.h
 test-results/
 # Repository Python defaults ignore lib/; this is a source library.
 !lib/
+# Reviewed, credential-free evidence for the isolated build diagnosis.
+!evidence/build-20261101/*.log

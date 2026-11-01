@@ -1,0 +1,113 @@
+Processing wokwi (platform: espressif32@6.9.0; board: esp32dev; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/esp32dev.html
+PLATFORM: Espressif 32 (6.9.0) > Espressif ESP32 Dev Module
+HARDWARE: ESP32 240MHz, 320KB RAM, 4MB Flash
+DEBUG: Current (cmsis-dap) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES:
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b
+ - tool-esptoolpy @ 1.40501.0 (4.5.1)
+ - toolchain-xtensa-esp32 @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ chain, Compatibility ~ soft
+Found 35 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- PubSubClient @ 2.8.0
+|-- WiFi @ 2.0.0
+|-- WiFiClientSecure @ 2.0.0
+|-- PosteCore
+Building in release mode
+Compiling .pio\build\wokwi\src\communication.cpp.o
+Compiling .pio\build\wokwi\src\hardware.cpp.o
+Compiling .pio\build\wokwi\src\main.cpp.o
+Compiling .pio\build\wokwi\src\trusted_clock.cpp.o
+Building .pio\build\wokwi\bootloader.bin
+esptool.py v4.5.1
+Creating esp32 image...
+Merged 1 ELF section
+Successfully created esp32 image.
+Generating partitions .pio\build\wokwi\partitions.bin
+Compiling .pio\build\wokwi\lib691\PubSubClient\PubSubClient.cpp.o
+Compiling .pio\build\wokwi\lib90a\WiFi\WiFi.cpp.o
+Archiving .pio\build\wokwi\lib691\libPubSubClient.a
+Compiling .pio\build\wokwi\lib90a\WiFi\WiFiAP.cpp.o
+Compiling .pio\build\wokwi\lib90a\WiFi\WiFiClient.cpp.o
+Compiling .pio\build\wokwi\lib90a\WiFi\WiFiGeneric.cpp.o
+Compiling .pio\build\wokwi\lib90a\WiFi\WiFiMulti.cpp.o
+Compiling .pio\build\wokwi\lib90a\WiFi\WiFiSTA.cpp.o
+Compiling .pio\build\wokwi\lib90a\WiFi\WiFiScan.cpp.o
+Compiling .pio\build\wokwi\lib90a\WiFi\WiFiServer.cpp.o
+Compiling .pio\build\wokwi\lib90a\WiFi\WiFiUdp.cpp.o
+Compiling .pio\build\wokwi\libbcb\WiFiClientSecure\WiFiClientSecure.cpp.o
+Archiving .pio\build\wokwi\lib90a\libWiFi.a
+Compiling .pio\build\wokwi\libbcb\WiFiClientSecure\esp_crt_bundle.c.o
+Compiling .pio\build\wokwi\libbcb\WiFiClientSecure\ssl_client.cpp.o
+Compiling .pio\build\wokwi\libc7a\PosteCore\poste_core.cpp.o
+Archiving .pio\build\wokwi\libc7a\libPosteCore.a
+Compiling .pio\build\wokwi\FrameworkArduino\Esp.cpp.o
+Archiving .pio\build\wokwi\libbcb\libWiFiClientSecure.a
+Compiling .pio\build\wokwi\FrameworkArduino\FirmwareMSC.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\FunctionalInterrupt.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\HWCDC.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\HardwareSerial.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\IPAddress.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\IPv6Address.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\MD5Builder.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\Print.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\Stream.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\StreamString.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\Tone.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\USB.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\USBCDC.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\USBMSC.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\WMath.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\WString.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\base64.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\cbuf.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-adc.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-bt.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-cpu.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-dac.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-gpio.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-i2c-slave.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-i2c.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-ledc.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-matrix.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-misc.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-psram.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-rgb-led.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-rmt.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-sigmadelta.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-spi.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-time.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-timer.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-tinyusb.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-touch.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\esp32-hal-uart.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\firmware_msc_fat.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\libb64\cdecode.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\libb64\cencode.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\main.cpp.o
+Compiling .pio\build\wokwi\FrameworkArduino\stdlib_noniso.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\wiring_pulse.c.o
+Compiling .pio\build\wokwi\FrameworkArduino\wiring_shift.c.o
+Archiving .pio\build\wokwi\libFrameworkArduino.a
+Linking .pio\build\wokwi\firmware.elf
+Retrieving maximum program size .pio\build\wokwi\firmware.elf
+Checking size .pio\build\wokwi\firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [==        ]  17.0% (used 55668 bytes from 327680 bytes)
+Flash: [=======   ]  69.5% (used 911069 bytes from 1310720 bytes)
+Building .pio\build\wokwi\firmware.bin
+esptool.py v4.5.1
+Creating esp32 image...
+Merged 27 ELF sections
+Successfully created esp32 image.
+========================= [SUCCESS] Took 57.73 seconds =========================
+
+Environment    Status    Duration
+-------------  --------  ------------
+wokwi          SUCCESS   00:00:57.725
+========================= 1 succeeded in 00:00:57.725 =========================

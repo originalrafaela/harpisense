@@ -1,5 +1,9 @@
 # Ensaio reproduzível do Poste 1
 
+Build Windows corrigido e passos atuais de simulação:
+[simulation/EXECUTAR.md](simulation/EXECUTAR.md). Evidências atuais e limites:
+[VALIDACAO_BUILD_20261101.md](VALIDACAO_BUILD_20261101.md).
+
 Base: feat/poste1-ldr-firmware, 49d2eac. A lógica em src/ e lib/PosteCore/ é a mesma para placa e Wokwi. Nenhum firmware alternativo foi criado. O ambiente wokwi apenas injeta configuração de circuito, inverte a orientação do ADC e mantém todos os gates de publicação fechados. Nunca gravar o ambiente wokwi em hardware.
 
 ## Referências e precedência

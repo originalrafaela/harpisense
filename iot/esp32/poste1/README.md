@@ -171,3 +171,9 @@ autorizado antes de qualquer habilitação operacional. Não alterar broker/VMs
 para fazer o firmware passar nesses gates.
 
 Ensaio físico e simulação local: consulte [ENSAIO.md](ENSAIO.md). O ambiente wokwi reutiliza as fontes existentes e nunca deve ser gravado em placa.
+
+Build Windows com core isolado: [passos atuais](simulation/EXECUTAR.md).
+`scripts/build.ps1` exige `-CoreDir` e aceita `-Python` para o executável local.
+[Resultados desta continuação](VALIDACAO_BUILD_20261101.md): esp32dev e wokwi
+compilados; Wokwi lint passou com informação sobre o catálogo de placa;
+execução virtual pendente de token/licença. Nenhum ensaio físico executado.
