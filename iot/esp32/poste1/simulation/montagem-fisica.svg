@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="520" viewBox="0 0 1000 520">
+<rect width="1000" height="520" fill="#fff"/>
+<g font-family="sans-serif" fill="#17202a" font-size="20">
+<text x="40" y="40" font-size="26">Poste 1 — montagem física proposta (ESP32-WROOM-32)</text>
+<text x="40" y="76">Montar sem energia. Confirmar serigrafia da placa e trilhos da protoboard.</text>
+<rect x="40" y="120" width="210" height="270" rx="12" fill="#e9f1f7" stroke="#17202a" stroke-width="2"/>
+<text x="65" y="160">ESP32 dev board</text><text x="175" y="210">3V3</text><text x="163" y="280">GPIO34</text><text x="163" y="350">GPIO25</text>
+<g fill="none" stroke-width="4">
+<path d="M250 202 H340 M430 202 H520 V272 H250" stroke="#b82020"/>
+<path d="M520 202 H620 M720 202 H820 V430 H140 V390" stroke="#202020"/>
+<path d="M250 342 H340 M430 342 H630 M680 342 H820" stroke="#ad6400"/>
+</g>
+<rect x="340" y="187" width="90" height="30" fill="#fff" stroke="#17202a" stroke-width="2"/>
+<text x="355" y="177">LDR</text>
+<circle cx="520" cy="202" r="6"/><text x="445" y="305">nó ADC</text>
+<rect x="620" y="187" width="100" height="30" fill="#fff" stroke="#17202a" stroke-width="2"/>
+<text x="625" y="177">10 kΩ</text>
+<rect x="340" y="327" width="90" height="30" fill="#fff" stroke="#17202a" stroke-width="2"/>
+<text x="345" y="317">330 Ω</text>
+<path d="M630 322 L670 342 L630 362 Z M680 322 V362" fill="#dc3030" stroke="#17202a" stroke-width="2"/>
+<text x="570" y="387">A (+) LED C (−)</text><text x="770" y="465">GND comum</text>
+<text x="40" y="490">USB alimenta a placa. Divisor em 3,3 V. Nunca conectar o nó ADC ao VIN/5V.</text>
+</g></svg>
+

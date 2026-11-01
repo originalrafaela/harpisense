@@ -169,3 +169,5 @@ CA errada, hostname errado e expirado; recusa de identidade/tópicos não autori
 correlação com o adaptador oficial preservando Poste 2. Tudo em ambiente isolado
 autorizado antes de qualquer habilitação operacional. Não alterar broker/VMs
 para fazer o firmware passar nesses gates.
+
+Ensaio físico e simulação local: consulte [ENSAIO.md](ENSAIO.md). O ambiente wokwi reutiliza as fontes existentes e nunca deve ser gravado em placa.
