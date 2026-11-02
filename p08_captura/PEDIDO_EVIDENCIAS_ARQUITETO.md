@@ -1,5 +1,7 @@
 # Pedido incremental ao arquiteto — 01/11/2026
 
+Atualização de 02/11: interfaces e tabela IPv4 do Windows já obtidas em `WINDOWS_NETWORK_READONLY_2026-11-02.json`; não repetir esse inventário. Serviço Mosquitto Stopped e consulta TCP 1883 OK sem endpoints. Restam somente os itens descritos em `RETOMADA_ROTAS_2026-11-02.md`, com comandos para console. SSH do HarpiServer recusou a chave existente; Maestri sem arquiteto conectado. Pedido ainda não transmitido; solicitar conexão/canal autorizado, sem enviar segredos. O pedido abaixo é histórico e a atualização reduz seu escopo.
+
 Já reutilizados: relatórios V2 de 18/10 e 23/10, procedimento P08 de 31/10, inspeção de percurso de 31/10 e comparação candidata/VM. Não reenviar pacotes inteiros. Favor fornecer apenas as evidências abaixo, com host, operador e UTC, sanitizadas; sem senhas, tokens ou Environment completo de serviços. Nenhuma mudança ou geração de tráfego é solicitada.
 
 1. **Poste 2 pelo console autenticado**: saídas abaixo, MAC de cada NIC e correspondência VMware NIC → VMnet/modo. Confirmar destino MQTT resolvido, porta, client_id/tópico e serviço/configuração em uso, sem segredo. `.142` não é premissa.

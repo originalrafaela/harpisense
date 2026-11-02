@@ -1,0 +1,179 @@
+{
+  "observed_at_utc": "2026-11-02T05:25:22.1660180Z",
+  "host": "ACER",
+  "interfaces": [
+    {
+      "InterfaceAlias": "VMware Network Adapter VMnet8",
+      "InterfaceIndex": 17,
+      "IPAddress": "192.168.155.1",
+      "PrefixLength": 24
+    },
+    {
+      "InterfaceAlias": "VMware Network Adapter VMnet1",
+      "InterfaceIndex": 12,
+      "IPAddress": "192.168.180.1",
+      "PrefixLength": 24
+    },
+    {
+      "InterfaceAlias": "vEthernet (WSL (Hyper-V firewall))",
+      "InterfaceIndex": 49,
+      "IPAddress": "172.18.144.1",
+      "PrefixLength": 20
+    },
+    {
+      "InterfaceAlias": "Conexão Local* 3",
+      "InterfaceIndex": 14,
+      "IPAddress": "169.254.51.172",
+      "PrefixLength": 16
+    },
+    {
+      "InterfaceAlias": "Conexão Local* 1",
+      "InterfaceIndex": 18,
+      "IPAddress": "169.254.40.80",
+      "PrefixLength": 16
+    },
+    {
+      "InterfaceAlias": "Wi-Fi",
+      "InterfaceIndex": 16,
+      "IPAddress": "169.254.28.238",
+      "PrefixLength": 16
+    },
+    {
+      "InterfaceAlias": "Tailscale",
+      "InterfaceIndex": 31,
+      "IPAddress": "100.64.232.126",
+      "PrefixLength": 32
+    },
+    {
+      "InterfaceAlias": "Ethernet",
+      "InterfaceIndex": 20,
+      "IPAddress": "192.168.1.5",
+      "PrefixLength": 24
+    },
+    {
+      "InterfaceAlias": "Loopback Pseudo-Interface 1",
+      "InterfaceIndex": 1,
+      "IPAddress": "127.0.0.1",
+      "PrefixLength": 8
+    }
+  ],
+  "routes": [
+    {
+      "DestinationPrefix": "192.168.180.255/32",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 12,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "192.168.180.1/32",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 12,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "192.168.180.0/24",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 12,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "192.168.155.255/32",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 17,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "192.168.155.1/32",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 17,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "192.168.155.0/24",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 17,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "192.168.1.255/32",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 20,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "192.168.1.5/32",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 20,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "192.168.1.0/24",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 20,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "172.18.159.255/32",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 49,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "172.18.144.1/32",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 49,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "172.18.144.0/20",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 49,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "127.255.255.255/32",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 1,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "127.0.0.1/32",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 1,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "127.0.0.0/8",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 1,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "100.100.100.100/32",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 31,
+      "RouteMetric": 0
+    },
+    {
+      "DestinationPrefix": "100.66.89.7/32",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 31,
+      "RouteMetric": 0
+    },
+    {
+      "DestinationPrefix": "100.64.232.126/32",
+      "NextHop": "0.0.0.0",
+      "InterfaceIndex": 31,
+      "RouteMetric": 256
+    },
+    {
+      "DestinationPrefix": "0.0.0.0/0",
+      "NextHop": "192.168.1.1",
+      "InterfaceIndex": 20,
+      "RouteMetric": 0
+    }
+  ],
+  "broker_service": "Stopped",
+  "tcp_1883_query_status": "OK",
+  "tcp_1883": []
+}

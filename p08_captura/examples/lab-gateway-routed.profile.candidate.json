@@ -18,7 +18,7 @@
     {
       "source": "mqtt_broker",
       "kind": "signed_log_bundle",
-      "host_id": "REPLACE_WITH_VERIFIED_WINDOWS_BROKER_HOST_ID",
+      "host_id": "ACER",
       "auxiliary_mqtt": true,
       "public_key": "/etc/harpisense/p08/trust/mqtt-broker-ed25519.pub",
       "public_key_sha256": "REPLACE_WITH_64_HEX_DER_FINGERPRINT"

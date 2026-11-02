@@ -1,5 +1,7 @@
 # Captura e contenção — candidata para revisão
 
+Atualização de 02/11: ver `RETOMADA_ROTAS_2026-11-02.md` e o recibo Windows associado. Mosquitto estava **Stopped**, sem endpoints TCP locais 1883 na consulta bem-sucedida. O estado de 31/10 abaixo é histórico. Rotas das VMs ainda não obtidas por falta de autenticação SSH; proposta roteada não confirmada, comandos mutantes/inversos ainda não fechados. Nenhum serviço foi iniciado.
+
 Base: `feat/p08-evidence-coverage`, `1cf058e1b1ffbf08a954d56ee082759be2eae49e`. Esta entrega acrescenta documentação e perfil; não refaz o coletor. Nenhuma operação nas VMs, captura, ataque, checkpoint, inferência ou IPS foi executada. Os 81 testes Linux isolados pertencem à base, conforme `LINUX_VALIDATION_RESULTS.json`; não comprovam implantação, cobertura ou contenção.
 
 ## Evidência reutilizada e lacuna decisiva
