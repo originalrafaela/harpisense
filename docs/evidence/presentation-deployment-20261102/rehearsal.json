@@ -1,0 +1,23 @@
+{
+  "candidate_sha256": "d8dc01de8ee14ca4daa31d34408882ef2a22a1d7858cad46abdd308bb0e957a9",
+  "runtime": "VM Python 3.14 / FastAPI 0.143.3",
+  "database": "isolated restored presentation_restore",
+  "real_http": true,
+  "production_validation": false,
+  "checked_gets": [
+    "p11/health",
+    "config/current",
+    "config/setup",
+    "config/catalog",
+    "config/presentation"
+  ],
+  "login_logout": true,
+  "unauthenticated_401": true,
+  "proposal_validation_apply": true,
+  "idempotency": true,
+  "consumption_verified": true,
+  "audit_verified": true,
+  "original_timestamps_preserved": true,
+  "projections_preserved": true,
+  "runtime_config_ddl": false
+}
