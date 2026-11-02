@@ -23,6 +23,28 @@ Leituras adicionais mínimas do Windows para a pendência temporal, sem sincroni
 
 Os dois documentos de evidência foram referenciados pelo arquiteto no worktree `p08-evidence-coverage`, conforme relato; isso não acrescenta leituras das VMs. Pendências de percurso, integrador, Wi-Fi e continuidade de fontes abaixo permanecem. A proposta roteada segue sem confirmação e sem comandos mutantes/inversos concretos até as leituras decisivas. Nenhuma mudança de rede, captura ou checkpoint autorizada.
 
+## HarpiServer — delta recebido de 2026-11-02T21:02:09Z
+
+Evidência sanitizada informada pelo arquiteto nesta conversa; incorporada documentalmente, sem nova execução por esta entrega. SSH restabelecido, por canal administrativo Tailscale com verificação estrita preservada. Supera a pendência de autenticação das tentativas anteriores, que permanecem históricas.
+
+| Leitura | Resultado informado |
+|---|---|
+| ens33 | UP, `192.168.155.144/24` |
+| ens37 | UP, `10.20.30.1/24` |
+| Rota default | via `192.168.155.2`, dev ens33 |
+| Rede de campo | `10.20.30.0/24`, conectada, dev ens37 |
+| `route get 192.168.155.1` | dev ens33, src `192.168.155.144` |
+| `net.ipv4.ip_forward` | `0` |
+| `NTPSynchronized` | `yes` |
+| SHA256 do integrador legado | `f1537b54ba721153b3daf8a09a09ba1e7aef24aee4a513828302ca237e5f06a5`, preservado |
+| Consumidor MQTT | `active`; `NRestarts` passou de 731 para 1266 entre leituras |
+
+O contador cresceu 535; não foram fornecidos os dois instantes nem um intervalo suficiente para calcular taxa ou causa. O arquiteto informa condição preexistente e nenhum restart solicitado por ele; não atribuir a variação a esta rodada. `active` não comprova estabilidade, conexão ao broker ou continuidade do consumidor. Não corrigir MQTT, reiniciar serviços ou coletar tráfego nesta rodada. Para aceite futuro, continuidade do consumidor continua pendente de evidência por intervalo, sem repetir o diagnóstico operacional.
+
+O indicador NTP do HarpiServer não resolve a pendência temporal do Windows nem fornece, isoladamente, limite numérico de erro entre fontes. A rota local ao broker não demonstra percurso do Poste 2. Forwarding IPv4 desabilitado impede confirmar o desenho candidato como gateway IPv4 encaminhando esse tráfego no estado relatado. Captura em ens33/ens37 continua sem visibilidade garantida de fluxos de terceiros.
+
+Não repetir como pendentes as leituras de interfaces, default, rede conectada, rota local ao broker, forwarding, indicador NTP e hash acima. Permanecem Poste 2, retorno Windows para sua origem real, ESP32/AP e continuidade/tempo das fontes. MAC/VMnet, regras/tabelas completas, IPv6, `stat` do integrador e detalhes da rota administrativa não constam deste delta: se necessários ao plano exato, solicitar somente esses complementos. Preservar o canal Tailscale informado; comandos e inversas de implantação seguem sem fechamento por falta do percurso completo. Perfil parametrizado mantém placeholders; não preencher origem ou NIC do produtor com dados do consumidor/HarpiServer.
+
 ## Somente dados ainda necessários e comandos
 
 **Poste 2**, console autenticado pelo arquiteto; registrar UTC e executar sem sudo:
@@ -41,7 +63,7 @@ ss -nt
 
 Anexar correspondência MAC/NIC → VMnet/modo e destino MQTT efetivo/porta/client_id/tópico sanitizados. Se o destino não for `.155.1`, obter `ip -4 route get` para o IPv4 realmente utilizado. Isso fecha dev/src/via e possíveis desvios, sem supor `.142`.
 
-**HarpiServer**, console autenticado ou canal SSH fornecido pelo arquiteto, somente para delta atual e preservação:
+**HarpiServer**: o bloco abaixo é o roteiro anterior, parcialmente atendido pelo delta das 21:02:09Z. Não reexecutar os itens já atendidos; obter somente complementos necessários indicados acima, pelo canal estrito preservado:
 
 ```sh
 date -u
