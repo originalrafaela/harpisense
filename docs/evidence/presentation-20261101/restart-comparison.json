@@ -1,0 +1,19 @@
+{
+  "unchanged_across_restart_and_idempotent_retry": {
+    "installation": true,
+    "revisions": true,
+    "operations": true,
+    "audit": true,
+    "receipts": true,
+    "presentation.json": true,
+    "presentation-journal.json": true,
+    "database_timezone": true
+  },
+  "effective_revision": 4,
+  "original_revision_instants": [
+    "2026-11-02 00:56:37.861608+00:00",
+    "2026-11-02 00:58:30.032249+00:00",
+    "2026-11-02 00:59:03.730874+00:00",
+    "2026-11-02 01:06:27.716422+00:00"
+  ]
+}

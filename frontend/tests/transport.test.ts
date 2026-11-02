@@ -60,10 +60,10 @@ test('proxy real Vite: caminho, Bearer, status, leitura restrita e logs sem cred
   assert.equal(calls.length,count+1);
   assert.ok(!logs.join('').includes('transport-fixture'));assert.ok(!logs.join('').includes(headers.Authorization));
   const config=`http://127.0.0.1:${local.port}/p11-api/api/v1/config`;const operation='123e4567-e89b-12d3-a456-426614174000';const start=calls.length;
-  for(const [path,method,body] of [['/setup','GET',undefined],['/current','GET',undefined],['/catalog','GET',undefined],['/history?after=0&limit=100','GET',undefined],['/setup','PUT',{expected_version:0}],['/proposals','POST',{schema_version:'1.0.0'}],[`/proposals/${operation}`,'GET',undefined],[`/proposals/${operation}/validate`,'POST',{expected_revision:1}] ] as const){
+  for(const [path,method,body] of [['/presentation','GET',undefined],['/setup','GET',undefined],['/current','GET',undefined],['/catalog','GET',undefined],['/history?after=0&limit=100','GET',undefined],['/setup','PUT',{expected_version:0}],['/proposals','POST',{schema_version:'1.0.0'}],[`/proposals/${operation}`,'GET',undefined],[`/proposals/${operation}/validate`,'POST',{expected_revision:1}],[`/proposals/${operation}/apply`,'POST',{expected_revision:1,current_password:'isolated-reauth'}] ] as const){
     const response=await fetch(config+path,{method,headers:{...headers,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});assert.equal(response.status,200,`${method} ${path}`);
   }
-  assert.deepEqual(calls.slice(start).map(call=>call.method),['GET','GET','GET','GET','PUT','POST','GET','POST']);
+  assert.deepEqual(calls.slice(start).map(call=>call.method),['GET','GET','GET','GET','GET','PUT','POST','GET','POST','POST']);
   assert.ok(calls.slice(start).every(call=>call.url.startsWith('/api/v1/config/')&&call.authorization===headers.Authorization));
   assert.ok(calls.slice(start).some(call=>call.url==='/api/v1/config/history?after=0&limit=100'));
   assert.equal((await fetch(config+'/apply',{method:'POST',headers})).status,405);

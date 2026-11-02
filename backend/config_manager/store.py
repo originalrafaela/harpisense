@@ -287,12 +287,32 @@ class ConfigStore:
                 (no_external_effects, op["installation_id"]))
             self._audit(cur, op, actor, status)
 
+    def finish_recovery(self, operation_id, actor, recovery_fence):
+        """Trusted presentation reconciler ONLY, after verified restoration.
+
+        Unlike no_external_effects, this records that effects occurred and were
+        reverted. Prior effective revision stays unchanged; old receipts are kept.
+        """
+        identifier(actor)
+        with self.connect() as conn, conn.cursor(row_factory=dict_row) as cur:
+            op = self._operation(cur, operation_id)
+            head = self._head(cur, op['installation_id'])
+            op = self._operation(cur, operation_id)
+            if (type(recovery_fence) is not int or head['fence'] != recovery_fence
+                    or head['active_operation'] != operation_id
+                    or op['status'] not in {'APPLYING', 'RECOVERY_REQUIRED'}
+                    or op['required_components'] != ['config-registry']):
+                raise Conflict('STALE_RECOVERY', head['desired_revision'])
+            cur.execute("UPDATE hs_config.operation SET status='FAILED',updated_at=clock_timestamp() WHERE operation_id=%s", (operation_id,))
+            cur.execute('UPDATE hs_config.installation SET active_operation=NULL,fence=fence+1 WHERE installation_id=%s', (op['installation_id'],))
+            self._audit(cur, op, actor, 'FAILED', 'PRESENTATION_ROLLBACK_VERIFIED')
+
     def current(self, installation):
         identifier(installation)
         with self.connect() as conn, conn.cursor(row_factory=dict_row) as cur:
             # Single statement gives one consistent desired/effective snapshot.
             cur.execute("""SELECT i.*, d.document AS proposed, d.fingerprint AS proposed_fingerprint,
-                o.status AS proposed_status, e.document AS effective
+                o.status AS proposed_status, o.operation_id AS proposed_operation_id, e.document AS effective
                 FROM hs_config.installation i
                 LEFT JOIN hs_config.revision d ON (d.installation_id=i.installation_id AND d.revision=i.desired_revision)
                 LEFT JOIN hs_config.operation o ON (o.installation_id=i.installation_id AND o.revision=i.desired_revision)
@@ -318,7 +338,7 @@ class ConfigStore:
             raise ConfigError("INVALID_REVISION")
         with self.connect() as conn, conn.cursor(row_factory=dict_row) as cur:
             cur.execute("""SELECT r.*,o.operation_id,o.status,o.capability_fingerprint,
-                o.required_components FROM hs_config.revision r JOIN hs_config.operation o
+                o.required_components,o.fence FROM hs_config.revision r JOIN hs_config.operation o
                 USING (installation_id,revision) WHERE installation_id=%s AND revision=%s""",
                 (installation, revision))
             result = cur.fetchone()

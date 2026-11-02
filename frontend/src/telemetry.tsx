@@ -1,3 +1,4 @@
+import {formatTime} from './presentation';
 import {useState} from 'react';
 import {telemetry, stale, type Row} from './api';
 import {Badge, Empty, Panel, Records, show} from './components';
@@ -27,9 +28,9 @@ export function Telemetry({rows, assets, compact=false}: {rows: Row[]; assets: R
             <dt>ID do registro</dt><dd>{row.id}</dd>
             <dt>Origem da projeção</dt><dd>{show(row.source)}</dd>
             <dt>Revisão</dt><dd>{show(row.revision)}</dd>
-            <dt>Registrado na projeção</dt><dd>{value.recorded || 'Não informado'}</dd>
-            <dt>Última observação</dt><dd>{value.observed || 'Não informada'}</dd>
-            <dt>Recebido pelo backend</dt><dd>{value.received || 'Não informado'}</dd>
+            <dt>Registrado na projeção</dt><dd>{formatTime(value.recorded || 'Não informado')}</dd>
+            <dt>Última observação</dt><dd>{formatTime(value.observed || 'Não informada')}</dd>
+            <dt>Recebido pelo backend</dt><dd>{formatTime(value.received || 'Não informado')}</dd>
             <dt>Luminosidade</dt><dd>{value.light}</dd>
             <dt>LED na leitura</dt><dd>{value.led}</dd>
             {value.provisionalTemperature !== null && <><dt>Temperatura do payload provisório (unidade não informada)</dt><dd>{value.provisionalTemperature}</dd></>}

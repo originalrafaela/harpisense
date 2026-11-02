@@ -1,0 +1,13 @@
+test_apply_requires_session_scope_and_fresh_password_not_browser_receipt (test_presentation.PresentationHttpTests.test_apply_requires_session_scope_and_fresh_password_not_browser_receipt) ... ok
+test_auth_all_routes (test_presentation.PresentationHttpTests.test_auth_all_routes) ... ok
+test_proposal_validation_conflict_history (test_presentation.PresentationHttpTests.test_proposal_validation_conflict_history) ... ok
+test_resume_persistence_and_idempotency (test_presentation.PresentationHttpTests.test_resume_persistence_and_idempotency) ... ok
+test_sanitized_errors (test_presentation.PresentationHttpTests.test_sanitized_errors) ... ok
+test_scope_and_reference_rejection (test_presentation.PresentationHttpTests.test_scope_and_reference_rejection) ... ok
+test_setup_concurrent_writers (test_presentation.PresentationHttpTests.test_setup_concurrent_writers) ... ok
+test_setup_rejects_bootstrap_and_secrets_without_persistence (test_presentation.PresentationHttpTests.test_setup_rejects_bootstrap_and_secrets_without_persistence) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 33.346s
+
+OK

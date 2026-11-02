@@ -1,5 +1,14 @@
 # API e assistente de primeira configuração
 
+Atualização de integração: existe agora aplicador **opcional e limitado à
+apresentação**, conforme [PRESENTATION.md](PRESENTATION.md). Quando instalado
+explicitamente pelo bootstrap, acrescenta GET presentation e POST
+proposals/{uuid}/apply com reautenticação, além de metadados de escopo em
+current/catalog. Sem essa opção, permanecem válidas as limitações da entrega
+original abaixo. Operational continua false em ambos os casos; os demais
+grupos continuam sem aplicadores. Descrições antigas de ausência de rotas de
+aplicação referem-se à composição original sem essa opção.
+
 Continuação de `feat/config-manager-stage1`, commit
 `edd0cb7e1d92e14a2518790db61a7b0c0ffef8dd`. Branch desta entrega:
 `feat/config-manager-api`, worktree `harpisense-worktrees/config-manager-api`.

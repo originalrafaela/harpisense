@@ -1,3 +1,4 @@
+import {formatTime} from './presentation';
 import {useEffect, useState} from 'react';
 import {object, type Row, type ControlState} from './api';
 import {Badge, Empty, Panel, show} from './components';
@@ -114,7 +115,7 @@ export function HarpiaCard({incidents, explanations, failure, health, context}: 
         {unavailable && <p className="error" role="status">Serviço indisponível.{failure ? ` ${failure}` : ' BitNet não está disponível; uma alternativa recebida pode ser exibida abaixo.'}</p>}
         {explanation ? <>
           <div className="explanation-meta"><Badge>{origin(explanation)}</Badge><small>Incidente {selectedId} · revisão da explicação {show(explanation.revision)}</small></div>
-          <small>Revisão do incidente explicada: {show(explanationRevision(explanation))} · Horário da explicação: {explanationTime(explanation) ? new Date(explanationTime(explanation)!).toLocaleString('pt-BR') : 'Não informado'}{explanationTime(explanation) && !explanation.data.generated_at ? ' (registro na API; horário de geração não informado)' : ''}</small>
+          <small>Revisão do incidente explicada: {show(explanationRevision(explanation))} · Horário da explicação: {explanationTime(explanation) ? formatTime(explanationTime(explanation)!) : 'Não informado'}{explanationTime(explanation) && !explanation.data.generated_at ? ' (registro na API; horário de geração não informado)' : ''}</small>
           {freshness === 'stale' && <p role="status" className="error">Explicação desatualizada: pertence a outra revisão do incidente. Não representa a revisão selecionada.</p>}
           {freshness === 'unknown' && <p role="status">Atualidade da explicação não verificada: revisão de vínculo não informada.</p>}
           {explanation.data.persisted === false && <small>Explicação calculada nesta consulta; não é uma revisão persistida de texto. Evidências originais permanecem no backend.</small>}

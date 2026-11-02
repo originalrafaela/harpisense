@@ -11,10 +11,10 @@ export function p11Transport(target) {
   const prefix = '/p11-api';
   const allowed = new Set(['health','asset','telemetry','network_event','window','detection','xai','evidence','incident','risk','decision','approval','execution','verification','bitnet'].map(kind=>`/api/v1/p11/${kind}`));
   allowed.add('/api/v1/security/settings/mode/default');allowed.add('/api/v1/security/audit');
-  const configReads=new Set(['/api/v1/config/current','/api/v1/config/setup','/api/v1/config/catalog','/api/v1/config/history']);
+  const configReads=new Set(['/api/v1/config/current','/api/v1/config/setup','/api/v1/config/catalog','/api/v1/config/history','/api/v1/config/presentation']);
   const configWrite=(path,method)=>method==='PUT'&&path==='/api/v1/config/setup'||method==='POST'&&path==='/api/v1/config/proposals';
   const configOperation=path=>/^\/api\/v1\/config\/proposals\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(path);
-  const configValidation=path=>/^\/api\/v1\/config\/proposals\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/validate$/.test(path);
+  const configValidation=path=>/^\/api\/v1\/config\/proposals\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/(validate|apply)$/.test(path);
   const guard = server => {server.middlewares.use((request, response, next) => {
     if (!request.url?.startsWith(prefix)) return next();
     const url = new URL(request.url, 'http://127.0.0.1');

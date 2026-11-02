@@ -173,6 +173,26 @@ class AdminAuth:
                          (token_hash(token),))
             self.audit(conn, 'LOGOUT', 'OK', 1)
 
+    def reauthenticate(self, token, password):
+        """Authorize one sensitive action using the current session and password.
+
+        Reuses the existing throttle/account/audit. No second token or MFA claim.
+        """
+        error = None
+        with self.transaction() as conn:
+            self.session(conn, token)
+            error = self.throttle(conn)
+            if not error:
+                account = conn.execute('SELECT password_hash FROM hs_admin_account WHERE id=1').fetchone()
+                if not checked_verify(password, account['password_hash']):
+                    self.failed(conn)
+                    error = AuthError(403, 'REAUTHENTICATION_REQUIRED')
+                else:
+                    conn.execute("UPDATE hs_admin_throttle SET failures=0,blocked_until='-infinity' WHERE id=1")
+            self.audit(conn, 'CONFIG_APPLY_REAUTH', error.code if error else 'OK', 1)
+        if error:
+            raise error
+
     def change(self, token, current_password, *, password=None, username=None):
         if (password is None) == (username is None):
             raise AuthError(422, 'INVALID_CHANGE')

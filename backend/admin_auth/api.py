@@ -147,5 +147,6 @@ def install_admin_auth(app, auth, *, allowed_origins):
     app.include_router(router)
     app.state.admin_auth = auth
     app.state.require_admin_session = require_admin
+    app.state.require_admin_token = request_token
     app.openapi_schema = None
     return require_admin

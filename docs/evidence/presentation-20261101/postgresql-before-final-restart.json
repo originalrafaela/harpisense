@@ -1,0 +1,424 @@
+{
+  "installation_id": "presentation-local-20261101",
+  "test_capabilities_only": "presentation-test-only-1",
+  "installation": [
+    {
+      "installation_id": "presentation-local-20261101",
+      "desired_revision": 4,
+      "effective_revision": 4,
+      "fence": 7,
+      "active_operation": null
+    }
+  ],
+  "revisions": [
+    {
+      "revision": 1,
+      "document": {
+        "parameters": {
+          "timezone": "America/Sao_Paulo",
+          "display_name": "HarpiSense Apresentacao Local"
+        },
+        "record_type": "config.document",
+        "schema_version": "1.0.0"
+      },
+      "fingerprint": "0894007d785d67519e89e7eaa66511fc052f30db4afa80d53d228e57bbacd124",
+      "created_at": "2026-11-02 00:56:37.861608+00:00"
+    },
+    {
+      "revision": 2,
+      "document": {
+        "parameters": {
+          "timezone": "Asia/Tokyo",
+          "display_name": "Falha local ensaiada"
+        },
+        "record_type": "config.document",
+        "schema_version": "1.0.0"
+      },
+      "fingerprint": "c50f1363d1faa6c0b2db1b088eb29d7e2aaf415816914e660f1eae4671328d25",
+      "created_at": "2026-11-02 00:58:30.032249+00:00"
+    },
+    {
+      "revision": 3,
+      "document": {
+        "parameters": {
+          "timezone": "Asia/Tokyo",
+          "display_name": "Recuperacao a verificar"
+        },
+        "record_type": "config.document",
+        "schema_version": "1.0.0"
+      },
+      "fingerprint": "0cef356beca477bf74b4e39af44a3070aee2aaeaa4fb4ccaa895f112866948c6",
+      "created_at": "2026-11-02 00:59:03.730874+00:00"
+    },
+    {
+      "revision": 4,
+      "document": {
+        "parameters": {
+          "timezone": "Asia/Tokyo",
+          "display_name": "HarpiSense Apresentacao Confirmada"
+        },
+        "record_type": "config.document",
+        "schema_version": "1.0.0"
+      },
+      "fingerprint": "fe7fb2ec3d8a329f49c9bcc3979b000ff9fb23766017de44126d6ab3b1418691",
+      "created_at": "2026-11-02 01:06:27.716422+00:00"
+    }
+  ],
+  "operations": [
+    {
+      "operation_id": "0c3422e0-8d1b-47d1-a7d6-d6095a67c5ca",
+      "revision": 1,
+      "status": "APPLIED",
+      "fence": 1,
+      "required_components": [
+        "config-registry"
+      ]
+    },
+    {
+      "operation_id": "0a081d89-fae9-4ecb-a10d-3d3372ba85df",
+      "revision": 2,
+      "status": "FAILED",
+      "fence": 2,
+      "required_components": [
+        "config-registry"
+      ]
+    },
+    {
+      "operation_id": "2353513d-c33c-493a-9ebf-cafa4796af78",
+      "revision": 3,
+      "status": "FAILED",
+      "fence": 4,
+      "required_components": [
+        "config-registry"
+      ]
+    },
+    {
+      "operation_id": "a61939f7-1e96-4d2c-ac14-5e1ead215469",
+      "revision": 4,
+      "status": "APPLIED",
+      "fence": 7,
+      "required_components": [
+        "config-registry"
+      ]
+    }
+  ],
+  "audit": [
+    {
+      "id": 154,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "0c3422e0-8d1b-47d1-a7d6-d6095a67c5ca",
+      "revision": 1,
+      "actor": "admin-account-1",
+      "event": "PROPOSED",
+      "result_code": "OK",
+      "at": "2026-11-02 00:56:37.867831+00:00"
+    },
+    {
+      "id": 155,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "0c3422e0-8d1b-47d1-a7d6-d6095a67c5ca",
+      "revision": 1,
+      "actor": "admin-account-1",
+      "event": "VALIDATED",
+      "result_code": "SCHEMA_AND_REFERENCES_ONLY",
+      "at": "2026-11-02 00:56:43.176044+00:00"
+    },
+    {
+      "id": 156,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "0c3422e0-8d1b-47d1-a7d6-d6095a67c5ca",
+      "revision": 1,
+      "actor": "admin-account-1",
+      "event": "APPLYING",
+      "result_code": "OK",
+      "at": "2026-11-02 00:56:51.348905+00:00"
+    },
+    {
+      "id": 157,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "0c3422e0-8d1b-47d1-a7d6-d6095a67c5ca",
+      "revision": 1,
+      "actor": "presentation-consumer",
+      "event": "VERIFIED",
+      "result_code": "OK",
+      "at": "2026-11-02 00:56:51.404140+00:00"
+    },
+    {
+      "id": 158,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "0c3422e0-8d1b-47d1-a7d6-d6095a67c5ca",
+      "revision": 1,
+      "actor": "presentation-worker",
+      "event": "APPLIED",
+      "result_code": "OK",
+      "at": "2026-11-02 00:56:51.424467+00:00"
+    },
+    {
+      "id": 159,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "0a081d89-fae9-4ecb-a10d-3d3372ba85df",
+      "revision": 2,
+      "actor": "admin-account-1",
+      "event": "PROPOSED",
+      "result_code": "OK",
+      "at": "2026-11-02 00:58:30.036115+00:00"
+    },
+    {
+      "id": 160,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "0a081d89-fae9-4ecb-a10d-3d3372ba85df",
+      "revision": 2,
+      "actor": "admin-account-1",
+      "event": "VALIDATED",
+      "result_code": "SCHEMA_AND_REFERENCES_ONLY",
+      "at": "2026-11-02 00:58:30.152205+00:00"
+    },
+    {
+      "id": 161,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "0a081d89-fae9-4ecb-a10d-3d3372ba85df",
+      "revision": 2,
+      "actor": "admin-account-1",
+      "event": "APPLYING",
+      "result_code": "OK",
+      "at": "2026-11-02 00:58:39.052124+00:00"
+    },
+    {
+      "id": 162,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "0a081d89-fae9-4ecb-a10d-3d3372ba85df",
+      "revision": 2,
+      "actor": "presentation-worker",
+      "event": "FAILED",
+      "result_code": "PRESENTATION_ROLLBACK_VERIFIED",
+      "at": "2026-11-02 00:58:39.170885+00:00"
+    },
+    {
+      "id": 163,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "2353513d-c33c-493a-9ebf-cafa4796af78",
+      "revision": 3,
+      "actor": "admin-account-1",
+      "event": "PROPOSED",
+      "result_code": "OK",
+      "at": "2026-11-02 00:59:03.734549+00:00"
+    },
+    {
+      "id": 164,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "2353513d-c33c-493a-9ebf-cafa4796af78",
+      "revision": 3,
+      "actor": "admin-account-1",
+      "event": "VALIDATED",
+      "result_code": "SCHEMA_AND_REFERENCES_ONLY",
+      "at": "2026-11-02 00:59:03.812514+00:00"
+    },
+    {
+      "id": 165,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "2353513d-c33c-493a-9ebf-cafa4796af78",
+      "revision": 3,
+      "actor": "admin-account-1",
+      "event": "APPLYING",
+      "result_code": "OK",
+      "at": "2026-11-02 00:59:11.679639+00:00"
+    },
+    {
+      "id": 166,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "2353513d-c33c-493a-9ebf-cafa4796af78",
+      "revision": 3,
+      "actor": "presentation-worker",
+      "event": "RECOVERY_REQUIRED",
+      "result_code": "OK",
+      "at": "2026-11-02 00:59:11.770055+00:00"
+    },
+    {
+      "id": 167,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "2353513d-c33c-493a-9ebf-cafa4796af78",
+      "revision": 3,
+      "actor": "presentation-worker",
+      "event": "FAILED",
+      "result_code": "PRESENTATION_ROLLBACK_VERIFIED",
+      "at": "2026-11-02 01:00:03.057868+00:00"
+    },
+    {
+      "id": 219,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "a61939f7-1e96-4d2c-ac14-5e1ead215469",
+      "revision": 4,
+      "actor": "admin-account-1",
+      "event": "PROPOSED",
+      "result_code": "OK",
+      "at": "2026-11-02 01:06:27.721671+00:00"
+    },
+    {
+      "id": 220,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "a61939f7-1e96-4d2c-ac14-5e1ead215469",
+      "revision": 4,
+      "actor": "admin-account-1",
+      "event": "VALIDATED",
+      "result_code": "SCHEMA_AND_REFERENCES_ONLY",
+      "at": "2026-11-02 01:06:27.795478+00:00"
+    },
+    {
+      "id": 221,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "a61939f7-1e96-4d2c-ac14-5e1ead215469",
+      "revision": 4,
+      "actor": "admin-account-1",
+      "event": "APPLYING",
+      "result_code": "OK",
+      "at": "2026-11-02 01:06:36.409149+00:00"
+    },
+    {
+      "id": 222,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "a61939f7-1e96-4d2c-ac14-5e1ead215469",
+      "revision": 4,
+      "actor": "presentation-consumer",
+      "event": "VERIFIED",
+      "result_code": "OK",
+      "at": "2026-11-02 01:06:36.465905+00:00"
+    },
+    {
+      "id": 223,
+      "installation_id": "presentation-local-20261101",
+      "operation_id": "a61939f7-1e96-4d2c-ac14-5e1ead215469",
+      "revision": 4,
+      "actor": "presentation-worker",
+      "event": "APPLIED",
+      "result_code": "OK",
+      "at": "2026-11-02 01:06:36.505957+00:00"
+    }
+  ],
+  "receipts": [
+    {
+      "operation_id": "0c3422e0-8d1b-47d1-a7d6-d6095a67c5ca",
+      "component": "config-registry",
+      "fence": 1,
+      "document_fingerprint": "0894007d785d67519e89e7eaa66511fc052f30db4afa80d53d228e57bbacd124",
+      "verifier_ref": "presentation-consumer",
+      "evidence_ref": "presentation-0c3422e0-8d1b-47d1-a7d6-d6095a67c5ca",
+      "observed_at": "2026-11-02 00:56:51.384054+00:00",
+      "recorded_at": "2026-11-02 00:56:51.403196+00:00"
+    },
+    {
+      "operation_id": "a61939f7-1e96-4d2c-ac14-5e1ead215469",
+      "component": "config-registry",
+      "fence": 7,
+      "document_fingerprint": "fe7fb2ec3d8a329f49c9bcc3979b000ff9fb23766017de44126d6ab3b1418691",
+      "verifier_ref": "presentation-consumer",
+      "evidence_ref": "presentation-a61939f7-1e96-4d2c-ac14-5e1ead215469",
+      "observed_at": "2026-11-02 01:06:36.446155+00:00",
+      "recorded_at": "2026-11-02 01:06:36.464986+00:00"
+    }
+  ],
+  "utc": "2026-11-02 01:06:51.150860+00:00",
+  "database_timezone": "Etc/UTC",
+  "reauth_audit": [
+    {
+      "event": "CONFIG_APPLY_REAUTH",
+      "result": "REAUTHENTICATION_REQUIRED",
+      "at": "2026-11-02 00:51:25.781468+00:00"
+    },
+    {
+      "event": "CONFIG_APPLY_REAUTH",
+      "result": "OK",
+      "at": "2026-11-02 00:51:27.338473+00:00"
+    },
+    {
+      "event": "CONFIG_APPLY_REAUTH",
+      "result": "OK",
+      "at": "2026-11-02 00:51:29.158594+00:00"
+    },
+    {
+      "event": "CONFIG_APPLY_REAUTH",
+      "result": "OK",
+      "at": "2026-11-02 00:56:51.243017+00:00"
+    },
+    {
+      "event": "CONFIG_APPLY_REAUTH",
+      "result": "OK",
+      "at": "2026-11-02 00:57:14.056788+00:00"
+    },
+    {
+      "event": "CONFIG_APPLY_REAUTH",
+      "result": "OK",
+      "at": "2026-11-02 00:58:31.839009+00:00"
+    },
+    {
+      "event": "CONFIG_APPLY_REAUTH",
+      "result": "OK",
+      "at": "2026-11-02 00:58:38.971084+00:00"
+    },
+    {
+      "event": "CONFIG_APPLY_REAUTH",
+      "result": "OK",
+      "at": "2026-11-02 00:59:11.565706+00:00"
+    },
+    {
+      "event": "CONFIG_APPLY_REAUTH",
+      "result": "REAUTHENTICATION_REQUIRED",
+      "at": "2026-11-02 01:00:30.823993+00:00"
+    },
+    {
+      "event": "CONFIG_APPLY_REAUTH",
+      "result": "REAUTHENTICATION_REQUIRED",
+      "at": "2026-11-02 01:03:24.325321+00:00"
+    },
+    {
+      "event": "CONFIG_APPLY_REAUTH",
+      "result": "OK",
+      "at": "2026-11-02 01:03:25.842685+00:00"
+    },
+    {
+      "event": "CONFIG_APPLY_REAUTH",
+      "result": "OK",
+      "at": "2026-11-02 01:03:27.563210+00:00"
+    },
+    {
+      "event": "CONFIG_APPLY_REAUTH",
+      "result": "OK",
+      "at": "2026-11-02 01:06:36.327160+00:00"
+    }
+  ],
+  "presentation.json": {
+    "document_fingerprint": "fe7fb2ec3d8a329f49c9bcc3979b000ff9fb23766017de44126d6ab3b1418691",
+    "fence": 7,
+    "installation_id": "presentation-local-20261101",
+    "parameters": {
+      "display_name": "HarpiSense Apresentacao Confirmada",
+      "timezone": "Asia/Tokyo"
+    },
+    "revision": 4
+  },
+  "presentation-journal.json": {
+    "before": {
+      "document_fingerprint": "0894007d785d67519e89e7eaa66511fc052f30db4afa80d53d228e57bbacd124",
+      "fence": 1,
+      "installation_id": "presentation-local-20261101",
+      "parameters": {
+        "display_name": "HarpiSense Apresentacao Local",
+        "timezone": "America/Sao_Paulo"
+      },
+      "revision": 1
+    },
+    "fence": 7,
+    "operation_id": "a61939f7-1e96-4d2c-ac14-5e1ead215469",
+    "phase": "applied",
+    "revision": 4,
+    "target": {
+      "document_fingerprint": "fe7fb2ec3d8a329f49c9bcc3979b000ff9fb23766017de44126d6ab3b1418691",
+      "fence": 7,
+      "installation_id": "presentation-local-20261101",
+      "parameters": {
+        "display_name": "HarpiSense Apresentacao Confirmada",
+        "timezone": "Asia/Tokyo"
+      },
+      "revision": 4
+    }
+  }
+}

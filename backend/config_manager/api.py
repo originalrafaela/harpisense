@@ -8,7 +8,7 @@ from fastapi.routing import APIRoute
 from fastapi.exceptions import RequestValidationError
 from jsonschema import Draft202012Validator
 
-from .schema import ConfigError, REQUEST_SCHEMA, checked, obj
+from .schema import ConfigError, REQUEST_SCHEMA, checked, obj, text
 from .store import Conflict
 from .setup import FIRMWARE, SAVE_SCHEMA, SetupStore
 
@@ -80,7 +80,7 @@ async def body(request, schema):
     return checked(value, schema)
 
 
-def install_config_api(app, store, *, installation_id):
+def install_config_api(app, store, *, installation_id, presentation=None):
     """Call after install_admin_auth. Installation scope is server supplied."""
     require_admin = getattr(app.state, 'require_admin_session', None)
     if require_admin is None or getattr(app.state, 'config_api_installed', False):
@@ -88,6 +88,14 @@ def install_config_api(app, store, *, installation_id):
     setup = SetupStore(store)
     router = APIRouter(prefix='/api/v1/config', route_class=SafeRoute,
                        dependencies=[Depends(require_admin)])
+
+    def preparation_state(result):
+        if presentation:
+            result = {**result, 'pending': [
+                ({**item, 'code': 'OTHER_APPLICATORS_UNAVAILABLE'}
+                 if item['code'] == 'NO_REAL_APPLICATORS' else item)
+                for item in result['pending']]}
+        return result
 
     def operation(operation_id):
         try:
@@ -109,7 +117,9 @@ def install_config_api(app, store, *, installation_id):
                            'APPLIED': 'applied_verified', 'REJECTED': 'failed', 'FAILED': 'failed',
                            'RECOVERY_REQUIRED': 'failed'}.get(result['proposed_status'], 'not_started')
         result['operational'] = False  # This stage has no readiness verifier.
-        result['applicability'] = 'not_applicable_no_real_applicators'
+        result['applicability'] = 'presentation_only' if presentation else 'not_applicable_no_real_applicators'
+        if presentation:
+            result['presentation'] = presentation.observe()
         return result
 
     @router.post('/proposals')
@@ -136,18 +146,37 @@ def install_config_api(app, store, *, installation_id):
 
     @router.get('/setup')
     def resume():
-        return setup.get(installation_id)
+        return preparation_state(setup.get(installation_id))
 
     @router.put('/setup')
     async def save(request: Request):
         value = await body(request, SAVE_SCHEMA)
         if isinstance(value, JSONResponse): return value
-        return setup.save(installation_id, 'admin-account-1', value)
+        return preparation_state(setup.save(installation_id, 'admin-account-1', value))
 
     @router.get('/catalog')
     def catalog():
         return {'firmware_profiles': FIRMWARE, 'deployment_profiles': ['esp32-lighting'],
-                'applicators': [], 'backup': 'not_applicable', 'bootstrap_managed': False}
+                'applicators': ['presentation'] if presentation else [],
+                'application_scope': ['display_name', 'timezone'] if presentation else [],
+                'reauthentication_required': bool(presentation),
+                'backup': 'not_applicable', 'bootstrap_managed': False}
+
+    if presentation:
+        @router.get('/presentation')
+        def consumed_presentation():
+            return presentation.observe()
+
+        @router.post('/proposals/{operation_id}/apply')
+        async def apply_presentation(operation_id: str, request: Request,
+                                     token=Depends(app.state.require_admin_token)):
+            value = await body(request, obj({
+                'expected_revision': {'type': 'integer', 'minimum': 1},
+                'current_password': text(128)}))
+            if isinstance(value, JSONResponse): return value
+            operation(operation_id)  # Installation scope before effects.
+            app.state.admin_auth.reauthenticate(token, value.pop('current_password'))
+            return presentation.apply(UUID(operation_id), value['expected_revision'])
 
     app.include_router(router)
     app.state.config_api_installed = True

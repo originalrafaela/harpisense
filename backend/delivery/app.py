@@ -38,7 +38,8 @@ def build_app():
 
 
 def build_candidate_app(*, installation_id, capabilities, allowed_origins,
-                        technical_credentials=()):
+                        technical_credentials=(), presentation_directory=None,
+                        presentation_fault=None):
     """Installer-supplied scope and trusted manifest; no migrations or seeds.
 
     Explicit candidate factory: existing build_app callers remain compatible.
@@ -56,5 +57,16 @@ def build_candidate_app(*, installation_id, capabilities, allowed_origins,
     install_admin_auth(app, AdminAuth(dsn, technical_credentials=technical_credentials),
                        allowed_origins=allowed_origins)
     config = ConfigStore(store._connect, capabilities)
-    install_config_api(app, config, installation_id=installation_id)
+    presentation = None
+    if presentation_directory is not None:
+        from config_manager.presentation import PresentationApplicator
+        presentation = PresentationApplicator(config, installation_id,
+            presentation_directory, fault=presentation_fault)
+        try:
+            presentation.recover()
+        except Exception:
+            pass  # Unknown remains visible and blocks further application.
+        app.state.presentation = presentation
+    install_config_api(app, config, installation_id=installation_id,
+                       presentation=presentation)
     return app
