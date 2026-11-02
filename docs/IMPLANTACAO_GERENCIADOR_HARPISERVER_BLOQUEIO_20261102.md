@@ -2,30 +2,32 @@
 
 ## Resultado desta retomada
 
-**Implantação não iniciada.** O worktree candidato está limpo em
-`feat/frontend-backend-autonomia`, commit
-`1be05034e6e8540e3f3b70db3fe6ad7cf475aba3`, igual ao tracking remoto observado.
+**Implantação não iniciada.** O worktree candidato foi conferido sem alterações
+em `feat/frontend-backend-autonomia`, commit base
+`1be05034e6e8540e3f3b70db3fe6ad7cf475aba3`, igual ao tracking remoto observado
+naquele momento. Este relatório foi publicado depois como commit `3a27920`.
 O worktree da branch `main` não foi usado nem alterado; nele havia arquivos não
 rastreados preexistentes, preservados.
 
 O endpoint SSH previamente aprovado foi testado em modo Batch, somente leitura,
 com `StrictHostKeyChecking=yes`, `IdentitiesOnly=yes` e timeout. As duas chaves
 existentes testadas para `harpiserver@100.66.89.7` foram recusadas com
-`Permission denied (publickey,password)`. O agente SSH não está disponível nesta
-sessão. Não houve prompt de senha, criação/troca de chave, aceitação de host novo,
-acesso remoto, backup, escrita, reinício ou mudança de serviço. Portanto, estado
-atual da VM, fingerprint de host alcançado, alterações remotas concorrentes,
+`Permission denied (publickey,password)`. `ssh-add -l` retornou que não havia
+agente SSH disponível nesta sessão. Isso **não prova** que a chave perdeu
+autorização. Não houve prompt de senha, criação/troca de chave, aceitação de host
+novo, acesso remoto, backup, escrita, reinício ou mudança de serviço. Portanto,
+estado atual da VM, fingerprint de host alcançado, alterações remotas concorrentes,
 backup e versão implantada são **não verificados**. Não alegar comparação ou
 recuperação remota aprovada.
 
-Correção mínima para retomar: o operador responsável deve restaurar, fora deste
-chat, a autorização da chave pública de implantação já existente para a conta
-`harpiserver` no host aprovado, ou restabelecer o caminho SSH autorizado usado
-por essa conta. Manter a entrada `known_hosts` aprovada. Não enviar chave privada,
-senha ou token no chat. Depois, repetir uma leitura SSH estrita; se o fingerprint
-do host divergir, parar e conferir por canal independente antes de qualquer
-conexão. Se a implantação posteriormente exigir `sudo` interativo, será preparado
-o comando concreto e aguardada sua execução pelo operador no terminal.
+Ordem da próxima retomada: primeiro conferir a chave existente e seu fingerprint,
+verificar se ela está carregada no agente SSH e se o agente/chave estão disponíveis
+na sessão Maestri usada para acessar o host; só então repetir a conexão SSH estrita.
+Não propor alteração em `authorized_keys` antes desse diagnóstico. Manter a
+entrada `known_hosts` aprovada. Se o fingerprint do host divergir, parar e conferir
+por canal independente. Não enviar chave privada, senha ou token no chat. Se a
+implantação posteriormente exigir `sudo` interativo, será preparado o comando
+concreto e aguardada sua execução pelo operador no terminal.
 
 ## Inventário candidato conhecido, ainda sem comparação com a VM
 
@@ -42,8 +44,10 @@ o comando concreto e aguardada sua execução pelo operador no terminal.
   módulos e suas dependências com o bootstrap real, não substituir a árvore ativa.
 - Frontend compatível: fonte/artefato construído de `frontend/`, incluindo o
   assistente e o painel de apresentação; conferir o servidor e proxy atualmente
-  servido antes de trocar qualquer artefato. A origem e o mecanismo de hospedagem
-  da VM permanecem não verificados nesta retomada.
+  servido antes de trocar qualquer artefato. A entrega `40908b3` já foi integrada
+  e validada nas rodadas posteriores; não repetir cherry-pick nem tratá-la como
+  pendência. A origem e o mecanismo de hospedagem da VM permanecem não verificados
+  nesta retomada.
 - Persistência do aplicador: PostgreSQL existente para propostas, revisão efetiva,
   recibos e auditoria; diretório privado por instalação contendo
   `presentation.json` e `presentation-journal.json`. Nenhuma migração automática,
@@ -98,6 +102,22 @@ validado contra os caminhos/versões reais. Não executar comandos genéricos de
   retomada do assistente, proposta, aplicação ou auditoria real verificada.
 - `operational=false` continua obrigatório. Aplicação confirmada de nome/fuso não
   torna MQTT, captura, P08/P09, detecção, defesa ou inferência operacionais.
+- Gerenciador e aplicador de nome/fuso estão validados localmente, mas ainda não
+  implantados no HarpiServer.
+
+## Processos temporários locais ao encerrar
+
+Conferência rápida em 02/11/2026: nenhuma escuta nas portas locais usadas pelos
+previews/backend/túnel (4174, 4175, 8000, 18000–18002, 5174), nenhuma conexão TCP
+associada aos processos Node/Python listados e nenhuma conexão associada ao
+processo `ssh` observado (PID 34480). `docker ps` não retornou containers ativos.
+A consulta filtrada de tarefas agendadas não retornou tarefa em execução.
+
+Ainda existem processos Node/Python no host local; como não foi possível inspecionar
+suas linhas de comando por restrição do sistema, não atribuir propriedade nem
+encerrá-los às cegas. Não há evidência de túnel ativo que precise ser encerrado
+antes de desligar as VMs. Isso não inspeciona processos dentro das VMs e não
+substitui o procedimento normal de desligamento dos serviços nelas.
 
 ## Leituras de rede ainda solicitadas pela Edge
 
@@ -119,17 +139,33 @@ compartilhar apenas os resultados necessários:
   modo proxy/subnet e firmware/perfil instalado, se já disponível. Não revelar
   SSID privado, senha, token, chave, payload ou credencial.
 
-O inventário de rotas e conexões não prova percurso fim a fim. A proposta Edge de
-visibilidade/contenção continua separada e não autoriza mudar rede, broker,
-firewall ou iniciar captura nesta rodada.
+Estado do Mosquitto já observado pela Edge em 01/11/2026: serviço Windows parado
+(`Stopped`), sem conexão retornada na porta 1883. É um dado datado; conferir o
+estado corrente na próxima retomada. A lista única das leituras pendentes está em
+`docs/EDGE_LEITURAS_PENDENTES_20261101.md` (console Poste 2, rotas Windows após
+identificar o IP real, delta HarpiServer e dados sanitizados ESP32/intermediário/
+fontes). Reutilizar essa lista e as evidências históricas; não repetir inventários
+já lidos nem presumir que Wokwi represente a rede física. O inventário de rotas e
+conexões não prova percurso fim a fim. A proposta Edge de visibilidade/contenção
+continua separada e não autoriza mudar rede, broker, firewall ou iniciar captura.
+
+## Poste 1 — ensaio e próxima etapa física
+
+Entrega IoT/Wokwi informada como validada no commit `69cd62d`; não confundir essa
+simulação com ensaio na placa. Hardware atual: ESP32-WROOM-32 com LDR e LED.
+Próximo passo físico é reconhecer o dispositivo por USB/COM e confirmar que a
+porta corresponde à placa. Nenhuma placa foi gravada; não gravar firmware sem
+autorização e checklist próprios.
 
 ## Próxima ação objetiva
 
-Restabelecer a autorização SSH da chave existente para a conta/host aprovados e
-confirmar o fingerprint por canal confiável. Em seguida, executar somente o
-preflight remoto de leitura, comparar o bootstrap/módulos/dependências frontend e
-backend, produzir backup/manifesto e ensaiar restauração isolada. A implantação
-controlada só começa após esses gates e antes de qualquer reinício deve limitar-se
-ao serviço efetivamente afetado. Se qualquer hash, unidade, diretório, esquema ou
-versão divergir, parar, registrar a divergência e preparar substituição mínima que
-preserve a adaptação remota.
+Diagnosticar primeiro a sessão SSH: conferir a chave existente, carregamento no
+agente e disponibilidade pela sessão Maestri; não presumir perda de autorização e
+não propor `authorized_keys` antes disso. Em seguida, conferir Mosquitto e obter
+as rotas pendentes da lista Edge antes de qualquer alteração de rede. A validação
+local do gerenciador/aplicador e a integração do frontend `40908b3` estão
+concluídas; nenhum cherry-pick frontend é necessário. Só depois do preflight
+remoto, comparação dos módulos/dependências, backup e ensaio isolado de recuperação
+podem começar a implantação controlada. Se qualquer hash, unidade, diretório,
+esquema ou versão divergir, parar e preparar substituição mínima que preserve a
+adaptação remota.
