@@ -1,5 +1,8 @@
 # Build e verificação do projeto de simulação — 01/11/2026
 
+Atualização posterior: [simulação web executada em 02/11/2026](VALIDACAO_SIMULACAO_20261102.md).
+Este documento preserva o estado e as evidências da rodada de build.
+
 Continuação de `feat/poste1-ensaio-wokwi`, base `fdfd27e`. Resultado: os dois
 ambientes ESP32 compilaram. O projeto passou no lint Wokwi com um aviso
 informativo. A execução do simulador foi tentada e parou por token ausente;

@@ -1,5 +1,78 @@
 # Executar o ensaio de circuito
 
+Atualização 02/11/2026: o caminho **web com binário já compilado** dispensa o
+token da CLI e foi usado nesta rodada. Os builds anteriores continuam válidos;
+não é necessário recompilar para repetir o mesmo ensaio. Consulte os resultados
+em [VALIDACAO_SIMULACAO_20261102.md](../VALIDACAO_SIMULACAO_20261102.md).
+
+## Caminho web: abrir os arquivos prontos
+
+Na pasta `iot/esp32/poste1`, executar apenas a preparação dos arquivos:
+
+```powershell
+./scripts/prepare-web.ps1
+```
+
+Isso verifica o hash do binário aprovado de `d746d43` e copia o diagrama
+canônico, sem compilar nem acessar USB. Nesta máquina, os arquivos estão em
+`.tools/wokwi-web/` e o pacote está em `.tools/wokwi-web.zip`. Extrair o ZIP
+se for usá-lo em outro local. O binário é exclusivo da simulação.
+
+1. Abrir [Novo ESP32 no Wokwi](https://wokwi.com/projects/new/esp32) no navegador.
+   Alternativa oficial: [template de aplicação pré-compilada](https://wokwi.com/projects/305457271083631168).
+2. Abrir a aba **diagram.json** e substituir **todo** o texto pelo conteúdo
+   de `.tools/wokwi-web/diagram.json`. Conferir ESP32, LDR, LED e resistor.
+3. Clicar dentro do editor e pressionar **F1**. Procurar **Upload Firmware
+   and Start Simulation…** (algumas versões usam **Load HEX File and Start
+   Simulation…**). Selecionar `.tools/wokwi-web/firmware.bin`.
+4. Esse comando carrega o binário e inicia a simulação. **Não usar o botão
+   normal de compilar o sketch.ino do template**: ele não é o nosso firmware.
+   Não escolher **Flash firmware to device**: isso seria acesso físico.
+5. Esperar o serial mostrar `network_closed: configuration/acceptance gates`
+   e amostras `ldr_adc_raw=... led_commanded=... utc_valid=0`.
+6. Clicar no módulo LDR. Ajustar o controle de luz em lux, nesta sequência:
+   **100000 → 100 → 0.1 → 100 → 100000**. Esperar **duas novas linhas de
+   amostra** após cada ajuste. Esperar pelo tempo simulado/serial, não só pelo
+   relógio real: o navegador pode simular lentamente em segundo plano.
+7. Guardar o serial completo e observar o LED externo virtual. Os dois passos
+   em 100 lux devem manter estados diferentes conforme a condição anterior,
+   demonstrando a histerese. Os resultados medidos nesta rodada estão no relatório.
+
+Nesta sessão anônima não foi necessário login nem WOKWI_CLI_TOKEN para carregar
+o binário. Salvar um projeto permanente na conta pode exigir login; isso não
+foi feito. Reabrir/recarregar a página pode exigir repetir diagrama e upload.
+O portal Maestri criado para este ensaio chama-se **Poste 1 Wokwi**; os arquivos
+locais/Git são a fonte reproduzível, não a sessão temporária do navegador.
+
+O `wokwi.toml` é usado por VS Code/CLI; no caminho web o firmware é escolhido
+manualmente. Não copiar os fontes para sketch.ino nem manter outra lógica.
+Binário SHA256: `a01327f11ac8102e3b1d138b71b105efc112040162ab0b0383d26ea51d6d33f6`.
+O script publica também `SHA256.json` no pacote local.
+
+Referência: [carregar aplicação pronta no Wokwi](https://docs.wokwi.com/guides/esp32).
+
+## Autenticação local, se preferir VS Code ou CLI
+
+O caminho web acima funciona sem o token da CLI. Para a extensão, ativar a
+licença no navegador conforme a opção A abaixo. Para CLI, criar o token no
+dashboard e inseri-lo **somente no terminal local**, com entrada oculta:
+
+```powershell
+$wokwiSecret = Read-Host 'Token Wokwi (somente nesta sessão)' -AsSecureString
+$env:WOKWI_CLI_TOKEN = [Net.NetworkCredential]::new('', $wokwiSecret).Password
+try {
+    & .tools/wokwi/wokwi-cli.exe . --scenario simulation/circuit.yaml --timeout 30000 --serial-log-file test-results/wokwi-serial.log
+    if ($LASTEXITCODE -ne 0) { throw 'Cenário não concluído' }
+} finally {
+    Remove-Item Env:WOKWI_CLI_TOKEN -ErrorAction SilentlyContinue
+    $wokwiSecret.Dispose()
+}
+```
+
+O exemplo substitui/remove a variável apenas nesta sessão. Se ela já estiver
+configurada pelo usuário, usar diretamente o comando CLI da opção B. Não
+colocar o token no código, Git, screenshots, histórico de comandos ou chat.
+
 Este projeto usa as fontes originais do firmware. GPIO34 recebe AO do módulo
 LDR e GPIO25 comanda o LED externo. O módulo virtual tem divisor interno e
 resposta inversa à montagem física proposta. Não copiar os limiares virtuais
@@ -41,7 +114,7 @@ virtual bloqueia essa mistura deliberadamente.
    `.pio/build/wokwi/firmware.bin` e `firmware.elf`.
 6. Confirmar no serial `network_closed: configuration/acceptance gates`.
    `utc_valid=0` é esperado, pois a rede está fechada.
-7. Clicar no módulo LDR e variar `lux`: **100000 → 0.1 → 100000**,
+7. Clicar no módulo LDR e variar `lux`: **100000 → 100 → 0.1 → 100 → 100000**,
    aguardando pelo menos 3 segundos em cada condição.
 8. Salvar o serial completo e capturas do circuito nas três condições.
    Confirmar ADC alto no escuro, baixo no claro, `led_commanded=0 → 1 → 0`
@@ -69,7 +142,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Simulação não aprovada; verificar erro e lo
 ```
 
 O cenário usa a API documentada `set-control` para lux e `expect-pin` para
-GPIO25, verificando claro→escuro→claro e comando serial com UTC inválido. Exige
+GPIO25, verificando claro→intermediário→escuro→intermediário→claro e comando serial com UTC inválido. Exige
 saída 0; timeout, falha de autenticação ou cenário não concluído não são sucesso.
 Guardar também versão da CLI, saída do processo e hashes do binário/ELF.
 Se um limiar não for alcançado pelo modelo, registrar o ADC e o resultado real

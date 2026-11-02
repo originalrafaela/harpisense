@@ -1,0 +1,62 @@
+[
+  {
+    "phase": "bright_initial",
+    "wallUtc": "2026-11-02T05:28:38.4807886Z",
+    "simTime": "00:04.300",
+    "lux": "100000",
+    "sampleCount": 3,
+    "adc": 32,
+    "ledCommand": 0,
+    "utcValid": 0,
+    "ledVirtual": false,
+    "ledBrightness": 0
+  },
+  {
+    "phase": "middle_after_bright",
+    "wallUtc": "2026-11-02T05:29:14.0043529Z",
+    "simTime": "00:05.466",
+    "lux": "100",
+    "sampleCount": 5,
+    "adc": 2045,
+    "ledCommand": 0,
+    "utcValid": 0,
+    "ledVirtual": false,
+    "ledBrightness": 0
+  },
+  {
+    "phase": "dark",
+    "wallUtc": "2026-11-02T05:30:14.7168225Z",
+    "simTime": "00:07.466",
+    "lux": "0.1",
+    "sampleCount": 7,
+    "adc": 4063,
+    "ledCommand": 1,
+    "utcValid": 0,
+    "ledVirtual": true,
+    "ledBrightness": 1
+  },
+  {
+    "phase": "middle_after_dark",
+    "wallUtc": "2026-11-02T05:31:15.3511744Z",
+    "simTime": "00:09.500",
+    "lux": "100",
+    "sampleCount": 9,
+    "adc": 2045,
+    "ledCommand": 1,
+    "utcValid": 0,
+    "ledVirtual": true,
+    "ledBrightness": 1
+  },
+  {
+    "phase": "bright_final",
+    "wallUtc": "2026-11-02T05:33:32.6124140Z",
+    "simTime": "00:14.033",
+    "lux": "100000",
+    "sampleCount": 13,
+    "adc": 32,
+    "ledCommand": 0,
+    "utcValid": 0,
+    "ledVirtual": false,
+    "ledBrightness": 0
+  }
+]

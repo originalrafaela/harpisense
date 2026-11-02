@@ -176,4 +176,8 @@ Build Windows com core isolado: [passos atuais](simulation/EXECUTAR.md).
 `scripts/build.ps1` exige `-CoreDir` e aceita `-Python` para o executável local.
 [Resultados desta continuação](VALIDACAO_BUILD_20261101.md): esp32dev e wokwi
 compilados; Wokwi lint passou com informação sobre o catálogo de placa;
-execução virtual pendente de token/licença. Nenhum ensaio físico executado.
+execução CLI dependia de token/licença naquela rodada.
+[Simulação web executada em 02/11](VALIDACAO_SIMULACAO_20261102.md), sem token
+da CLI: leitura, LED virtual e histerese observados. Nenhum ensaio físico
+executado. [Próxima sequência USB/gravação](PROXIMO_ENSAIO_FISICO.md), somente
+após confirmação da placa pelo usuário.
