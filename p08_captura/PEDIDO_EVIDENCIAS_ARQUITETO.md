@@ -1,5 +1,7 @@
 # Pedido incremental ao arquiteto — 01/11/2026
 
+Delta recebido na retomada de 02/11 incorporado a `RETOMADA_ROTAS_2026-11-02.md`: não repetir inventário Windows. Falta evidência temporal confiável (`w32tm` não sincronizado/Local CMOS Clock), além das leituras remotas já pendentes. A tentativa SSH com chave Maestri alcança aceitação da chave pública, mas não conclui assinatura local; isso não fornece leitura das VMs. Não solicitar nova chave ou iniciar agente/serviço nesta rodada. As observações abaixo sobre canal Maestri e autenticação descrevem a tentativa histórica, não substituem este delta recebido.
+
 Atualização de 02/11: interfaces e tabela IPv4 do Windows já obtidas em `WINDOWS_NETWORK_READONLY_2026-11-02.json`; não repetir esse inventário. Serviço Mosquitto Stopped e consulta TCP 1883 OK sem endpoints. Restam somente os itens descritos em `RETOMADA_ROTAS_2026-11-02.md`, com comandos para console. SSH do HarpiServer recusou a chave existente; Maestri sem arquiteto conectado. Pedido ainda não transmitido; solicitar conexão/canal autorizado, sem enviar segredos. O pedido abaixo é histórico e a atualização reduz seu escopo.
 
 Já reutilizados: relatórios V2 de 18/10 e 23/10, procedimento P08 de 31/10, inspeção de percurso de 31/10 e comparação candidata/VM. Não reenviar pacotes inteiros. Favor fornecer apenas as evidências abaixo, com host, operador e UTC, sanitizadas; sem senhas, tokens ou Environment completo de serviços. Nenhuma mudança ou geração de tráfego é solicitada.

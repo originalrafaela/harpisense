@@ -10,6 +10,19 @@ Mosquitto **Stopped**, consulta TCP completa bem-sucedida sem endpoints locais 1
 
 SSH `harpiserver@192.168.155.144`, BatchMode, chave existente `harpiserver_ed25519`, host key estrita: conexão alcançou autenticação, recusada com `Permission denied (publickey,password)`. Nenhuma leitura remota foi obtida; não inferir estado das NICs/forwarding a partir desse resultado. `maestri list` identificou somente portais, sem arquiteto conectado. Solicitado ao usuário conectar o arquiteto ou indicar canal autorizado; nenhuma mensagem foi entregue a outro agente.
 
+## Delta sanitizado recebido do arquiteto — retomada de 02/11
+
+Relato recebido nesta conversa, sem nova execução ou leitura remota por esta entrega; não altera o recibo JSON das 05:25 UTC:
+
+- SSH: host confere com `known_hosts`; servidor aceita a chave pública Maestri, mas a assinatura local não conclui e o `ssh-agent` Windows está parado. É uma tentativa distinta da anterior: não classificar este resultado como recusa da chave pelo servidor, nem como login concluído. Nenhuma leitura remota disponível. Não iniciar agente, trocar chaves ou relaxar verificação de host nesta rodada.
+- Windows às 18:43 UTC: VMnet1 ifIndex12 `192.168.180.1`, VMnet8 ifIndex17 `192.168.155.1`, Ethernet ifIndex20 `192.168.1.5`. Endereços/índices coincidem com o recibo anterior; não foram relatadas novas máscaras, rotas ou seleção de retorno.
+- `w32tm` informa relógio não sincronizado, fonte `Local CMOS Clock`. Os horários Windows são horários reportados, sem garantia de alinhamento UTC com as demais fontes, inclusive para comparar recibos desta rodada. Não inferir desvio numérico nem ordem entre hosts. Falta comprovar offset/última sincronização e limite de erro aceitável antes da correlação fim a fim; não ajustar relógio ou serviço agora.
+- Às 17:17 UTC reportadas: Mosquitto `Stopped`, consulta 1883 sem entradas. Confirma o estado relatado naquele instante; não garante disponibilidade posterior ou ausência de broker em outra porta.
+
+Leituras adicionais mínimas do Windows para a pendência temporal, sem sincronizar ou reconfigurar: `w32tm /query /status /verbose`, `w32tm /query /source`, `Get-Service W32Time` e `Get-Date -AsUTC` (PowerShell 7). Anexar somente estado, fonte, último sincronismo, erro/offset disponível e horário reportado, com operador/host; se offset confiável não estiver disponível, registrar desconhecido. Não executar `/resync`, `/config` ou start/restart. Uma comparação independente de relógios permanece requisito para aceite futuro; UTC formatado sozinho não prova sincronismo.
+
+Os dois documentos de evidência foram referenciados pelo arquiteto no worktree `p08-evidence-coverage`, conforme relato; isso não acrescenta leituras das VMs. Pendências de percurso, integrador, Wi-Fi e continuidade de fontes abaixo permanecem. A proposta roteada segue sem confirmação e sem comandos mutantes/inversos concretos até as leituras decisivas. Nenhuma mudança de rede, captura ou checkpoint autorizada.
+
 ## Somente dados ainda necessários e comandos
 
 **Poste 2**, console autenticado pelo arquiteto; registrar UTC e executar sem sudo:
