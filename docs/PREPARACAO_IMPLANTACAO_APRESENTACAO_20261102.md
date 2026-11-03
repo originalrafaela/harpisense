@@ -273,3 +273,29 @@ Próxima ação interativa do operador: `sudo systemctl restart harpisense-p11.s
 Aguardar confirmação para validar o processo carregado e executar os checks HTTP
 operacionais. Frontend candidato permanece preparado, ainda sem publicação nesta
 retomada. Nenhuma alteração de conta, consumidor ou rede foi realizada.
+
+### P11 reiniciado e frontend publicado — 03/11/2026
+
+Operador executou restart sem saída. Conferência: P11 active/running, PID 14142,
+partida 16:38:02 -03, NRestarts=0; bootstrap SHA-256 d8dc01de...bb0e957a9
+confere com candidato aprovado. API health sem sessão retorna 401.
+
+Frontend candidato publicado no preview local http://127.0.0.1:4174, túnel
+SSH estrito em 127.0.0.1:18000 para API real loopback 8000. Index e JS servidos
+por HTTP retornaram 200 com os hashes aprovados integralmente iguais aos acima.
+Health/current/setup/catalog/presentation/telemetry via proxy retornaram 401
+Bearer sem sessão. Dist anterior preservado em local-evidence/deployment-backups;
+PIDs próprios registrados em local-evidence/presentation-preview-deployment.json.
+Processos mantidos para validação do operador. Portal Maestri indisponível
+(no daemon pipe found); nenhuma validação visual autenticada foi declarada.
+
+Verificador direcionado backend/presentation_ops/verify_live.py instalado em
+.presentation-validation/verify_live.py fora da release imutável; compilação no
+runtime da VM aprovada. Executar no terminal SSH com Python do venv, sem sudo.
+Solicita usuário e senha oculta; usa conta existente e não altera credenciais.
+Solicita nome/fuso (defaults HarpiSense/America/Sao_Paulo), recusa sobrescrever
+configuração/assistente preexistente e executa fluxo HTTP real de sessão, saúde,
+telemetria, save/resume, proposta/validação, aplicação/consumo, retry e auditoria.
+Compara digest das projeções e revoga a sessão ao sair. Recibo sanitizado privado
+em .presentation-validation/verified.json somente após checks aprovados.
+Execução autenticada e resultado ainda pendentes; não enviar senha/token ao chat.
