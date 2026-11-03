@@ -257,3 +257,19 @@ retomada. Caminho e guards do comando sudo acima reconfirmados; aguardar a saíd
 do operador antes de prosseguir. A autenticação HTTP e demais validações reais
 permanecem para depois da migração/ativação. Não houve delegação ou mudança de
 rede, consumidores, P08/P09, firmware, modelos ou autonomia.
+
+### Migração comprovada e bootstrap ativado — 03/11/2026
+
+Operador informou `CONFIG_SCHEMA_READY; no service restarted; bootstrap unchanged`.
+Conferência remota confirmou recibos migration.json/restore-metadata.json existentes,
+root:0600; conteúdo privado não foi lido pelo usuário de serviço. Checksums SQL
+001/002 instalados no banco conferem exatamente com a release, runtime sem CREATE
+em hs_config e guards novamente aprovados. `deploy.activate()` concluiu:
+`BOOTSTRAP_ACTIVATED; restart only harpisense-p11.service with operator sudo`.
+Registry provisionado e diretório persistente criados pelo ativador aprovado;
+bootstrap substituído atomicamente. Nenhum serviço foi reiniciado pelo agente.
+
+Próxima ação interativa do operador: `sudo systemctl restart harpisense-p11.service`.
+Aguardar confirmação para validar o processo carregado e executar os checks HTTP
+operacionais. Frontend candidato permanece preparado, ainda sem publicação nesta
+retomada. Nenhuma alteração de conta, consumidor ou rede foi realizada.
