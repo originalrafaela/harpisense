@@ -230,3 +230,30 @@ preexistente, sem diagnosticar causa ou alterar MQTT nesta rodada. Telemetria
 histórica no banco não comprova ingestão nova, broker disponível ou sensor físico.
 Poste 2/retorno Windows/ESP32/AP/fontes e cursores continuam com Edge. Nenhuma
 captura, contenção, inferência, BitNet, checkpoint ou alteração de rede foi feita.
+
+## Retomada de 03/11/2026 — aguardando migração interativa
+
+Conferência direcionada às 18:08 UTC: worktree limpo em `a6e4159`, branch
+`feat/frontend-backend-autonomia`, sem commits posteriores. SSH estrito com a
+chave existente confirmou usuário `harpiserver`, hostname `gateway` e fingerprint
+ED25519 `SHA256:Uv4vgbxMChdUGjvlC8Dw+j/xQRZtVDPn5+17OpJPboA`.
+
+`deploy.checked()` retornou `GUARDS_AND_BACKUP_HASH_OK`: hashes da release,
+arquivos ativos protegidos, dump e recibo de recuperação conferem. Candidato
+corresponde ao `candidate_sha256` do ensaio aprovado. Dependências FastAPI,
+psycopg, jsonschema e Uvicorn mantêm as versões registradas acima. Unidade P11
+ativa com o mesmo bootstrap, usuário e API loopback 8000.
+
+Em transação REPEATABLE READ READ ONLY, todas as sete tabelas atuais coincidiram
+em contagem e digest com o snapshot aprovado: inclusive 1 conta, 6 sessões,
+11 eventos de autenticação e 22 projeções. Nenhum delta foi encontrado.
+Backup privado com modo 0700 e aproximadamente 10,7 GB livres. Não foi necessário
+novo backup, restore ou repetição do ensaio HTTP. A evidência é de telemetria
+histórica preservada, sem comprovação de novas mensagens MQTT.
+
+`hs_config` continua ausente; `migration.json` e `presentation-state` também.
+Nenhuma migração, ativação ou reinicialização operacional foi executada nesta
+retomada. Caminho e guards do comando sudo acima reconfirmados; aguardar a saída
+do operador antes de prosseguir. A autenticação HTTP e demais validações reais
+permanecem para depois da migração/ativação. Não houve delegação ou mudança de
+rede, consumidores, P08/P09, firmware, modelos ou autonomia.
