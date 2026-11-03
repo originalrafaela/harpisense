@@ -1,5 +1,55 @@
 # HarpiServer — preparação e recuperação verificadas em 02/11/2026
 
+## Fechamento vigente — 03/11/2026
+
+**Implantação concluída e fluxo HTTP real aprovado:** release
+`presentation-20261102-r1`, gerenciador e aplicador de apresentação ativos no
+HarpiServer. Nome **HarpiSense**, fuso **America/Sao_Paulo**, revisão desejada e
+efetiva **1**, consumidor `verified=true`, `active_operation` vazio.
+`operational=false` permanece: sucesso de apresentação não atesta prontidão IDS/IPS.
+As seções de pausa/preparação abaixo são histórico; prevalece este fechamento.
+
+O operador executou migração, restart do P11 e verificador com a conta existente.
+Recibo remoto `.presentation-validation/verified.json` conferido pelo agente,
+com `verified_at=2026-11-03T20:39:58.569705+00:00`:
+
+- Sessão administrativa e saúde HTTP aprovadas; recusa 401 sem sessão e após
+  logout/revogação. Conta administrativa única preservada.
+- Telemetria existente consultada; salvamento e retomada do assistente aprovados.
+- Proposta, validação, reautenticação, aplicação real e retry idempotente aprovados.
+- Consumo real de nome/fuso confirmado, revisão efetiva 1 e auditoria exatamente
+  PROPOSED → VALIDATED → APPLYING → VERIFIED → APPLIED.
+- Instante original `2026-11-01T12:00:00Z` preservado; amostra do consumidor exibida
+  como `2026-11-01T09:00:00-03:00`. Essa amostra é verificação do aplicador, não
+  evidência de mensagem MQTT nova.
+- As 22 projeções mantêm contagem e digest do backup anterior:
+  `e1b9b661521848bac8f2e4790bf4bb3e`. Registro de telemetria não foi regravado.
+- Manifesto da release e hashes dos arquivos ativos protegidos conferidos após
+  implantação, exceto bootstrap, cuja mudança aprovada corresponde ao candidato.
+  P11 active/running, PID 14142, NRestarts=0 na conferência final. Nenhum outro
+  serviço operacional foi reiniciado nesta entrega.
+
+Frontend compatível servido em http://127.0.0.1:4174, com index/JS aprovados
+conferidos por HTTP e transporte para API real via túnel SSH loopback; seis
+endpoints protegidos recusaram acesso sem sessão. Preview e túnel permanecem
+ativos para uso do operador e dependem desta máquina. **Conferência visual
+com sessão no navegador permanece pendente**: portal Maestri indisponível;
+a execução autenticada comprovada foi pelo verificador HTTP na VM.
+
+Sem evidência de ingestão MQTT nova; reinícios preexistentes do consumidor
+continuam sem causa confirmada, fora desta entrega. Backup aprovado preserva
+o estado anterior à implantação, e não inclui as novas revisões/journal/artefato;
+não usá-lo para sobrescrever o banco atual. Para backup futuro do aplicador ativo,
+coordenar escritas e preservar PostgreSQL + presentation.json +
+presentation-journal.json da mesma instalação conforme PRESENTATION.md.
+
+Próxima ação do núcleo P08 → P09, **não iniciada nesta rodada**: fechar origem,
+percurso e cursores das entradas reais com as evidências Edge existentes,
+distinguindo mensagem nova de consulta histórica; confirmar o contrato de entrada
+antes do próximo ensaio do núcleo. Nenhuma mudança de rede, VPN, nftables,
+firmware, modelos, autonomia, inferência, contenção ou BitNet foi realizada.
+
+
 ## Pausa solicitada pelo operador
 
 Trabalho pausado por limite de créditos. **Não continuar a implantação até
