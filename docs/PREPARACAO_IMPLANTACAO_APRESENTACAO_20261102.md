@@ -1,5 +1,63 @@
 # HarpiServer — preparação e recuperação verificadas em 02/11/2026
 
+## Pausa solicitada pelo operador
+
+Trabalho pausado por limite de créditos. **Não continuar a implantação até
+nova solicitação do operador.** Ponto publicado anterior: `34a63a2`, branch
+`feat/frontend-backend-autonomia`. Trabalhos dos demais agentes preservados.
+Edge publicada em `a2e7a2f`; IoT/Wokwi em `69cd62d` (não é execução física).
+
+Confirmado pelo operador: `deploy.py migrate` **NÃO foi executado por ele**.
+Conferência final somente leitura: recibo `migration.json` ausente e bootstrap
+ativo ainda com SHA-256
+`81950f60a288a95777da73c64ffdf28fa5dd9f871fcd5cd243ebff6cc76947e7`.
+Bootstrap novo não ativado; frontend novo não publicado; validação operacional
+pendente. SSH restabelecido; comparação e recuperação isolada aprovadas nos
+limites descritos abaixo; ensaio HTTP candidato aprovado. Restauração de
+proprietário/grupo/modos permanece preparada para a etapa privilegiada, sem
+ser confundida com a restauração de bytes já conferida.
+
+Consumidor MQTT com reinícios preexistentes, **sem causa confirmada**. Não
+houve alteração nem correção desse serviço. Não atribuir reinícios à candidata.
+
+Encerramento: `pg_ctl status` confirmou que o cluster PostgreSQL isolado não
+está rodando; não houve listener nas portas temporárias 18019/55449 nem processo
+rehearse.py/snapshot.py/deploy.py na conferência final. O servidor HTTP de ensaio
+foi encerrado pelo preparador. Não foi iniciado túnel ou preview local nesta
+rodada; sessões de comando concluídas. Nenhum processo de outro agente foi
+encerrado. Não há tarefa temporária desta rodada que impeça desligar as VMs;
+usar desligamento normal do sistema para preservar os serviços/banco existentes.
+
+### Primeira ação na retomada, antes de migrar
+
+1. Conferir branch/worktree e alterações posteriores; restabelecer SSH estrito
+   pela chave existente. Não presumir sobrevivência do agente após desligamento.
+2. Na release privada da VM, executar apenas a verificação de guards:
+
+   ```sh
+   cd /opt/harpisense/staging/p11-postgresql/.presentation-releases/presentation-20261102-r1
+   /opt/harpisense/venv/bin/python -c 'import deploy; deploy.checked(); print("GUARDS_AND_BACKUP_HASH_OK")'
+   ```
+
+   Isso confere hashes da release, arquivos ativos protegidos, dump e recibo de
+   restauração; **não migra nem ativa**. Conferir também `rehearsal.json` e seu
+   candidate_sha256 contra app.candidate.py, permissões/acesso ao backup, espaço
+   em disco, unidades/dependências e ausência de alteração concorrente.
+3. Ler o estado atual do banco em transação READ ONLY: confirmar que hs_config
+   ainda não existe, autenticação permanece válida e avaliar novos dados desde
+   o snapshot. Hash íntegro não garante atualidade do backup. Havendo mudanças
+   relevantes, produzir novo backup consistente e ensaiar sua recuperação;
+   atualizar de forma revisada a referência BACKUP do preparador e manifesto
+   antes de pedir sudo. Não reutilizar cegamente o caminho fixo desta rodada.
+4. Somente com guards, comparação e recuperação ainda válidos, solicitar ao
+   operador o comando exato `sudo .../deploy.py migrate` registrado abaixo.
+   Se qualquer divergência aparecer, parar antes de escrever e preparar a
+   correção mínima. Não repetir a suíte local já aprovada sem motivo novo.
+5. Após migração comprovada, ativar com guards, solicitar restart somente de
+   harpisense-p11 e publicar/verificar o frontend correto. Realizar as validações
+   operacionais pendentes, preservando o par registry/journal/artefato e todos
+   os limites anteriores. Aprovação de apresentação não torna IDS/IPS operacional.
+
 ## Estado desta etapa
 
 SSH restabelecido com a chave existente carregada pelo operador. Agente acessível
