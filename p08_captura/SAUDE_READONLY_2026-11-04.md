@@ -1,0 +1,15 @@
+# Conferência read-only — 2026-11-04
+
+Base conferida: branch `feat/p08-evidence-coverage`, HEAD `a2e7a2f259992021f02dd545ca1b3406d4b5c0a8`, worktree `harpisense-worktrees/p08-evidence-coverage`, limpa antes deste recibo. Arquivos exclusivos de trabalho: este recibo; escopo de continuidade: `p08_captura/` e `backend/p08_p09/`. Nenhum arquivo de outro agente alterado.
+
+SSH estrito, canal administrativo Tailscale, apenas consultas. HarpiServer reportou 2026-11-04 18:21:51 UTC: uptime 3 minutos, systemd `running`, zero unidades failed, NTPSynchronized=yes. ens33 192.168.155.144/24, ens37 10.20.30.1/24, ip_forward=0. PostgreSQL 18-main, consumidor MQTT e API P11 ativos. API escuta 127.0.0.1:8000; PostgreSQL 127.0.0.1:5432. Firewall service active/exited não comprova regras ou efeito de contenção; regras não consultadas nem alteradas.
+
+Às 18:22:18 UTC: MQTT e P11 active/running, NRestarts=0 desde 15:18:28 -03. Journal registra consumidor iniciado e MQTT conectado e autenticado às 15:18:30 -03; API concluiu startup às 15:18:32 -03. Janela curta após boot: não comprova estabilidade prolongada. Não há nestes logs recibo de mensagem Poste 2, persistência correspondente ou leitura pela API. **Aceite fim a fim Poste 2 pendente**, sem rejeitar ensaio por ausência do ESP32. Nenhuma publicação, captura ou ataque executado.
+
+P08 existente: capture_session_v4.py, coverage_evidence.py, build_source_manifest.py e integração de gates/janelas em backend/p08_p09. Recibo histórico LINUX_VALIDATION_RESULTS.json: 81 testes sintéticos em Linux isolado; não reexecutados nesta conferência, não equivalem a aceite operacional. Percurso: evidências de rede anteriores preservadas em RETOMADA_ROTAS_2026-11-02.md; ip_forward=0 continua sem confirmar gateway de trânsito. Origem/retorno efetivos do Poste 2 e cursores correlacionados de broker/consumidor/API ainda precisam de evidência de janela. Não garantir observação de tráfego de terceiros em ens33/ens37.
+
+Referências mais recentes localizadas em referencias/versão_v2: Pacote09 contém harpisense RF/IF/XAI/Risk/Policy e demo_consolidado.py sintético; README informa ausência de modelos treinados finais. Pacote10 preserva defense_executor.py, execution_control.py, execution_manager.py e adapter nftables; integracao/ contém execution_gate.py, journal.py e quarantine.py. README classifica integração como protótipo fail-closed não operacional. Pendências declaradas incluem contrato/catálogo runtime, aprovação autenticada persistida, mTLS, concorrência e recuperação/efeito reais. Nenhuma dessas ligações foi implementada ou validada nesta conferência. Pacotes anteriores de Versões corretas continuam fontes para componentes não substituídos.
+
+Comunicação: skill Maestri aplicada. `maestri list` identifica este terminal como HarpiSense Arquiteto; tentativa `maestri ask "HarpiSense Arquiteto"` falhou com No connection. `maestri debug`: transporte e /list OK. Falta destino conectado distinto para entregar o reporte pelo canal solicitado.
+
+Nenhuma configuração, serviço, topologia, integrador legado ou contenção da VM foi alterado.

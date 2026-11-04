@@ -1,0 +1,83 @@
+{
+  "evidence_type": "operational_vm_readonly_and_operator_receipt",
+  "simulation": true,
+  "id": "poste2-2aaecdebdf958fb477df944622d7aede8926a3effe2beaa831a8395129f67e9b",
+  "topic": "harpisense/poste2/telemetry",
+  "payload_utf8": "{\"device_id\":\"poste2\",\"luminosity\":351,\"led_state\":\"ON\",\"source\":\"ubuntu\",\"status\":\"online\",\"sent_at\":\"2026-11-04T18:43:25Z\"}",
+  "publisher": {
+    "evidence_source": "operator_console_transcript",
+    "host": "poste2",
+    "broker": "192.168.155.1:1883",
+    "qos": 1,
+    "retain": false,
+    "connack": 0,
+    "puback_mid": 1,
+    "puback_rc": 0,
+    "process_exit": 0,
+    "sent_at_utc": "2026-11-04T18:43:25Z",
+    "previous_attempt": {
+      "sent_at_utc": "2026-11-04T18:36:50Z",
+      "connack": 5,
+      "published": false
+    }
+  },
+  "database": {
+    "observed_at_utc": "2026-11-04T15:43:59.555142-03:00",
+    "inspection": "existing inspect_p11_readonly.py over strict SSH; SET TRANSACTION READ ONLY",
+    "database": "harpisense",
+    "role": "harpisense_app",
+    "kind": "telemetry",
+    "revision": 1,
+    "source": "trusted-service",
+    "payload_matches": true,
+    "created_at": "2026-11-04T15:43:25.79958-03:00",
+    "telemetry_total_observed": 16,
+    "window_total_observed": 7
+  },
+  "consumer": {
+    "unit": "harpisense-mqtt.service",
+    "message": "PostgreSQL: gravado | poste2-2aaecdebdf958fb477df944622d7aede8926a3effe2beaa831a8395129f67e9b",
+    "journal_cursor": "s=7987e18a3bcf4acba45c283a737a475a;i=3d6c1;b=76896da0a673465bbed0c19232c8ba0f;m=5a27d2dd;t=65f77c11b7e0c;x=89fc483b5a5615ef",
+    "boot_id": "76896da0a673465bbed0c19232c8ba0f",
+    "realtime_timestamp_us": "1793817805815308",
+    "code_sha256": "188490130d89a3eebe6370bd23e645cd5089ef18f80364624b3f3e0ce0da8f30"
+  },
+  "api": {
+    "path": "/api/v1/p11/telemetry?limit=3&offset=0",
+    "legacy_basic_http_status": 401,
+    "current_auth": "administrative Bearer session required; API acceptance pending",
+    "matching_message_observed": false,
+    "acceptance": "pending"
+  },
+  "path": {
+    "evidence_source": "operator_console_transcript",
+    "route_observed_at_utc": "2026-11-04T18:33:34Z",
+    "destination": "192.168.155.1",
+    "dev": "ens33",
+    "src": "192.168.155.142",
+    "via": null,
+    "route_conclusion": "directly connected route to broker; not via 10.20.30.1",
+    "packet_level_gateway_transit_proven": false,
+    "capture_coverage_proven": false
+  },
+  "p08": {
+    "session_id": null,
+    "window_links": [],
+    "kernel_drops": null,
+    "loss_rate": null,
+    "coverage_gate": "unknown",
+    "broker_log_cursor": null,
+    "publisher_source_cursor": null,
+    "source_clock_offset_bound": null,
+    "limitations": "No bounded capture session or source cursor intervals collected. PUBACK MID1 is connection-local, not a persistent broker cursor. sent_at and created_at do not establish latency without clock error bounds. Journal cursor anchors one consumer event only; SQL ID/revision is not a temporal coverage cursor. No artificial window links or gate approval."
+  },
+  "vm_configuration_changed": false,
+  "containment_enabled_by_this_work": false,
+  "backend_p08_p09_edited": false,
+  "functional_acceptance": "confirmed through PostgreSQL only; API and frontend pending per user instruction; do not republish",
+  "frontend": {
+    "acceptance": "pending",
+    "note": "Prior operator interface report does not close acceptance; user explicitly kept API and frontend pending."
+  },
+  "paused": true
+}
