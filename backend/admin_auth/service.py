@@ -133,16 +133,20 @@ class AdminAuth:
                     self.audit(conn, 'LOGIN', error.code)
                 else:
                     conn.execute("UPDATE hs_admin_throttle SET failures=0,blocked_until='-infinity' WHERE id=1")
-                    token = secrets.token_urlsafe(32)
-                    row = conn.execute("INSERT INTO hs_admin_session(token_hash,account_id,credential_revision,expires_at) "
-                                       "VALUES(%s,1,%s,clock_timestamp()+interval '8 hours') RETURNING expires_at",
-                                       (token_hash(token), account['credential_revision'])).fetchone()
                     self.audit(conn, 'LOGIN', 'OK', 1)
-                    result = dict(access_token=token, token_type='Bearer', expires_at=row['expires_at'].isoformat(),
-                                  idle_timeout_seconds=1800, username=account['username'])
+                    result = self.issue_session(conn, account)
         if error:
             raise error
         return result
+
+    def issue_session(self, conn, account):
+        """Single session format shared with the opt-in MFA candidate."""
+        token = secrets.token_urlsafe(32)
+        row = conn.execute("INSERT INTO hs_admin_session(token_hash,account_id,credential_revision,expires_at) "
+                           "VALUES(%s,1,%s,clock_timestamp()+interval '8 hours') RETURNING expires_at",
+                           (token_hash(token), account['credential_revision'])).fetchone()
+        return dict(access_token=token, token_type='Bearer', expires_at=row['expires_at'].isoformat(),
+                    idle_timeout_seconds=1800, username=account['username'])
 
     def session(self, conn, token):
         if not token or not re.fullmatch(r'[A-Za-z0-9_-]{43}', token, flags=re.ASCII):

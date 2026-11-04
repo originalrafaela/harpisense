@@ -21,6 +21,7 @@ yarn-error.log*
 __pycache__/
 *.py[cod]
 .venv/
+.mfa-venv/
 venv/
 .pytest_cache/
 # Compila├º├Áes
