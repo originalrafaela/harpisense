@@ -1,0 +1,88 @@
+{
+  "schema": "harpisense.p08.preflight-receipt.v1",
+  "base_commit_local_and_remote": "e5a7f17a15859c697415f7ba8d56576bb278fcfb",
+  "vm_reported_utc": "2026-11-04T23:49:00Z",
+  "windows_reported_utc": "2026-11-04T23:50:58.5522049Z",
+  "timestamps_have_verified_cross_host_error_bound": false,
+  "legacy_integrator_sha256": "f1537b54ba721153b3daf8a09a09ba1e7aef24aee4a513828302ca237e5f06a5",
+  "legacy_integrator_changed": false,
+  "candidate_comparison": {
+    "capture_session_v4.py": {
+      "vm_sha256": "0dc0c3e5a12d54ae6a26010e853dfab99380a08ed5f4cba718bc7ecabfe51efc",
+      "git_sha256": "85432f7166e653a2c2ad98f793c58e542b9516fca43e720910cda61c82dad1fd",
+      "equal": false
+    },
+    "integrar_p08_v2.py": {
+      "vm_sha256": "040143d349f82ba8b6579a87476bb73b575584a44ed5ac35edf613b7a331a021",
+      "git_sha256": "652a0d2a6ea4c7fb0256b16a4ec449eb17a67565af04ec724684739b3f2acfd9",
+      "equal": false
+    }
+  },
+  "consumer": {
+    "state": "active",
+    "nrestarts": 0,
+    "active_enter_timestamp": "2026-11-04T15:18:28-03:00",
+    "connection": "192.168.155.144:56345 -> 192.168.155.1:1883 ESTAB",
+    "interval_coverage_verified": false
+  },
+  "return_to_poste2": {
+    "windows_interface": "VMware Network Adapter VMnet8",
+    "windows_source": "192.168.155.1",
+    "windows_prefix": "192.168.155.0/24",
+    "windows_next_hop": "0.0.0.0",
+    "gateway_interface": "ens33",
+    "gateway_source": "192.168.155.144",
+    "gateway_via": null,
+    "packet_path_verified": false
+  },
+  "clocks": {
+    "gateway_ntp_synchronized": true,
+    "windows_ntp_synchronized": false,
+    "windows_source": "Local CMOS Clock",
+    "windows_last_success": null,
+    "cross_host_offset_bound_seconds": null
+  },
+  "windows_capture_discovery": {
+    "pktmon_path": "C:/Windows/system32/PktMon.exe",
+    "dumpcap_in_standard_path": false,
+    "npcap_driver_in_tested_path": false,
+    "npcap_service_returned": false,
+    "pktmon_import_homologated_for_p08": false,
+    "scope": "PATH, standard Wireshark executable path, standard npcap driver path and service query only"
+  },
+  "broker": {
+    "listener_directive": "listener 1883 192.168.155.1",
+    "explicit_logging_directives_returned": [],
+    "effective_log_destination_verified": false,
+    "cursor_interval_verified": false
+  },
+  "historical_message_acceptance_current_user_confirmation": {
+    "id": "poste2-2aaecdebdf958fb477df944622d7aede8926a3effe2beaa831a8395129f67e9b",
+    "simulation": true,
+    "luminosity": 351,
+    "led_state": "ON",
+    "consumer_and_postgresql": "independent_readonly_technical_evidence_in_original_receipt",
+    "authenticated_frontend": "user_visual_report",
+    "independent_authenticated_api_response_captured": false,
+    "automatic_refresh_proven": false,
+    "republished": false,
+    "proves_gateway_transit_or_p08_coverage": false
+  },
+  "backend_p08_p09_ownership": "exclusive edits by composition in feat/detection-composition; Edge will not edit this directory",
+  "architect_window_confirmed": false,
+  "session_executed": false,
+  "inference_gate_eligible": false,
+  "blockers": [
+    "compatible capture sensor on publisher-broker segment not confirmed",
+    "signed candidate differs from installed staging",
+    "required-source exporters and cursor intervals not established",
+    "cross-host clock error bound unavailable",
+    "architect scope and window not confirmed; Maestri destination connection missing"
+  ],
+  "vm_files_modified": false,
+  "topology_modified": false,
+  "containment_enabled_by_this_work": false,
+  "checkpoints_advanced": false,
+  "attacks_executed": false,
+  "sensitive_captures_committed": false
+}
