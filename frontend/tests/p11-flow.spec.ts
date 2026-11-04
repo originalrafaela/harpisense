@@ -29,7 +29,8 @@ test('sessão administrativa → telemetria → mesmo registro exibido, sem pers
   await enter(page);
   const card = page.getByRole('article', {name: 'Telemetria de poste2'});
   await expect(card).toBeVisible();
-  for (const value of [record.id, record.created_at, 'trusted-service', '28.4', 'teste_systemd']) await expect(card).toContainText(value);
+  const projectionTime = new Intl.DateTimeFormat('pt-BR',{timeZone:'UTC',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'shortOffset'}).format(new Date(record.created_at));
+  for (const value of [record.id, projectionTime, 'trusted-service', '28.4', 'teste_systemd']) await expect(card).toContainText(value);
   await expect(card).toContainText('unidade não informada');
   await expect(card).toContainText('Não informada');
   expect(paths).toContain('/p11-api/api/v1/p11/health');expect(paths).toContain('/p11-api/api/v1/p11/telemetry');
@@ -49,7 +50,7 @@ test('sessão administrativa → telemetria → mesmo registro exibido, sem pers
 
 test('consulta vazia não inventa dispositivo ou medição (isolado)', async ({page}) => {
   await page.route('**/p11-api/api/v1/p11/**', route => route.fulfill({contentType: 'application/json', body: route.request().url().endsWith('/health') ? '{"api":"available"}' : '[]'}));
-  await enter(page);await expect(page.getByText('Consulta autenticada')).toBeVisible();
+  await enter(page);await expect(page.getByRole('button',{name:'Sair',exact:true})).toBeVisible();
   await expect(page.getByText('Sem registros nesta consulta.').first()).toBeVisible();
   await expect(page.getByRole('article', {name: 'Telemetria de poste2'})).toHaveCount(0);
 });
@@ -62,6 +63,6 @@ test('credencial inválida e rede indisponível não abrem operação nem demons
   await page.getByLabel('Senha',{exact:true}).fill('invalid-fixture');
   await page.getByRole('button', {name: 'Entrar na central'}).click();
   await expect(page.getByRole('alert')).toContainText('Falha de rede/configuração');
-  await expect(page.getByText('Consulta autenticada')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Sair',exact:true})).toHaveCount(0);
   await expect(page.getByText('Dados de demonstração — sem conexão operacional')).toHaveCount(0);
 });

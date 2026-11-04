@@ -3,7 +3,7 @@ import type {Page} from '@playwright/test';
 
 const initial={value:{operation:'IDS',execution_enabled:false,autonomy_mode:1},revision:1,emergency_stopped:false,updated_at:'2026-10-27T12:00:00Z',observed_at:'2026-10-27T12:01:00Z',real_execution_blocked:true,pending:{reliable:true,blockers:[]},change_allowed:true};
 async function enter(page:Page){
- await page.goto('http://127.0.0.1:5174');await page.getByLabel('Usuário',{exact:true}).fill('fixture');await page.getByLabel('Senha',{exact:true}).fill('fixture');await page.getByRole('button',{name:'Entrar na central'}).click();await expect(page.getByText('Consulta autenticada')).toBeVisible();
+ await page.goto('http://127.0.0.1:5174');await page.getByLabel('Usuário',{exact:true}).fill('fixture');await page.getByLabel('Senha',{exact:true}).fill('fixture');await page.getByRole('button',{name:'Entrar na central'}).click();await expect(page.getByRole('button',{name:'Sair',exact:true})).toBeVisible();
 }
 test('confirma perfil só após servidor; recusa, parada e logs fora da home',async({page})=>{
  let state=structuredClone(initial);const bodies:unknown[]=[];let reject=false;
@@ -45,4 +45,16 @@ test('autorização negada nos controles encerra acesso e permite autenticar nov
  await expect(page.getByRole('heading',{name:'Acesso administrativo',exact:true})).toBeVisible();
  await expect(page.getByRole('button',{name:'Entrar na central',exact:true})).toBeEnabled();
  await expect(page.getByText('Dados de demonstração — sem conexão operacional')).toHaveCount(0);
+});
+
+
+test('pendências ou recusa explícita do backend impedem solicitar perfil',async({page})=>{
+ await page.route('**/api/v1/p11/**',route=>route.fulfill({json:route.request().url().endsWith('/health')?{api:'available',control_api:{version:1}}:[]}));
+ let writes=0;
+ await page.route('**/api/v1/security/**',route=>{if(route.request().method()!=='GET')writes++;return route.fulfill({json:{...initial,change_allowed:false,pending:{reliable:true,blockers:[{id:'pending-1',state:'VERIFYING'}]}}})});
+ await page.route('**/api/v1/config/**',route=>route.fulfill({status:503,json:{}}));
+ await enter(page);await page.getByRole('link',{name:'Configurações',exact:true}).click();
+ await page.getByLabel('Justificativa da alteração').fill('Não conceder autorização local');
+ await expect(page.getByRole('button',{name:'Solicitar M3',exact:true})).toBeDisabled();
+ expect(writes).toBe(0);
 });

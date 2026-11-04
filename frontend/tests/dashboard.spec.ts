@@ -24,7 +24,7 @@ async function login(page: Page, health: Record<string, unknown> = {}, records: 
   await page.getByLabel('Usuário', {exact: true}).fill('isolated');
   await page.getByLabel('Senha', {exact: true}).fill('isolated');
   await page.getByRole('button', {name: 'Entrar na central'}).click();
-  await expect(page.getByText('Consulta autenticada')).toBeVisible();
+  await expect(page.getByRole('button',{name:'Sair',exact:true})).toBeVisible();
   await expect(page.getByRole('heading', {name: 'Estado operacional efetivo', exact: true})).toBeVisible();
 }
 

@@ -13,12 +13,12 @@ test('prévia visual: estados de conta são ilustrativos e não enviam requisiç
  await page.getByLabel('Senha',{exact:true}).fill('sensitive-preview-only');await page.getByRole('button',{name:'Mostrar senha'}).click();await expect(page.getByLabel('Senha',{exact:true})).toHaveAttribute('type','text');
  await page.getByRole('button',{name:'Explorar demonstração visual'}).click();await expect(page.getByLabel('Senha',{exact:true})).toHaveCount(0);expect(await page.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}))).not.toContain('sensitive-preview-only');
  await page.getByRole('button',{name:'Sair'}).click();
- await page.getByRole('button',{name:'Esqueci minha senha'}).click();await expect(page.getByRole('heading',{name:'Recuperação de senha'})).toBeVisible();
- await page.getByRole('button',{name:'Simular etapa'}).click();await expect(page.getByRole('status').filter({hasText:'nenhuma conta ou serviço'})).toBeVisible();
- await page.getByRole('button',{name:'Verificar MFA'}).click();await expect(page.getByLabel('QR ilustrativo, não funcional')).toBeVisible();
- await expect(page.getByText('O código e o QR não são segredos reais')).toBeVisible();
- await page.getByRole('button',{name:'Ver estados de acesso (demonstração)'}).click();await page.getByRole('button',{name:'Credenciais inválidas'}).click();await expect(page.getByText('Credenciais inválidas · exemplo visual. Nenhuma autenticação foi tentada.')).toBeVisible();
- await page.getByRole('button',{name:'Serviço indisponível'}).click();await expect(page.getByText('Serviço indisponível · exemplo visual. Nenhuma chamada foi enviada.')).toBeVisible();expect(apiRequests).toEqual([]);
+ await page.getByRole('button',{name:'Esqueci minha senha'}).click();await expect(page.getByRole('region',{name:'Disponibilidade da instalação e MFA'})).toBeVisible();
+ await expect(page.getByRole('status')).toContainText('sem os endpoints abaixo');await expect(page.getByText('Recuperação de senha', {exact:false})).toBeVisible();
+ await page.getByRole('button',{name:'Fechar'}).click();await page.getByRole('button',{name:'Verificar MFA'}).click();
+ await expect(page.getByRole('status')).toContainText('sem os endpoints abaixo');await expect(page.getByText('Cadastro e confirmação TOTP')).toBeVisible();
+ await page.getByRole('button',{name:'Fechar'}).click();await page.getByRole('button',{name:'Primeiro acesso e segurança da conta'}).click();
+ await expect(page.getByText('Primeiro acesso protegido e criação de usuário e senha')).toBeVisible();expect(apiRequests).toEqual([]);
 });
 
 test('autonomia demonstrativa mantém operação e execução independentes e controla estado local',async({page})=>{

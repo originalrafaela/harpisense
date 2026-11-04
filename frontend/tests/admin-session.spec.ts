@@ -29,7 +29,7 @@ async function fixture(page:Page,{invalid=false,expired=false,logoutFailure=fals
 
 test('conta própria: senha só no login, Bearer em memória, logout remoto e recarga sem sessão',async({page})=>{
  await page.clock.install();const calls=await fixture(page);
- await expect(page.getByText('Consulta autenticada',{exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Sair',exact:true})).toBeVisible();
  const stored=await page.evaluate(()=>JSON.stringify({local:{...localStorage},session:{...sessionStorage},cookies:document.cookie}));
  expect(stored).not.toContain(token);expect(stored).not.toContain(password);expect(stored).not.toContain('owner');
  await page.getByRole('button',{name:'Sair',exact:true}).click();
@@ -44,7 +44,7 @@ test('login inválido mantém operação fechada e limpa a senha',async({page})=
  const calls=await fixture(page,{invalid:true});
  await expect(page.getByRole('alert')).toContainText('Credenciais inválidas');
  await expect(page.getByLabel('Senha',{exact:true})).toHaveValue('');
- expect(calls.length).toBe(1);await expect(page.getByText('Consulta autenticada')).toHaveCount(0);
+ expect(calls.length).toBe(1);await expect(page.getByRole('button',{name:'Sair',exact:true})).toHaveCount(0);
 });
 
 test('sessão expirada pela API encerra consulta e exige login, sem fallback técnico',async({page})=>{
@@ -56,14 +56,14 @@ test('sessão expirada pela API encerra consulta e exige login, sem fallback té
 
 test('limite absoluto encerra a sessão mesmo com consultas periódicas',async({page})=>{
  await page.clock.install();await fixture(page);
- await expect(page.getByText('Consulta autenticada',{exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Sair',exact:true})).toBeVisible();
  await page.clock.runFor(60050);
  await expect(page.getByRole('alert')).toContainText('Sessão expirada');
  await expect(page.getByLabel('Senha',{exact:true})).toHaveValue('');
 });
 
 test('logout sem confirmação remota encerra localmente e informa a limitação',async({page})=>{
- await fixture(page,{logoutFailure:true});await expect(page.getByText('Consulta autenticada',{exact:true})).toBeVisible();
+ await fixture(page,{logoutFailure:true});await expect(page.getByRole('button',{name:'Sair',exact:true})).toBeVisible();
  await page.getByRole('button',{name:'Sair',exact:true}).click();
  await expect(page.getByRole('alert')).toContainText('Não foi possível confirmar a revogação');
  await expect(page.getByLabel('Senha',{exact:true})).toHaveValue('');

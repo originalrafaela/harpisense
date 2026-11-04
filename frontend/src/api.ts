@@ -78,6 +78,16 @@ export class Client {
  async changeControls(value:ControlState['value'],revision:number,reason:string){return controlState(await this.get('/api/v1/security/settings/mode/default','PUT',{value,expected_revision:revision,reason}))}
  async emergencyStop(reason:string){return controlState(await this.get('/api/v1/security/emergency-stop','POST',{reason}))}
  async audit(offset=0){return adaptRows(await this.get(`/api/v1/security/audit?limit=50&offset=${offset}`),'p11')}
+ async recordHistory(kind:string,id:string):Promise<Row[]>{
+  const kinds=new Set(['asset','telemetry','network_event','window','detection','xai','evidence','incident','risk','decision','approval','execution','verification','bitnet']);
+  if(this.profile!=='p11'||!kinds.has(kind)||!id)throw new ApiError('unavailable','Histórico não disponível para este recurso nesta API.');
+  const value=await this.get(`/api/v1/p11/${kind}/${encodeURIComponent(id)}/history`);
+  if(!Array.isArray(value))throw new ApiError('invalid','Histórico de projeção em formato inválido.');
+  return value.map((row,index)=>{
+   if(!object(row)||!Number.isInteger(row.revision)||Number(row.revision)<1||typeof row.source!=='string'||!object(row.data))throw new ApiError('invalid','Revisão da projeção incompatível.');
+   return {id:`${kind}:${id}@${row.revision}:${index}`,revision:Number(row.revision),source:row.source,data:row.data};
+  });
+ }
  async explanationHistory(id:string):Promise<Row[]>{
   if(this.profile!=='p11')throw new ApiError('unavailable','Histórico não disponível na API da base Git.');
   const value=await this.get(`${this.path('bitnet')}/${encodeURIComponent(id)}/history`);

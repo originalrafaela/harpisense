@@ -28,6 +28,7 @@ test('proxy real Vite: caminho, Bearer, status, leitura restrita e logs sem cred
     if(request.url?.startsWith('/api/v1/config/proposals/')&&request.url.endsWith('/validate'))return response.end('{"status":"VALIDATED"}');
     if(request.url?.startsWith('/api/v1/config/proposals/'))return response.end('{"status":"DRAFT"}');
     if(request.url==='/api/v1/config/proposals')return response.end('{"operation_id":"123e4567-e89b-12d3-a456-426614174000","revision":1,"status":"DRAFT"}');
+    if(request.url==='/api/v1/p11/incident/incident-1/history')return response.end('[{"revision":1,"source":"trusted-service","data":{"incident_id":"incident-1","status":"OBSERVED"}}]');
     response.end('[{"id":"fixture-record","revision":1,"source":"trusted-service","created_at":"2026-10-18T01:14:12.498058-03:00","data":{"device_id":"poste2","temperatura":28.4,"tipo":"teste_systemd"}}]');
   });
   await new Promise<void>(resolve=>fixture.listen(0,'127.0.0.1',resolve));
@@ -49,12 +50,16 @@ test('proxy real Vite: caminho, Bearer, status, leitura restrita e logs sem cred
   assert.equal(calls[2].url,'/api/v1/p11/telemetry?limit=50&offset=0');assert.equal(calls[2].authorization,headers.Authorization);
   const explanation=await fetch(base+'/explain/synthetic-fixture',{headers});assert.equal(explanation.status,200);
   assert.equal(calls[3].url,'/api/v1/p11/explain/synthetic-fixture');assert.equal(calls[3].authorization,headers.Authorization);
+  const incidentHistory=await fetch(base+'/incident/incident-1/history',{headers});assert.equal(incidentHistory.status,200);assert.equal((await incidentHistory.json())[0].revision,1);
+  assert.equal(calls[4].url,'/api/v1/p11/incident/incident-1/history');assert.equal(calls[4].authorization,headers.Authorization);
   const count=calls.length;
   assert.equal((await fetch(base+'/health',{headers:{Authorization:'Basic '+btoa('technical:fixture')}})).status,401);
   assert.equal((await fetch(base+'/ingest/telemetry',{method:'POST',headers})).status,405);
   assert.equal((await fetch(base+'/telemetry',{method:'POST',headers})).status,405);
   assert.equal((await fetch(base+'/explain/synthetic-fixture',{method:'POST',headers})).status,405);
   assert.equal((await fetch(base+'/incident',{headers})).status,200);
+  assert.equal((await fetch(base+'/unknown-kind/id/history',{headers})).status,404);
+  assert.equal((await fetch(base+'/incident/incident-1/history?limit=10',{headers})).status,400);
   assert.equal((await fetch(base+'/health',{headers:{...headers,Origin:'https://foreign.example'}})).status,403);
   assert.equal((await fetch(base+'/telemetry?password=forbidden',{headers})).status,400);
   assert.equal(calls.length,count+1);

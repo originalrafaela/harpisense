@@ -5,7 +5,7 @@ test('composição local real: P11/PostgreSQL, pendência desconhecida e auditor
  const user=process.env.HARPISENSE_TEST_ADMIN_USER;const password=process.env.HARPISENSE_TEST_ADMIN_PASSWORD;
  if(!user||!password)throw Error('Defina as credenciais da composição de teste no ambiente do runner.');
  await page.goto('http://127.0.0.1:5174');await page.getByLabel('Usuário',{exact:true}).fill(user);await page.getByLabel('Senha',{exact:true}).fill(password);await page.getByRole('button',{name:'Entrar na central'}).click();
- await expect(page.getByText('Consulta autenticada')).toBeVisible();await expect(page.getByText('Dados de demonstração — sem conexão operacional')).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Sair',exact:true})).toBeVisible();await expect(page.getByText('Dados de demonstração — sem conexão operacional')).toHaveCount(0);
  await expect(page.getByRole('heading',{name:'Estado operacional efetivo'})).toBeVisible();await expect(page.getByText('M1',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'↻ Atualizar consulta'})).toBeEnabled();await page.screenshot({path:'local-evidence/delivery-dashboard-postgresql-isolated.png',fullPage:true});
  await page.getByRole('link',{name:'Configurações',exact:true}).click();await expect(page.getByText('Pendências não verificadas.',{exact:false})).toBeVisible();
  await page.getByLabel('Justificativa da alteração').fill('Validação isolada da recusa por fila não integrada');await page.getByRole('button',{name:'Solicitar M3',exact:true}).click();
