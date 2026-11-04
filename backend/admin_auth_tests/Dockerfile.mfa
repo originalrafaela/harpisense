@@ -1,0 +1,6 @@
+FROM python:3.12-slim
+WORKDIR /work
+COPY backend/delivery/requirements.txt backend/delivery/requirements-test.txt /tmp/delivery/
+COPY backend/admin_auth/requirements-mfa.txt /tmp/mfa/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/delivery/requirements-test.txt -r /tmp/mfa/requirements.txt
+CMD ["python", "-m", "unittest", "discover", "-s", "backend/admin_auth_tests", "-p", "test_mfa*.py", "-v"]
