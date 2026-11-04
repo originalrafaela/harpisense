@@ -1,0 +1,4 @@
+export function AccountAvailability({close,flow='access'}:{close:()=>void;flow?:string}) {
+ const title=flow==='recuperar'?'Recuperação de senha':flow==='mfa'?'Verificação de MFA':'Primeiro acesso e segurança da conta';
+ return <section className="account-flow" aria-label="Disponibilidade da instalação e MFA"><h3>{title}</h3><p role="status">Não integrado: o backend entregue oferece login por senha e sessão, sem os endpoints abaixo.</p><ul><li>Primeiro acesso protegido e criação de usuário e senha</li><li>Cadastro e confirmação TOTP</li><li>Emissão de códigos de recuperação</li><li>Login em duas etapas e recuperação por código</li><li>Adesão ao MFA da conta administrativa existente</li></ul><p>Nenhuma conta foi criada e nenhum fator foi cadastrado. A disponibilidade depende da entrega e validação do contrato HTTP.</p><button type="button" onClick={close}>Fechar</button></section>;
+}

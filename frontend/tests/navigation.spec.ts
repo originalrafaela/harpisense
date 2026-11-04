@@ -13,7 +13,7 @@ test('login, navegação autenticada e logout com API simulada isolada',async({p
  await page.route('**/api/v1/p11/**',route=>route.fulfill({contentType:'application/json',body:route.request().url().includes('/health')?JSON.stringify({api:'available'}):'[]'}));
  await page.goto('http://127.0.0.1:5174');await page.getByText('Conexão da API').click();await page.getByLabel('URL da API').fill('http://127.0.0.1:5174');await page.getByRole('button',{name:'Salvar conexão local'}).click();
  await page.getByLabel('Usuário',{exact:true}).fill('isolated');await page.getByLabel('Senha',{exact:true}).fill('isolated');await page.getByRole('button',{name:'Entrar na central'}).click();
- await expect(page.getByText('Consulta autenticada')).toBeVisible();await page.getByRole('link',{name:'Postes e telemetria',exact:true}).click();await expect(page.getByText('Sem registros nesta consulta.').first()).toBeVisible();
+ await expect(page.getByRole('button',{name:'Sair',exact:true})).toBeVisible();await page.getByRole('link',{name:'Postes e telemetria',exact:true}).click();await expect(page.getByText('Sem registros nesta consulta.').first()).toBeVisible();
  await page.getByRole('button',{name:'Sair',exact:true}).click();await expect(page.getByLabel('Senha',{exact:true})).toHaveValue('');
  expect(await page.evaluate(()=>JSON.stringify({...localStorage}))).not.toContain('isolated');
 });
@@ -30,7 +30,7 @@ test('capturas login e mobile',async({page})=>{
 test('resposta inválida após login é erro, não zero registros ou demonstração',async({page})=>{
  let invalid=false;
  await page.route('**/api/v1/p11/**',route=>route.fulfill({contentType:'application/json',body:route.request().url().includes('/health')?JSON.stringify({api:'available'}):invalid?'{}':'[]'}));
- await page.goto('http://127.0.0.1:5174');await page.getByText('Conexão da API').click();await page.getByLabel('URL da API').fill('http://127.0.0.1:5174');await page.getByRole('button',{name:'Salvar conexão local'}).click();await page.getByLabel('Usuário',{exact:true}).fill('test');await page.getByLabel('Senha',{exact:true}).fill('test');await page.getByRole('button',{name:'Entrar na central'}).click();await expect(page.getByText('Consulta autenticada')).toBeVisible();invalid=true;
+ await page.goto('http://127.0.0.1:5174');await page.getByText('Conexão da API').click();await page.getByLabel('URL da API').fill('http://127.0.0.1:5174');await page.getByRole('button',{name:'Salvar conexão local'}).click();await page.getByLabel('Usuário',{exact:true}).fill('test');await page.getByLabel('Senha',{exact:true}).fill('test');await page.getByRole('button',{name:'Entrar na central'}).click();await expect(page.getByRole('button',{name:'Sair',exact:true})).toBeVisible();invalid=true;
  await page.getByRole('link',{name:'Postes e telemetria',exact:true}).click();await expect(page.getByRole('alert').filter({hasText:'Resposta inválida'}).first()).toBeVisible();await expect(page.getByText('Sem registros nesta consulta.')).toHaveCount(0);await expect(page.getByText('Dados de demonstração — sem conexão operacional')).toHaveCount(0);
 });
 test('login pode ser alcançado por teclado em notebook',async({page})=>{

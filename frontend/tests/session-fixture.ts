@@ -10,6 +10,9 @@ export const test=base.extend<{sessionFixture:void}>({
    if(path.endsWith('/logout'))return route.fulfill({status:204});
    return route.fulfill({status:404,json:{}});
   });
+  // The presentation capability is optional. Keep browser fixtures isolated
+  // from a locally running Vite proxy or any candidate API.
+  await page.route('**/api/v1/config/presentation',route=>route.fulfill({status:404,json:{detail:'Not integrated in this fixture'}}));
   await use();
  },{auto:true}],
 });

@@ -17,6 +17,7 @@ export type DashboardContext = {
   demoEmergencyStopped:boolean;
   onDemoEmergencyStopped:(value:boolean)=>void;
   loadHistory: (id: string) => Promise<Row[]>;
+  loadRecordHistory?: (kind: string, id: string) => Promise<Row[]>;
   loadExplanations?: (id: string) => Promise<Row[]>;
   loading?: boolean;
   loadControls?:()=>Promise<ControlState>;

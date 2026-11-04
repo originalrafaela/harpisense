@@ -68,6 +68,18 @@ test('histórico inválido é rejeitado sem inventar revisões',async()=>{
  const c=new Client('https://example.test','p11',(async(url)=>sessionResponse(url)||new Response(JSON.stringify(String(url).endsWith('/history')?[{revision:1,data:{}}]:[]))) as typeof fetch);
  await c.login(credentials);await assert.rejects(()=>c.explanationHistory('exp'),/Revisão de explicação inválida/);
 });
+test('histórico de incidente usa apenas GET autenticado e valida revisões da projeção',async()=>{
+ const calls:{url:string;init?:RequestInit}[]=[];
+ const c=new Client('https://example.test','p11',(async(url,init)=>{const auth=sessionResponse(url);if(auth)return auth;calls.push({url:String(url),init});return new Response(JSON.stringify([{revision:2,source:'trusted-service',data:{incident_id:'inc/1',status:'OBSERVED'}}]))}) as typeof fetch);
+ await c.login(credentials);const history=await c.recordHistory('incident','inc/1');
+ assert.match(calls[0].url,/\/api\/v1\/p11\/incident\/inc%2F1\/history$/);assert.equal(calls[0].init?.method,'GET');assert.equal((calls[0].init?.headers as Record<string,string>).Authorization,'Bearer '+'a'.repeat(43));
+ assert.equal(history[0].revision,2);assert.equal(history[0].data.incident_id,'inc/1');
+ await assert.rejects(()=>c.recordHistory('apply','id'),/Histórico não disponível/);
+});
+test('histórico com esquema inválido não é apresentado como vazio',async()=>{
+ const c=new Client('https://example.test','p11',(async url=>sessionResponse(url)||new Response('[{"revision":1,"source":"trusted-service"}]')) as typeof fetch);
+ await c.login(credentials);await assert.rejects(()=>c.recordHistory('incident','inc-1'),/Revisão da projeção incompatível/);
+});
 
 test('sessão recusada é descartada sem Basic ou repetição do login',async()=>{
  const paths:string[]=[];
