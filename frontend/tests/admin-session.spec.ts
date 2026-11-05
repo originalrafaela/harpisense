@@ -3,7 +3,7 @@ import {test,expect,type Page} from '@playwright/test';
 const token='s'.repeat(43);
 const password='isolated administrator password';
 async function fixture(page:Page,{invalid=false,expired=false,logoutFailure=false}={}){
- const calls:{path:string;method:string;authorization?:string}[]=[];
+ const calls:{path:string;method:string;authorization?:string;status?:number;responseCode?:string}[]=[];
  await page.route('**/p11-api/api/**',async route=>{
   const request=route.request();const path=new URL(request.url()).pathname;
   calls.push({path,method:request.method(),authorization:request.headers().authorization});
@@ -17,13 +17,15 @@ async function fixture(page:Page,{invalid=false,expired=false,logoutFailure=fals
   if(path.endsWith('/admin-auth/session'))return route.fulfill({json:{authenticated:true,username:'owner',expires_at:new Date(Date.now()+60000).toISOString(),idle_timeout_seconds:1800,mfa_available:false,email_recovery_available:false}});
   if(path.endsWith('/admin-auth/logout'))return route.fulfill({status:logoutFailure?503:204,...(logoutFailure?{json:{error:{code:'AUTH_UNAVAILABLE'}}}:{})});
   if(path.endsWith('/health'))return route.fulfill({json:{api:'available'}});
-  if(expired)return route.fulfill({status:401,json:{error:{code:'SESSION_EXPIRED'}}});
+  if(expired){calls[calls.length-1].status=401;calls[calls.length-1].responseCode='SESSION_EXPIRED';return route.fulfill({status:401,json:{error:{code:'SESSION_EXPIRED'}}});}
   return route.fulfill({json:[]});
  });
  await page.goto('http://127.0.0.1:5174');
  await page.getByLabel('Usuário',{exact:true}).fill('owner');
  await page.getByLabel('Senha',{exact:true}).fill(password);
+ const sessionResponse=invalid?undefined:page.waitForResponse(response=>new URL(response.url()).pathname.endsWith('/admin-auth/session')&&response.ok());
  await page.getByRole('button',{name:'Entrar na central',exact:true}).click();
+ if(sessionResponse)await sessionResponse;else await expect(page.getByRole('alert')).toContainText('Usuário ou senha inválidos');
  return calls;
 }
 
@@ -42,14 +44,14 @@ test('conta própria: senha só no login, Bearer em memória, logout remoto e re
 
 test('login inválido mantém operação fechada e limpa a senha',async({page})=>{
  const calls=await fixture(page,{invalid:true});
- await expect(page.getByRole('alert')).toContainText('Credenciais inválidas');
+ await expect(page.getByRole('alert')).toContainText('Usuário ou senha inválidos');
  await expect(page.getByLabel('Senha',{exact:true})).toHaveValue('');
  expect(calls.length).toBe(1);await expect(page.getByRole('button',{name:'Sair',exact:true})).toHaveCount(0);
 });
 
 test('sessão expirada pela API encerra consulta e exige login, sem fallback técnico',async({page})=>{
  const calls=await fixture(page,{expired:true});
- await expect(page.getByRole('alert')).toContainText('Sessão expirada');
+ await expect(page.getByRole('alert'),JSON.stringify(calls.map(({path,method,status,responseCode})=>({path,method,status,responseCode})))).toContainText('Sessão expirada');
  await expect(page.getByLabel('Senha',{exact:true})).toHaveValue('');
  expect(calls.filter(call=>call.path.endsWith('/login')).length).toBe(1);
 });

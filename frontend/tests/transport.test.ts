@@ -74,3 +74,22 @@ test('proxy real Vite: caminho, Bearer, status, leitura restrita e logs sem cred
   assert.equal((await fetch(config+'/apply',{method:'POST',headers})).status,405);
   assert.equal((await fetch(config+'/history?after=0&secret=no',{headers})).status,400);
 });
+
+test('proxy libera somente as rotas candidatas de primeiro acesso/MFA e não envia Basic',async t=>{
+ const calls:{url:string;method:string;authorization:string|undefined;origin:string|undefined}[]=[];
+ const fixture=httpServer((request,response)=>{
+  calls.push({url:request.url||'',method:request.method||'GET',authorization:request.headers.authorization,origin:request.headers.origin});
+  response.setHeader('content-type','application/json');response.setHeader('set-cookie','must-not-reach-browser');
+  response.end('{"challenge_token":"fixture-only","next_step":"login","expires_at":"2099-01-01T00:00:00Z"}');
+ });
+ await new Promise<void>(resolve=>fixture.listen(0,'127.0.0.1',resolve));t.after(()=>{fixture.closeAllConnections();fixture.close()});
+ const target=fixture.address();assert.ok(target&&typeof target!=='string');const transport=p11Transport(`http://127.0.0.1:${target.port}`);
+ const logger=createLogger('silent');const server=await createServer({configFile:false,customLogger:logger,plugins:[transport.plugin],server:{host:'127.0.0.1',port:0,hmr:false,cors:false,proxy:transport.proxy},optimizeDeps:{noDiscovery:true}});
+ t.after(()=>server.close());await server.listen();const local=server.httpServer?.address();assert.ok(local&&typeof local!=='string');const origin=`http://127.0.0.1:${local.port}`;const endpoint=`${origin}/p11-api/api/v1/admin-auth/mfa/verify`;
+ const result=await fetch(endpoint,{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({challenge_token:'temporary-challenge',code:'123456'})});
+ assert.equal(result.status,200);assert.equal(result.headers.get('set-cookie'),null);assert.equal(calls[0].url,'/api/v1/admin-auth/mfa/verify');assert.equal(calls[0].method,'POST');assert.equal(calls[0].authorization,undefined);assert.equal(calls[0].origin,origin);
+ assert.equal((await fetch(`${origin}/p11-api/api/v1/admin-auth/mfa/disable`,{method:'POST',headers:{Origin:origin}})).status,405);
+ assert.equal((await fetch(`${origin}/p11-api/api/v1/admin-auth/mfa/verify?code=123456`,{method:'POST',headers:{Origin:origin}})).status,400);
+ assert.equal((await fetch(endpoint,{method:'POST',headers:{Origin:origin,Authorization:'Basic dGVjaDpzZWNyZXQ='}})).status,401);
+ assert.equal(calls.length,1);
+});

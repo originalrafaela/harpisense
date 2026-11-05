@@ -26,7 +26,7 @@ export function p11Transport(target) {
       response.writeHead(403, {'Content-Type': 'application/json'});
       return response.end('{"detail":"Origem não permitida no transporte local"}');
     }
-    const authRoutes = new Map([['/api/v1/admin-auth/login','POST'],['/api/v1/admin-auth/session','GET'],['/api/v1/admin-auth/logout','POST'],['/api/v1/admin-auth/password','PUT'],['/api/v1/admin-auth/username','PUT']]);
+    const authRoutes = new Map([['/api/v1/admin-auth/login','POST'],['/api/v1/admin-auth/session','GET'],['/api/v1/admin-auth/logout','POST'],['/api/v1/admin-auth/password','PUT'],['/api/v1/admin-auth/username','PUT'],['/api/v1/admin-auth/bootstrap','POST'],['/api/v1/admin-auth/local-recovery','POST'],['/api/v1/admin-auth/mfa/enrollment/authorize','POST'],['/api/v1/admin-auth/mfa/enrollment/begin','POST'],['/api/v1/admin-auth/mfa/enrollment/confirm','POST'],['/api/v1/admin-auth/mfa/verify','POST'],['/api/v1/admin-auth/mfa/recover','POST'],['/api/v1/admin-auth/mfa/cancel','POST']]);
     const auth = authRoutes.get(path) === request.method;
     // The browser transport has no technical Basic or service-ingestion path.
     if (request.headers.authorization && !/^Bearer [A-Za-z0-9_-]{43}$/.test(request.headers.authorization)) {
