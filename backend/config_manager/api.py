@@ -11,6 +11,7 @@ from jsonschema import Draft202012Validator
 from .schema import ConfigError, REQUEST_SCHEMA, checked, obj, text
 from .store import Conflict
 from .setup import FIRMWARE, SAVE_SCHEMA, SetupStore
+from .mqtt import mqtt_capabilities, mqtt_status
 
 
 class SafeRoute(APIRoute):
@@ -160,7 +161,12 @@ def install_config_api(app, store, *, installation_id, presentation=None):
                 'applicators': ['presentation'] if presentation else [],
                 'application_scope': ['display_name', 'timezone'] if presentation else [],
                 'reauthentication_required': bool(presentation),
-                'backup': 'not_applicable', 'bootstrap_managed': False}
+                'backup': 'not_applicable', 'bootstrap_managed': False,
+                'mqtt': mqtt_capabilities(store.capabilities)}
+
+    @router.get('/mqtt/status')
+    def observed_mqtt():
+        return mqtt_status()
 
     if presentation:
         @router.get('/presentation')

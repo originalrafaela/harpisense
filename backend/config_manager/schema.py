@@ -35,6 +35,7 @@ class Parameters(TypedDict, total=False):
     capture_window_seconds: Literal[10]
     feature_schema_version: str
     mqtt_broker_host: str
+    mqtt_broker_mode: Literal["local_managed", "external"]
     mqtt_broker_port: int
     mqtt_tls_mode: Literal["required"]
     mqtt_ca_ref: str
@@ -76,6 +77,7 @@ PARAMETER_SCHEMA = obj({
     "capture_window_seconds": {"type": "integer", "const": 10},
     "feature_schema_version": {"const": "harpisense.if.window.v1"},
     "mqtt_broker_host": text(253),
+    "mqtt_broker_mode": {"enum": ["local_managed", "external"]},
     "mqtt_broker_port": {"type": "integer", "minimum": 1, "maximum": 65535},
     "mqtt_tls_mode": {"const": "required"},
     "mqtt_ca_ref": IDENTIFIER,
