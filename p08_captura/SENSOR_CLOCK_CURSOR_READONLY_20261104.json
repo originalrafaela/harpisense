@@ -1,0 +1,55 @@
+{
+  "base_commit": "d6a2380d51c4c98558f5eb8679c1e9fd04967979",
+  "composition_read_commit": "7fe8294",
+  "scope": "read_only_preparation_no_trial",
+  "chosen_sensor": {"host": "poste2", "interface": "ens33", "source": "192.168.155.142", "broker": "192.168.155.1:1883", "console_receipt_pending": true, "topology_change_required": false},
+  "architect_reported_compatibility": {
+    "source": "user_message_from_architect_not_independently_rerun",
+    "converter_sha256": "6a923456b580b15f0dafcc477192267dd35e355b603b52b732700b2ef9b10152",
+    "aggregator_sha256": "5f92f1091dd8c381bd78dc234fccdf950dcffdc64a94d312bdbdd7bd68d080be",
+    "accepted_capture": "classic_pcap_ethernet_no_vlan_ipv4_tcp_not_fragmented_not_truncated",
+    "bytes_semantics": "IP.total_length",
+    "pcapng_supported": false
+  },
+  "windows_observed_at_reported_utc": "2026-11-05T01:04:05.8023009Z",
+  "windows_interface": {"name": "VMware Network Adapter VMnet8", "ifindex": 17, "mac": "00-50-56-C0-00-08", "status": "Up"},
+  "pktmon": {"driver_access": "denied", "capture_started": false, "selected_for_trial": false, "reason": "driver privilege missing and current converter does not accept PCAPNG"},
+  "windows_clock": {
+    "synchronized": false,
+    "reported_source": "Local CMOS Clock",
+    "configured_peer": "time.windows.com,0x9",
+    "peer_state": "pending",
+    "stripchart_peer_responded": true,
+    "stripchart_sample_local_times": ["2026-11-04T22:06:02", "2026-11-04T22:06:04", "2026-11-04T22:06:06"],
+    "stripchart_offsets_seconds": [0.3965910, 0.3967258, 0.3980179],
+    "cross_host_error_bound_verified": false,
+    "clock_adjusted": false
+  },
+  "broker_log_discovery": {
+    "observed_at_reported_utc": "2026-11-05T01:12:33.0239541Z",
+    "config": "D:/Programas/Mosquitto/mosquitto.conf",
+    "explicit_directives_returned": ["listener 1883 192.168.155.1"],
+    "log_files_returned_in_config_directory": [],
+    "event_providers_returned": [],
+    "effective_log_destination_verified": false,
+    "scope_not_global_absence_claim": true
+  },
+  "gateway_metadata_observed_at_reported_utc": "2026-11-05T01:12:40Z",
+  "gateway_boot_id": "76896da0-a673-465b-bed0-c19232c8ba0f",
+  "journals": {
+    "mqtt": {"active": true, "pid": 1788, "nrestarts": 0, "cursor": "s=7987e18a3bcf4acba45c283a737a475a;i=3dc55;b=76896da0a673465bbed0c19232c8ba0f;m=2501415f5;t=65f7bc8e35ff6;x=b8f1151a375e6f7b", "realtime_timestamp_us": "1793835116224502"},
+    "api": {"active": true, "pid": 1789, "nrestarts": 0, "cursor": "s=7987e18a3bcf4acba45c283a737a475a;i=3dcaf;b=76896da0a673465bbed0c19232c8ba0f;m=313be7fb9;t=65f7c8c8dc9bb;x=db0c147e0218f177", "realtime_timestamp_us": "1793838398949819"},
+    "future_session_boundaries": false,
+    "continuity_for_future_session_verified": false,
+    "checkpoints_advanced": false
+  },
+  "composition_contract": {"schema": "harpisense.if.window.v1", "window_seconds": 10, "synthetic_bundle_profile": "demo_tcp_ingress", "p08_candidate_profile": "tcp-observacao", "profile_compatibility_verified": false, "process_p08_gate": "DependencyBlocked"},
+  "vm_files_modified": false,
+  "backend_p08_p09_modified": false,
+  "models_modified": false,
+  "capture_started": false,
+  "new_publication": false,
+  "inference_executed": false,
+  "attacks_executed": false,
+  "containment_enabled_by_this_work": false
+}
