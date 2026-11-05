@@ -1,0 +1,36 @@
+{
+  "captured_at_utc": "2026-11-05T00:51:09.481338+00:00",
+  "tests_run": 11,
+  "failures": 0,
+  "errors": 0,
+  "inference": "real sklearn estimators fitted/calibrated on explicit synthetic data",
+  "database": "disposable PostgreSQL 18.6",
+  "api": "P11 TestClient with real PostgreSQL store",
+  "laboratory_validated": false,
+  "statistical_validation": false,
+  "vm_validated": false,
+  "execution_performed": false,
+  "regressions": [
+    {
+      "name": "p08-adapters",
+      "tests_run": 46,
+      "returncode": 0,
+      "evidence": "synthetic contract fixtures"
+    },
+    {
+      "name": "p08-batch",
+      "tests_run": 14,
+      "returncode": 0,
+      "evidence": "synthetic contract fixtures"
+    }
+  ],
+  "code_sha256": {
+    "backend/detection_composition/__init__.py": "b1393cf7e50cdc43940b94815104100f36180e84e067426bbcf4b74bcbba6300",
+    "backend/detection_composition/__main__.py": "2478ca164e73728d2fb847ea32e85bf544348c64915e2393e6b5b3df6e543488",
+    "backend/detection_composition/core.py": "25614c599abdbf294e1f64eadd90830246b5a266995a5aa43db2aa9a334c5101",
+    "backend/detection_composition/provenance.py": "dc125ac41c1ce5eed021f942d5a2dcb8f3043c68a293467329582e8c079c9cc1",
+    "backend/detection_composition/store.py": "d25fda4fde77c2597bce3c9bc69d195b4bc58097b9f80ca326856d1c46ca12cb",
+    "backend/detection_composition/tests/run_suite.py": "943979938cb3fd6f2de1d4e3b4884a2b816d0f50d75e6b8861cb7dbcf46f03b0",
+    "backend/detection_composition/tests/test_composition.py": "55e0358c0564c1463d1285150ee592a4ddb6b168fe973f08fa6ca578523bd988"
+  }
+}

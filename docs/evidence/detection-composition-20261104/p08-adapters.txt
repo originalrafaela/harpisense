@@ -1,0 +1,51 @@
+test_ambiguous_binding (test_context_adapter.TestContextAdapter.test_ambiguous_binding) ... ok
+test_invalid_input (test_context_adapter.TestContextAdapter.test_invalid_input) ... ok
+test_missing_binding (test_context_adapter.TestContextAdapter.test_missing_binding) ... ok
+test_missing_context (test_context_adapter.TestContextAdapter.test_missing_context) ... ok
+test_original_evidence_unchanged (test_context_adapter.TestContextAdapter.test_original_evidence_unchanged) ... ok
+test_reserved_context_rejected (test_context_adapter.TestContextAdapter.test_reserved_context_rejected) ... ok
+test_valid_binding (test_context_adapter.TestContextAdapter.test_valid_binding) ... ok
+test_duplicate_evidence_rejected (test_context_security.TestContextSecurity.test_duplicate_evidence_rejected) ... ok
+test_empty_evidence_id_rejected (test_context_security.TestContextSecurity.test_empty_evidence_id_rejected) ... ok
+test_unexpected_binding_rejected (test_context_security.TestContextSecurity.test_unexpected_binding_rejected) ... ok
+test_context_to_window (test_context_window_integration.TestContextWindowIntegration.test_context_to_window) ... ok
+test_different_sensor_rejected (test_coverage_gate.TestCoverageAdditionalContext.test_different_sensor_rejected) ... ok
+test_different_target_rejected (test_coverage_gate.TestCoverageAdditionalContext.test_different_target_rejected) ... ok
+test_missing_context_rejected (test_coverage_gate.TestCoverageAdditionalContext.test_missing_context_rejected) ... ok
+test_different_session_rejected (test_coverage_gate.TestCoverageContext.test_different_session_rejected) ... ok
+test_missing_coverage_rejected (test_coverage_gate.TestCoverageGate.test_missing_coverage_rejected) ... ok
+test_partial_coverage_rejected (test_coverage_gate.TestCoverageGate.test_partial_coverage_rejected) ... ok
+test_unverified_coverage_rejected (test_coverage_gate.TestCoverageGate.test_unverified_coverage_rejected) ... ok
+test_consecutive_intervals_accepted (test_coverage_gate.TestCoverageIntervals.test_consecutive_intervals_accepted) ... ok
+test_full_coverage_accepted (test_coverage_gate.TestCoverageIntervals.test_full_coverage_accepted) ... ok
+test_missing_required_source_rejected (test_coverage_gate.TestCoverageIntervals.test_missing_required_source_rejected) ... ok
+test_temporal_gap_rejected (test_coverage_gate.TestCoverageIntervals.test_temporal_gap_rejected) ... ok
+test_signed_coverage_proof_is_recorded_but_counts_stay_blocked (test_log_coverage_integration.TestLogCoverageIntegration.test_signed_coverage_proof_is_recorded_but_counts_stay_blocked) ... ok
+test_untrusted_coverage_must_not_release_counts (test_log_coverage_integration.TestLogCoverageIntegration.test_untrusted_coverage_must_not_release_counts) ... ok
+test_different_sensor (test_log_window_adapter.TestAdditionalIsolation.test_different_sensor) ... ok
+test_different_target (test_log_window_adapter.TestAdditionalIsolation.test_different_target) ... ok
+test_duplicate_window_id (test_log_window_adapter.TestAdditionalIsolation.test_duplicate_window_id) ... ok
+test_missing_context (test_log_window_adapter.TestAdditionalIsolation.test_missing_context) ... ok
+test_different_session_must_not_count (test_log_window_adapter.TestContextIsolation.test_different_session_must_not_count) ... ok
+test_count (test_log_window_adapter.TestLogWindowAdapter.test_count) ... ok
+test_duplicate (test_log_window_adapter.TestLogWindowAdapter.test_duplicate) ... ok
+test_end_exclusive (test_log_window_adapter.TestLogWindowAdapter.test_end_exclusive) ... ok
+test_incomplete_coverage (test_log_window_adapter.TestLogWindowAdapter.test_incomplete_coverage) ... ok
+test_invalid_input (test_log_window_adapter.TestLogWindowAdapter.test_invalid_input) ... ok
+test_invalid_window (test_log_window_adapter.TestLogWindowAdapter.test_invalid_window) ... ok
+test_multiple_features (test_log_window_adapter.TestLogWindowAdapter.test_multiple_features) ... ok
+test_start_inclusive (test_log_window_adapter.TestLogWindowAdapter.test_start_inclusive) ... ok
+test_timestamp_without_timezone (test_log_window_adapter.TestLogWindowAdapter.test_timestamp_without_timezone) ... ok
+test_unknown_event (test_log_window_adapter.TestLogWindowAdapter.test_unknown_event) ... ok
+test_conflicting_collection_state (test_p08_artifact_validator.TestP08ArtifactValidator.test_conflicting_collection_state) ... ok
+test_consistent_artifacts (test_p08_artifact_validator.TestP08ArtifactValidator.test_consistent_artifacts) ... ok
+test_inference_enabled_rejected (test_p08_artifact_validator.TestP08ArtifactValidator.test_inference_enabled_rejected) ... ok
+test_invalid_session_name (test_p08_artifact_validator.TestP08ArtifactValidator.test_invalid_session_name) ... ok
+test_modified_pcap (test_p08_artifact_validator.TestP08ArtifactValidator.test_modified_pcap) ... ok
+test_wrong_session (test_p08_artifact_validator.TestP08ArtifactValidator.test_wrong_session) ... ok
+test_signed_source_records_reach_p09_gate_without_releasing_counts (test_signed_coverage_pipeline.SignedCoveragePipelineTests.test_signed_source_records_reach_p09_gate_without_releasing_counts) ... ok
+
+----------------------------------------------------------------------
+Ran 46 tests in 0.018s
+
+OK

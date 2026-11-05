@@ -1,0 +1,222 @@
+{
+  "captured_at_utc": "2026-10-26T17:56:35.977229+00:00",
+  "effective_uid": 1000,
+  "read_only": true,
+  "installed": {
+    "auxiliary_audit_adapter.py": {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/auxiliary_audit_adapter.py",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "size_bytes": 5896,
+      "mtime_ns": "1793037104692321639",
+      "sha256": "04b58d66d5d6d9cd513bff4b559c187bca4a2d13ea370e80fcbfc97bb9eb5416",
+      "matches_validated_candidate": true
+    },
+    "p08_p09_pipeline.py": {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/p08_p09_pipeline.py",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "size_bytes": 3548,
+      "mtime_ns": "1793037104694954357",
+      "sha256": "4ec9ed8c2fb5b068ebdae4b6cd7643d1aca5a5c0fcc5d9c354e28f5f7f12d8dc",
+      "matches_validated_candidate": true
+    }
+  },
+  "backups": [
+    {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/.validated-batch-backup-5jgd2gmh",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o700",
+      "size_bytes": 4096,
+      "mtime_ns": "1793037104694954357",
+      "regular_file": false,
+      "files": {
+        "auxiliary_audit_adapter.py": {
+          "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/.validated-batch-backup-5jgd2gmh/auxiliary_audit_adapter.py",
+          "error": "PermissionError",
+          "matches_original": null
+        },
+        "p08_p09_pipeline.py": {
+          "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09/.validated-batch-backup-5jgd2gmh/p08_p09_pipeline.py",
+          "error": "PermissionError",
+          "matches_original": null
+        }
+      },
+      "receipt": {},
+      "receipt_error": "PermissionError"
+    }
+  ],
+  "sessions": [],
+  "selected_session": null,
+  "batch_session_link_verified": false,
+  "adapter_directory": {
+    "path": "/opt/harpisense/staging/p09-deteccao-decisao/adaptador_logs_p08_p09",
+    "uid": 0,
+    "gid": 0,
+    "mode": "0o755",
+    "size_bytes": 4096,
+    "mtime_ns": "1793037104694954357",
+    "regular_file": false
+  },
+  "batches": [
+    {
+      "batch": "mqtt_v4_acabf4a909f00b5f68cfa3c906d58cf1483931902f394c58e4ddc9178e1dc9bf.json",
+      "input_error": null,
+      "event_count": 1,
+      "event_metadata": [
+        {
+          "event_type": "validation_failure",
+          "observed_at": "2026-10-25T18:46:20.171871+00:00",
+          "sensor_id": null,
+          "journal_cursor_present": true,
+          "journal_boot_id_present": true
+        }
+      ],
+      "manifest_metadata": {
+        "schema_version": "4.0",
+        "coverage": "UNKNOWN",
+        "continuity_verified": false,
+        "authorized_for_inference": false,
+        "authorized_for_ips": false,
+        "audit_events_found": 1,
+        "journal_records_read": 1
+      },
+      "manifest_cursors_present": true
+    },
+    {
+      "batch": "mqtt_v4_d94cc2181f5932c7876b065ed9d61533d42542342494ae56b03ddb7ce96a41d1.json",
+      "input_error": null,
+      "event_count": 0,
+      "event_metadata": [],
+      "manifest_metadata": {
+        "schema_version": "4.0",
+        "coverage": "UNKNOWN",
+        "continuity_verified": false,
+        "authorized_for_inference": false,
+        "authorized_for_ips": false,
+        "audit_events_found": 0,
+        "journal_records_read": 0
+      },
+      "manifest_cursors_present": true
+    }
+  ],
+  "session_discovery_error": "PermissionError",
+  "state_before": {
+    "mqtt_v4_acabf4a909f00b5f68cfa3c906d58cf1483931902f394c58e4ddc9178e1dc9bf.json": {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_acabf4a909f00b5f68cfa3c906d58cf1483931902f394c58e4ddc9178e1dc9bf.json",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "size_bytes": 356,
+      "mtime_ns": "1792953983230126358",
+      "sha256": "cff3245d0be5afb5a792a5d81eed6d721323fd7fb46dfc8f6de5fd1f3b49edae"
+    },
+    "mqtt_v4_acabf4a909f00b5f68cfa3c906d58cf1483931902f394c58e4ddc9178e1dc9bf.manifest.json": {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_acabf4a909f00b5f68cfa3c906d58cf1483931902f394c58e4ddc9178e1dc9bf.manifest.json",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "size_bytes": 547,
+      "mtime_ns": "1792953983232071463",
+      "sha256": "daf510c455b18483c61ae0d75e529f9bcde89efb9d43e992e836e229223541b9"
+    },
+    "mqtt_v4_d94cc2181f5932c7876b065ed9d61533d42542342494ae56b03ddb7ce96a41d1.json": {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_d94cc2181f5932c7876b065ed9d61533d42542342494ae56b03ddb7ce96a41d1.json",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "size_bytes": 2,
+      "mtime_ns": "1792953389164007591",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "mqtt_v4_d94cc2181f5932c7876b065ed9d61533d42542342494ae56b03ddb7ce96a41d1.manifest.json": {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_d94cc2181f5932c7876b065ed9d61533d42542342494ae56b03ddb7ce96a41d1.manifest.json",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "size_bytes": 547,
+      "mtime_ns": "1792953389166291483",
+      "sha256": "cf2661162abfe050c97ef1706adc740c84f794025eadcf1f649472fdc2c260d8"
+    },
+    "mqtt_collection_checkpoint.json": {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_collection_checkpoint.json",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "size_bytes": 579,
+      "mtime_ns": "1792952748598549832",
+      "sha256": "7ffe3b525549e4610c8c1a5a8b829cdb8ca6f0845388777960c14909d31a0aa0"
+    }
+  },
+  "state_after": {
+    "mqtt_v4_acabf4a909f00b5f68cfa3c906d58cf1483931902f394c58e4ddc9178e1dc9bf.json": {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_acabf4a909f00b5f68cfa3c906d58cf1483931902f394c58e4ddc9178e1dc9bf.json",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "size_bytes": 356,
+      "mtime_ns": "1792953983230126358",
+      "sha256": "cff3245d0be5afb5a792a5d81eed6d721323fd7fb46dfc8f6de5fd1f3b49edae"
+    },
+    "mqtt_v4_acabf4a909f00b5f68cfa3c906d58cf1483931902f394c58e4ddc9178e1dc9bf.manifest.json": {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_acabf4a909f00b5f68cfa3c906d58cf1483931902f394c58e4ddc9178e1dc9bf.manifest.json",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "size_bytes": 547,
+      "mtime_ns": "1792953983232071463",
+      "sha256": "daf510c455b18483c61ae0d75e529f9bcde89efb9d43e992e836e229223541b9"
+    },
+    "mqtt_v4_d94cc2181f5932c7876b065ed9d61533d42542342494ae56b03ddb7ce96a41d1.json": {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_d94cc2181f5932c7876b065ed9d61533d42542342494ae56b03ddb7ce96a41d1.json",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "size_bytes": 2,
+      "mtime_ns": "1792953389164007591",
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "mqtt_v4_d94cc2181f5932c7876b065ed9d61533d42542342494ae56b03ddb7ce96a41d1.manifest.json": {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_v4_d94cc2181f5932c7876b065ed9d61533d42542342494ae56b03ddb7ce96a41d1.manifest.json",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "size_bytes": 547,
+      "mtime_ns": "1792953389166291483",
+      "sha256": "cf2661162abfe050c97ef1706adc740c84f794025eadcf1f649472fdc2c260d8"
+    },
+    "mqtt_collection_checkpoint.json": {
+      "path": "/opt/harpisense/staging/p09-deteccao-decisao/auditoria_cobertura_p08/mqtt_collection_checkpoint.json",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "size_bytes": 579,
+      "mtime_ns": "1792952748598549832",
+      "sha256": "7ffe3b525549e4610c8c1a5a8b829cdb8ca6f0845388777960c14909d31a0aa0"
+    }
+  },
+  "original_batches_manifests_checkpoint_unchanged": true,
+  "p11_files": {
+    "postgres_store.py": {
+      "path": "/opt/harpisense/staging/p11-postgresql/postgres_store.py",
+      "uid": 1000,
+      "gid": 1000,
+      "mode": "0o664",
+      "size_bytes": 4551,
+      "mtime_ns": "1792292284901516602",
+      "sha256": "cba6be580f72a8e39077ea9e7437cadee04b67effbb618737309f6450d97643c"
+    },
+    "app.py": {
+      "path": "/opt/harpisense/staging/p11-postgresql/app.py",
+      "uid": 1000,
+      "gid": 1000,
+      "mode": "0o664",
+      "size_bytes": 586,
+      "mtime_ns": "1792967127882913211",
+      "sha256": "52078a449886528569a85645e02df974826dc1a24566c01db6bc5f487f328ef2"
+    }
+  }
+}
