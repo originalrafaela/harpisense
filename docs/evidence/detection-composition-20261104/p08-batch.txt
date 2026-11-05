@@ -1,0 +1,19 @@
+test_artifact_and_coverage_gates_not_bypassed (test_batch_pipeline.TestBatchPipeline.test_artifact_and_coverage_gates_not_bypassed) ... ok
+test_both_inputs_rejected_before_io_even_empty_events (test_batch_pipeline.TestBatchPipeline.test_both_inputs_rejected_before_io_even_empty_events) ... ok
+test_empty_batch_retains_manifest_provenance (test_batch_pipeline.TestBatchPipeline.test_empty_batch_retains_manifest_provenance) ... ok
+test_legacy_results_unchanged_and_no_forged_batch_integrity (test_batch_pipeline.TestBatchPipeline.test_legacy_results_unchanged_and_no_forged_batch_integrity) ... ok
+test_malformed_batch_manifest_and_envelope (test_batch_pipeline.TestBatchPipeline.test_malformed_batch_manifest_and_envelope) ... ok
+test_manifest_tampering_in_isolated_copies (test_batch_pipeline.TestBatchPipeline.test_manifest_tampering_in_isolated_copies) ... ok
+test_missing_traceability_rejected (test_batch_pipeline.TestBatchPipeline.test_missing_traceability_rejected) ... ok
+test_modified_bytes_and_missing_manifest (test_batch_pipeline.TestBatchPipeline.test_modified_bytes_and_missing_manifest) ... ok
+test_normalizes_once_and_never_feeds_auxiliary_counts (test_batch_pipeline.TestBatchPipeline.test_normalizes_once_and_never_feeds_auxiliary_counts) ... ok
+test_unknown_event_rejected_even_with_consistent_hashes (test_batch_pipeline.TestBatchPipeline.test_unknown_event_rejected_even_with_consistent_hashes) ... ok
+test_valid_event_provenance_survives_missing_session (test_batch_pipeline.TestBatchPipeline.test_valid_event_provenance_survives_missing_session) ... ok
+test_backup_and_exact_replacement (test_staging_update.TestStagingUpdate.test_backup_and_exact_replacement) ... ok
+test_dry_run_and_refuse_unexpected_changes (test_staging_update.TestStagingUpdate.test_dry_run_and_refuse_unexpected_changes) ... ok
+test_failure_restores_both_files (test_staging_update.TestStagingUpdate.test_failure_restores_both_files) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.545s
+
+OK

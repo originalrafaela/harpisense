@@ -1,0 +1,2 @@
+# Preserve approved source bytes, including intentional upstream EOF spacing.
+*.py -text whitespace=-blank-at-eof

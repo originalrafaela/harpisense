@@ -1,0 +1,945 @@
+{
+  "input_origin": "synthetic",
+  "real_estimators": true,
+  "laboratory_validated": false,
+  "statistical_validation": false,
+  "dataset_sha256": {
+    "rf-train": "9efd6bbac87e0c1e798687808e4750a0c00e0c1fe8de5d7e0dfb597b3b100433",
+    "rf-calibration": "d387337858cfc992a66fa940595b3f1f0c7c1f5cffcb4d66af67e316cb63443a",
+    "if-train": "f47682c7c4f88223bf65c4b2b51c2f33ff01a6be5bbc1a92ce181faf65234212",
+    "if-calibration": "67dc6b15954736a4d10ce876774be9e29770a5187c92ad15cce3259807a53662"
+  },
+  "versions": {
+    "python": "3.12.15",
+    "scikit_learn": "1.8.0",
+    "scipy": "1.17.0",
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "joblib": "1.5.3"
+  },
+  "result": {
+    "run_id": "composition-7afcdbb5af96310e1e73d8cdb5329c33046fde4e88d3661820a4c47e4a436f5e",
+    "input_origin": "synthetic",
+    "laboratory_validated": false,
+    "execution_performed": false,
+    "artifacts": {
+      "random_forest": {
+        "sha256": "11f30e77c376f314ff40c1f4d759955a5dbf61b2a10807b0356c475a2ff1ca10",
+        "model_version": "rf-6970a2ce-3545-415f-ad75-67ae50a2dfc3",
+        "features": [
+          "packet_count",
+          "bytes_total",
+          "packets_per_second",
+          "connections_per_second",
+          "syn_count",
+          "rst_count",
+          "unique_dst_ports",
+          "avg_packet_size",
+          "mean_interarrival_ms"
+        ],
+        "profile": "demo_tcp_ingress",
+        "window_seconds": 10.0,
+        "versions": {
+          "python": "3.12.15",
+          "scikit_learn": "1.8.0",
+          "scipy": "1.17.0",
+          "numpy": "2.3.5",
+          "pandas": "2.2.3",
+          "joblib": "1.5.3"
+        }
+      },
+      "isolation_forest": {
+        "sha256": "1d70c4696e385fe7d2c728b680851b372ab504edf07a73476462694522d1efba",
+        "model_version": "if-2026-11-05T00:51:00.081221+00:00",
+        "features": [
+          "packet_count",
+          "bytes_total",
+          "packets_per_second",
+          "connections_per_second",
+          "syn_count",
+          "rst_count",
+          "unique_dst_ports",
+          "avg_packet_size",
+          "mean_interarrival_ms"
+        ],
+        "profile": "demo_tcp_ingress",
+        "window_seconds": 10.0,
+        "versions": {
+          "python": "3.12.15",
+          "scikit_learn": "1.8.0",
+          "scipy": "1.17.0",
+          "numpy": "2.3.5",
+          "pandas": "2.2.3",
+          "joblib": "1.5.3"
+        }
+      }
+    },
+    "detections": [
+      {
+        "schema_version": "1.0.0",
+        "record_type": "detection",
+        "detection_id": "det-f2def96beb9540c5b4816d37e571ca3714a1ee2d87531e13c6ef90e82cfca144",
+        "created_at": "2026-11-04T18:00:11+00:00",
+        "window": {
+          "window_id": "synthetic-inference-only-C01-0",
+          "collection_session_id": "synthetic-inference-only",
+          "sensor_id": "synthetic-sensor",
+          "feature_schema_version": "harpisense.if.window.v1",
+          "traffic_profile": "demo_tcp_ingress",
+          "start": "2026-11-04T18:00:00+00:00",
+          "end": "2026-11-04T18:00:10+00:00"
+        },
+        "entity": {
+          "source_ip": null,
+          "destination_ip": null,
+          "device_id": null,
+          "mqtt_client_id": null
+        },
+        "model": {
+          "detector": "random_forest",
+          "model_version": "rf-6970a2ce-3545-415f-ad75-67ae50a2dfc3",
+          "input_dtype": "float32"
+        },
+        "quality": {
+          "status": "VALID",
+          "valid_until": "2026-11-04T18:01:10+00:00"
+        },
+        "features": {
+          "packet_count": 138.0,
+          "bytes_total": 12006.0,
+          "packets_per_second": 13.800000190734863,
+          "connections_per_second": 0.10000000149011612,
+          "syn_count": 1.0,
+          "rst_count": 2.0,
+          "unique_dst_ports": 20.0,
+          "avg_packet_size": 87.0,
+          "mean_interarrival_ms": 72.4637680053711
+        },
+        "input_fingerprint": "10d50ae867b4c74b9e593690b6311f43f828208246a8ce29a0d739b65aebe529",
+        "classification": {
+          "predicted_class": "C01",
+          "accepted_class": "C01",
+          "probabilities": {
+            "C01": 0.9615384552693282,
+            "normal": 0.038461544730671704
+          },
+          "confidence": 0.9615384552693282,
+          "attack_probability": 0.9615384552693282,
+          "confidence_threshold": 0.7,
+          "needs_review": false
+        },
+        "anomaly": null,
+        "block_authorized": false,
+        "provenance": {
+          "source_schema": "harpisense.detection.rf.v1",
+          "source_id": "f2def96beb9540c5b4816d37e571ca3714a1ee2d87531e13c6ef90e82cfca144"
+        }
+      },
+      {
+        "schema_version": "1.0.0",
+        "record_type": "detection",
+        "detection_id": "det-b06bb6e5a788776479081cb855cc21d590d17b89ce62efe850aa4d2d4c0f7aed",
+        "created_at": "2026-11-04T18:00:11+00:00",
+        "window": {
+          "window_id": "synthetic-inference-only-C01-0",
+          "collection_session_id": "synthetic-inference-only",
+          "sensor_id": "synthetic-sensor",
+          "feature_schema_version": "harpisense.if.window.v1",
+          "traffic_profile": "demo_tcp_ingress",
+          "start": "2026-11-04T18:00:00+00:00",
+          "end": "2026-11-04T18:00:10+00:00"
+        },
+        "entity": {
+          "source_ip": null,
+          "destination_ip": null,
+          "device_id": null,
+          "mqtt_client_id": null
+        },
+        "model": {
+          "detector": "isolation_forest",
+          "model_version": "if-2026-11-05T00:51:00.081221+00:00",
+          "input_dtype": "float32"
+        },
+        "quality": {
+          "status": "VALID",
+          "valid_until": "2026-11-04T18:01:10+00:00"
+        },
+        "features": {
+          "packet_count": 138.0,
+          "bytes_total": 12006.0,
+          "packets_per_second": 13.800000190734863,
+          "connections_per_second": 0.10000000149011612,
+          "syn_count": 1.0,
+          "rst_count": 2.0,
+          "unique_dst_ports": 20.0,
+          "avg_packet_size": 87.0,
+          "mean_interarrival_ms": 72.4637680053711
+        },
+        "input_fingerprint": "10d50ae867b4c74b9e593690b6311f43f828208246a8ce29a0d739b65aebe529",
+        "classification": null,
+        "anomaly": {
+          "anomaly_score": 0.5693687479800148,
+          "anomaly_threshold": 0.6263863883482579,
+          "anomaly_margin": -0.05701764036824308,
+          "is_anomaly": false,
+          "normal_reference_percentile": 0.87
+        },
+        "block_authorized": false,
+        "provenance": {
+          "source_schema": "harpisense.detection.if.v1",
+          "source_id": "b06bb6e5a788776479081cb855cc21d590d17b89ce62efe850aa4d2d4c0f7aed"
+        }
+      }
+    ],
+    "incident": {
+      "schema_version": "1.0.0",
+      "record_type": "incident",
+      "incident_id": "inc-1548cd7aeb711ef3690914d5d8d6ef5bd6a153ee404e485d8cd3bb3132fff56e",
+      "created_at": "2026-11-04T18:00:11+00:00",
+      "updated_at": "2026-11-04T18:00:11+00:00",
+      "revision": 1,
+      "correlation_key": "1548cd7aeb711ef3690914d5d8d6ef5bd6a153ee404e485d8cd3bb3132fff56e",
+      "status": "SUSPECTED",
+      "scenario_id": "C01",
+      "scenario_group": "Low",
+      "detection_refs": [
+        "det-b06bb6e5a788776479081cb855cc21d590d17b89ce62efe850aa4d2d4c0f7aed",
+        "det-f2def96beb9540c5b4816d37e571ca3714a1ee2d87531e13c6ef90e82cfca144"
+      ],
+      "explanation_refs": [],
+      "evidence_refs": [],
+      "target_ref": null,
+      "risk": {
+        "status": "COMPLETE",
+        "score": 44.65,
+        "level": "MODERATE",
+        "formula_version": "harpisense.risk-policy.v1:9a915a2fcc0824374d25",
+        "factors": {
+          "detection": 96.153846,
+          "corroboration": 0.0,
+          "impact": 30.0,
+          "anomaly": 0.0,
+          "criticality": 50.0
+        }
+      },
+      "gates": {
+        "evidence": "FAIL",
+        "target": "UNKNOWN",
+        "scope": "UNKNOWN",
+        "freshness": "PASS",
+        "protected_assets": "UNKNOWN",
+        "executor_ready": "UNKNOWN"
+      }
+    },
+    "decision": {
+      "schema_version": "1.0.0",
+      "record_type": "decision",
+      "decision_id": "dec-a14cb53fdd8d51b2cd60a77bf445d13ef38214af7299e9acca389431298490b1",
+      "created_at": "2026-11-04T18:00:11+00:00",
+      "supersedes_decision_id": null,
+      "incident_id": "inc-1548cd7aeb711ef3690914d5d8d6ef5bd6a153ee404e485d8cd3bb3132fff56e",
+      "incident_revision": 1,
+      "policy_version": "harpisense.risk-policy.v1:9a915a2fcc0824374d25",
+      "autonomy_mode": 1,
+      "scenario_id": "C01",
+      "scenario_group": "Low",
+      "risk_score": 44.65,
+      "risk_level": "MODERATE",
+      "status": "OBSERVE_ONLY",
+      "reason_codes": [
+        "NOT_CORROBORATED",
+        "GATE_EVIDENCE_FAIL",
+        "GATE_TARGET_UNKNOWN",
+        "GATE_SCOPE_UNKNOWN",
+        "GATE_PROTECTED_ASSETS_UNKNOWN",
+        "GATE_EXECUTOR_READY_UNKNOWN",
+        "BELOW_ACTION_THRESHOLD"
+      ],
+      "evidence_refs": [],
+      "detection_refs": [
+        "det-b06bb6e5a788776479081cb855cc21d590d17b89ce62efe850aa4d2d4c0f7aed",
+        "det-f2def96beb9540c5b4816d37e571ca3714a1ee2d87531e13c6ef90e82cfca144"
+      ],
+      "gates": {
+        "evidence": "FAIL",
+        "target": "UNKNOWN",
+        "scope": "UNKNOWN",
+        "freshness": "PASS",
+        "protected_assets": "UNKNOWN",
+        "executor_ready": "UNKNOWN"
+      },
+      "action": null,
+      "action_fingerprint": null,
+      "approval": null,
+      "valid_until": "2026-11-04T18:02:11+00:00",
+      "execution_requested": false
+    },
+    "audit": {
+      "formula_version": "harpisense.risk-policy.v1:9a915a2fcc0824374d25",
+      "context_fingerprint": "ac41420991755b45e66698262afcedadc11226960904760f0127fe6faec6502a",
+      "evaluated_at": "2026-11-04T18:00:11+00:00",
+      "weights": {
+        "detection": 35,
+        "corroboration": 20,
+        "impact": 20,
+        "anomaly": 15,
+        "criticality": 10
+      },
+      "weighted_terms": {
+        "detection": "33.6538461",
+        "corroboration": "0.0",
+        "impact": "6.0",
+        "anomaly": "0.0",
+        "criticality": "5.0"
+      },
+      "independent_sources": [],
+      "rejected_evidence": {},
+      "missing_factors": [],
+      "catalog_version": "harpisense.catalog.v2.2026-10-27",
+      "config": {
+        "version": "harpisense.risk-policy.v1",
+        "weights": {
+          "detection": 35,
+          "corroboration": 20,
+          "impact": 20,
+          "anomaly": 15,
+          "criticality": 10
+        },
+        "min_action_score": 60,
+        "min_rf_confidence": 0.9,
+        "min_independent_sources": 1,
+        "max_evidence_age_seconds": 60,
+        "decision_seconds": 120,
+        "min_ttl_seconds": 30,
+        "max_ttl_seconds": 600,
+        "default_ttl_seconds": 120
+      }
+    },
+    "replayed": false
+  },
+  "p11_receipts": {
+    "detection": [
+      {
+        "id": "det-f2def96beb9540c5b4816d37e571ca3714a1ee2d87531e13c6ef90e82cfca144",
+        "revision": 1,
+        "source": "synthetic",
+        "data": {
+          "model": {
+            "detector": "random_forest",
+            "input_dtype": "float32",
+            "model_version": "rf-6970a2ce-3545-415f-ad75-67ae50a2dfc3"
+          },
+          "entity": {
+            "device_id": null,
+            "source_ip": null,
+            "destination_ip": null,
+            "mqtt_client_id": null
+          },
+          "window": {
+            "end": "2026-11-04T18:00:10+00:00",
+            "start": "2026-11-04T18:00:00+00:00",
+            "sensor_id": "synthetic-sensor",
+            "window_id": "synthetic-inference-only-C01-0",
+            "traffic_profile": "demo_tcp_ingress",
+            "collection_session_id": "synthetic-inference-only",
+            "feature_schema_version": "harpisense.if.window.v1"
+          },
+          "anomaly": null,
+          "quality": {
+            "status": "VALID",
+            "valid_until": "2026-11-04T18:01:10+00:00"
+          },
+          "features": {
+            "rst_count": 2.0,
+            "syn_count": 1.0,
+            "bytes_total": 12006.0,
+            "packet_count": 138.0,
+            "avg_packet_size": 87.0,
+            "unique_dst_ports": 20.0,
+            "packets_per_second": 13.800000190734863,
+            "mean_interarrival_ms": 72.4637680053711,
+            "connections_per_second": 0.10000000149011612
+          },
+          "created_at": "2026-11-04T18:00:11+00:00",
+          "provenance": {
+            "source_id": "f2def96beb9540c5b4816d37e571ca3714a1ee2d87531e13c6ef90e82cfca144",
+            "source_schema": "harpisense.detection.rf.v1"
+          },
+          "record_type": "detection",
+          "detection_id": "det-f2def96beb9540c5b4816d37e571ca3714a1ee2d87531e13c6ef90e82cfca144",
+          "classification": {
+            "confidence": 0.9615384552693282,
+            "needs_review": false,
+            "probabilities": {
+              "C01": 0.9615384552693282,
+              "normal": 0.038461544730671704
+            },
+            "accepted_class": "C01",
+            "predicted_class": "C01",
+            "attack_probability": 0.9615384552693282,
+            "confidence_threshold": 0.7
+          },
+          "schema_version": "1.0.0",
+          "block_authorized": false,
+          "input_fingerprint": "10d50ae867b4c74b9e593690b6311f43f828208246a8ce29a0d739b65aebe529"
+        },
+        "created_at": "2026-11-05T00:51:00.831259+00:00"
+      },
+      {
+        "id": "det-b06bb6e5a788776479081cb855cc21d590d17b89ce62efe850aa4d2d4c0f7aed",
+        "revision": 1,
+        "source": "synthetic",
+        "data": {
+          "model": {
+            "detector": "isolation_forest",
+            "input_dtype": "float32",
+            "model_version": "if-2026-11-05T00:51:00.081221+00:00"
+          },
+          "entity": {
+            "device_id": null,
+            "source_ip": null,
+            "destination_ip": null,
+            "mqtt_client_id": null
+          },
+          "window": {
+            "end": "2026-11-04T18:00:10+00:00",
+            "start": "2026-11-04T18:00:00+00:00",
+            "sensor_id": "synthetic-sensor",
+            "window_id": "synthetic-inference-only-C01-0",
+            "traffic_profile": "demo_tcp_ingress",
+            "collection_session_id": "synthetic-inference-only",
+            "feature_schema_version": "harpisense.if.window.v1"
+          },
+          "anomaly": {
+            "is_anomaly": false,
+            "anomaly_score": 0.5693687479800148,
+            "anomaly_margin": -0.05701764036824308,
+            "anomaly_threshold": 0.6263863883482579,
+            "normal_reference_percentile": 0.87
+          },
+          "quality": {
+            "status": "VALID",
+            "valid_until": "2026-11-04T18:01:10+00:00"
+          },
+          "features": {
+            "rst_count": 2.0,
+            "syn_count": 1.0,
+            "bytes_total": 12006.0,
+            "packet_count": 138.0,
+            "avg_packet_size": 87.0,
+            "unique_dst_ports": 20.0,
+            "packets_per_second": 13.800000190734863,
+            "mean_interarrival_ms": 72.4637680053711,
+            "connections_per_second": 0.10000000149011612
+          },
+          "created_at": "2026-11-04T18:00:11+00:00",
+          "provenance": {
+            "source_id": "b06bb6e5a788776479081cb855cc21d590d17b89ce62efe850aa4d2d4c0f7aed",
+            "source_schema": "harpisense.detection.if.v1"
+          },
+          "record_type": "detection",
+          "detection_id": "det-b06bb6e5a788776479081cb855cc21d590d17b89ce62efe850aa4d2d4c0f7aed",
+          "classification": null,
+          "schema_version": "1.0.0",
+          "block_authorized": false,
+          "input_fingerprint": "10d50ae867b4c74b9e593690b6311f43f828208246a8ce29a0d739b65aebe529"
+        },
+        "created_at": "2026-11-05T00:51:00.830220+00:00"
+      }
+    ],
+    "incident": [
+      {
+        "id": "inc-1548cd7aeb711ef3690914d5d8d6ef5bd6a153ee404e485d8cd3bb3132fff56e",
+        "revision": 1,
+        "source": "synthetic",
+        "data": {
+          "risk": {
+            "level": "MODERATE",
+            "score": 44.65,
+            "status": "COMPLETE",
+            "factors": {
+              "impact": 30.0,
+              "anomaly": 0.0,
+              "detection": 96.153846,
+              "criticality": 50.0,
+              "corroboration": 0.0
+            },
+            "formula_version": "harpisense.risk-policy.v1:9a915a2fcc0824374d25"
+          },
+          "gates": {
+            "scope": "UNKNOWN",
+            "target": "UNKNOWN",
+            "evidence": "FAIL",
+            "freshness": "PASS",
+            "executor_ready": "UNKNOWN",
+            "protected_assets": "UNKNOWN"
+          },
+          "status": "SUSPECTED",
+          "revision": 1,
+          "created_at": "2026-11-04T18:00:11+00:00",
+          "target_ref": null,
+          "updated_at": "2026-11-04T18:00:11+00:00",
+          "incident_id": "inc-1548cd7aeb711ef3690914d5d8d6ef5bd6a153ee404e485d8cd3bb3132fff56e",
+          "record_type": "incident",
+          "scenario_id": "C01",
+          "evidence_refs": [],
+          "detection_refs": [
+            "det-b06bb6e5a788776479081cb855cc21d590d17b89ce62efe850aa4d2d4c0f7aed",
+            "det-f2def96beb9540c5b4816d37e571ca3714a1ee2d87531e13c6ef90e82cfca144"
+          ],
+          "scenario_group": "Low",
+          "schema_version": "1.0.0",
+          "correlation_key": "1548cd7aeb711ef3690914d5d8d6ef5bd6a153ee404e485d8cd3bb3132fff56e",
+          "explanation_refs": []
+        },
+        "created_at": "2026-11-05T00:51:00.833330+00:00"
+      }
+    ],
+    "risk": [
+      {
+        "id": "inc-1548cd7aeb711ef3690914d5d8d6ef5bd6a153ee404e485d8cd3bb3132fff56e",
+        "revision": 1,
+        "source": "synthetic",
+        "data": {
+          "risk": {
+            "level": "MODERATE",
+            "score": 44.65,
+            "status": "COMPLETE",
+            "factors": {
+              "impact": 30.0,
+              "anomaly": 0.0,
+              "detection": 96.153846,
+              "criticality": 50.0,
+              "corroboration": 0.0
+            },
+            "formula_version": "harpisense.risk-policy.v1:9a915a2fcc0824374d25"
+          },
+          "audit": {
+            "config": {
+              "version": "harpisense.risk-policy.v1",
+              "weights": {
+                "impact": 20,
+                "anomaly": 15,
+                "detection": 35,
+                "criticality": 10,
+                "corroboration": 20
+              },
+              "max_ttl_seconds": 600,
+              "min_ttl_seconds": 30,
+              "decision_seconds": 120,
+              "min_action_score": 60,
+              "min_rf_confidence": 0.9,
+              "default_ttl_seconds": 120,
+              "min_independent_sources": 1,
+              "max_evidence_age_seconds": 60
+            },
+            "weights": {
+              "impact": 20,
+              "anomaly": 15,
+              "detection": 35,
+              "criticality": 10,
+              "corroboration": 20
+            },
+            "evaluated_at": "2026-11-04T18:00:11+00:00",
+            "weighted_terms": {
+              "impact": "6.0",
+              "anomaly": "0.0",
+              "detection": "33.6538461",
+              "criticality": "5.0",
+              "corroboration": "0.0"
+            },
+            "catalog_version": "harpisense.catalog.v2.2026-10-27",
+            "formula_version": "harpisense.risk-policy.v1:9a915a2fcc0824374d25",
+            "missing_factors": [],
+            "rejected_evidence": {},
+            "context_fingerprint": "ac41420991755b45e66698262afcedadc11226960904760f0127fe6faec6502a",
+            "independent_sources": []
+          },
+          "incident_id": "inc-1548cd7aeb711ef3690914d5d8d6ef5bd6a153ee404e485d8cd3bb3132fff56e",
+          "incident_revision": 1
+        },
+        "created_at": "2026-11-05T00:51:00.834876+00:00"
+      }
+    ],
+    "decision": [
+      {
+        "id": "dec-a14cb53fdd8d51b2cd60a77bf445d13ef38214af7299e9acca389431298490b1",
+        "revision": 1,
+        "source": "synthetic",
+        "data": {
+          "gates": {
+            "scope": "UNKNOWN",
+            "target": "UNKNOWN",
+            "evidence": "FAIL",
+            "freshness": "PASS",
+            "executor_ready": "UNKNOWN",
+            "protected_assets": "UNKNOWN"
+          },
+          "action": null,
+          "status": "OBSERVE_ONLY",
+          "approval": null,
+          "created_at": "2026-11-04T18:00:11+00:00",
+          "risk_level": "MODERATE",
+          "risk_score": 44.65,
+          "decision_id": "dec-a14cb53fdd8d51b2cd60a77bf445d13ef38214af7299e9acca389431298490b1",
+          "incident_id": "inc-1548cd7aeb711ef3690914d5d8d6ef5bd6a153ee404e485d8cd3bb3132fff56e",
+          "record_type": "decision",
+          "scenario_id": "C01",
+          "valid_until": "2026-11-04T18:02:11+00:00",
+          "reason_codes": [
+            "NOT_CORROBORATED",
+            "GATE_EVIDENCE_FAIL",
+            "GATE_TARGET_UNKNOWN",
+            "GATE_SCOPE_UNKNOWN",
+            "GATE_PROTECTED_ASSETS_UNKNOWN",
+            "GATE_EXECUTOR_READY_UNKNOWN",
+            "BELOW_ACTION_THRESHOLD"
+          ],
+          "autonomy_mode": 1,
+          "evidence_refs": [],
+          "detection_refs": [
+            "det-b06bb6e5a788776479081cb855cc21d590d17b89ce62efe850aa4d2d4c0f7aed",
+            "det-f2def96beb9540c5b4816d37e571ca3714a1ee2d87531e13c6ef90e82cfca144"
+          ],
+          "policy_version": "harpisense.risk-policy.v1:9a915a2fcc0824374d25",
+          "scenario_group": "Low",
+          "schema_version": "1.0.0",
+          "incident_revision": 1,
+          "action_fingerprint": null,
+          "execution_requested": false,
+          "supersedes_decision_id": null
+        },
+        "created_at": "2026-11-05T00:51:00.824209+00:00"
+      }
+    ],
+    "window": [
+      {
+        "id": "composition-7afcdbb5af96310e1e73d8cdb5329c33046fde4e88d3661820a4c47e4a436f5e",
+        "revision": 1,
+        "source": "synthetic",
+        "data": {
+          "window": {
+            "rst_count": 2,
+            "sensor_id": "synthetic-sensor",
+            "syn_count": 1,
+            "window_id": "synthetic-inference-only-C01-0",
+            "window_end": "2026-11-04T18:00:10+00:00",
+            "bytes_total": 12006,
+            "packet_count": 138,
+            "window_start": "2026-11-04T18:00:00+00:00",
+            "window_seconds": 10.0,
+            "avg_packet_size": 87,
+            "traffic_profile": "demo_tcp_ingress",
+            "unique_dst_ports": 20,
+            "packets_per_second": 13.8,
+            "mean_interarrival_ms": 72.46376811594203,
+            "collection_session_id": "synthetic-inference-only",
+            "connections_per_second": 0.1,
+            "feature_schema_version": "harpisense.if.window.v1"
+          },
+          "composition": {
+            "audit": {
+              "config": {
+                "version": "harpisense.risk-policy.v1",
+                "weights": {
+                  "impact": 20,
+                  "anomaly": 15,
+                  "detection": 35,
+                  "criticality": 10,
+                  "corroboration": 20
+                },
+                "max_ttl_seconds": 600,
+                "min_ttl_seconds": 30,
+                "decision_seconds": 120,
+                "min_action_score": 60,
+                "min_rf_confidence": 0.9,
+                "default_ttl_seconds": 120,
+                "min_independent_sources": 1,
+                "max_evidence_age_seconds": 60
+              },
+              "weights": {
+                "impact": 20,
+                "anomaly": 15,
+                "detection": 35,
+                "criticality": 10,
+                "corroboration": 20
+              },
+              "evaluated_at": "2026-11-04T18:00:11+00:00",
+              "weighted_terms": {
+                "impact": "6.0",
+                "anomaly": "0.0",
+                "detection": "33.6538461",
+                "criticality": "5.0",
+                "corroboration": "0.0"
+              },
+              "catalog_version": "harpisense.catalog.v2.2026-10-27",
+              "formula_version": "harpisense.risk-policy.v1:9a915a2fcc0824374d25",
+              "missing_factors": [],
+              "rejected_evidence": {},
+              "context_fingerprint": "ac41420991755b45e66698262afcedadc11226960904760f0127fe6faec6502a",
+              "independent_sources": []
+            },
+            "run_id": "composition-7afcdbb5af96310e1e73d8cdb5329c33046fde4e88d3661820a4c47e4a436f5e",
+            "decision": {
+              "gates": {
+                "scope": "UNKNOWN",
+                "target": "UNKNOWN",
+                "evidence": "FAIL",
+                "freshness": "PASS",
+                "executor_ready": "UNKNOWN",
+                "protected_assets": "UNKNOWN"
+              },
+              "action": null,
+              "status": "OBSERVE_ONLY",
+              "approval": null,
+              "created_at": "2026-11-04T18:00:11+00:00",
+              "risk_level": "MODERATE",
+              "risk_score": 44.65,
+              "decision_id": "dec-a14cb53fdd8d51b2cd60a77bf445d13ef38214af7299e9acca389431298490b1",
+              "incident_id": "inc-1548cd7aeb711ef3690914d5d8d6ef5bd6a153ee404e485d8cd3bb3132fff56e",
+              "record_type": "decision",
+              "scenario_id": "C01",
+              "valid_until": "2026-11-04T18:02:11+00:00",
+              "reason_codes": [
+                "NOT_CORROBORATED",
+                "GATE_EVIDENCE_FAIL",
+                "GATE_TARGET_UNKNOWN",
+                "GATE_SCOPE_UNKNOWN",
+                "GATE_PROTECTED_ASSETS_UNKNOWN",
+                "GATE_EXECUTOR_READY_UNKNOWN",
+                "BELOW_ACTION_THRESHOLD"
+              ],
+              "autonomy_mode": 1,
+              "evidence_refs": [],
+              "detection_refs": [
+                "det-b06bb6e5a788776479081cb855cc21d590d17b89ce62efe850aa4d2d4c0f7aed",
+                "det-f2def96beb9540c5b4816d37e571ca3714a1ee2d87531e13c6ef90e82cfca144"
+              ],
+              "policy_version": "harpisense.risk-policy.v1:9a915a2fcc0824374d25",
+              "scenario_group": "Low",
+              "schema_version": "1.0.0",
+              "incident_revision": 1,
+              "action_fingerprint": null,
+              "execution_requested": false,
+              "supersedes_decision_id": null
+            },
+            "incident": {
+              "risk": {
+                "level": "MODERATE",
+                "score": 44.65,
+                "status": "COMPLETE",
+                "factors": {
+                  "impact": 30.0,
+                  "anomaly": 0.0,
+                  "detection": 96.153846,
+                  "criticality": 50.0,
+                  "corroboration": 0.0
+                },
+                "formula_version": "harpisense.risk-policy.v1:9a915a2fcc0824374d25"
+              },
+              "gates": {
+                "scope": "UNKNOWN",
+                "target": "UNKNOWN",
+                "evidence": "FAIL",
+                "freshness": "PASS",
+                "executor_ready": "UNKNOWN",
+                "protected_assets": "UNKNOWN"
+              },
+              "status": "SUSPECTED",
+              "revision": 1,
+              "created_at": "2026-11-04T18:00:11+00:00",
+              "target_ref": null,
+              "updated_at": "2026-11-04T18:00:11+00:00",
+              "incident_id": "inc-1548cd7aeb711ef3690914d5d8d6ef5bd6a153ee404e485d8cd3bb3132fff56e",
+              "record_type": "incident",
+              "scenario_id": "C01",
+              "evidence_refs": [],
+              "detection_refs": [
+                "det-b06bb6e5a788776479081cb855cc21d590d17b89ce62efe850aa4d2d4c0f7aed",
+                "det-f2def96beb9540c5b4816d37e571ca3714a1ee2d87531e13c6ef90e82cfca144"
+              ],
+              "scenario_group": "Low",
+              "schema_version": "1.0.0",
+              "correlation_key": "1548cd7aeb711ef3690914d5d8d6ef5bd6a153ee404e485d8cd3bb3132fff56e",
+              "explanation_refs": []
+            },
+            "artifacts": {
+              "random_forest": {
+                "sha256": "11f30e77c376f314ff40c1f4d759955a5dbf61b2a10807b0356c475a2ff1ca10",
+                "profile": "demo_tcp_ingress",
+                "features": [
+                  "packet_count",
+                  "bytes_total",
+                  "packets_per_second",
+                  "connections_per_second",
+                  "syn_count",
+                  "rst_count",
+                  "unique_dst_ports",
+                  "avg_packet_size",
+                  "mean_interarrival_ms"
+                ],
+                "versions": {
+                  "numpy": "2.3.5",
+                  "scipy": "1.17.0",
+                  "joblib": "1.5.3",
+                  "pandas": "2.2.3",
+                  "python": "3.12.15",
+                  "scikit_learn": "1.8.0"
+                },
+                "model_version": "rf-6970a2ce-3545-415f-ad75-67ae50a2dfc3",
+                "window_seconds": 10.0
+              },
+              "isolation_forest": {
+                "sha256": "1d70c4696e385fe7d2c728b680851b372ab504edf07a73476462694522d1efba",
+                "profile": "demo_tcp_ingress",
+                "features": [
+                  "packet_count",
+                  "bytes_total",
+                  "packets_per_second",
+                  "connections_per_second",
+                  "syn_count",
+                  "rst_count",
+                  "unique_dst_ports",
+                  "avg_packet_size",
+                  "mean_interarrival_ms"
+                ],
+                "versions": {
+                  "numpy": "2.3.5",
+                  "scipy": "1.17.0",
+                  "joblib": "1.5.3",
+                  "pandas": "2.2.3",
+                  "python": "3.12.15",
+                  "scikit_learn": "1.8.0"
+                },
+                "model_version": "if-2026-11-05T00:51:00.081221+00:00",
+                "window_seconds": 10.0
+              }
+            },
+            "detections": [
+              {
+                "model": {
+                  "detector": "random_forest",
+                  "input_dtype": "float32",
+                  "model_version": "rf-6970a2ce-3545-415f-ad75-67ae50a2dfc3"
+                },
+                "entity": {
+                  "device_id": null,
+                  "source_ip": null,
+                  "destination_ip": null,
+                  "mqtt_client_id": null
+                },
+                "window": {
+                  "end": "2026-11-04T18:00:10+00:00",
+                  "start": "2026-11-04T18:00:00+00:00",
+                  "sensor_id": "synthetic-sensor",
+                  "window_id": "synthetic-inference-only-C01-0",
+                  "traffic_profile": "demo_tcp_ingress",
+                  "collection_session_id": "synthetic-inference-only",
+                  "feature_schema_version": "harpisense.if.window.v1"
+                },
+                "anomaly": null,
+                "quality": {
+                  "status": "VALID",
+                  "valid_until": "2026-11-04T18:01:10+00:00"
+                },
+                "features": {
+                  "rst_count": 2.0,
+                  "syn_count": 1.0,
+                  "bytes_total": 12006.0,
+                  "packet_count": 138.0,
+                  "avg_packet_size": 87.0,
+                  "unique_dst_ports": 20.0,
+                  "packets_per_second": 13.800000190734863,
+                  "mean_interarrival_ms": 72.4637680053711,
+                  "connections_per_second": 0.10000000149011612
+                },
+                "created_at": "2026-11-04T18:00:11+00:00",
+                "provenance": {
+                  "source_id": "f2def96beb9540c5b4816d37e571ca3714a1ee2d87531e13c6ef90e82cfca144",
+                  "source_schema": "harpisense.detection.rf.v1"
+                },
+                "record_type": "detection",
+                "detection_id": "det-f2def96beb9540c5b4816d37e571ca3714a1ee2d87531e13c6ef90e82cfca144",
+                "classification": {
+                  "confidence": 0.9615384552693282,
+                  "needs_review": false,
+                  "probabilities": {
+                    "C01": 0.9615384552693282,
+                    "normal": 0.038461544730671704
+                  },
+                  "accepted_class": "C01",
+                  "predicted_class": "C01",
+                  "attack_probability": 0.9615384552693282,
+                  "confidence_threshold": 0.7
+                },
+                "schema_version": "1.0.0",
+                "block_authorized": false,
+                "input_fingerprint": "10d50ae867b4c74b9e593690b6311f43f828208246a8ce29a0d739b65aebe529"
+              },
+              {
+                "model": {
+                  "detector": "isolation_forest",
+                  "input_dtype": "float32",
+                  "model_version": "if-2026-11-05T00:51:00.081221+00:00"
+                },
+                "entity": {
+                  "device_id": null,
+                  "source_ip": null,
+                  "destination_ip": null,
+                  "mqtt_client_id": null
+                },
+                "window": {
+                  "end": "2026-11-04T18:00:10+00:00",
+                  "start": "2026-11-04T18:00:00+00:00",
+                  "sensor_id": "synthetic-sensor",
+                  "window_id": "synthetic-inference-only-C01-0",
+                  "traffic_profile": "demo_tcp_ingress",
+                  "collection_session_id": "synthetic-inference-only",
+                  "feature_schema_version": "harpisense.if.window.v1"
+                },
+                "anomaly": {
+                  "is_anomaly": false,
+                  "anomaly_score": 0.5693687479800148,
+                  "anomaly_margin": -0.05701764036824308,
+                  "anomaly_threshold": 0.6263863883482579,
+                  "normal_reference_percentile": 0.87
+                },
+                "quality": {
+                  "status": "VALID",
+                  "valid_until": "2026-11-04T18:01:10+00:00"
+                },
+                "features": {
+                  "rst_count": 2.0,
+                  "syn_count": 1.0,
+                  "bytes_total": 12006.0,
+                  "packet_count": 138.0,
+                  "avg_packet_size": 87.0,
+                  "unique_dst_ports": 20.0,
+                  "packets_per_second": 13.800000190734863,
+                  "mean_interarrival_ms": 72.4637680053711,
+                  "connections_per_second": 0.10000000149011612
+                },
+                "created_at": "2026-11-04T18:00:11+00:00",
+                "provenance": {
+                  "source_id": "b06bb6e5a788776479081cb855cc21d590d17b89ce62efe850aa4d2d4c0f7aed",
+                  "source_schema": "harpisense.detection.if.v1"
+                },
+                "record_type": "detection",
+                "detection_id": "det-b06bb6e5a788776479081cb855cc21d590d17b89ce62efe850aa4d2d4c0f7aed",
+                "classification": null,
+                "schema_version": "1.0.0",
+                "block_authorized": false,
+                "input_fingerprint": "10d50ae867b4c74b9e593690b6311f43f828208246a8ce29a0d739b65aebe529"
+              }
+            ],
+            "input_origin": "synthetic",
+            "execution_performed": false,
+            "laboratory_validated": false
+          },
+          "composition_request_sha256": "480afec52f500da07f81794dc15821233bc2e550797b9c4abdf96087ffeebb98"
+        },
+        "created_at": "2026-11-05T00:51:00.836972+00:00"
+      }
+    ]
+  }
+}
