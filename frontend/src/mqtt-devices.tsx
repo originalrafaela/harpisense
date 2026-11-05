@@ -6,8 +6,11 @@ type Data=Record<string,unknown>;
 const modeName=(mode:unknown)=>mode==='local_managed'?'Broker local gerenciado pelo HarpiSense':mode==='external'?'Broker externo':'Não informado pelo backend';
 const parametersOf=(document:unknown):Data=>object(document)&&object(document.parameters)?document.parameters:{};
 const validStatus=(value:unknown):value is Data=>object(value)&&value.schema_version==='1.0.0'&&
- ['component','broker','consumer'].every(key=>object(value[key])&&value[key].state==='not_verified'&&value[key].observed_at===null)&&
- Array.isArray(value.devices)&&value.devices.length===0&&value.device_observation==='not_verified';
+ ['component','broker','consumer'].every(key=>object(value[key])&&
+  (value[key].state==='not_verified'||value[key].state===({component:'installed',broker:'available',consumer:'connected'} as Data)[key])&&
+  (value[key].observed_at===null||typeof value[key].observed_at==='string'&&Number.isFinite(Date.parse(value[key].observed_at))))&&
+ Array.isArray(value.devices)&&value.devices.every(item=>object(item)&&typeof item.device_id==='string'&&typeof item.observed_at==='string')&&
+ ['not_verified','observed'].includes(String(value.device_observation));
 export type MqttDevicesProps={
  capabilities:unknown;parameters:Data;savedParameters:Data|null;current:Data|null;
  request:(path:string,method?:string,body?:unknown)=>Promise<unknown>;logout:()=>void;
@@ -26,6 +29,14 @@ export function MqttDevices({capabilities,parameters,savedParameters,current,req
   if(active)setQuery({request,attempt,value:validStatus(value)?value:null,failed:!validStatus(value)});
  },error=>{if(!active)return;if(error instanceof ApiError&&error.kind==='unauthorized')logout();setQuery({request,attempt,value:null,failed:true})});return()=>{active=false}},[request,logout,attempt]);
  const result=query?.request===request&&query.attempt===attempt?query:null;
+ const observed=result?.value;
+ const stateOf=(key:string)=>observed&&object(observed[key])?observed[key] as Data:null;
+ const broker=stateOf('broker'), consumer=stateOf('consumer');
+ const fresh=(entry:Data|null)=>entry&&typeof entry.observed_at==='string'&&Date.now()-Date.parse(entry.observed_at)<=45000;
+ const brokerAvailable=broker?.state==='available'&&fresh(broker);
+ const consumerConnected=consumer?.state==='connected'&&fresh(consumer);
+ const devices=observed&&Array.isArray(observed.devices)?observed.devices.filter(object):[];
+ const awaiting=brokerAvailable&&consumerConnected&&observed?.device_observation==='observed'&&devices.length===0&&Array.isArray(observed?.inventory)&&observed.inventory.length>0;
  const effective=parametersOf(current?.effective);
  const proposed=parametersOf(current?.proposed);
  const hasEffective=typeof current?.effective_revision==='number'&&current.effective_revision>0&&Object.keys(effective).some(k=>k.startsWith('mqtt_'));
@@ -42,12 +53,12 @@ export function MqttDevices({capabilities,parameters,savedParameters,current,req
    <article aria-label="Proposta MQTT"><strong>Proposta MQTT</strong><p>{Object.keys(proposed).some(k=>k.startsWith('mqtt_'))?(current?.proposed_status==='VALIDATED'?'Proposta validada em parâmetros; conexão não verificada':`Estado informado: ${String(current?.proposed_status??'Não verificado')}`):'Nenhuma proposta MQTT informada'}</p></article>
   </div>
   <div className="config-status-grid" aria-label="Observações MQTT">
-   <article><strong>Componente instalado</strong><p>Não verificado</p></article>
-   <article><strong>Broker disponível</strong><p>Não verificado</p></article>
-   <article><strong>Consumidor conectado</strong><p>Não verificado</p></article>
-   <article><strong>Última mensagem por dispositivo</strong><p>Não verificado</p><small>O contrato atual não oferece observação real por dispositivo. Lista vazia não comprova ausência de dispositivos ou mensagens.</small></article>
+   <article><strong>Componente instalado</strong><p>{stateOf('component')?.state==='installed'?'Instalado pelo instalador nativo':'Não verificado'}</p></article>
+   <article><strong>Broker disponível</strong><p>{brokerAvailable?'Disponível · MQTT autenticado':'Não verificado'}</p></article>
+   <article><strong>Consumidor conectado</strong><p>{consumerConnected?'Conectado · assinatura confirmada':'Não verificado'}</p></article>
+   <article><strong>Última mensagem por dispositivo</strong>{devices.length?devices.map(item=><p key={String(item.device_id)}>{String(item.device_id)} · {String(item.message_id??'Identificador não informado')} · {String(item.observed_at)}</p>):<p>{awaiting?'Broker ativo, aguardando primeira mensagem':'Não verificado'}</p>}<small>Recebimento observado não comprova sensor físico ou defesa disponível.</small></article>
   </div>
-  {!result?<p role="status">Consultando estados MQTT…</p>:result.failed?<p role="alert">Não foi possível consultar os estados MQTT. Não verificado; o rascunho foi preservado.</p>:<p>O backend ainda não dispõe de observador MQTT. Serviço instalado, conexão do consumidor e recebimento de mensagens exigem confirmações separadas.</p>}
+  {!result?<p role="status">Consultando estados MQTT…</p>:result.failed?<p role="alert">Não foi possível consultar os estados MQTT. Não verificado; o rascunho foi preservado.</p>:<p>{observed?.device_observation==='observed'?'Observação do consumidor nativo; estados de conexão perdem validade após 45 segundos sem atualização.':'O backend ainda não confirmou observação MQTT. Lista vazia não comprova ausência de dispositivos.'}</p>}
   <button type="button" disabled={!result} onClick={()=>setAttempt(n=>n+1)}>Atualizar estados MQTT</button>
   {!supported&&<p role="alert">Capacidades MQTT indisponíveis ou incompatíveis. Nenhuma operação MQTT será presumida.</p>}
   <fieldset disabled={busy||!supported}>

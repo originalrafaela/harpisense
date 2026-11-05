@@ -215,3 +215,5 @@ __marimo__/
 .local-postgres/
 
 .npm-cache/
+.native-build/
+.native-test/

@@ -81,7 +81,7 @@ async def body(request, schema):
     return checked(value, schema)
 
 
-def install_config_api(app, store, *, installation_id, presentation=None):
+def install_config_api(app, store, *, installation_id, presentation=None, mqtt_observer=None):
     """Call after install_admin_auth. Installation scope is server supplied."""
     require_admin = getattr(app.state, 'require_admin_session', None)
     if require_admin is None or getattr(app.state, 'config_api_installed', False):
@@ -166,7 +166,7 @@ def install_config_api(app, store, *, installation_id, presentation=None):
 
     @router.get('/mqtt/status')
     def observed_mqtt():
-        return mqtt_status()
+        return mqtt_observer() if mqtt_observer is not None else mqtt_status()
 
     if presentation:
         @router.get('/presentation')

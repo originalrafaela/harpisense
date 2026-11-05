@@ -1,0 +1,82 @@
+{
+  "environment": "Windows native disposable processes; existing workstation, not clean OS",
+  "docker": false,
+  "service_registration": false,
+  "machine_reboot": false,
+  "checks": [
+    "fresh_product_migrations_and_protected_grant",
+    "real_broker_tls_authentication_and_suback",
+    "external_mode_validates_tls_and_suback_without_administering_broker",
+    "anonymous_p11_denied",
+    "anonymous_mqtt_status_denied",
+    "dns_rebinding_denied",
+    "cross_origin_bootstrap_denied",
+    "invalid_totp_does_not_activate",
+    "ten_recovery_codes_browser",
+    "browser_bootstrap_totp_confirmation_dashboard",
+    "setup_save_http_200",
+    "browser_saved_setup_in_real_postgresql",
+    "repeated_preparation_preserves_account",
+    "new_browser_login_requires_real_totp_after_process_restart",
+    "setup_preserved_after_process_restart",
+    "broker_active_consumer_subscribed_no_device_publication",
+    "authenticated_mqtt_publication_persisted_and_read_by_real_api",
+    "one_identifiable_postgresql_projection",
+    "mqtt_mode_saved_as_draft_only",
+    "saving_broker_mode_does_not_apply_or_replace_active_local_broker",
+    "stale_consumer_heartbeat_does_not_claim_current_connection",
+    "reinstallation_refused_before_changes_preserving_data",
+    "mqtt_observation_does_not_mark_configuration_operational"
+  ],
+  "mqtt_before": {
+    "schema_version": "1.0.0",
+    "component": {
+      "state": "installed",
+      "observed_at": "2026-11-05T17:14:03.296020+00:00"
+    },
+    "broker": {
+      "state": "available",
+      "observed_at": "2026-11-05T14:14:30.677263-03:00"
+    },
+    "consumer": {
+      "state": "connected",
+      "observed_at": "2026-11-05T14:14:30.677263-03:00"
+    },
+    "devices": [],
+    "device_observation": "observed",
+    "reason_code": "AWAITING_FIRST_MESSAGE",
+    "inventory": [
+      "poste2"
+    ]
+  },
+  "mqtt_after": {
+    "schema_version": "1.0.0",
+    "component": {
+      "state": "installed",
+      "observed_at": "2026-11-05T17:14:03.296020+00:00"
+    },
+    "broker": {
+      "state": "available",
+      "observed_at": "2026-11-05T14:14:30.677263-03:00"
+    },
+    "consumer": {
+      "state": "connected",
+      "observed_at": "2026-11-05T14:14:30.677263-03:00"
+    },
+    "devices": [
+      {
+        "device_id": "poste2",
+        "message_id": "native-acceptance-56417fef0ac7462b922c1781cba12e9f",
+        "projection_id": "poste2-7fcc4f54a46f19a6ac2a1ef90b1fc928dcb2d831deeb00a192158763edbb93a2",
+        "observed_at": "2026-11-05T14:14:32.961585-03:00",
+        "origin": "authenticated_mqtt_consumer"
+      }
+    ],
+    "device_observation": "observed",
+    "reason_code": "MESSAGE_RECEIVED",
+    "inventory": [
+      "poste2"
+    ]
+  },
+  "result": "passed"
+}
