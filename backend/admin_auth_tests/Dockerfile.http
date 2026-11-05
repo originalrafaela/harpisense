@@ -1,0 +1,4 @@
+FROM harpisense-admin-mfa-tests:latest
+COPY backend/config_manager/requirements.txt /tmp/config/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/config/requirements.txt
+CMD ["python", "backend/admin_auth_tests/http_acceptance.py"]
