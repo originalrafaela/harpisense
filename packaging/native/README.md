@@ -7,6 +7,10 @@ Node e Vite não são requisitos de execução do produto.
 
 ## Artefatos
 
+Download publicado: [pré-release candidata](https://github.com/originalrafaela/harpisense/releases/tag/native-installers-20261105-candidate.1).
+[Recibo com hashes e URLs verificadas](../../docs/evidence/native-installers/published-assets.json).
+Não é uma release homologada em sistemas limpos.
+
 Na raiz da worktree, após build:
 
 - `dist/HarpiSense-Setup-Windows-x64.exe`: instalador gráfico com elevação UAC,

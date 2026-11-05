@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 from urllib.parse import quote
 
 import httpx
@@ -50,6 +51,20 @@ Comandos, capacidades e limitações: packaging/native/README.md na branch feat/
     api = 'https://api.github.com/repos/' + REPO
     with httpx.Client(headers=headers, timeout=600, follow_redirects=False) as client:
         existing = client.get(api + '/releases/tags/' + TAG)
+        if '--refresh-receipt' in sys.argv:
+            if existing.status_code != 200 or existing.json()['draft']:
+                raise SystemExit('PUBLISHED_RELEASE_REQUIRED')
+            output = ROOT/'docs/evidence/native-installers/published-assets.json'
+            receipt = json.loads(output.read_text())
+            remote_assets = {asset['name']: asset for asset in existing.json()['assets']}
+            for asset in receipt['assets']:
+                remote_asset = remote_assets[asset['name']]
+                if remote_asset['size'] != asset['size'] or remote_asset.get('digest') != 'sha256:' + asset['sha256']:
+                    raise SystemExit('PUBLISHED_ASSET_CHECKSUM_MISMATCH')
+                asset['download'] = remote_asset['browser_download_url']
+            output.write_text(json.dumps(receipt, indent=2), encoding='utf-8')
+            print(json.dumps({'release': receipt['release'], 'verified_assets': len(receipt['assets'])}))
+            return
         if existing.status_code != 404:
             raise SystemExit('RELEASE_TAG_ALREADY_EXISTS_OR_UNAVAILABLE')
         response = client.post(api + '/releases', json={'tag_name': TAG, 'target_commitish': head,
@@ -80,6 +95,9 @@ Comandos, capacidades e limitações: packaging/native/README.md na branch feat/
         receipt = {'branch': 'feat/native-installers', 'commit': head,
                    'release': response.json()['html_url'], 'prerelease': True,
                    'clean_os_installation_approved': False, 'assets': published}
+        urls = {asset['name']: asset['browser_download_url'] for asset in response.json()['assets']}
+        for asset in published:
+            asset['download'] = urls.get(asset['name'], asset['download'])
         output = ROOT/'docs/evidence/native-installers/published-assets.json'
         output.write_text(json.dumps(receipt, indent=2), encoding='utf-8')
         print(json.dumps({'release': receipt['release'], 'assets': len(published)}))
