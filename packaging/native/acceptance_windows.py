@@ -47,7 +47,8 @@ def main():
     parser.add_argument('--runtime', type=Path, help='Test frozen product runtime instead of Python source')
     args = parser.parse_args()
     evidence = {'environment': 'Windows native disposable processes; existing workstation, not clean OS',
-                'docker': False, 'service_registration': False, 'machine_reboot': False, 'checks': []}
+                'docker': False, 'service_registration': False, 'machine_reboot': False,
+                'runtime': 'frozen_executable' if args.runtime else 'python_source', 'checks': []}
     def check(value, label):
         if not value:
             raise AssertionError(label)
@@ -85,7 +86,10 @@ def main():
         run([args.postgres_bin/'pg_ctl.exe', '-D', private/'postgres', '-l', private/'postgres.log', '-w', 'start'])
         pg_started = True
         initialize_database(state, private)
-        prepare_database(private/'state.json')
+        if args.runtime:
+            run(api_command + ['prepare', '--state', private/'state.json'])
+        else:
+            prepare_database(private/'state.json')
         check(True, 'fresh_product_migrations_and_protected_grant')
         process([args.mosquitto, '-c', config], 'broker')
         wait_for(lambda: probe_broker(state) == {'connected': True, 'subscribed': True})
@@ -148,7 +152,10 @@ def main():
             pg_started = False
             run([args.postgres_bin/'pg_ctl.exe', '-D', private/'postgres', '-l', private/'postgres.log', '-w', 'start'])
             pg_started = True
-            prepare_database(private/'state.json')
+            if args.runtime:
+                run(api_command + ['prepare', '--state', private/'state.json'])
+            else:
+                prepare_database(private/'state.json')
             api = process(api_command + ['api', '--state', str(private/'state.json')], 'api-restarted')
             consumer = process(api_command + ['consumer', '--state', str(private/'state.json')], 'consumer-restarted')
             wait_for(lambda: http.get('/').status_code == 200)

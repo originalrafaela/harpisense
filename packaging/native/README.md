@@ -130,6 +130,7 @@ Usar Python 3.13 no Windows, Node somente no build e ambiente Python isolado:
 ```powershell
 uv venv .venv
 uv pip install --python .venv/Scripts/python.exe -r packaging/native/requirements.txt pyinstaller==6.16.0 pip==25.3
+uv pip install --python .venv/Scripts/python.exe -r packaging/native/runtime-windows.lock --require-hashes
 cd frontend
 npm.cmd ci --ignore-scripts
 npm.cmd run build
@@ -175,6 +176,11 @@ salvar/retomar, reinício dos processos/API/consumer/DB e novo login, MQTT TLS/A
 ausência de publicação, publicação identificável até PostgreSQL/API, modo externo
 somente leitura, rascunho sem aplicação, observação vencida e recusa de reinstalação.
 Publicação de aceitação não representa sensor físico, laboratório P08 ou RF/IF.
+
+Resultado final: **23 verificações reais aprovadas com o executável congelado**,
+incluindo preparação das migrações SQL embarcadas. Complementos: build/typecheck,
+51 unitários frontend, 16 cenários de navegador da UI com fixtures e quatro
+testes do contrato MQTT. Esses complementos não homologam instalação nativa.
 
 **Bloqueio Windows limpo:** este host já possui PostgreSQL/Mosquitto do laboratório;
 instalar aqui violaria o escopo e é recusado pelo preflight. Não houve reboot da

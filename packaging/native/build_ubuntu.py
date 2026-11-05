@@ -13,8 +13,12 @@ ROOT = Path(__file__).resolve().parents[2]
 def main():
     stage = ROOT/('.native-build/ubuntu-' + str(time.time_ns()))
     stage.mkdir(parents=True)
-    for source, target in [('frontend/dist', 'frontend/dist'), ('packaging/native', 'packaging/native')]:
+    for source, target in [('frontend/dist', 'frontend/dist')]:
         shutil.copytree(ROOT/source, stage/target, ignore=shutil.ignore_patterns('__pycache__'))
+    scripts = stage/'packaging/native'
+    scripts.mkdir(parents=True)
+    for name in ('entry.py', 'provision.py', 'ubuntu_install.py'):
+        shutil.copyfile(ROOT/'packaging/native'/name, scripts/name)
     for name in ('delivery', 'admin_auth', 'config_manager', 'native_server'):
         shutil.copytree(ROOT/'backend'/name, stage/'backend'/name,
                         ignore=shutil.ignore_patterns('__pycache__'))

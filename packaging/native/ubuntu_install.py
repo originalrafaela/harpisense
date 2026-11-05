@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import pwd
+import platform
 import shutil
 import subprocess
 import sys
@@ -51,6 +52,8 @@ def main():
     release = Path('/etc/os-release').read_text()
     if 'ID=ubuntu' not in release or 'VERSION_ID="24.04"' not in release:
         raise SystemExit('This first package targets Ubuntu 24.04 x86_64 only')
+    if platform.machine() != 'x86_64':
+        raise SystemExit('UNSUPPORTED_ARCHITECTURE_REQUIRES_X86_64')
     mode = 'external' if args.external_broker else 'local_managed'
     preflight(DATA, APP, mode)
     # Inspect before apt; do not adopt pre-existing installations or service users.
@@ -62,13 +65,14 @@ def main():
         else:
             raise SystemExit('EXISTING_SERVICE_ACCOUNT')
     external = json.loads(args.external_broker.read_text()) if args.external_broker else None
-    run(['apt-get', 'update'])
+    print('Preparando componentes do HarpiSense…', flush=True)
+    run(['apt-get', 'update'], timeout=1200)
     # Since preflight rejects existing PostgreSQL/broker configuration, any default
     # services below were installed by this invocation, never third-party services.
     packages = ['python3-venv', 'python3-pip', 'postgresql-16', 'ca-certificates']
     if mode == 'local_managed':
         packages.append('mosquitto')
-    run(['apt-get', 'install', '-y'] + packages, env=dict(os.environ, DEBIAN_FRONTEND='noninteractive'))
+    run(['apt-get', 'install', '-y'] + packages, env=dict(os.environ, DEBIAN_FRONTEND='noninteractive'), timeout=1200)
     run(['systemctl', 'stop', 'postgresql@16-main.service'])
     run(['systemctl', 'disable', 'postgresql.service'])
     if mode == 'local_managed':

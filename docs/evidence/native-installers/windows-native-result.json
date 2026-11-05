@@ -3,6 +3,7 @@
   "docker": false,
   "service_registration": false,
   "machine_reboot": false,
+  "runtime": "frozen_executable",
   "checks": [
     "fresh_product_migrations_and_protected_grant",
     "real_broker_tls_authentication_and_suback",
@@ -32,15 +33,15 @@
     "schema_version": "1.0.0",
     "component": {
       "state": "installed",
-      "observed_at": "2026-11-05T17:14:03.296020+00:00"
+      "observed_at": "2026-11-05T17:29:09.508116+00:00"
     },
     "broker": {
       "state": "available",
-      "observed_at": "2026-11-05T14:14:30.677263-03:00"
+      "observed_at": "2026-11-05T14:30:02.432006-03:00"
     },
     "consumer": {
       "state": "connected",
-      "observed_at": "2026-11-05T14:14:30.677263-03:00"
+      "observed_at": "2026-11-05T14:30:02.432006-03:00"
     },
     "devices": [],
     "device_observation": "observed",
@@ -53,22 +54,22 @@
     "schema_version": "1.0.0",
     "component": {
       "state": "installed",
-      "observed_at": "2026-11-05T17:14:03.296020+00:00"
+      "observed_at": "2026-11-05T17:29:09.508116+00:00"
     },
     "broker": {
       "state": "available",
-      "observed_at": "2026-11-05T14:14:30.677263-03:00"
+      "observed_at": "2026-11-05T14:30:02.432006-03:00"
     },
     "consumer": {
       "state": "connected",
-      "observed_at": "2026-11-05T14:14:30.677263-03:00"
+      "observed_at": "2026-11-05T14:30:02.432006-03:00"
     },
     "devices": [
       {
         "device_id": "poste2",
-        "message_id": "native-acceptance-56417fef0ac7462b922c1781cba12e9f",
-        "projection_id": "poste2-7fcc4f54a46f19a6ac2a1ef90b1fc928dcb2d831deeb00a192158763edbb93a2",
-        "observed_at": "2026-11-05T14:14:32.961585-03:00",
+        "message_id": "native-acceptance-ad1f98d79256419182bd067af2ad9dd3",
+        "projection_id": "poste2-09b57496cf8a0a35c242f361d7539e4d126a87383ec64f0cfe9d541ae0b30b4d",
+        "observed_at": "2026-11-05T14:30:03.684032-03:00",
         "origin": "authenticated_mqtt_consumer"
       }
     ],
