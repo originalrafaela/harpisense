@@ -1,0 +1,43 @@
+{
+  "candidate_branch": "feat/native-installers",
+  "candidate_head_on_resume": "35dd646f35efa75c64eff95fc984af0429469176",
+  "remote_head_on_resume": "35dd646f35efa75c64eff95fc984af0429469176",
+  "pending_changes_on_resume": false,
+  "previous_23_checks_reexecuted": false,
+  "artifacts_match_published_sha256": true,
+  "lab_vms_modified": false,
+  "existing_windows_services_modified": false,
+  "hypervisor": "VMware Workstation",
+  "platforms": {
+    "windows": {
+      "media": "Windows 11 Enterprise Evaluation 25H2 pt-BR ISO, local",
+      "vmx": ".native-test/clean-os/windows11/HarpiSense-Clean.vmx",
+      "disk": "new empty sparse VMDK, 64 GB maximum",
+      "memory_mib": 4096,
+      "os_installed": false,
+      "product_installed": false,
+      "machine_reboot_tested": false,
+      "mfa_after_reboot_tested": false,
+      "configuration_after_reboot_tested": false,
+      "unattended_telemetry_after_reboot_tested": false,
+      "result": "blocked_before_guest_start",
+      "first_blocker": "Host-memory preflight: 2588 MiB free; procedure requires 6144 MiB (4096 guest + 2048 host reserve)."
+    },
+    "ubuntu": {
+      "media": "Ubuntu 24.04.4 Desktop amd64 ISO, local",
+      "vmx": ".native-test/clean-os/ubuntu2404/HarpiSense-Clean.vmx",
+      "disk": "new empty sparse VMDK, 64 GB maximum",
+      "memory_mib": 4096,
+      "os_installed": false,
+      "product_installed": false,
+      "machine_reboot_tested": false,
+      "mfa_after_reboot_tested": false,
+      "configuration_after_reboot_tested": false,
+      "unattended_telemetry_after_reboot_tested": false,
+      "result": "blocked_before_guest_start",
+      "first_blocker": "Host-memory preflight: 2288 MiB free; procedure requires 6144 MiB (4096 guest + 2048 host reserve)."
+    }
+  },
+  "next_step": "Provide a clean remote target or free at least 6144 MiB without stopping/reconfiguring lab VMs; then install each OS and execute the installer/reboot/MFA/persistence/telemetry path, one guest at a time.",
+  "clean_installation_approved": false
+}
