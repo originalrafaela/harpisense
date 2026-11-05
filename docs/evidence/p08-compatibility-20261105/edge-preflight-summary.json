@@ -1,0 +1,50 @@
+{
+  "source": "Edge read-only receipt, consulted from its worktree",
+  "source_file": "p08_captura/SENSOR_CLOCK_CURSOR_READONLY_20261104.json",
+  "source_sha256": "4850ef60aac31b4bb710d86f1f0d324df7a9ca3deb6f5eb96c477c9b4a36b3c1",
+  "source_head_at_read": "d6a2380d51c4c98558f5eb8679c1e9fd04967979",
+  "source_file_not_yet_published_at_read": true,
+  "chosen_sensor": {
+    "host": "poste2",
+    "interface": "ens33",
+    "source": "192.168.155.142",
+    "broker": "192.168.155.1:1883",
+    "console_receipt_pending": true,
+    "topology_change_required": false
+  },
+  "windows_clock": {
+    "synchronized": false,
+    "reported_source": "Local CMOS Clock",
+    "configured_peer": "time.windows.com,0x9",
+    "peer_state": "pending",
+    "stripchart_peer_responded": true,
+    "stripchart_sample_local_times": [
+      "2026-11-04T22:06:02",
+      "2026-11-04T22:06:04",
+      "2026-11-04T22:06:06"
+    ],
+    "stripchart_offsets_seconds": [
+      0.396591,
+      0.3967258,
+      0.3980179
+    ],
+    "cross_host_error_bound_verified": false,
+    "clock_adjusted": false
+  },
+  "broker_log_discovery": {
+    "observed_at_reported_utc": "2026-11-05T01:12:33.0239541Z",
+    "config": "D:/Programas/Mosquitto/mosquitto.conf",
+    "explicit_directives_returned": [
+      "listener 1883 192.168.155.1"
+    ],
+    "log_files_returned_in_config_directory": [],
+    "event_providers_returned": [],
+    "effective_log_destination_verified": false,
+    "scope_not_global_absence_claim": true
+  },
+  "journal_future_session_boundaries": false,
+  "journal_continuity_verified": false,
+  "capture_started": false,
+  "inference_executed": false,
+  "independently_rerun_by_integrator": false
+}

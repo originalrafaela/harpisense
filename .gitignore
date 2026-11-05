@@ -216,3 +216,4 @@ __marimo__/
 .npm-cache/
 # Locally fitted synthetic composition bundles and CSVs; never production models.
 /local-evidence/detection-composition/
+/local-evidence/p08-compatibility/

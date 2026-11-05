@@ -1,0 +1,22 @@
+{
+  "schema_version": "harpisense.p08.compatibility-plan.v1",
+  "capture_authorized": false,
+  "status": "DRAFT_PENDING_ENDPOINT_CLOCK_AND_SOURCE_RECEIPTS",
+  "profile_id": "poste2-endpoint-observation-pending",
+  "traffic_profile": "tcp-observacao",
+  "sensor_id": "poste2-ens33-observation",
+  "interface": "ens33",
+  "source_ip": "192.168.155.142",
+  "destination_ip": "192.168.155.1",
+  "capture_position": "publisher_endpoint_not_inline_gateway",
+  "gateway_traversal_verified": false,
+  "future_containment_available": false,
+  "required_sources": [
+    {"source": "gateway_capture", "kind": "gateway_capture", "host_id": "poste2", "public_key": null, "public_key_sha256": null},
+    {"source": "mqtt_broker", "kind": "signed_log_bundle", "host_id": "windows-broker", "public_key": null, "public_key_sha256": null},
+    {"source": "mqtt_consumer", "kind": "signed_log_bundle", "host_id": "harpiserver", "public_key": null, "public_key_sha256": null},
+    {"source": "api_fastapi", "kind": "signed_log_bundle", "host_id": "harpiserver", "public_key": null, "public_key_sha256": null}
+  ],
+  "legacy_source_identifier_note": "gateway_capture is the existing schema identifier; host_id explicitly denotes the endpoint, not gateway traversal",
+  "not_a_capture_profile": "Deliberately different schema and unknown keys: cannot authorize or start the controller"
+}

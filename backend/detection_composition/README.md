@@ -65,7 +65,8 @@ O caminho P08 de laboratório continua pendente, conforme a matriz de entrega.
 
 As nove características usadas no ensaio sintético mantêm a ordem de
 `harpisense_data.windows.FEATURES`: `packet_count` (contagem), `bytes_total`
-(bytes), `packets_per_second` (pacotes/s), `connections_per_second` (conexões/s),
+(bytes IP), `packets_per_second` (pacotes/s), `connections_per_second` (tentativas
+SYN sem ACK distintas por par de portas/s; não conexões estabelecidas),
 `syn_count`, `rst_count`, `unique_dst_ports` (contagens), `avg_packet_size` (bytes)
 e `mean_interarrival_ms` (ms). Schema `harpisense.if.window.v1`, perfil
 `demo_tcp_ingress`, janela 10 s. A transformação oficial valida consistência,

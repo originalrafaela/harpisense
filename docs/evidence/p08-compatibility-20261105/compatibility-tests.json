@@ -1,0 +1,19 @@
+{
+  "captured_at_utc": "2026-11-05T01:22:27.642766+00:00",
+  "tests_run": 8,
+  "failures": 0,
+  "errors": 0,
+  "evidence_type": "offline packet-format and numeric-contract fixtures only",
+  "laboratory_capture": false,
+  "model_training": false,
+  "inference": false,
+  "packets_sent": false,
+  "code_sha256": {
+    "backend/p08_p09/compatibility_audit.py": "a007a4655d17bf8ea58435685f39ac08e01d47290f06c3328346ac7755950d7e",
+    "backend/p08_p09/compatibility_sources/__init__.py": "20c79f48e711424e94ceba290ec0ae009d88ac1a5e61075a5fff90318da3bdf6",
+    "backend/p08_p09/compatibility_sources/edge_features.py": "5f92f1091dd8c381bd78dc234fccdf950dcffdc64a94d312bdbdd7bd68d080be",
+    "backend/p08_p09/compatibility_sources/pcap_to_events.py": "6a923456b580b15f0dafcc477192267dd35e355b603b52b732700b2ef9b10152",
+    "backend/p08_p09/compatibility_tests/run_tests.py": "bc8c672aa7af9ee672fc768ab7b0ce2c8bb31e4a4617eafbfd5841d900c6cb9c",
+    "backend/p08_p09/compatibility_tests/test_compatibility_audit.py": "da97a38fc28a20236b64d7ea2c5f4296797e746b9480626b0f29907c559086c0"
+  }
+}

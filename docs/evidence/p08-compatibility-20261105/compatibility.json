@@ -1,0 +1,155 @@
+{
+  "schema_version": "harpisense.p08.compatibility.audit.v1",
+  "captured_at_utc": "2026-11-05T01:20:05.403690+00:00",
+  "status": "BLOCKED",
+  "blockers": [
+    "P08_INFERENCE_GATE_REMAINS_CLOSED",
+    "NO_LAB_PCAP_SESSION_PROVIDED",
+    "REQUIRED_SOURCE_COVERAGE_NOT_VERIFIED",
+    "RF_COMPATIBILITY_NOT_VERIFIED",
+    "IF_COMPATIBILITY_NOT_VERIFIED"
+  ],
+  "model_loaded": false,
+  "inference_performed": false,
+  "authorized_for_inference": false,
+  "authorized_for_ips": false,
+  "feature_contract": [
+    {
+      "order": 1,
+      "name": "packet_count",
+      "unit": "packets"
+    },
+    {
+      "order": 2,
+      "name": "bytes_total",
+      "unit": "IP_bytes"
+    },
+    {
+      "order": 3,
+      "name": "packets_per_second",
+      "unit": "packets/s"
+    },
+    {
+      "order": 4,
+      "name": "connections_per_second",
+      "unit": "estimated_distinct_SYN_attempts/s"
+    },
+    {
+      "order": 5,
+      "name": "syn_count",
+      "unit": "SYN_without_ACK_packets"
+    },
+    {
+      "order": 6,
+      "name": "rst_count",
+      "unit": "RST_packets"
+    },
+    {
+      "order": 7,
+      "name": "unique_dst_ports",
+      "unit": "destination_ports"
+    },
+    {
+      "order": 8,
+      "name": "avg_packet_size",
+      "unit": "IP_bytes"
+    },
+    {
+      "order": 9,
+      "name": "mean_interarrival_ms",
+      "unit": "ms"
+    }
+  ],
+  "feature_schema_version": "harpisense.if.window.v1",
+  "window_seconds": 10,
+  "grouping": [
+    "sensor_id",
+    "src_ip",
+    "dst_ip",
+    "UTC_epoch_bucket"
+  ],
+  "preprocessing": "P09 validate -> ordered model columns -> float32; no imputation",
+  "profile": {
+    "profile_id": "poste2-endpoint-observation-pending",
+    "traffic_profile": "tcp-observacao",
+    "sensor_id": "poste2-ens33-observation",
+    "interface": "ens33",
+    "required_sources": [
+      {
+        "source": "gateway_capture",
+        "kind": "gateway_capture",
+        "host_id": "poste2"
+      },
+      {
+        "source": "mqtt_broker",
+        "kind": "signed_log_bundle",
+        "host_id": "windows-broker"
+      },
+      {
+        "source": "mqtt_consumer",
+        "kind": "signed_log_bundle",
+        "host_id": "harpiserver"
+      },
+      {
+        "source": "api_fastapi",
+        "kind": "signed_log_bundle",
+        "host_id": "harpiserver"
+      }
+    ]
+  },
+  "sources": {
+    "pcap_to_events.py": {
+      "source": "HarpiServer:/opt/harpisense/staging/p08-captura/pcap_to_events.py",
+      "sha256": "6a923456b580b15f0dafcc477192267dd35e355b603b52b732700b2ef9b10152",
+      "scope": "Read-only deployed source snapshot; no changes"
+    },
+    "edge_features.py": {
+      "source": "referencias/versão_v2/08_Coleta_Evidencias/HarpiSense_Pacote08_Coleta_Evidencias_v2/HarpiSense_Pacote08_Coleta_Evidencias_v2/componentes/edge/edge_features.py",
+      "sha256": "5f92f1091dd8c381bd78dc234fccdf950dcffdc64a94d312bdbdd7bd68d080be",
+      "deployed_equal": true,
+      "deployed_path": "/opt/harpisense/integration-v2/HarpiSense_Pacote13_Integracao_Testes_v2/componentes/p08/componentes/edge/edge_features.py"
+    },
+    "integrator_readonly_comparison": {
+      "source": "/opt/harpisense/staging/p08-captura/integracao/integrar_p08.py",
+      "sha256": "f1537b54ba721153b3daf8a09a09ba1e7aef24aee4a513828302ca237e5f06a5",
+      "window_seconds": 10,
+      "collection_complete": false,
+      "logs_complete": false,
+      "profile_default": "tcp-observacao"
+    }
+  },
+  "models": {
+    "rf": {
+      "status": "NOT_VERIFIED",
+      "model_loaded": false,
+      "numeric_status": "NOT_CHECKED",
+      "reasons": [
+        "MODEL_DIRECTORY_NOT_PROVIDED"
+      ]
+    },
+    "if": {
+      "status": "NOT_VERIFIED",
+      "model_loaded": false,
+      "numeric_status": "NOT_CHECKED",
+      "reasons": [
+        "MODEL_DIRECTORY_NOT_PROVIDED"
+      ]
+    }
+  },
+  "packet_audit": null,
+  "coverage": {
+    "status": "NOT_VERIFIED",
+    "source_coverage": {}
+  },
+  "cross_host_clock_error_bound_verified": false,
+  "unmapped_optional_log_features": [
+    "admin_auth_failures",
+    "connection_failures",
+    "mqtt_publish_count"
+  ],
+  "limitations": [
+    "No artifact deserialization or inference; compatibility is not training provenance or efficacy",
+    "Source coverage checker does not establish a cross-host clock error bound",
+    "PCAP does not supply missing broker/API/consumer log features or target verification"
+  ]
+}

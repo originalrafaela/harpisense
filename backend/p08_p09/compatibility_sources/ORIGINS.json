@@ -1,0 +1,21 @@
+{
+  "pcap_to_events.py": {
+    "source": "HarpiServer:/opt/harpisense/staging/p08-captura/pcap_to_events.py",
+    "sha256": "6a923456b580b15f0dafcc477192267dd35e355b603b52b732700b2ef9b10152",
+    "scope": "Read-only deployed source snapshot; no changes"
+  },
+  "edge_features.py": {
+    "source": "referencias/versão_v2/08_Coleta_Evidencias/HarpiSense_Pacote08_Coleta_Evidencias_v2/HarpiSense_Pacote08_Coleta_Evidencias_v2/componentes/edge/edge_features.py",
+    "sha256": "5f92f1091dd8c381bd78dc234fccdf950dcffdc64a94d312bdbdd7bd68d080be",
+    "deployed_equal": true,
+    "deployed_path": "/opt/harpisense/integration-v2/HarpiSense_Pacote13_Integracao_Testes_v2/componentes/p08/componentes/edge/edge_features.py"
+  },
+  "integrator_readonly_comparison": {
+    "source": "/opt/harpisense/staging/p08-captura/integracao/integrar_p08.py",
+    "sha256": "f1537b54ba721153b3daf8a09a09ba1e7aef24aee4a513828302ca237e5f06a5",
+    "window_seconds": 10,
+    "collection_complete": false,
+    "logs_complete": false,
+    "profile_default": "tcp-observacao"
+  }
+}

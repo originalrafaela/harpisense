@@ -7,9 +7,9 @@ a worktree limpa; não houve reinicialização de trabalho nem alteração da ma
 | Entrega | Implementado | Integrado | Validado localmente | Validado na VM | Pendente |
 |---|---|---|---|---|---|
 | RF/IF → Risk/Policy → PostgreSQL/P11 | Sim | Sim, isolado | Sim, estimadores reais sobre dados sintéticos | Não | Bundles e entrada de laboratório |
-| P08 → entrada certificada | Gate existente reutilizado | Diagnóstico ligado à composição | Rejeições e regressões aprovadas | Não nesta rodada | Certificação de contagens/features e vínculo à sessão |
+| P08 → entrada certificada | Gate e auditor offline | Conversor instalado + P08/P09 comparados | 8 testes novos de formato/features; sem repetir inferência | Fontes/conversão conferidas em leitura; coleta não validada | Console Poste2, relógios, logs/cursores assinados e bundles operacionais |
 | M1/M2/M3, proteção e execução | Motor vigente preservado | Sem despacho | Matriz e gates em fixtures declaradas | Não | Revisão posterior do executor Edge |
-| Frontend segurança d172a387 / MFA 3b5aa70 | Entregas dos agentes | Interfaces revisadas; não reaplicadas | Não retestadas nesta branch | Não implantadas | Integração MFA pelo backend/instalador e ensaio de recuperação |
+| Frontend segurança d172a387 / MFA 737ae26 | Entregas dos agentes | Contrato MFA/OpenAPI revisado; não reaplicados | Recibos Backend revisados, não repetidos | Não implantadas | Transporte frontend/instalador e ensaio no ambiente-alvo |
 
 O teste reproduzível está em `backend/detection_composition/README.md`. Evidências:
 `docs/evidence/detection-composition-20261104/composition.json` contém os modelos,
@@ -66,10 +66,11 @@ A comunicação Maestri foi tentada uma vez por destinatário; o retorno consult
 da Edge informa falha de comunicação com o arquiteto. Não se tomou a ausência de
 resposta como aprovação e não se repetiram mensagens ao próprio terminal.
 
-- **Edge:** permanece dona de `p08_captura/` e `backend/p08_p09/`. Nesta branch,
-  esses diretórios foram incorporados sem alteração a partir de `c314ca5` para
-  uso e regressão. Alterações futuras devem chegar por commit da worktree Edge;
-  novos arquivos do integrador ficam em `backend/detection_composition/`.
+- **Edge:** dona de `p08_captura/`. O repasse `d6a2380` confirma edição exclusiva de
+  `backend/p08_p09/` pela composição nesta worktree. Em `7fe8294`, os dois diretórios
+  foram incorporados sem alteração de `c314ca5`. A continuação acrescenta somente
+  auditor e snapshots de conversão em `backend/p08_p09/`; não altera a captura Edge
+  nem libera os gates. Detalhamento: `docs/COMPATIBILIDADE_P08_LAB_20261105.md`.
 - **Frontend:** `feat/frontend-auth-defense-v2`, `d172a387`, usa consultas P11
   existentes e risco em `incident.data.risk`, com vínculos por `incident_id` e
   `decision_id`. Não há endpoint operacional de aprovação liberado por esta
