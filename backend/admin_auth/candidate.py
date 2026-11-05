@@ -82,4 +82,6 @@ def install_candidate_admin_auth(app, conninfo, *, protection_key, allowed_origi
         return Response(status_code=204, headers={'Cache-Control': 'no-store'})
 
     app.include_router(router)
+    from .http_contract import install_http_contract
+    install_http_contract(app)
     return auth
