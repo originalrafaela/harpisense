@@ -1,0 +1,406 @@
+{
+  "captured_at_utc": "2026-11-05T14:38:07.5870256Z",
+  "p08_head": "a59a8c0ef253fb894746eddf6af2e28ef58200b4",
+  "composition_head": "f71918813ad2617f5514e71302d9505f9f7f223d",
+  "reused_composition_base": "7fe829428db1d9377263100df0b8bc54cb0100bf",
+  "evidence_type": "local source and metadata inventory; no runtime numeric audit",
+  "schema": {
+    "version": "harpisense.if.window.v1",
+    "window_seconds_default": 10,
+    "group_by": [
+      "sensor_id",
+      "src_ip",
+      "dst_ip"
+    ],
+    "direction": "source_to_protected_host_tcp",
+    "features_default": [
+      "packet_count",
+      "bytes_total",
+      "packets_per_second",
+      "connections_per_second",
+      "syn_count",
+      "rst_count",
+      "unique_dst_ports",
+      "avg_packet_size",
+      "mean_interarrival_ms"
+    ],
+    "optional_features_from_logs": [
+      "connection_failures",
+      "auth_failures",
+      "auth_successes",
+      "mqtt_publish_count",
+      "mqtt_acl_denials",
+      "api_auth_failures",
+      "admin_auth_failures",
+      "telemetry_identifier_conflicts",
+      "telemetry_stale_count"
+    ],
+    "metadata_required": [
+      "window_id",
+      "collection_session_id",
+      "feature_schema_version",
+      "window_seconds",
+      "traffic_profile"
+    ],
+    "label_values": [
+      "normal",
+      "C01",
+      "C02",
+      "C03",
+      "C04",
+      "C05",
+      "C06",
+      "C07",
+      "C08",
+      "C09"
+    ],
+    "missing_data_policy": "reject",
+    "metadata_required_operational": [
+      "sensor_id",
+      "window_start",
+      "window_end"
+    ],
+    "scope": [
+      "collection_session_id",
+      "traffic_profile",
+      "capture_interface"
+    ],
+    "compatibility_note": "Contrato de features compartilhado RF/IF; nome legado preservado para compatibilidade dos artefatos."
+  },
+  "source_comparisons": [
+    {
+      "component": "p08_aggregator",
+      "reference": "D:\\Projetos\\tcc - harpisense\\referencias\\versão_v2\\08_Coleta_Evidencias\\HarpiSense_Pacote08_Coleta_Evidencias_v2\\HarpiSense_Pacote08_Coleta_Evidencias_v2\\componentes\\edge\\edge_features.py",
+      "composition_path": "backend/p08_p09/compatibility_sources/edge_features.py",
+      "reference_sha256": "5f92f1091dd8c381bd78dc234fccdf950dcffdc64a94d312bdbdd7bd68d080be",
+      "actual_sha256": "5f92f1091dd8c381bd78dc234fccdf950dcffdc64a94d312bdbdd7bd68d080be",
+      "byte_equal": true
+    },
+    {
+      "component": "p09_validator",
+      "reference": "D:\\Projetos\\tcc - harpisense\\referencias\\versão_v2\\09_Deteccao_Decisao\\HarpiSense_Pacote09_Deteccao_Decisao_v2\\harpisense_data\\windows.py",
+      "composition_path": "backend/domain/harpisense_data/windows.py",
+      "reference_sha256": "31605cfefe8919562f38517a1644f9ef29f6ba51e7f148fbbce9468211cba59a",
+      "actual_sha256": "31605cfefe8919562f38517a1644f9ef29f6ba51e7f148fbbce9468211cba59a",
+      "byte_equal": true
+    },
+    {
+      "component": "rf",
+      "reference": "D:\\Projetos\\tcc - harpisense\\referencias\\versão_v2\\09_Deteccao_Decisao\\HarpiSense_Pacote09_Deteccao_Decisao_v2\\harpisense_rf\\random_forest.py",
+      "composition_path": "backend/domain/harpisense_rf/random_forest.py",
+      "reference_sha256": "5b073e712bebe1710780bce054c22a25a0ed5744f5a05bf88309afcabbc002c8",
+      "actual_sha256": "5b073e712bebe1710780bce054c22a25a0ed5744f5a05bf88309afcabbc002c8",
+      "byte_equal": true
+    },
+    {
+      "component": "if",
+      "reference": "D:\\Projetos\\tcc - harpisense\\referencias\\versão_v2\\09_Deteccao_Decisao\\HarpiSense_Pacote09_Deteccao_Decisao_v2\\harpisense_if\\isolation_forest.py",
+      "composition_path": "backend/domain/harpisense_if/isolation_forest.py",
+      "reference_sha256": "dedd1848f4757652b6b9fc98835919367e67b25fd065c4f397a080fec81e1325",
+      "actual_sha256": "dedd1848f4757652b6b9fc98835919367e67b25fd065c4f397a080fec81e1325",
+      "byte_equal": true
+    }
+  ],
+  "deployed_source_receipt": {
+    "pcap_to_events.py": {
+      "source": "HarpiServer:/opt/harpisense/staging/p08-captura/pcap_to_events.py",
+      "sha256": "6a923456b580b15f0dafcc477192267dd35e355b603b52b732700b2ef9b10152",
+      "scope": "Read-only deployed source snapshot; no changes"
+    },
+    "edge_features.py": {
+      "source": "referencias/versão_v2/08_Coleta_Evidencias/HarpiSense_Pacote08_Coleta_Evidencias_v2/HarpiSense_Pacote08_Coleta_Evidencias_v2/componentes/edge/edge_features.py",
+      "sha256": "5f92f1091dd8c381bd78dc234fccdf950dcffdc64a94d312bdbdd7bd68d080be",
+      "deployed_equal": true,
+      "deployed_path": "/opt/harpisense/integration-v2/HarpiSense_Pacote13_Integracao_Testes_v2/componentes/p08/componentes/edge/edge_features.py"
+    },
+    "integrator_readonly_comparison": {
+      "source": "/opt/harpisense/staging/p08-captura/integracao/integrar_p08.py",
+      "sha256": "f1537b54ba721153b3daf8a09a09ba1e7aef24aee4a513828302ca237e5f06a5",
+      "window_seconds": 10,
+      "collection_complete": false,
+      "logs_complete": false,
+      "profile_default": "tcp-observacao"
+    }
+  },
+  "models": [
+    {
+      "path": "local-evidence\\detection-composition\\25a843dd9343d35b\\if\\metadata.json",
+      "provenance": "synthetic composition fixtures; not operational or laboratory",
+      "metadata_sha256": "36d7e6fcbbe7d07e7f44af8702b03a2f33211d7179ad0089a68ae944a329804c",
+      "artifact_sha256": "455f5dfad40aa4136f6424114c907258798065f629bdce9497cffeb83f4f1e35",
+      "metadata_hash_matches": true,
+      "external_trusted_pin_verified": false,
+      "features": [
+        "packet_count",
+        "bytes_total",
+        "packets_per_second",
+        "connections_per_second",
+        "syn_count",
+        "rst_count",
+        "unique_dst_ports",
+        "avg_packet_size",
+        "mean_interarrival_ms"
+      ],
+      "default_order_matches": true,
+      "feature_schema_version": "harpisense.if.window.v1",
+      "window_seconds": 10.0,
+      "profile": "demo_tcp_ingress",
+      "p08_profile_matches": false,
+      "versions": {
+        "python": "3.12.15",
+        "scikit_learn": "1.8.0",
+        "scipy": "1.17.0",
+        "numpy": "2.3.5",
+        "pandas": "2.2.3",
+        "joblib": "1.5.3"
+      },
+      "model_version": "if-2026-11-05T00:00:13.953491+00:00",
+      "artifact_version": 2
+    },
+    {
+      "path": "local-evidence\\detection-composition\\25a843dd9343d35b\\rf\\metadata.json",
+      "provenance": "synthetic composition fixtures; not operational or laboratory",
+      "metadata_sha256": "f9f69139e65a3ec29f247c3fa43461fd8ee9aafd8479503b5b7bb427cf8753ed",
+      "artifact_sha256": "b6019ca76685ebfbd6b0947f891b2a9c5cefc30e88a97a63e42e1daaf7e11af0",
+      "metadata_hash_matches": true,
+      "external_trusted_pin_verified": false,
+      "features": [
+        "packet_count",
+        "bytes_total",
+        "packets_per_second",
+        "connections_per_second",
+        "syn_count",
+        "rst_count",
+        "unique_dst_ports",
+        "avg_packet_size",
+        "mean_interarrival_ms"
+      ],
+      "default_order_matches": true,
+      "feature_schema_version": "harpisense.if.window.v1",
+      "window_seconds": 10.0,
+      "profile": "demo_tcp_ingress",
+      "p08_profile_matches": false,
+      "versions": {
+        "python": "3.12.15",
+        "scikit_learn": "1.8.0",
+        "scipy": "1.17.0",
+        "numpy": "2.3.5",
+        "pandas": "2.2.3",
+        "joblib": "1.5.3"
+      },
+      "model_version": "rf-0dae2297-3310-42a0-af86-3c290222dba3",
+      "artifact_version": 1
+    },
+    {
+      "path": "local-evidence\\detection-composition\\6cb2cb316974299b\\if\\metadata.json",
+      "provenance": "synthetic composition fixtures; not operational or laboratory",
+      "metadata_sha256": "231e26bc4b755bdaa7d2749c1731844750c4f2e81988e37c6632d6fdc40a1cb0",
+      "artifact_sha256": "2bf789ed403942135660c185d2d3201d0447a7213d13f938bfdd95c01a6c9fd9",
+      "metadata_hash_matches": true,
+      "external_trusted_pin_verified": false,
+      "features": [
+        "packet_count",
+        "bytes_total",
+        "packets_per_second",
+        "connections_per_second",
+        "syn_count",
+        "rst_count",
+        "unique_dst_ports",
+        "avg_packet_size",
+        "mean_interarrival_ms"
+      ],
+      "default_order_matches": true,
+      "feature_schema_version": "harpisense.if.window.v1",
+      "window_seconds": 10.0,
+      "profile": "demo_tcp_ingress",
+      "p08_profile_matches": false,
+      "versions": {
+        "python": "3.12.15",
+        "scikit_learn": "1.8.0",
+        "scipy": "1.17.0",
+        "numpy": "2.3.5",
+        "pandas": "2.2.3",
+        "joblib": "1.5.3"
+      },
+      "model_version": "if-2026-11-04T23:57:51.049083+00:00",
+      "artifact_version": 2
+    },
+    {
+      "path": "local-evidence\\detection-composition\\6cb2cb316974299b\\rf\\metadata.json",
+      "provenance": "synthetic composition fixtures; not operational or laboratory",
+      "metadata_sha256": "aef6f067b027d11be43511685b985853c1a2a8c7d47c136de9065e0e64b966b6",
+      "artifact_sha256": "9a54fd65e61b63a976bf8ff8f0bb78947c607a4de9397743d027775604e28185",
+      "metadata_hash_matches": true,
+      "external_trusted_pin_verified": false,
+      "features": [
+        "packet_count",
+        "bytes_total",
+        "packets_per_second",
+        "connections_per_second",
+        "syn_count",
+        "rst_count",
+        "unique_dst_ports",
+        "avg_packet_size",
+        "mean_interarrival_ms"
+      ],
+      "default_order_matches": true,
+      "feature_schema_version": "harpisense.if.window.v1",
+      "window_seconds": 10.0,
+      "profile": "demo_tcp_ingress",
+      "p08_profile_matches": false,
+      "versions": {
+        "python": "3.12.15",
+        "scikit_learn": "1.8.0",
+        "scipy": "1.17.0",
+        "numpy": "2.3.5",
+        "pandas": "2.2.3",
+        "joblib": "1.5.3"
+      },
+      "model_version": "rf-e6fb9361-79a4-4df4-9756-bf73635381c0",
+      "artifact_version": 1
+    },
+    {
+      "path": "local-evidence\\detection-composition\\7bf7b4968144d04d\\if\\metadata.json",
+      "provenance": "synthetic composition fixtures; not operational or laboratory",
+      "metadata_sha256": "b318520006f1d5b4a36e52a11ab453374c34738dc513e84406d9a0f28ed5f105",
+      "artifact_sha256": "8dbcac01a4fa373f7f63ac0dd624cfbd2d7347a0d5cc424a8a952bf960cd2103",
+      "metadata_hash_matches": true,
+      "external_trusted_pin_verified": false,
+      "features": [
+        "packet_count",
+        "bytes_total",
+        "packets_per_second",
+        "connections_per_second",
+        "syn_count",
+        "rst_count",
+        "unique_dst_ports",
+        "avg_packet_size",
+        "mean_interarrival_ms"
+      ],
+      "default_order_matches": true,
+      "feature_schema_version": "harpisense.if.window.v1",
+      "window_seconds": 10.0,
+      "profile": "demo_tcp_ingress",
+      "p08_profile_matches": false,
+      "versions": {
+        "python": "3.12.15",
+        "scikit_learn": "1.8.0",
+        "scipy": "1.17.0",
+        "numpy": "2.3.5",
+        "pandas": "2.2.3",
+        "joblib": "1.5.3"
+      },
+      "model_version": "if-2026-11-05T00:12:37.666900+00:00",
+      "artifact_version": 2
+    },
+    {
+      "path": "local-evidence\\detection-composition\\7bf7b4968144d04d\\rf\\metadata.json",
+      "provenance": "synthetic composition fixtures; not operational or laboratory",
+      "metadata_sha256": "2353ecc3c931dae5b601273595b310a3c6b28cdf0afc89a0f5a54940bea83ca7",
+      "artifact_sha256": "49c9383191294edabe1076da5f6c23791c2ba574367501fa9f6a175a8d2bc0c8",
+      "metadata_hash_matches": true,
+      "external_trusted_pin_verified": false,
+      "features": [
+        "packet_count",
+        "bytes_total",
+        "packets_per_second",
+        "connections_per_second",
+        "syn_count",
+        "rst_count",
+        "unique_dst_ports",
+        "avg_packet_size",
+        "mean_interarrival_ms"
+      ],
+      "default_order_matches": true,
+      "feature_schema_version": "harpisense.if.window.v1",
+      "window_seconds": 10.0,
+      "profile": "demo_tcp_ingress",
+      "p08_profile_matches": false,
+      "versions": {
+        "python": "3.12.15",
+        "scikit_learn": "1.8.0",
+        "scipy": "1.17.0",
+        "numpy": "2.3.5",
+        "pandas": "2.2.3",
+        "joblib": "1.5.3"
+      },
+      "model_version": "rf-d028bf7e-175a-4d62-a7a5-0690e66d007c",
+      "artifact_version": 1
+    },
+    {
+      "path": "local-evidence\\detection-composition\\c27e43085be6e4be\\if\\metadata.json",
+      "provenance": "synthetic composition fixtures; not operational or laboratory",
+      "metadata_sha256": "26f567231aa8960662a5e542fc90ea23e24b69ec471e4b5dc9eb45ef89570e15",
+      "artifact_sha256": "1d70c4696e385fe7d2c728b680851b372ab504edf07a73476462694522d1efba",
+      "metadata_hash_matches": true,
+      "external_trusted_pin_verified": false,
+      "features": [
+        "packet_count",
+        "bytes_total",
+        "packets_per_second",
+        "connections_per_second",
+        "syn_count",
+        "rst_count",
+        "unique_dst_ports",
+        "avg_packet_size",
+        "mean_interarrival_ms"
+      ],
+      "default_order_matches": true,
+      "feature_schema_version": "harpisense.if.window.v1",
+      "window_seconds": 10.0,
+      "profile": "demo_tcp_ingress",
+      "p08_profile_matches": false,
+      "versions": {
+        "python": "3.12.15",
+        "scikit_learn": "1.8.0",
+        "scipy": "1.17.0",
+        "numpy": "2.3.5",
+        "pandas": "2.2.3",
+        "joblib": "1.5.3"
+      },
+      "model_version": "if-2026-11-05T00:51:00.081221+00:00",
+      "artifact_version": 2
+    },
+    {
+      "path": "local-evidence\\detection-composition\\c27e43085be6e4be\\rf\\metadata.json",
+      "provenance": "synthetic composition fixtures; not operational or laboratory",
+      "metadata_sha256": "f30beab342cb17abfd1cca49ca69561fc652124d7fb49bf16e1d2cc7fe77b6ea",
+      "artifact_sha256": "11f30e77c376f314ff40c1f4d759955a5dbf61b2a10807b0356c475a2ff1ca10",
+      "metadata_hash_matches": true,
+      "external_trusted_pin_verified": false,
+      "features": [
+        "packet_count",
+        "bytes_total",
+        "packets_per_second",
+        "connections_per_second",
+        "syn_count",
+        "rst_count",
+        "unique_dst_ports",
+        "avg_packet_size",
+        "mean_interarrival_ms"
+      ],
+      "default_order_matches": true,
+      "feature_schema_version": "harpisense.if.window.v1",
+      "window_seconds": 10.0,
+      "profile": "demo_tcp_ingress",
+      "p08_profile_matches": false,
+      "versions": {
+        "python": "3.12.15",
+        "scikit_learn": "1.8.0",
+        "scipy": "1.17.0",
+        "numpy": "2.3.5",
+        "pandas": "2.2.3",
+        "joblib": "1.5.3"
+      },
+      "model_version": "rf-6970a2ce-3545-415f-ad75-67ae50a2dfc3",
+      "artifact_version": 1
+    }
+  ],
+  "observed_p08_windows": null,
+  "source_coverage": "UNKNOWN",
+  "laboratory_session": null,
+  "inference_performed": false,
+  "p11_write_performed": false,
+  "status": "BLOCKED",
+  "first_collection_blocker": "Poste2 ens33 capture permission/linktype receipt missing"
+}
