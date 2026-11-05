@@ -21,7 +21,7 @@ O cliente mantém challenge, senha, grant, chave TOTP, QR e códigos de recupera
 
 ## Propriedade e entrada do instalador
 
-`src/account-mfa.tsx` expõe `AdminAccess({client,onAuthenticated})` para a tela de acesso/primeiro provisionamento e `AccountSecurityPanel({client})` para adesão de uma conta existente em Configurações. O frontend mantém a tela e o cliente; o Gerenciador de Configurações permanece responsável por orquestrar a abertura do assistente depois da instalação. Nenhum arquivo do assistente/orquestrador foi alterado nesta candidata.
+`src/account-mfa.tsx` expõe `AdminAccess({client,onAuthenticated})` para a tela de acesso/primeiro provisionamento e `AccountSecurityPanel({client})` para adesão de uma conta existente em Configurações. Após a sessão completa, `main.tsx` monta `InstallationEntry` no dashboard com o `Client` autenticado (`Pick<Client,'get'>`) e `onOpenSettings={() => navigate('settings')}`. A implementação reutiliza o export do Gerenciador em `feat/installer-orchestration` (`b42eb4e`): `src/installation-entry.tsx` e `src/installation-state.ts`. Esse cartão consulta o estado persistido sem redirecionar nem bloquear as demais funções; iniciar/retomar abre o `ConfigManager` existente. A conclusão não faz redirecionamento automático, conforme interface fornecida pelo Gerenciador.
 
 Primeiro provisionamento não é inferido de `localStorage`. A tela pede o grant local e a API decide se o singleton ainda pode ser criado. A tela de Configurações só oferece adesão existente quando a sessão consultada informa `mfa_enrollment_available=true`.
 
@@ -39,7 +39,28 @@ Os testes do frontend com `route.fulfill` e `fetch` stub são fixtures isoladas 
 
 ## Evidências desta entrega
 
-- Frontend: `npm.cmd run typecheck`, `npm.cmd run build`, `npm.cmd test` (46/46) e `npx.cmd playwright test` (54 aprovados, 1 teste de composição local ignorado; todos usam fixtures/mocks isolados). `git diff --check` limpo.
+- Frontend: `npm.cmd run typecheck`, `npm.cmd run build`, `npm.cmd test` (46/46) e `npx.cmd playwright test` (56 aprovados, 1 teste de composição local ignorado; todos usam fixtures/mocks isolados). Cobertura de `InstallationEntry`: estado novo não bloqueia dashboard, abre o `ConfigManager` existente; progresso pendente reabre na etapa salva. `git diff --check` limpo.
 - Navegador: fluxo de primeiro cadastro, TOTP, apresentação dos códigos, login MFA, fator inválido, expiração, recuperação e adesão de conta existente passaram por `route.fulfill`; esses resultados não são HTTP conectado.
-- Backend: o recibo em `docs/ADMIN_MFA_HTTP_RESULTADO.json` declara 258 verificações aprovadas, transporte Uvicorn/TCP loopback e banco `mfa_http_fixture`, com `operational_deployment=false`. Hash OpenAPI conferido acima. Não foi possível executar o navegador contra essa composição nesta worktree porque nenhum listener loopback estava ativo e o recibo não publica URL/porta nem procedimento de grant privado.
+- Backend: o recibo em `docs/ADMIN_MFA_HTTP_RESULTADO.json` declara 258 verificações aprovadas, transporte Uvicorn/TCP loopback e banco `mfa_http_fixture`, com `operational_deployment=false`. Hash OpenAPI conferido acima. Backend forneceu a URL prevista e CORS abaixo, mas não foi possível executar o navegador contra essa composição nesta sessão: fixture parada e daemon Docker Linux indisponível. O grant permanece privado no volume e não foi transferido ao Frontend.
 - Capturas Playwright existentes de login, dashboard e aprovações foram atualizadas em `docs/evidence/`; não contêm credenciais ou códigos de teste.
+
+## Ensaio browser → HTTP → PostgreSQL pendente
+
+Backend confirmou a URL isolada prevista `http://127.0.0.1:8086`, origens CORS somente `http://127.0.0.1:5174` e `http://127.0.0.1:4174`, e recibos backend de 258 verificações HTTP + 65 de transição (já executados por Backend; não repetidos pelo Frontend). A fixture está parada porque o daemon Docker Linux não está disponível nesta sessão.
+
+Quando o daemon voltar, no root da worktree Backend:
+
+```powershell
+docker start harpisense-admin-mfa-fixture
+docker network connect harpisense-mfa-isolated harpisense-admin-mfa-fixture
+docker compose -f backend/admin_auth_tests/http-browser.compose.yml up -d
+```
+
+No terminal frontend, a partir de `frontend/`:
+
+```powershell
+$env:HARPI_API_TUNNEL_TARGET = 'http://127.0.0.1:8086'
+npm.cmd run dev
+```
+
+Em `http://127.0.0.1:5174`, o operador fornece o grant somente no campo local da tela. Percurso: bootstrap → cadastro/confirmar TOTP → guardar os códigos → dashboard → `InstallationEntry` → iniciar assistente → salvar rascunho → voltar ao dashboard → reabrir/retomar e conferir campos → logout → login com segundo fator → dashboard. Rejeição de código inválido e acesso anônimo são consultados pelo mesmo navegador via `/p11-api` sem Bearer, esperando `401`. Não aplicar a proposta: a fixture não habilita a configuração como operacional.
