@@ -1,17 +1,19 @@
 import {test,expect} from '@playwright/test';
 
-test('primeiro acesso, recuperação e MFA ausentes não coletam fatores nem simulam sucesso',async({page})=>{
- const requests:string[]=[];
- page.on('request',request=>{if(request.url().includes('/api/'))requests.push(request.url())});
+test('login não chama a API até o administrador iniciar um fluxo explicitamente',async({page})=>{
+ const requests:string[]=[];page.on('request',request=>{if(request.url().includes('/api/'))requests.push(request.url())});
  await page.goto('http://127.0.0.1:5174');
- for(const name of ['Primeiro acesso e segurança da conta','Esqueci minha senha','Verificar MFA']){
-  await page.getByRole('button',{name,exact:true}).click();
-  const panel=page.getByRole('region',{name:'Disponibilidade da instalação e MFA'});
-  // section has an accessible name and exposes the missing HTTP contract.
-  await expect(panel).toContainText('Não integrado');
-  await expect(panel.locator('input')).toHaveCount(0);
-  await expect(panel).toContainText('Nenhuma conta foi criada');
-  await panel.getByRole('button',{name:'Fechar',exact:true}).click();
- }
+ await expect(page.getByRole('heading',{name:'Acesso administrativo'})).toBeVisible();
+ await page.getByRole('button',{name:'Primeira configuração'}).click();
+ await expect(page.getByText(/grant temporário entregue localmente pelo operador/)).toBeVisible();
+ await expect(page.getByLabel('Grant local de uso único')).toBeVisible();
+ expect(requests).toEqual([]);
+});
+
+test('recuperação por e-mail não é oferecida nem tenta enviar mensagens',async({page})=>{
+ const requests:string[]=[];page.on('request',request=>{if(request.url().includes('/api/'))requests.push(request.url())});
+ await page.goto('http://127.0.0.1:5174');
+ await expect(page.getByText(/Recuperação por e-mail não está integrada/).first()).toBeVisible();
+ await expect(page.getByRole('button',{name:/recuperar por e-mail/i})).toHaveCount(0);
  expect(requests).toEqual([]);
 });

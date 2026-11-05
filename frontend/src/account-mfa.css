@@ -1,0 +1,8 @@
+.mfa-enrollment{display:grid;grid-template-columns:minmax(140px,220px) minmax(220px,1fr);gap:18px;align-items:center;margin:18px 0}
+.mfa-qr{display:block;width:min(100%,210px);height:auto;padding:10px;background:#fff;border-radius:8px;shape-rendering:crispEdges}
+.recovery-codes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 22px;padding:14px 14px 14px 38px;background:#0b1525;border:1px solid #405771;border-radius:8px;font-family:ui-monospace,Consolas,monospace;overflow-wrap:anywhere}
+.recovery-codes li{padding:4px}
+.check-label{display:flex!important;grid-template-columns:20px 1fr;align-items:center;gap:10px}
+.account-flow .password-field input{min-width:0}
+.account-flow input[readonly]{font-family:ui-monospace,Consolas,monospace;letter-spacing:.08em}
+@media(max-width:620px){.mfa-enrollment{grid-template-columns:1fr}.mfa-qr{margin:auto}.recovery-codes{grid-template-columns:1fr}}

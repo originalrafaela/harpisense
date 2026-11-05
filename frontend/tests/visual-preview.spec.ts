@@ -6,19 +6,15 @@ async function enterPreview(page:import('@playwright/test').Page){
  await expect(page.getByText('Prévia visual — dados de demonstração, sem ações reais.')).toBeVisible();
 }
 
-test('prévia visual: estados de conta são ilustrativos e não enviam requisições operacionais',async({page})=>{
+test('demonstração é isolada e primeiro acesso exige ação e grant locais explícitos',async({page})=>{
  const apiRequests:string[]=[];page.on('request',r=>{if(r.url().includes('/api/')||r.url().includes('/p11-api')||r.url().includes('localhost:8000'))apiRequests.push(r.url())});
  await page.goto('http://127.0.0.1:5174');
  await expect(page.getByLabel('Usuário',{exact:true})).toHaveValue('');await expect(page.getByLabel('Senha',{exact:true})).toHaveValue('');
  await page.getByLabel('Senha',{exact:true}).fill('sensitive-preview-only');await page.getByRole('button',{name:'Mostrar senha'}).click();await expect(page.getByLabel('Senha',{exact:true})).toHaveAttribute('type','text');
  await page.getByRole('button',{name:'Explorar demonstração visual'}).click();await expect(page.getByLabel('Senha',{exact:true})).toHaveCount(0);expect(await page.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}))).not.toContain('sensitive-preview-only');
  await page.getByRole('button',{name:'Sair'}).click();
- await page.getByRole('button',{name:'Esqueci minha senha'}).click();await expect(page.getByRole('region',{name:'Disponibilidade da instalação e MFA'})).toBeVisible();
- await expect(page.getByRole('status')).toContainText('sem os endpoints abaixo');await expect(page.getByText('Recuperação de senha', {exact:false})).toBeVisible();
- await page.getByRole('button',{name:'Fechar'}).click();await page.getByRole('button',{name:'Verificar MFA'}).click();
- await expect(page.getByRole('status')).toContainText('sem os endpoints abaixo');await expect(page.getByText('Cadastro e confirmação TOTP')).toBeVisible();
- await page.getByRole('button',{name:'Fechar'}).click();await page.getByRole('button',{name:'Primeiro acesso e segurança da conta'}).click();
- await expect(page.getByText('Primeiro acesso protegido e criação de usuário e senha')).toBeVisible();expect(apiRequests).toEqual([]);
+ await expect(page.getByText(/Esqueceu o autenticador/)).toBeVisible();
+ await page.getByRole('button',{name:'Primeira configuração'}).click();await expect(page.getByLabel('Grant local de uso único')).toBeVisible();expect(apiRequests).toEqual([]);
 });
 
 test('autonomia demonstrativa mantém operação e execução independentes e controla estado local',async({page})=>{

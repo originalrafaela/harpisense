@@ -81,6 +81,66 @@ test('histórico com esquema inválido não é apresentado como vazio',async()=>
  await c.login(credentials);await assert.rejects(()=>c.recordHistory('incident','inc-1'),/Revisão da projeção incompatível/);
 });
 
+test('login com segundo fator retorna desafio temporário sem criar sessão administrativa',async()=>{
+ const calls:{path:string;method:string;authorization:string|undefined;body:unknown}[]=[];
+ const candidateSession={authenticated:true,username:'fixture-owner',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,mfa_available:true,mfa_enabled:true,mfa_enrollment_available:true,email_recovery_available:false};
+ const fetcher=(async(url,init)=>{const path=new URL(String(url),'http://local').pathname;const headers=init?.headers as Record<string,string>|undefined;let body:unknown;try{body=JSON.parse(String(init?.body))}catch{}calls.push({path,method:init?.method||'GET',authorization:headers?.Authorization,body});
+  if(path.endsWith('/admin-auth/login'))return new Response(JSON.stringify({challenge_token:'c'.repeat(43),next_step:'login',expires_at:new Date(Date.now()+300000).toISOString()}));
+  if(path.endsWith('/mfa/verify'))return new Response(JSON.stringify({access_token:'b'.repeat(43),token_type:'Bearer',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,username:'fixture-owner'}));
+  if(path.endsWith('/admin-auth/session'))return new Response(JSON.stringify(candidateSession));
+  return new Response('[]');
+ }) as typeof fetch;
+ const client=new Client('/p11-api','p11',fetcher);const first=await client.login(credentials);
+ assert.equal(first.kind,'challenge');if(first.kind!=='challenge')return;
+ assert.equal(first.challenge.next_step,'login');await assert.rejects(()=>client.rows('incident'),/Não autorizado/);
+ const completed=await client.verifyMfa(first.challenge.challenge_token,'123456');assert.equal(completed.kind,'session');
+ assert.deepEqual(calls.map(call=>call.path),['/p11-api/api/v1/admin-auth/login','/p11-api/api/v1/admin-auth/mfa/verify','/p11-api/api/v1/admin-auth/session']);
+ assert.equal(calls[1].authorization,undefined);assert.deepEqual(calls[1].body,{challenge_token:'c'.repeat(43),code:'123456'});
+ assert.equal(calls[2].authorization,'Bearer '+'b'.repeat(43));
+});
+
+test('bootstrap, QR, confirmação e códigos de recuperação ficam em memória e validam sessão',async()=>{
+ const calls:{path:string;authorization:string|undefined;body:unknown}[]=[];const recovery=Array.from({length:10},(_,i)=>String(i).padStart(32,'a'));
+ const session={authenticated:true,username:'new-owner',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,mfa_available:true,mfa_enabled:true,mfa_enrollment_available:true,email_recovery_available:false};
+ const fetcher=(async(url,init)=>{const path=new URL(String(url),'http://local').pathname;const headers=init?.headers as Record<string,string>|undefined;let body:unknown;try{body=JSON.parse(String(init?.body))}catch{}calls.push({path,authorization:headers?.Authorization,body});
+  if(path.endsWith('/bootstrap'))return new Response(JSON.stringify({challenge_token:'e'.repeat(43),next_step:'enroll',expires_at:new Date(Date.now()+300000).toISOString()}));
+  if(path.endsWith('/enrollment/begin'))return new Response(JSON.stringify({manual_key:'JBSWY3DPEHPK3PXP',provisioning_uri:'otpauth://totp/HarpiSense:owner?secret=JBSWY3DPEHPK3PXP',qr_svg:'<svg viewBox="0 0 21 21"><path fill="#000000" d="M0 0h1v1z"/></svg>',expires_at:new Date(Date.now()+300000).toISOString()}));
+  if(path.endsWith('/enrollment/confirm'))return new Response(JSON.stringify({access_token:'f'.repeat(43),token_type:'Bearer',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,username:'new-owner',recovery_codes:recovery}));
+  if(path.endsWith('/admin-auth/session'))return new Response(JSON.stringify(session));
+  return new Response('{}',{status:404});
+ }) as typeof fetch;
+ const client=new Client('/p11-api','p11',fetcher);const begun=await client.bootstrap('g'.repeat(43),'new-owner','new-password-is-temporary');assert.equal(begun.kind,'challenge');if(begun.kind!=='challenge')return;
+ const material=await client.beginMfaEnrollment(begun.challenge.challenge_token);assert.equal(material.manualKey,'JBSWY3DPEHPK3PXP');assert.deepEqual(Object.keys(material).sort(),['expiresAt','manualKey','qrSvg']);assert.equal(JSON.stringify(material).includes('otpauth://'),false);
+ const confirmed=await client.confirmMfaEnrollment(begun.challenge.challenge_token,'123456');assert.equal(confirmed.kind,'session');if(confirmed.kind!=='session')return;
+ assert.deepEqual(confirmed.recoveryCodes,recovery);assert.equal(confirmed.session.mfa_enabled,true);
+ assert.ok(calls.slice(0,3).every(call=>call.authorization===undefined));assert.deepEqual(calls[0].body,{bootstrap_secret:'g'.repeat(43),username:'new-owner',password:'new-password-is-temporary'});
+ assert.deepEqual(calls[1].body,{challenge_token:'e'.repeat(43)});assert.deepEqual(calls[2].body,{challenge_token:'e'.repeat(43),code:'123456'});
+ assert.equal(calls[3].authorization,'Bearer '+'f'.repeat(43));
+});
+
+test('código de recuperação emite somente enrollment; adesão existente exige sessão Bearer',async()=>{
+ const calls:{path:string;authorization:string|undefined;body:unknown}[]=[];
+ const fetcher=(async(url,init)=>{const path=new URL(String(url),'http://local').pathname;const headers=init?.headers as Record<string,string>|undefined;let body:unknown;try{body=JSON.parse(String(init?.body))}catch{}calls.push({path,authorization:headers?.Authorization,body});
+  if(path.endsWith('/admin-auth/login'))return new Response(JSON.stringify({challenge_token:'l'.repeat(43),next_step:'login',expires_at:new Date(Date.now()+300000).toISOString()}));
+  if(path.endsWith('/mfa/recover'))return new Response(JSON.stringify({challenge_token:'n'.repeat(43),next_step:'enroll',expires_at:new Date(Date.now()+300000).toISOString()}));
+  if(path.endsWith('/enrollment/authorize'))return new Response(JSON.stringify({challenge_token:'o'.repeat(43),next_step:'enroll',expires_at:new Date(Date.now()+300000).toISOString()}));
+  return new Response('{}',{status:404});
+ }) as typeof fetch;const client=new Client('/p11-api','p11',fetcher);
+ const login=await client.login(credentials);assert.equal(login.kind,'challenge');if(login.kind!=='challenge')return;
+ const enroll=await client.recoverMfa(login.challenge.challenge_token,'R'.repeat(32));assert.equal(enroll.kind,'challenge');if(enroll.kind==='challenge')assert.equal(enroll.challenge.next_step,'enroll');
+ assert.equal(calls[1].authorization,undefined);assert.deepEqual(calls[1].body,{challenge_token:'l'.repeat(43),code:'R'.repeat(32)});
+ await assert.rejects(()=>client.authorizeMfaEnrollment('current-password'),/Não autorizado/);
+ assert.equal(calls.length,2);
+});
+
+test('desafio MFA malformado ou expirado não é tratado como sessão',async()=>{
+ for(const expires of [new Date(Date.now()-1000).toISOString(),'not-a-date']){
+  const client=new Client('/p11-api','p11',(async()=>new Response(JSON.stringify({challenge_token:'c'.repeat(43),next_step:'login',expires_at:expires}))) as typeof fetch);
+  await assert.rejects(()=>client.login(credentials),/Desafio de autenticação inválido/);
+  await assert.rejects(()=>client.health(),/Não autorizado/);
+ }
+});
+
 test('sessão recusada é descartada sem Basic ou repetição do login',async()=>{
  const paths:string[]=[];
  const c=new Client('/p11-api','p11',(async(url)=>{paths.push(String(url));return sessionResponse(url)||new Response('{"error":{"code":"SESSION_REVOKED"}}',{status:401})}) as typeof fetch);

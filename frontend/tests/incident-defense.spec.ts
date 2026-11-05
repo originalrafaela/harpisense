@@ -60,11 +60,11 @@ test('consultation failures stay distinct from empty incident and approval resul
  await expect(page.getByText('A API não retornou aprovações nesta consulta.')).toHaveCount(0);
 });
 
-test('first access and MFA state says unavailable instead of sending guessed routes',async({page})=>{
+test('first access waits for explicit grant submission and does not treat a challenge as a session',async({page})=>{
  const requests:string[]=[];page.on('request',request=>{if(request.url().includes('/api/'))requests.push(new URL(request.url()).pathname)});
  await page.goto('http://127.0.0.1:5174');
- await page.getByRole('button',{name:'Primeiro acesso e segurança da conta'}).click();
- await expect(page.getByText(/backend entregue oferece login por senha e sessão/)).toBeVisible();
- await expect(page.getByText(/Cadastro e confirmação TOTP/)).toBeVisible();
+ await page.getByRole('button',{name:'Primeira configuração'}).click();
+ await expect(page.getByLabel('Grant local de uso único')).toBeVisible();
+ await expect(page.getByRole('button',{name:'Criar conta e configurar MFA'})).toBeVisible();
  expect(requests).toEqual([]);
 });

@@ -57,7 +57,7 @@ test('consulta vazia não inventa dispositivo ou medição (isolado)', async ({p
 
 test('credencial inválida e rede indisponível não abrem operação nem demonstração (isolado)', async ({page}) => {
   await page.route('**/api/v1/admin-auth/login', route => route.fulfill({status:401,json:{error:{code:'INVALID_CREDENTIALS'}}}));
-  await enter(page, 'invalid-fixture');await expect(page.getByRole('alert')).toContainText('Credenciais inválidas');
+  await enter(page, 'invalid-fixture');await expect(page.getByRole('alert')).toContainText('Usuário ou senha inválidos');
   await page.unroute('**/api/v1/admin-auth/login');
   await page.route('**/api/v1/admin-auth/login', route => route.abort('connectionrefused'));
   await page.getByLabel('Senha',{exact:true}).fill('invalid-fixture');
