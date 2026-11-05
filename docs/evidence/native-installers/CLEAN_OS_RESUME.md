@@ -1,5 +1,32 @@
 # Retomada: instalação e reboot em sistemas limpos
 
+## Atualização após desligamento do Poste 2 pelo operador
+
+Foram observados 5.152 MiB livres e somente o servidor do laboratório ligado.
+A reserva de host de 2 GiB era margem do procedimento; agora pode ser ajustada
+explicitamente para 1 GiB com `-HostReserveMiB 1024`, mantendo a VM com 4 GiB.
+O mínimo desse modo é 5.120 MiB livres. Não foi alterada a memória do servidor.
+
+A primeira tentativa de iniciar a VM nova expôs um erro do scaffold: faltavam
+as portas PCIe usadas pela placa e1000e. O log mostrou `No PCIe slot available
+for Ethernet0`, seguido de falha do VMware. A topologia foi corrigida no helper
+e somente nas configurações das duas VMs descartáveis, sem substituir discos.
+
+Depois da correção, `vmrun start ...ubuntu2404/HarpiSense-Clean.vmx nogui`
+retornou zero e `vmrun list` confirmou a VM de teste em execução junto com o
+servidor do laboratório. O Poste 2 permaneceu desligado. Essa confirmação é
+de VM ligada, não de SO instalado nem de instalação do HarpiSense concluída.
+
+Próximo bloqueio: `maestri computer apps` respondeu **Computer Use is off**.
+Foi solicitada a ativação em Settings › Agents › Control para operar o
+instalador gráfico. A captura pelo VIX também foi recusada por não haver login
+no convidado ainda. Windows aguarda a conclusão/desligamento do teste Ubuntu;
+nenhuma segunda VM de teste foi iniciada.
+
+As 23 verificações anteriores continuam preservadas, sem nova execução.
+
+## Inspeção inicial preservada
+
 Conferência inicial: branch `feat/native-installers`, HEAD local/remoto
 `35dd646f35efa75c64eff95fc984af0429469176`, worktree limpa, sem alterações
 pendentes. EXE e `.run` locais conferem com os SHA-256 publicados. As 23

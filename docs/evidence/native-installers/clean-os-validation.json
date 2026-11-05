@@ -39,5 +39,21 @@
     }
   },
   "next_step": "Provide a clean remote target or free at least 6144 MiB without stopping/reconfiguring lab VMs; then install each OS and execute the installer/reboot/MFA/persistence/telemetry path, one guest at a time.",
-  "clean_installation_approved": false
+  "clean_installation_approved": false,
+  "latest_attempt": {
+    "operator_stopped_poste2": true,
+    "free_memory_mib_before_start": 5152,
+    "host_reserve_mib_for_attempt": 1024,
+    "guest_memory_mib": 4096,
+    "initial_scaffold_failure": "Missing PCIe root ports for ethernet0; VMware terminated before OS boot.",
+    "scaffold_repaired": true,
+    "ubuntu_vm_start_exit_code_after_repair": 0,
+    "ubuntu_vm_confirmed_running": true,
+    "ubuntu_os_installation_completed": false,
+    "product_installation_completed": false,
+    "windows_test_vm_started": false,
+    "current_blocker": "Maestri Computer Use is off; graphical OS installation awaits enablement in Settings / Agents / Control.",
+    "previous_23_checks_reexecuted": false,
+    "lab_server_unchanged": true
+  }
 }
