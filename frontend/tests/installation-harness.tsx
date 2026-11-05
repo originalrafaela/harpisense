@@ -8,7 +8,7 @@ import type {InstallationClient} from '../src/installation-state';
 // Test harness only: production uses Client.get and its authenticated transport.
 function makeClient():InstallationClient{return {get:async(path,method='GET',body)=>{
  const response=await fetch(path,{method,headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});
- if(!response.ok)throw new ApiError(response.status===401?'unauthorized':'error','Fixture query failed');
+ if(!response.ok)throw new ApiError(response.status===401?'unauthorized':response.status===409?'conflict':'error','Fixture query failed');
  return response.json();
 }}}
 function Harness(){
