@@ -127,3 +127,15 @@ Referências: P08/P09 aprovados em `referencias/versão_v2`; pacotes anteriores 
 Aguardamos **somente o recibo de console Poste2 acima** para fechar acesso/ferramenta/link type/permissão; em paralelo, donos resolvem relógio e destino/exportação do broker. Depois definir chaves de fontes/perfil, limites temporais e janela explícita120s com publicador único. Uma nova mensagem futura receberá session_id e recibo próprios, sem repetir o ID históricoa8395129f67e9b. Nesta rodada, nenhuma publicação ou coleta.
 
 Maestri ask para HarpiSense Arquiteto falhou com No connection, pois list identifica o próprio terminal com esse nome. Encaminhamento manual: enviar este documento, recibo JSON e commit ao arquiteto. Não interpretar a falha como janela autorizada.
+
+## Adendo — auditor recebido em 4c30d599
+
+Lidos diretamente por `git show` os documentos `docs/COMPATIBILIDADE_P08_LAB_20261105.md` e `backend/p08_p09/COMPATIBILITY.md` do commit `4c30d599b987af8b3e3d63c017ace6a30a3d695f`, sem importar ou editar a composição. O encaminhamento desta worktree já foi publicado em `cb5bbef5414293d5d743f3bf18843c6ff41f6404`, posterior ao rascunho `d6a2380` referenciado na composição.
+
+O auditor reutilizável é `python -m p08_p09.compatibility_audit`, na worktree/ambiente da composição. Não copiá-lo para recriar contrato nesta pasta. Oito testes offline foram relatados na entrega da composição; não foram repetidos pela Edge, nem houve treino, inferência ou coleta. BLOCKED continua sendo resultado esperado até a apresentação de sessão/fontes e artefatos operacionais confiáveis.
+
+**Filtro preservado:** TCP entre os dois IPs, sem restringir à porta1883. A seleção destino=broker e o agrupamento sensor+origem+destino, buckets UTC alinhados à época com intervalos [início,fim), devem coincidir com integrador/treino. Captura pode conter os dois sentidos; não somar fluxos inversos ao mesmo vetor nem alterar silenciosamente o filtro de captura. Tentativas de conexão são pares distintos (porta origem,destino) com SYN sem ACK; syn_count conta pacotes SYN sem ACK, incluindo retransmissões. A ordem do bundle é a autoridade, mantendo todas as nove features base necessárias ao validador.
+
+O auditor calcula alias v2 sem reescrever window_id legado; observation_id de cobertura não substitui ID de features. `gateway_capture` é identificador legado da fonte, com host_id=poste2 e posição=endpoint no futuro perfil aprovado, não evidência de trânsito pelo gateway. PCAP clássico Ethernet, IPv4/TCP íntegro sem VLAN/fragmentação/truncamento, bytes IP e perfil original permanecem obrigatórios.
+
+As quatro fontes captura/broker/consumidor/API continuam obrigatórias. Nenhum cursor desta preparação será avançado ou reutilizado como fronteira da sessão futura. Não liberar gate, restringir população para parecer compatível ou preencher opcionais ausentes. Não iniciar coleta antes do recibo console, relógios/limites temporais, logs broker, fronteiras e janela coordenada. Sem nova rodada operacional nesta entrega.
