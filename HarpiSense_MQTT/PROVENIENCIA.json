@@ -1,0 +1,113 @@
+{
+  "commit": "69cd62d",
+  "files": [
+    {
+      "path": "diagram.json",
+      "sha256": "06d4a1cd5a5bdfa2f59f46b9217bba60341ce4f697b8025eb490edb4e1b4b431"
+    },
+    {
+      "path": "include/communication.h",
+      "sha256": "36c2a5c5d7a67ec6bd4d7593bfefba503995f1ba4688e3d1b41c2d281d605555"
+    },
+    {
+      "path": "include/config.example.h",
+      "sha256": "69c04ec0b4a40b3f1dd771de68ef17434780d479ae0a00c872823829723d0a32"
+    },
+    {
+      "path": "include/hardware.h",
+      "sha256": "ae55adaedc45608c90a5f061908c3e23034d40fa17e8844899bdf67218d1e3a5"
+    },
+    {
+      "path": "include/settings.h",
+      "sha256": "0b3afba20c9024882e3910e31133eb36260d103297a6041b5baa8a2962f09a30"
+    },
+    {
+      "path": "include/trusted_clock.h",
+      "sha256": "0e90d54dbdcd7de28f8638aae816beca7257b64b5d2184f89e7c69a6fda112c8"
+    },
+    {
+      "path": "lib/PosteCore/src/poste_core.cpp",
+      "sha256": "97f1675380403b6d2d2eba1952fe2645453e5edbb9a00e5e91ae28727c5f9333"
+    },
+    {
+      "path": "lib/PosteCore/src/poste_core.h",
+      "sha256": "c8b004192d4914b3df01883ea018b106033dcbb0eee008133f3b5dc4dbaf385e"
+    },
+    {
+      "path": "platformio.ini",
+      "sha256": "277963eb98f85b7b6125c1cb911f939071f2b2aec39d64d401e1942446905f82"
+    },
+    {
+      "path": "scripts/build.ps1",
+      "sha256": "0916c237f2c1dc600b385269468b67884ed03f1be124fa4619579412f565e63b"
+    },
+    {
+      "path": "simulation/circuit.yaml",
+      "sha256": "39e04adc098b7f8314b76c0ab52567fb9de13d64db585f7abe9fbb2ea8bcf1e8"
+    },
+    {
+      "path": "simulation/config.h",
+      "sha256": "53d7f883a7fe352386768875439e37807795594cc9f8a1a737741d158b949520"
+    },
+    {
+      "path": "src/communication.cpp",
+      "sha256": "fe35226be1520e445429f250450761e7eda70b6967eb5a2cc112158a405dfda5"
+    },
+    {
+      "path": "src/hardware.cpp",
+      "sha256": "4d171a2ee772fd152fc6b0999d6283a9f46d92c33c2c7d05784dfc1b6213081d"
+    },
+    {
+      "path": "src/main.cpp",
+      "sha256": "8a6c19e55746ea06c8a9ae09f0986d394a2fccf0ebba9f4ac05a460fafbf69e7"
+    },
+    {
+      "path": "src/trusted_clock.cpp",
+      "sha256": "04f2bee3c177f64b49c64880205da8b017088aa047ddeae68c812ac33961da68"
+    },
+    {
+      "path": "tests/circuit_fakes/Arduino.h",
+      "sha256": "6beabc78f6541f155de428dccc3639633a13069f88a6a40661ff1f1b9b11f63e"
+    },
+    {
+      "path": "tests/circuit_test.cpp",
+      "sha256": "b2fc8302eb63ddf0c22bafbffee69311416d8d98d881c4a59c4fb884f7af470f"
+    },
+    {
+      "path": "tests/communication_test.cpp",
+      "sha256": "5e65a7b513b5daf606c37ca2e7e6fa930d8e0ed7c8d5c3cbc664e4ed68385ad7"
+    },
+    {
+      "path": "tests/core_test.cpp",
+      "sha256": "017cacc76e74457d9c6505adcf5d52a96fef51e698f6e6b40516f6d8370f663b"
+    },
+    {
+      "path": "tests/fakes/Arduino.h",
+      "sha256": "c03ca21a1c8c8b889e94037ad7c4c40c238e0436b066a9e36df313940d5684fc"
+    },
+    {
+      "path": "tests/fakes/PubSubClient.h",
+      "sha256": "6691dae5a3793c8066b0a630d815c7be8b41c56329f74f5d0f600f1c3ff91142"
+    },
+    {
+      "path": "tests/fakes/WiFi.h",
+      "sha256": "be723e5c62f88103c9e8a59791307b6cca6be3f9ebe3f8501b800ad99d338f03"
+    },
+    {
+      "path": "tests/fakes/WiFiClientSecure.h",
+      "sha256": "9314eb536c03cf7f6a62b5022bae4d3b358cf835a40cc894469b160d537afa05"
+    },
+    {
+      "path": "tests/fakes/test_config.h",
+      "sha256": "78a51c7ae54ff33013eece8e06eacd0d16396501bd2213cd1f582e895117f922"
+    },
+    {
+      "path": "tests/verify_contract.py",
+      "sha256": "6747e5a2371358a3ae7a68ce826f70d034364bba4b8a8bf049db718ebf0ebbb8"
+    },
+    {
+      "path": "wokwi.toml",
+      "sha256": "e48186c57a0734e29b1bee8a20f51fe2785e6a0a289092ea41a73dcd4d5bf5a4"
+    }
+  ]
+}

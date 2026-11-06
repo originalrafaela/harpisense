@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-05",
+  "source_commit": "69cd62d",
+  "source_comparison": "src/include/lib identical to 49d2eac",
+  "provenance_hashes": "all matched",
+  "wokwi_lint": {
+    "version": "0.29.1",
+    "exit_code": 0,
+    "info": "unsupported-part: board-esp32-devkit-c-v4 (canonical diagram preserved)"
+  },
+  "simulation_execution": "not repeated; canonical sources/configuration/diagram unchanged",
+  "platformio_core": "6.2.0",
+  "physical_tls_acl": "pending",
+  "uploads": false,
+  "builds": {
+    "esp32dev": {
+      "status": "PASS",
+      "artifacts": {
+        "bin": "d52e2bb3efdeb822a9e258d402cd771a6f1efcd465f973ca4c7295abdb517a9c",
+        "elf": "23f38df1d36b8d9e591c42aff09ba87dbb2f52b8529917301acb5d41f9ba783d"
+      }
+    },
+    "wokwi": {
+      "status": "PASS",
+      "artifacts": {
+        "bin": "37026c1139e4378617ced5b788997e1eeffe2fe7fbda3022a49efd59a65f50e5",
+        "elf": "4d81bbef3d308ff8c3e1fcfbcbbfdf2568add53b3d9c459762978d1625f09048"
+      }
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "profile_id": "poste1-ldr-wokwi",
+  "device_id": "harpisense.poste.poste-1",
+  "compatible_board": "ESP32-WROOM-32 / PlatformIO esp32dev",
+  "firmware_version": "git:69cd62d (src/include/lib unchanged from 49d2eac)",
+  "sensor": {
+    "type": "ldr",
+    "gpio": 34,
+    "measurement": "ldr_adc_raw"
+  },
+  "actuator": {
+    "type": "led",
+    "gpio": 25,
+    "active_high": true
+  },
+  "simulation_environment": "wokwi",
+  "physical_environment": "esp32dev",
+  "mqtt_enabled_in_simulation": false,
+  "installer_requires_simulator": false,
+  "validation": {
+    "hysteresis": "Wokwi validated in 69cd62d; unchanged inputs; not repeated",
+    "local_build": "PASS 2026-11-05: esp32dev and wokwi; PlatformIO 6.2.0",
+    "physical_board": "pending",
+    "tls_and_acl": "pending operational validation"
+  }
+}
