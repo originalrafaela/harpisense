@@ -103,7 +103,7 @@ try:
         private['last_totp_step'] = int(time.time() // 30)
         token = session['access_token']
         setup = request('GET', '/config/setup', token=token)
-        document = {'step': 'deployment', 'parameters': {'display_name': 'Ubuntu candidate2 clean reboot trial',
+        document = {'step': 'deployment', 'parameters': {'display_name': 'Ubuntu candidate3 clean reboot trial',
                      'timezone': 'America/Sao_Paulo'}}
         saved = request('PUT', '/config/setup', {'expected_version': setup['version'],
             'idempotency_key': 'ubuntu-trial-' + uuid.uuid4().hex, 'document': document}, token=token)
@@ -128,7 +128,7 @@ try:
         publisher = mqtt_client(publisher_state)
         publisher.connect(STATE['mqtt']['host'], STATE['mqtt']['port'], 30)
         publisher.loop_start()
-        message_id = 'ubuntu-candidate2-' + uuid.uuid4().hex
+        message_id = 'ubuntu-candidate3-' + uuid.uuid4().hex
         try:
             raw = json.dumps({'device_id': 'poste2', 'message_id': message_id,
                 'observed_at': datetime.now(timezone.utc).isoformat(), 'purpose': 'installer_acceptance_no_sensor_claim'})

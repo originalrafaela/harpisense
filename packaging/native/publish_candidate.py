@@ -11,7 +11,7 @@ import httpx
 
 ROOT = Path(__file__).resolve().parents[2]
 REPO = 'originalrafaela/harpisense'
-TAG = 'native-installers-20261106-candidate.2'
+TAG = 'native-installers-20261106-candidate.3'
 
 
 def main():
@@ -37,7 +37,12 @@ def main():
         raise SystemExit('GITHUB_RELEASE_CREDENTIAL_UNAVAILABLE')
     headers = {'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json',
                'X-GitHub-Api-Version': '2022-11-28'}
-    body = '''Candidata 2 de instaladores nativos, ainda não homologada em sistemas limpos.
+    body = '''Candidata 3 de instaladores nativos, ainda não homologada em sistemas limpos.
+
+Inclui a correção Backend 6587e009a19bf152060eceeb9c4682ee501f2065:
+throttle compatível com sentinela -infinity no PostgreSQL 16.
+Candidatas 1 e 2 e suas evidências de falha preservadas.
+Esta publicação precede o novo ensaio em VM limpa; não implica aprovação.
 
 Corrige ausência de harpisense_catalog no payload Ubuntu. Verificação de imports
 do runtime distribuído antes da criação/migração do banco em ambas as plataformas.
@@ -78,7 +83,7 @@ Evidências: https://github.com/originalrafaela/harpisense/tree/feat/native-inst
         if '--refresh-receipt' in sys.argv:
             if existing.status_code != 200 or existing.json()['draft']:
                 raise SystemExit('PUBLISHED_RELEASE_REQUIRED')
-            output = ROOT/'docs/evidence/native-installers/published-assets.json'
+            output = ROOT/'docs/evidence/native-installers/published-assets-candidate3.json'
             receipt = json.loads(output.read_text())
             remote_assets = {asset['name']: asset for asset in existing.json()['assets']}
             for asset in receipt['assets']:
@@ -122,7 +127,7 @@ Evidências: https://github.com/originalrafaela/harpisense/tree/feat/native-inst
         urls = {asset['name']: asset['browser_download_url'] for asset in response.json()['assets']}
         for asset in published:
             asset['download'] = urls.get(asset['name'], asset['download'])
-        output = ROOT/'docs/evidence/native-installers/published-assets.json'
+        output = ROOT/'docs/evidence/native-installers/published-assets-candidate3.json'
         output.write_text(json.dumps(receipt, indent=2), encoding='utf-8')
         print(json.dumps({'release': receipt['release'], 'assets': len(published)}))
 
