@@ -1,0 +1,22 @@
+HarpiSense-Setup-Ubuntu-24.04-x86_64.run: OK
+HarpiSense-Setup-Ubuntu-24.04-x86_64.run: OK
+Preparando componentes do HarpiSense…
+HarpiSense instalado. Abra HarpiSense no menu de aplicações: http://127.0.0.1:18080
+Grant no arquivo privado /var/lib/harpisense/bootstrap.secret; acesso administrativo local necessário.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+
+ 61 16.4M   61 10.0M    0     0  9570k      0  0:00:01  0:00:01 --:--:-- 9570k
+100 16.4M  100 16.4M    0     0  9507k      0  0:00:01  0:00:01 --:--:-- 9418k
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+
+100   108  100   108    0     0    196      0 --:--:-- --:--:-- --:--:--   196

@@ -1,0 +1,30 @@
+{
+  "phase": "before-reboot",
+  "checks": [
+    "harpisense-postgres_is-active",
+    "harpisense-postgres_is-enabled",
+    "harpisense-broker_is-active",
+    "harpisense-broker_is-enabled",
+    "harpisense-api_is-active",
+    "harpisense-api_is-enabled",
+    "harpisense-mqtt_is-active",
+    "harpisense-mqtt_is-enabled",
+    "http_GET__config_setup_401",
+    "fresh_acceptance_account",
+    "http_POST__admin-auth_bootstrap_200",
+    "http_POST__admin-auth_mfa_enrollment_begin_200",
+    "http_POST__admin-auth_mfa_enrollment_confirm_401",
+    "http_POST__admin-auth_mfa_enrollment_confirm_200",
+    "mfa_enrollment_and_ten_recovery_codes",
+    "http_GET__config_setup_200",
+    "http_PUT__config_setup_200",
+    "configuration_saved_via_api",
+    "http_POST__admin-auth_login_200",
+    "password_alone_does_not_issue_session",
+    "http_POST__admin-auth_mfa_verify_200",
+    "real_totp_login_succeeded"
+  ],
+  "transport": "real installed HTTP API",
+  "boot_id": "694888f0-a4d7-4eac-9c69-761bde5cbfbc",
+  "result": "passed"
+}

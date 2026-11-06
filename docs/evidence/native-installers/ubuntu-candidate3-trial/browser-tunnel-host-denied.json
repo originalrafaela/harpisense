@@ -1,0 +1,8 @@
+{
+  "phase": "before-reboot",
+  "checks": [],
+  "transport": "Chromium over strict SSH tunnel",
+  "stage": "enter_password",
+  "result": "failed",
+  "failure_type": "TimeoutError"
+}

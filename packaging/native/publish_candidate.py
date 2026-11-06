@@ -52,7 +52,7 @@ Release anterior preservada; não reinstalar sobre a tentativa parcial.
 Windows 11 x64: EXE com central, PostgreSQL, Mosquitto local TLS, consumidor e serviços automáticos.
 Ubuntu 24.04 x86_64: instalador .run, wheels incluídos; apt requer Internet.
 
-Histórico da candidata 1 (não repetido nesta correção): 23 verificações reais passaram no Windows existente com runtime congelado e processos descartáveis. Nesta candidata foram executados os testes de imports isolados e rejeição de catálogo ausente descritos nas evidências. Instalação completa de serviços e reboot em Windows/Ubuntu limpos ainda NÃO foram testados.
+Histórico: candidata 1 passou em 23 verificações com processos descartáveis no Windows existente. Candidata 2 passou nos testes de imports isolados, mas falhou no bootstrap PostgreSQL16 em Ubuntu limpo. Esses resultados não aprovam esta candidata 3. A verificação de imports do novo runtime Windows passou durante o build; o ensaio completo desta versão será registrado separadamente.
 
 Não instalar sobre o laboratório. O preflight recusa PostgreSQL/Mosquitto/portas/diretórios existentes; reinstalação não substitui dados. Broker local atende loopback nesta candidata. Sensores físicos, captura Linux, RF/IF e contenção não são comprovados pela instalação da central.
 
@@ -64,20 +64,23 @@ Comandos, capacidades e limitações: packaging/native/README.md na branch feat/
         if '--record-clean-trial' in sys.argv:
             if existing.status_code != 200 or existing.json()['draft']:
                 raise SystemExit('PUBLISHED_RELEASE_REQUIRED')
-            note = '''Ensaio Ubuntu limpo de 2026-11-06: CANDIDATA NÃO APROVADA.
-Instalação e serviços automáticos após reboot passaram. MQTT TLS/QoS1 até PostgreSQL passou.
-Bootstrap administrativo falhou: HTTP 503 AUTH_UNAVAILABLE, PostgreSQL16 SQLSTATE 22008
-no throttle com blocked_until=-infinity. Login/MFA, configuração persistida e leitura
-autenticada da telemetria pela API continuam bloqueados. Nenhum contorno foi aplicado à VM.
-Evidências: https://github.com/originalrafaela/harpisense/tree/feat/native-installers/docs/evidence/native-installers/ubuntu-candidate2-trial
-'''
+            trial = ROOT/'docs/evidence/native-installers/ubuntu-candidate3-trial'
+            reports = [json.loads((trial/name).read_text()) for name in
+                       ('before-reboot.json', 'after-reboot.json',
+                        'before-reboot-browser.json', 'after-reboot-browser.json')]
+            passed = all(report['result'] == 'passed' for report in reports)
+            outcome = 'APROVADO' if passed else 'NÃO APROVADO'
+            note = ('Ensaio Ubuntu limpo da candidata 3: ' + outcome + '.\n'
+                    'Resultado exclusivo do Ubuntu; Windows limpo ainda não homologado.\n'
+                    'Evidências: https://github.com/originalrafaela/harpisense/tree/feat/native-installers/'
+                    'docs/evidence/native-installers/ubuntu-candidate3-trial\n')
             previous = existing.json().get('body') or ''
             if note.splitlines()[0] not in previous:
                 response = client.patch(api + '/releases/' + str(existing.json()['id']),
                                         json={'body': note + '\n' + previous})
                 if response.status_code != 200:
                     raise SystemExit('RELEASE_TRIAL_ANNOTATION_FAILED_HTTP_' + str(response.status_code))
-            print(json.dumps({'release': existing.json()['html_url'], 'clean_trial': 'failed_authentication',
+            print(json.dumps({'release': existing.json()['html_url'], 'clean_trial': 'passed' if passed else 'failed',
                               'assets_changed': False}))
             return
         if '--refresh-receipt' in sys.argv:

@@ -1,5 +1,12 @@
 # Retomada amanhã — instaladores Ubuntu — pausa em 2026-11-06
 
+Atualização após retomada autorizada em 2026-11-06:
+[candidata 3 e ensaio Ubuntu aprovado](evidence/native-installers/ubuntu-candidate3-trial/README.md).
+Backend integrado, nova release publicada, VM Ubuntu encerrada e snapshots
+preservados. Windows limpo pendente: RAM livre 5115 MiB, mínimo com reserva
+padrão 6144 MiB. Medir novamente antes de iniciar uma única VM Windows.
+O registro original da pausa abaixo permanece como histórico.
+
 Pausa solicitada pelo usuário: salvar o estado para continuar amanhã.
 Nenhum teste, build, instalação, reboot ou restauração iniciado nesta pausa.
 

@@ -1,0 +1,12 @@
+{
+  "checked_at_utc": "2026-11-06T18:35:13.7534177Z",
+  "running_vms": [
+    "Total running VMs: 0"
+  ],
+  "free_ram_mib": 5115.0,
+  "total_ram_mib": 16215.0,
+  "windows_vm_ram_mib": 4096,
+  "host_reserve_mib": 2048,
+  "required_free_mib": 6144,
+  "windows_start_allowed": false
+}

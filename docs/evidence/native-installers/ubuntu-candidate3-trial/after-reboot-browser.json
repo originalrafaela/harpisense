@@ -1,0 +1,10 @@
+{
+  "phase": "after-reboot",
+  "checks": [
+    "browser_password_totp_login_and_dashboard",
+    "browser_saved_configuration_resumed"
+  ],
+  "transport": "Chromium over strict SSH tunnel",
+  "stage": "wait_dashboard",
+  "result": "passed"
+}

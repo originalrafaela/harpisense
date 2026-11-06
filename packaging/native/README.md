@@ -7,6 +7,16 @@ Node e Vite não são requisitos de execução do produto.
 
 ## Artefatos
 
+Atualização 2026-11-06: [candidata 3](https://github.com/originalrafaela/harpisense/releases/tag/native-installers-20261106-candidate.3)
+inclui a correção de throttle PostgreSQL16 do Backend (`6587e00`, integrada como
+`cbdcb18`). **Ensaio Ubuntu limpo aprovado**, incluindo conta/TOTP, navegador,
+configuração persistida, reboot real, serviços automáticos e MQTT TLS até
+PostgreSQL/API autenticada. [Evidências e limites](../../docs/evidence/native-installers/ubuntu-candidate3-trial/README.md).
+[Hashes publicados da candidata 3](../../docs/evidence/native-installers/published-assets-candidate3.json).
+Windows limpo ainda pendente: VM Ubuntu encerrada; início do Windows bloqueado
+pela RAM livre abaixo da reserva do laboratório. O histórico abaixo descreve
+as candidatas anteriores e permanece preservado.
+
 Download publicado: [pré-release candidata 2](https://github.com/originalrafaela/harpisense/releases/tag/native-installers-20261106-candidate.2).
 Corrige catálogo ausente no Ubuntu e verifica imports antes de modificar o banco.
 [Diagnóstico, evidências e retomada](../../docs/evidence/native-installers/ubuntu-candidate2.md).
