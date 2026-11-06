@@ -1,0 +1,26 @@
+{
+  "checks": [
+    "real_machine_reboot_confirmed",
+    "harpisense-postgres_is-active_after_reboot",
+    "harpisense-postgres_is-enabled_after_reboot",
+    "harpisense-broker_is-active_after_reboot",
+    "harpisense-broker_is-enabled_after_reboot",
+    "harpisense-api_is-active_after_reboot",
+    "harpisense-api_is-enabled_after_reboot",
+    "harpisense-mqtt_is-active_after_reboot",
+    "harpisense-mqtt_is-enabled_after_reboot",
+    "anonymous_telemetry_stays_denied_after_reboot",
+    "frontend_served_after_reboot",
+    "mqtt_tls_authenticated_qos1_published_after_reboot",
+    "mqtt_consumer_persisted_one_identifiable_postgresql_projection_after_reboot"
+  ],
+  "authenticated_api": "blocked_by_bootstrap_AUTH_UNAVAILABLE",
+  "configuration_persistence": "not_tested_bootstrap_failed",
+  "login_mfa": "failed_bootstrap_503",
+  "ui_login": "not_tested",
+  "boot_id": "6f8e95bc-3852-44ce-b381-8e24f4d63a06",
+  "postgres_version": "16.15 (Ubuntu 16.15-0ubuntu0.24.04.1)",
+  "account_count": 0,
+  "message_id": "ubuntu-candidate2-d2251c3db80d495fa671c831d360978f",
+  "result": "partial_pass_with_authentication_blocker"
+}

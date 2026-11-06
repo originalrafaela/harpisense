@@ -1,5 +1,10 @@
 # Correção da tentativa Ubuntu — 2026-11-06
 
+Atualização posterior: [ensaio real em VM limpa](ubuntu-candidate2-trial/README.md)
+executado. Instalação/reboot/MQTT→PostgreSQL passaram; bootstrap falhou com
+SQLSTATE 22008. A candidata 2 permanece não aprovada. O texto abaixo preserva
+o registro da correção e publicação antes desse ensaio.
+
 ## Diagnóstico e custódia
 
 O operador baixou a candidata 1 em `~/harpisense-teste` e confirmou SHA-256

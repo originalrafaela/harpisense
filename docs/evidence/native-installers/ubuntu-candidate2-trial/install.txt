@@ -1,0 +1,4 @@
+HarpiSense-Setup-Ubuntu-24.04-x86_64.run: OK
+Preparando componentes do HarpiSense…
+HarpiSense instalado. Abra HarpiSense no menu de aplicações: http://127.0.0.1:18080
+Grant no arquivo privado /var/lib/harpisense/bootstrap.secret; acesso administrativo local necessário.

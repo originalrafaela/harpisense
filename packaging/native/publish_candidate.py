@@ -56,6 +56,25 @@ Comandos, capacidades e limitações: packaging/native/README.md na branch feat/
     api = 'https://api.github.com/repos/' + REPO
     with httpx.Client(headers=headers, timeout=600, follow_redirects=False) as client:
         existing = client.get(api + '/releases/tags/' + TAG)
+        if '--record-clean-trial' in sys.argv:
+            if existing.status_code != 200 or existing.json()['draft']:
+                raise SystemExit('PUBLISHED_RELEASE_REQUIRED')
+            note = '''Ensaio Ubuntu limpo de 2026-11-06: CANDIDATA NÃO APROVADA.
+Instalação e serviços automáticos após reboot passaram. MQTT TLS/QoS1 até PostgreSQL passou.
+Bootstrap administrativo falhou: HTTP 503 AUTH_UNAVAILABLE, PostgreSQL16 SQLSTATE 22008
+no throttle com blocked_until=-infinity. Login/MFA, configuração persistida e leitura
+autenticada da telemetria pela API continuam bloqueados. Nenhum contorno foi aplicado à VM.
+Evidências: https://github.com/originalrafaela/harpisense/tree/feat/native-installers/docs/evidence/native-installers/ubuntu-candidate2-trial
+'''
+            previous = existing.json().get('body') or ''
+            if note.splitlines()[0] not in previous:
+                response = client.patch(api + '/releases/' + str(existing.json()['id']),
+                                        json={'body': note + '\n' + previous})
+                if response.status_code != 200:
+                    raise SystemExit('RELEASE_TRIAL_ANNOTATION_FAILED_HTTP_' + str(response.status_code))
+            print(json.dumps({'release': existing.json()['html_url'], 'clean_trial': 'failed_authentication',
+                              'assets_changed': False}))
+            return
         if '--refresh-receipt' in sys.argv:
             if existing.status_code != 200 or existing.json()['draft']:
                 raise SystemExit('PUBLISHED_RELEASE_REQUIRED')

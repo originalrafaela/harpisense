@@ -1,0 +1,6 @@
+{
+  "source": "https://cloud-images.ubuntu.com/noble/20261017/noble-server-cloudimg-amd64.vmdk",
+  "sha256": "9a1e3959c9f4ad9d4752101fd4ff9a43191fb7d72e61fa20e033f9fd235ce794",
+  "new_disk": true,
+  "ram_mib": 2048
+}

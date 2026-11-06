@@ -1,0 +1,12 @@
+{
+  "method": "installed runtime; isolated diagnostic process; database transaction always rolled back",
+  "postgres_error": "DatetimeFieldOverflow",
+  "sqlstate": "22008",
+  "auth_status": 503,
+  "auth_code": "AUTH_UNAVAILABLE",
+  "account_count_after_rollback": 0,
+  "suspected_statement": "SELECT failures, EXTRACT(EPOCH FROM (blocked_until-clock_timestamp())) AS wait FROM hs_admin_throttle WHERE id=1",
+  "initial_blocked_until": "-infinity",
+  "application_files_modified_in_guest": false,
+  "manual_database_workaround": false
+}

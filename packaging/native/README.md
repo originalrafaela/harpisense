@@ -11,6 +11,10 @@ Download publicado: [pré-release candidata 2](https://github.com/originalrafael
 Corrige catálogo ausente no Ubuntu e verifica imports antes de modificar o banco.
 [Diagnóstico, evidências e retomada](../../docs/evidence/native-installers/ubuntu-candidate2.md).
 A candidata 1 foi preservada. Não reinstalar sobre uma tentativa parcial.
+**Ensaio real Ubuntu da candidata 2: não aprovada.** Instalação e serviços após
+reboot passaram, mas bootstrap retorna `503 AUTH_UNAVAILABLE` no PostgreSQL16.
+Login/MFA e os testes que dependem de login permanecem bloqueados.
+[Resultados e estado da VM nova](../../docs/evidence/native-installers/ubuntu-candidate2-trial/README.md).
 [Recibo com hashes e URLs verificadas](../../docs/evidence/native-installers/published-assets.json).
 Não é uma release homologada em sistemas limpos.
 
