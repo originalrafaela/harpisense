@@ -89,8 +89,15 @@ class AdminAuth:
 
     @staticmethod
     def throttle(conn):
-        row = conn.execute('SELECT failures, EXTRACT(EPOCH FROM (blocked_until-clock_timestamp())) AS wait '
+        # PostgreSQL 16 cannot subtract infinite timestamps. Keep -infinity as
+        # the unlocked sentinel; unexpected +infinity must never unlock access.
+        row = conn.execute('SELECT failures, CASE WHEN NOT isfinite(blocked_until) THEN '
+                           'CASE WHEN blocked_until < clock_timestamp() THEN 0 ELSE NULL END '
+                           'WHEN blocked_until > clock_timestamp() THEN '
+                           'EXTRACT(EPOCH FROM (blocked_until-clock_timestamp())) ELSE 0 END AS wait '
                            'FROM hs_admin_throttle WHERE id=1').fetchone()
+        if row['wait'] is None:
+            raise AuthError(503, 'AUTH_UNAVAILABLE')
         if row['wait'] > 0:
             return AuthError(429, 'TRY_LATER', max(1, math.ceil(row['wait'])))
 
