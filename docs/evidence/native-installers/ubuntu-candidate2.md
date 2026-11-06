@@ -53,10 +53,12 @@ estado/initdb; o build também exige o mesmo teste fora do checkout.
 
 Nova release `native-installers-20261106-candidate.2`, mantendo a candidata 1.
 Recibo antigo preservado em `published-assets-candidate1.json`; recibo da nova
-publicação em `published-assets.json` quando publicado.
+publicação em `published-assets.json`. Publicada com quatro assets e hashes
+conferidos na resposta do GitHub. Código corrigido: commit `589ed25`;
+o manifesto Windows identifica esse commit de origem.
 
-SHA-256 Ubuntu: `fd7b65896e55c83d61d211bb2687cb257ff90349ab4ef424e28477f1d3f58161`.
-SHA-256 Windows: `4c31a7eda007620e3396a103118b4a09167d00d45432111430626b7f3e1003f5`.
+SHA-256 Ubuntu: `a72c5966c1a53fac95c314ffe810aae6916c63dc381d2db666cc39a6d315daca`.
+SHA-256 Windows: `5b4f15469f5ca7e2fc59b6248825ac91d13acfe0b932ad9ccfee53160a83b266`.
 
 VM parcial preservada: não reinstalar nem remover `/opt/harpisense` ou
 `/var/lib/harpisense`. Nenhuma VM foi acessada, desligada ou alterada pelo agente.
