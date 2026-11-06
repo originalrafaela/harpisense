@@ -11,7 +11,7 @@ import httpx
 
 ROOT = Path(__file__).resolve().parents[2]
 REPO = 'originalrafaela/harpisense'
-TAG = 'native-installers-20261106-candidate.3'
+TAG = 'native-installers-20261106-candidate.4'
 
 
 def main():
@@ -37,7 +37,12 @@ def main():
         raise SystemExit('GITHUB_RELEASE_CREDENTIAL_UNAVAILABLE')
     headers = {'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json',
                'X-GitHub-Api-Version': '2022-11-28'}
-    body = '''Candidata 3 de instaladores nativos, ainda não homologada em sistemas limpos.
+    body = '''Candidata 4 de instaladores nativos, ainda não homologada em sistemas limpos.
+
+Corrige corrida na instalação Ubuntu: espera limitada pela escuta do broker local
+antes de validar MQTT/TLS. Falhas de certificado/autenticação não são repetidas.
+O reteste manual da candidata 3 falhou com ConnectionRefusedError, apesar de um
+ensaio anterior ter passado. A candidata 3 e todas as evidências são preservadas.
 
 Inclui a correção Backend 6587e009a19bf152060eceeb9c4682ee501f2065:
 throttle compatível com sentinela -infinity no PostgreSQL 16.
@@ -52,7 +57,7 @@ Release anterior preservada; não reinstalar sobre a tentativa parcial.
 Windows 11 x64: EXE com central, PostgreSQL, Mosquitto local TLS, consumidor e serviços automáticos.
 Ubuntu 24.04 x86_64: instalador .run, wheels incluídos; apt requer Internet.
 
-Histórico: candidata 1 passou em 23 verificações com processos descartáveis no Windows existente. Candidata 2 passou nos testes de imports isolados, mas falhou no bootstrap PostgreSQL16 em Ubuntu limpo. Esses resultados não aprovam esta candidata 3. A verificação de imports do novo runtime Windows passou durante o build; o ensaio completo desta versão será registrado separadamente.
+Histórico: candidata 1 passou em 23 verificações com processos descartáveis no Windows existente. Candidata 2 passou nos testes de imports isolados, mas falhou no bootstrap PostgreSQL16 em Ubuntu limpo. Esses resultados não aprovam esta candidata 4. A verificação de imports do novo runtime Windows passou durante o build; o ensaio completo desta versão será registrado separadamente.
 
 Não instalar sobre o laboratório. O preflight recusa PostgreSQL/Mosquitto/portas/diretórios existentes; reinstalação não substitui dados. Broker local atende loopback nesta candidata. Sensores físicos, captura Linux, RF/IF e contenção não são comprovados pela instalação da central.
 
@@ -60,20 +65,39 @@ Comandos, capacidades e limitações: packaging/native/README.md na branch feat/
 '''
     api = 'https://api.github.com/repos/' + REPO
     with httpx.Client(headers=headers, timeout=600, follow_redirects=False) as client:
-        existing = client.get(api + '/releases/tags/' + TAG)
+        existing = client.get(api + '/releases/tags/' + (
+            'native-installers-20261106-candidate.3' if '--record-candidate3-retest' in sys.argv else TAG))
+        if '--record-candidate3-retest' in sys.argv:
+            if existing.status_code != 200 or existing.json()['draft']:
+                raise SystemExit('PUBLISHED_RELEASE_REQUIRED')
+            note = ('Reteste Ubuntu limpo da candidata 3: FALHOU na instalação.\n'
+                    'ConnectionRefusedError na verificação MQTT imediatamente após iniciar serviços.\n'
+                    'Broker estava ativo ao inspecionar depois. Corrida de inicialização corrigida\n'
+                    'na candidata 4. O ensaio anterior aprovado fica como histórico; não prova\n'
+                    'confiabilidade deste instalador. Assets preservados, sem patch na VM.\n'
+                    'Evidências: https://github.com/originalrafaela/harpisense/blob/feat/native-installers/'
+                    'docs/evidence/native-installers/ubuntu-candidate3-retest-failure/README.md\n')
+            previous = existing.json().get('body') or ''
+            if note.splitlines()[0] not in previous:
+                response = client.patch(api + '/releases/' + str(existing.json()['id']),
+                                        json={'body': note + '\n' + previous})
+                if response.status_code != 200:
+                    raise SystemExit('RELEASE_TRIAL_ANNOTATION_FAILED_HTTP_' + str(response.status_code))
+            print(json.dumps({'candidate3_retest': 'failed', 'assets_changed': False}))
+            return
         if '--record-clean-trial' in sys.argv:
             if existing.status_code != 200 or existing.json()['draft']:
                 raise SystemExit('PUBLISHED_RELEASE_REQUIRED')
-            trial = ROOT/'docs/evidence/native-installers/ubuntu-candidate3-trial'
+            trial = ROOT/'docs/evidence/native-installers/ubuntu-candidate4-trial'
             reports = [json.loads((trial/name).read_text()) for name in
                        ('before-reboot.json', 'after-reboot.json',
                         'before-reboot-browser.json', 'after-reboot-browser.json')]
             passed = all(report['result'] == 'passed' for report in reports)
             outcome = 'APROVADO' if passed else 'NÃO APROVADO'
-            note = ('Ensaio Ubuntu limpo da candidata 3: ' + outcome + '.\n'
+            note = ('Ensaio Ubuntu limpo da candidata 4: ' + outcome + '.\n'
                     'Resultado exclusivo do Ubuntu; Windows limpo ainda não homologado.\n'
                     'Evidências: https://github.com/originalrafaela/harpisense/tree/feat/native-installers/'
-                    'docs/evidence/native-installers/ubuntu-candidate3-trial\n')
+                    'docs/evidence/native-installers/ubuntu-candidate4-trial\n')
             previous = existing.json().get('body') or ''
             if note.splitlines()[0] not in previous:
                 response = client.patch(api + '/releases/' + str(existing.json()['id']),
@@ -86,7 +110,7 @@ Comandos, capacidades e limitações: packaging/native/README.md na branch feat/
         if '--refresh-receipt' in sys.argv:
             if existing.status_code != 200 or existing.json()['draft']:
                 raise SystemExit('PUBLISHED_RELEASE_REQUIRED')
-            output = ROOT/'docs/evidence/native-installers/published-assets-candidate3.json'
+            output = ROOT/'docs/evidence/native-installers/published-assets-candidate4.json'
             receipt = json.loads(output.read_text())
             remote_assets = {asset['name']: asset for asset in existing.json()['assets']}
             for asset in receipt['assets']:
@@ -130,7 +154,7 @@ Comandos, capacidades e limitações: packaging/native/README.md na branch feat/
         urls = {asset['name']: asset['browser_download_url'] for asset in response.json()['assets']}
         for asset in published:
             asset['download'] = urls.get(asset['name'], asset['download'])
-        output = ROOT/'docs/evidence/native-installers/published-assets-candidate3.json'
+        output = ROOT/'docs/evidence/native-installers/published-assets-candidate4.json'
         output.write_text(json.dumps(receipt, indent=2), encoding='utf-8')
         print(json.dumps({'release': receipt['release'], 'assets': len(published)}))
 

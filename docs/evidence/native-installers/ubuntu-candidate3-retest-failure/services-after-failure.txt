@@ -1,0 +1,37 @@
+harpisense-ubuntu-reteste
+Fri Nov  6 21:36:28 UTC 2026
+Result=success
+ExecMainStartTimestamp=Fri 2026-11-06 21:33:34 UTC
+ExecMainStatus=0
+Id=harpisense-broker.service
+ActiveState=active
+SubState=running
+ActiveEnterTimestamp=Fri 2026-11-06 21:33:34 UTC
+
+Result=success
+ExecMainStartTimestamp=Fri 2026-11-06 21:33:34 UTC
+ExecMainStatus=0
+Id=harpisense-api.service
+ActiveState=active
+SubState=running
+ActiveEnterTimestamp=Fri 2026-11-06 21:33:34 UTC
+
+Result=success
+ExecMainStartTimestamp=Fri 2026-11-06 21:33:34 UTC
+ExecMainStatus=0
+Id=harpisense-mqtt.service
+ActiveState=active
+SubState=running
+ActiveEnterTimestamp=Fri 2026-11-06 21:33:34 UTC
+
+Result=success
+ExecMainStartTimestamp=Fri 2026-11-06 21:33:34 UTC
+ExecMainStatus=0
+Id=harpisense-postgres.service
+ActiveState=active
+SubState=running
+ActiveEnterTimestamp=Fri 2026-11-06 21:33:34 UTC
+Nov 06 21:33:34 harpisense-ubuntu-reteste systemd[1]: Started harpisense-broker.service - HarpiSense harpisense-broker.
+LISTEN 0      200        127.0.0.1:15432      0.0.0.0:*    users:(("postgres",pid=11141,fd=6))
+LISTEN 0      2048       127.0.0.1:18080      0.0.0.0:*    users:(("python",pid=11143,fd=6))
+LISTEN 0      100        127.0.0.1:8883       0.0.0.0:*    users:(("mosquitto",pid=11142,fd=4))

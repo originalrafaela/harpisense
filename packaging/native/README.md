@@ -7,6 +7,11 @@ Node e Vite não são requisitos de execução do produto.
 
 ## Artefatos
 
+Reteste manual posterior da candidata 3: **falhou na instalação**, por corrida
+entre início do broker local e verificação MQTT. [Registro](../../docs/evidence/native-installers/ubuntu-candidate3-retest-failure/README.md).
+A candidata 4 aguarda a escuta local com prazo limitado, preservando falhas
+TLS/autenticação. O ensaio aprovado abaixo é histórico; não aprova este reteste.
+
 Atualização 2026-11-06: [candidata 3](https://github.com/originalrafaela/harpisense/releases/tag/native-installers-20261106-candidate.3)
 inclui a correção de throttle PostgreSQL16 do Backend (`6587e00`, integrada como
 `cbdcb18`). **Ensaio Ubuntu limpo aprovado**, incluindo conta/TOTP, navegador,

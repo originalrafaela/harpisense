@@ -121,8 +121,11 @@ def finish(external_path):
     unit('harpisense-mqtt', command + 'consumer --state /var/lib/harpisense/state.json', ('harpisense-postgres',) + broker_deps)
     run(['systemctl', 'daemon-reload'])
     run(['systemctl', 'enable', '--now', 'harpisense-postgres', *broker_deps, 'harpisense-api', 'harpisense-mqtt'])
-    from native_server.runtime import probe_broker
-    probe_broker(state)
+    from native_server.runtime import probe_broker, wait_for_broker
+    if mode == 'local_managed':
+        wait_for_broker(state)
+    else:
+        probe_broker(state)
     Path('/usr/share/applications/harpisense.desktop').write_text('''[Desktop Entry]
 Type=Application
 Name=HarpiSense

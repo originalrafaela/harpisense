@@ -3,6 +3,7 @@ import json
 import os
 import ssl
 import threading
+import time
 from pathlib import Path
 
 import psycopg
@@ -156,6 +157,19 @@ def run_consumer(state):
     finally:
         stopping.set()
         heartbeat(state, False, False)
+
+
+def wait_for_broker(state, timeout=30, interval=.25):
+    """Wait for a newly started local broker; TLS/auth failures are final."""
+    deadline = time.monotonic() + timeout
+    while True:
+        try:
+            return probe_broker(state, timeout=min(10, max(.01, deadline - time.monotonic())))
+        except ConnectionRefusedError as error:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise RuntimeError('MQTT_BROKER_START_TIMEOUT') from error
+            time.sleep(min(interval, remaining))
 
 
 def probe_broker(state, timeout=10):

@@ -1,5 +1,10 @@
 # Candidata 3 — Ubuntu limpo — 2026-11-06
 
+Atualização posterior: [reteste manual falhou na instalação](../ubuntu-candidate3-retest-failure/README.md)
+por recusa de conexão no probe MQTT. O ensaio abaixo continua válido como
+histórico desta execução, mas não comprova confiabilidade da candidata 3.
+A corrida é corrigida na candidata 4; não há patch na VM.
+
 **Ubuntu aprovado. Windows limpo pendente por RAM.** Somente o alvo descartável
 foi operado. Nenhuma correção de fonte, SQL ou serviço foi aplicada dentro da VM.
 
