@@ -2,5 +2,5 @@ harpisense-candidate2-clean
 d4a14d56-fdae-2078-5ea1-71445a76a25f
 5a20f376179e45b4914ea2b6d0dddb64
 b041c732-5086-4cac-ab19-fabf7f53b572
-lo               UNKNOWN        127.0.0.1/8 ::1/128 
-ens160           UP             192.168.155.148/24 metric 100 fe80::20c:29ff:fe76:a25f/64 
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+ens160           UP             192.168.155.148/24 metric 100 fe80::20c:29ff:fe76:a25f/64

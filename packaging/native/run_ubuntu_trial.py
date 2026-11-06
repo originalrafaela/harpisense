@@ -29,7 +29,8 @@ def main():
             'd4a14d56-fdae-2078-5ea1-71445a76a25f' not in identity.stdout.lower()):
         print(identity.stdout + identity.stderr)
         raise SystemExit('DISPOSABLE_GUEST_IDENTITY_NOT_CONFIRMED')
-    (EVIDENCE / (phase + '-identity.txt')).write_text(identity.stdout, encoding='utf-8')
+    (EVIDENCE / (phase + '-identity.txt')).write_text(
+        '\n'.join(line.rstrip() for line in identity.stdout.splitlines()) + '\n', encoding='utf-8')
     if phase == 'probe':
         result = remote('set -eu; test ! -e /opt/harpisense; test ! -e /var/lib/harpisense; '
                         'test ! -e /usr/lib/postgresql/16; test ! -e /usr/sbin/mosquitto; '
