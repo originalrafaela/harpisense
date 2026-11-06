@@ -1,0 +1,55 @@
+name: Poste 1 - local LDR and LED, MQTT closed
+version: 1
+author: HarpiSense
+steps:
+  - wait-serial: 'network_closed: configuration/acceptance gates'
+  - set-control:
+      part-id: ldr
+      name: lux
+      value: 100000
+  - delay: 3s
+  - wait-serial: 'led_commanded=0 utc_valid=0'
+  - expect-pin:
+      part-id: esp
+      name: 25
+      value: 0
+  - set-control:
+      part-id: ldr
+      name: lux
+      value: 100
+  - delay: 3s
+  - wait-serial: 'led_commanded=0 utc_valid=0'
+  - expect-pin:
+      part-id: esp
+      name: 25
+      value: 0
+  - set-control:
+      part-id: ldr
+      name: lux
+      value: 0.1
+  - delay: 3s
+  - wait-serial: 'led_commanded=1 utc_valid=0'
+  - expect-pin:
+      part-id: esp
+      name: 25
+      value: 1
+  - set-control:
+      part-id: ldr
+      name: lux
+      value: 100
+  - delay: 3s
+  - wait-serial: 'led_commanded=1 utc_valid=0'
+  - expect-pin:
+      part-id: esp
+      name: 25
+      value: 1
+  - set-control:
+      part-id: ldr
+      name: lux
+      value: 100000
+  - delay: 3s
+  - wait-serial: 'led_commanded=0 utc_valid=0'
+  - expect-pin:
+      part-id: esp
+      name: 25
+      value: 0
