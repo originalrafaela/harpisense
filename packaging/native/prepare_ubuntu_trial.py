@@ -1,7 +1,10 @@
 """Provision a separate Ubuntu cloud-image VM; never reuse an existing test disk."""
+import argparse
 import hashlib
 import io
 import json
+import re
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -13,15 +16,32 @@ import pycdlib
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives import serialization
 
-target = ROOT/'.native-test/candidate2-clean-20261106'
+parser = argparse.ArgumentParser()
+parser.add_argument('--target-name', default='candidate2-clean-20261106')
+parser.add_argument('--hostname', default='harpisense-candidate2-clean')
+parser.add_argument('--image-file', type=Path)
+parser.add_argument('--checksum-file', type=Path)
+args = parser.parse_args()
+if not re.fullmatch(r'[a-z0-9][a-z0-9-]{0,62}', args.target_name):
+    raise SystemExit('INVALID_TARGET_NAME')
+if not re.fullmatch(r'[a-z0-9][a-z0-9-]{0,62}', args.hostname):
+    raise SystemExit('INVALID_HOSTNAME')
+if bool(args.image_file) != bool(args.checksum_file):
+    raise SystemExit('CACHED_IMAGE_REQUIRES_CHECKSUM_FILE')
+target = ROOT/'.native-test'/args.target_name
 target.mkdir(parents=True, exist_ok=False)
 base = 'https://cloud-images.ubuntu.com/noble/20261017/'
 image = 'noble-server-cloudimg-amd64.vmdk'
-checksums = urllib.request.urlopen(base + 'SHA256SUMS').read().decode()
+checksums = (args.checksum_file.read_text() if args.checksum_file else
+             urllib.request.urlopen(base + 'SHA256SUMS').read().decode())
 expected = next(line.split()[0] for line in checksums.splitlines() if line.endswith(image))
 (target/'SHA256SUMS').write_text(checksums)
-print('Downloading official Ubuntu 24.04 image', flush=True)
-urllib.request.urlretrieve(base + image, target/image)
+if args.image_file:
+    print('Verifying cached official Ubuntu 24.04 image', flush=True)
+    shutil.copyfile(args.image_file, target/image)
+else:
+    print('Downloading official Ubuntu 24.04 image', flush=True)
+    urllib.request.urlretrieve(base + image, target/image)
 actual = hashlib.file_digest((target/image).open('rb'), 'sha256').hexdigest()
 if actual != expected:
     raise SystemExit('CLOUD_IMAGE_CHECKSUM_MISMATCH')
@@ -33,7 +53,7 @@ public = key.public_key().public_bytes(serialization.Encoding.OpenSSH,
     serialization.PublicFormat.OpenSSH).decode()
 (target/'trial_ed25519.pub').write_text(public + '\n')
 userdata = f'''#cloud-config
-hostname: harpisense-candidate2-clean
+hostname: {args.hostname}
 manage_etc_hosts: true
 ssh_pwauth: false
 users:
@@ -49,7 +69,7 @@ packages: [open-vm-tools]
 iso = pycdlib.PyCdlib()
 iso.new(interchange_level=3, joliet=3, vol_ident='cidata')
 for name, data in [('user-data', userdata), ('meta-data',
-    'instance-id: harpisense-candidate2-clean-20261106\nlocal-hostname: harpisense-candidate2-clean\n')]:
+    f'instance-id: {args.target_name}\nlocal-hostname: {args.hostname}\n')]:
     blob = data.encode()
     iso.add_fp(io.BytesIO(blob), len(blob), iso_path='/' + name.upper().replace('-', '_') + ';1',
                joliet_path='/' + name)
@@ -65,7 +85,7 @@ allowed = ('config.version', 'virtualHW.version', 'pciBridge', 'guestOS', 'firmw
            'numvcpus', 'scsi0.', 'ethernet0.present', 'ethernet0.connectionType',
            'ethernet0.virtualDev', 'ethernet0.pciSlotNumber', 'ethernet0.addressType')
 config = [line for line in lines if line.startswith(allowed)]
-config += ['.encoding = "UTF-8"', 'displayName = "HarpiSense candidate2 CLEAN 20261106"',
+config += ['.encoding = "UTF-8"', f'displayName = "HarpiSense {args.hostname}"',
     'memsize = "2048"', 'scsi0:0.present = "TRUE"', 'scsi0:0.fileName = "system.vmdk"',
     'sata0.present = "TRUE"', 'sata0.pciSlotNumber = "36"', 'sata0:0.present = "TRUE"',
     'sata0:0.deviceType = "cdrom-image"', 'sata0:0.fileName = "seed.iso"',
