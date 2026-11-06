@@ -10,9 +10,16 @@ for path in ('backend', 'backend/domain', 'genai', 'packaging/native'):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('operation', choices=['api', 'consumer', 'prepare', 'probe', 'preflight', 'grant'])
-    parser.add_argument('--state', required=True, type=Path)
+    parser.add_argument('operation', choices=['check-runtime', 'api', 'consumer', 'prepare', 'probe', 'preflight', 'grant'])
+    parser.add_argument('--state', type=Path)
     args = parser.parse_args()
+    if args.operation in ('check-runtime', 'prepare'):
+        from runtime_check import check_runtime
+        check_runtime()
+    if args.operation == 'check-runtime':
+        return
+    if args.state is None:
+        parser.error('--state is required for this operation')
     if args.operation == 'preflight':
         from provision import preflight
         preflight(args.state.parent, ROOT, 'local_managed')

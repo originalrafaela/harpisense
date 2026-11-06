@@ -11,7 +11,7 @@ import httpx
 
 ROOT = Path(__file__).resolve().parents[2]
 REPO = 'originalrafaela/harpisense'
-TAG = 'native-installers-20261105-candidate.1'
+TAG = 'native-installers-20261106-candidate.2'
 
 
 def main():
@@ -37,12 +37,17 @@ def main():
         raise SystemExit('GITHUB_RELEASE_CREDENTIAL_UNAVAILABLE')
     headers = {'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json',
                'X-GitHub-Api-Version': '2022-11-28'}
-    body = '''Primeira candidata de instaladores nativos, ainda não homologada em sistemas limpos.
+    body = '''Candidata 2 de instaladores nativos, ainda não homologada em sistemas limpos.
+
+Corrige ausência de harpisense_catalog no payload Ubuntu. Verificação de imports
+do runtime distribuído antes da criação/migração do banco em ambas as plataformas.
+Windows congelado e Ubuntu/Python 3.12 isolado verificados sem checkout/PYTHONPATH.
+Release anterior preservada; não reinstalar sobre a tentativa parcial.
 
 Windows 11 x64: EXE com central, PostgreSQL, Mosquitto local TLS, consumidor e serviços automáticos.
 Ubuntu 24.04 x86_64: instalador .run, wheels incluídos; apt requer Internet.
 
-23 verificações reais passaram no Windows existente, sem Docker, com runtime congelado e processos descartáveis: bootstrap/MFA, dashboard, configuração, reinício dos processos e MQTT identificável até PostgreSQL/API. Broker ativo sem publicação aparece separadamente. Instalação de serviços e reboot da máquina em Windows/Ubuntu limpos ainda NÃO foram testados.
+Histórico da candidata 1 (não repetido nesta correção): 23 verificações reais passaram no Windows existente com runtime congelado e processos descartáveis. Nesta candidata foram executados os testes de imports isolados e rejeição de catálogo ausente descritos nas evidências. Instalação completa de serviços e reboot em Windows/Ubuntu limpos ainda NÃO foram testados.
 
 Não instalar sobre o laboratório. O preflight recusa PostgreSQL/Mosquitto/portas/diretórios existentes; reinstalação não substitui dados. Broker local atende loopback nesta candidata. Sensores físicos, captura Linux, RF/IF e contenção não são comprovados pela instalação da central.
 

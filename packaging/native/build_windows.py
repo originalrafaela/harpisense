@@ -33,6 +33,7 @@ def main():
                 'harpia', 'harpisense_contracts', 'uvicorn', 'psycopg', 'psycopg_binary',
                 'jsonschema', 'qrcode', 'paho.mqtt']
     collect = [item for package in packages for item in ('--collect-all', package)]
+    collect += ['--hidden-import', 'harpisense_catalog', '--hidden-import', 'runtime_check']
     data = ['--add-data', str(ROOT/'frontend/dist') + ';frontend/dist']
     for package in ('delivery', 'admin_auth', 'config_manager', 'native_server'):
         for source in (ROOT/'backend'/package).glob('*.sql'):
@@ -40,6 +41,9 @@ def main():
             data += ['--add-data', str(source) + ';' + package]
     subprocess.run(common + collect + data + ['--onedir', '--name', 'HarpiSense',
         '--distpath', str(ROOT/'.native-build/runtime'), str(ROOT/'packaging/native/entry.py')], check=True)
+    subprocess.run([str(ROOT/'.native-build/runtime/HarpiSense/HarpiSense.exe'), 'check-runtime'],
+                   cwd=ROOT.parent, env={k: v for k, v in __import__('os').environ.items()
+                                        if k not in ('PYTHONPATH', 'PYTHONHOME')}, check=True)
     stage.mkdir(parents=True)
     shutil.copytree(ROOT/'.native-build/runtime/HarpiSense', stage/'runtime')
     pg = stage/'vendor/postgresql'

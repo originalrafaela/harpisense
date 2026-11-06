@@ -17,13 +17,14 @@ def main():
         shutil.copytree(ROOT/source, stage/target, ignore=shutil.ignore_patterns('__pycache__'))
     scripts = stage/'packaging/native'
     scripts.mkdir(parents=True)
-    for name in ('entry.py', 'provision.py', 'ubuntu_install.py'):
+    for name in ('entry.py', 'provision.py', 'ubuntu_install.py', 'runtime_check.py'):
         shutil.copyfile(ROOT/'packaging/native'/name, scripts/name)
     for name in ('delivery', 'admin_auth', 'config_manager', 'native_server'):
         shutil.copytree(ROOT/'backend'/name, stage/'backend'/name,
                         ignore=shutil.ignore_patterns('__pycache__'))
     shutil.copytree(ROOT/'backend/domain/harpisense_contracts', stage/'backend/domain/harpisense_contracts',
                     ignore=shutil.ignore_patterns('__pycache__'))
+    shutil.copyfile(ROOT/'backend/domain/harpisense_catalog.py', stage/'backend/domain/harpisense_catalog.py')
     shutil.copytree(ROOT/'genai/harpia', stage/'genai/harpia', ignore=shutil.ignore_patterns('__pycache__'))
     requirements = []
     for name in ('backend/delivery/requirements.txt', 'backend/config_manager/requirements.txt',

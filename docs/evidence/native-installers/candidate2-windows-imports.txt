@@ -1,0 +1,3 @@
+39772 INFO: Build complete! The results are available in: <checkout>\.native-build\runtime
+RUNTIME_IMPORTS_OK
+80731 INFO: Build complete! The results are available in: <checkout>\dist

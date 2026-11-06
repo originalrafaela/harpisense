@@ -89,6 +89,9 @@ def main():
 
 
 def finish(external_path):
+    # Installed interpreter, isolated mode and package-owned paths; before any DB writes.
+    run([APP/'venv/bin/python', '-I', APP/'packaging/native/entry.py', 'check-runtime'],
+        env={k: v for k, v in os.environ.items() if k not in ('PYTHONPATH', 'PYTHONHOME')})
     external = json.loads(Path(external_path).read_text()) if external_path else None
     mode = 'external' if external else 'local_managed'
     state = create_state(DATA, mode=mode, external=external)

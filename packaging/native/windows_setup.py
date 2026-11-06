@@ -55,6 +55,7 @@ def install(mode, external=None):
     prerequisite = run([APP/'vendor/VC_redist.x64.exe', '/install', '/quiet', '/norestart'], check=False)
     if prerequisite.returncode not in (0, 1638, 3010):
         raise RuntimeError('VC_RUNTIME_INSTALL_FAILED')
+    run([APP/'runtime/HarpiSense.exe', 'check-runtime'])
     state = create_state(DATA, mode=mode, external=external)
     (DATA/'logs').mkdir()
     pg = APP/'vendor/postgresql/bin'

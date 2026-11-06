@@ -7,7 +7,10 @@ Node e Vite não são requisitos de execução do produto.
 
 ## Artefatos
 
-Download publicado: [pré-release candidata](https://github.com/originalrafaela/harpisense/releases/tag/native-installers-20261105-candidate.1).
+Download publicado: [pré-release candidata 2](https://github.com/originalrafaela/harpisense/releases/tag/native-installers-20261106-candidate.2).
+Corrige catálogo ausente no Ubuntu e verifica imports antes de modificar o banco.
+[Diagnóstico, evidências e retomada](../../docs/evidence/native-installers/ubuntu-candidate2.md).
+A candidata 1 foi preservada. Não reinstalar sobre uma tentativa parcial.
 [Recibo com hashes e URLs verificadas](../../docs/evidence/native-installers/published-assets.json).
 Não é uma release homologada em sistemas limpos.
 

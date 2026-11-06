@@ -1,0 +1,24 @@
+Origem: saída fornecida pelo operador por SSH em 2026-11-06 01:24 (hora local).
+Registro sanitizado: omitidos usuário/hostname, prompt de senha e URLs temporárias assinadas.
+Os logs privados da VM não foram coletados; este arquivo preserva a saída recebida.
+Download: HarpiSense-Setup-Ubuntu-24.04-x86_64.run, 17210951 bytes.
+Download: HarpiSense-Setup-Ubuntu-24.04-x86_64.run.sha256, 108 bytes.
+sha256sum -c: HarpiSense-Setup-Ubuntu-24.04-x86_64.run: SUCESSO
+Comando: sudo sh ./HarpiSense-Setup-Ubuntu-24.04-x86_64.run
+Preparando componentes do HarpiSense…
+Traceback (most recent call last):
+  File "/opt/harpisense/packaging/native/ubuntu_install.py", line 141, in <module>
+    finish(sys.argv[2])
+  File "/opt/harpisense/packaging/native/ubuntu_install.py", line 106, in finish
+    prepare_database(DATA/'state.json')
+  File "/opt/harpisense/packaging/native/provision.py", line 174, in prepare_database
+    from config_manager.setup import migrate_setup
+  File "/opt/harpisense/backend/config_manager/setup.py", line 7, in <module>
+    from harpisense_contracts.canonical import fingerprint
+  File "/opt/harpisense/backend/domain/harpisense_contracts/__init__.py", line 2, in <module>
+    from .validation import ContractError,validate,validate_links,execution_precheck,fingerprint,input_fingerprint
+  File "/opt/harpisense/backend/domain/harpisense_contracts/validation.py", line 6, in <module>
+    from .schema_source import SCHEMAS,SCENARIOS,CLASSES,SCENARIO_ACTIONS
+  File "/opt/harpisense/backend/domain/harpisense_contracts/schema_source.py", line 6, in <module>
+    from harpisense_catalog import SCENARIOS,SCENARIO_ACTIONS,ACTIONS
+ModuleNotFoundError: No module named 'harpisense_catalog'
