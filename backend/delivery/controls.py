@@ -5,6 +5,7 @@ No dispatcher, collector, shell command or model generation is called here.
 """
 from contextlib import contextmanager
 from datetime import datetime, timezone
+from copy import deepcopy
 
 from harpisense_contracts.compatibility import canonical_operation
 
@@ -46,10 +47,27 @@ class Controls:
     def view(self, tx):
         current = tx.read()
         pending = self.pending(tx)
+        return self.present(current, pending)
+
+    def present(self, current, pending):
+        """Independent axes: a selected autonomy mode never attests containment."""
+        allowed = pending['reliable'] and not pending['blockers']
         return {**current, 'pending': pending, 'observed_at': stamp(),
                 'real_execution_blocked': True,
                 'executor': 'isolated_simulation_only',
-                'change_allowed': pending['reliable'] and not pending['blockers']}
+                'change_allowed': allowed,
+                'effective_state': {
+                    'applied_profile': 'M' + str(current['value']['autonomy_mode']),
+                    'control_revision': current['revision'],
+                    'executor': 'isolated_simulation_only',
+                    'availability': 'stopped' if current['emergency_stopped'] else 'real_executor_unavailable',
+                    'execution_enabled': current['value']['execution_enabled'],
+                    'updated_at': current['updated_at'],
+                    'operational_visibility': 'current' if pending['reliable'] else 'unknown_or_partial',
+                    'blockers': deepcopy(pending['blockers']),
+                    'change_allowed': allowed,
+                    'containment_confirmed': False,
+                }}
 
     def get(self):
         with self.repository.transaction() as tx:
@@ -78,7 +96,8 @@ class Controls:
                 code, message = 'OPERATIONAL_PENDING', 'Há pendências operacionais que impedem a transição.'
             if code:
                 detail = {'code': code, 'message': message, 'pending': pending,
-                          'current_revision': before['revision']}
+                          'current_revision': before['revision'],
+                          'current': self.present(before, pending)}
                 tx.log(actor, 'CONTROL_CHANGE_REJECTED', {'code': code, 'reason': reason,
                        'expected_revision': expected_revision, 'pending': pending})
                 failure = Rejected(409, detail)
@@ -89,7 +108,8 @@ class Controls:
                 tx.save(value, before['revision'] + 1, before['emergency_stopped'])
                 tx.log(actor, 'CONTROL_CHANGED', {'before': before, 'value': value,
                        'revision': before['revision'] + 1, 'reason': reason})
-            result = self.view(tx)
+            # One authoritative snapshot per Apply, under the transaction lock.
+            result = self.present(tx.read(), pending)
         # Audit refusals commit too; exceptions inside the transaction would erase them.
         if failure:
             raise failure
@@ -102,9 +122,15 @@ class Controls:
             tx.save(value, before['revision'] + 1, True)
             tx.log(actor, 'EMERGENCY_STOP', {'reason': reason, 'revision': before['revision'] + 1})
             # Do not consult a queue adapter at all on the emergency path.
-            return {**tx.read(), 'pending': UnknownQueue().snapshot(tx), 'observed_at': stamp(),
-                    'real_execution_blocked': True, 'executor': 'isolated_simulation_only',
-                    'change_allowed': False}
+            return self.present(tx.read(), UnknownQueue().snapshot(tx))
+
+    @staticmethod
+    def historical_profile(current):
+        """Copy into a decision at admission; never resolve history from live settings."""
+        return {'applied_profile': 'M' + str(current['value']['autonomy_mode']),
+                'autonomy_mode': current['value']['autonomy_mode'],
+                'control_revision': current['revision'],
+                'control_updated_at': current['updated_at']}
 
     @contextmanager
     def decision_transaction(self, expected_revision):
@@ -118,4 +144,5 @@ class Controls:
             current = tx.read()
             if current['revision'] != expected_revision:
                 raise Rejected(409, {'code': 'REVISION_CONFLICT', 'message': 'Reavaliar sob o perfil atual.'})
+            current['historical_profile'] = self.historical_profile(current)
             yield tx, current
