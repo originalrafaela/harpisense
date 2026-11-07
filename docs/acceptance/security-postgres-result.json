@@ -1,0 +1,20 @@
+{
+  "environment": "disposable native PostgreSQL fixture on Windows host",
+  "port": 25439,
+  "docker": false,
+  "installed_os_acceptance": false,
+  "reboot": false,
+  "service_registration": false,
+  "checks": [
+    "M1_specific_approval_preserves_mode_without_dispatch",
+    "approval_is_not_result",
+    "repeat_after_new_connection_returns_same_simulation",
+    "simulation_origin_and_historical_mode_preserved",
+    "separate_postgresql_records_once",
+    "separate_audit_events_once",
+    "additive_migration_preserves_records",
+    "M1_unchanged_after_simulated_replay"
+  ],
+  "base_commit": "a8fef1f5810ad5077658a29fe2aa407ffd21df6d",
+  "result": "passed"
+}

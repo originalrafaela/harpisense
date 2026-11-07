@@ -217,3 +217,4 @@ __marimo__/
 .npm-cache/
 .native-build/
 .native-test/
+.acceptance-private/

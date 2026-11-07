@@ -2,7 +2,7 @@
   "source_commit": "a8fef1f5810ad5077658a29fe2aa407ffd21df6d",
   "environment": "isolated Python fixtures, memory repository, no PostgreSQL",
   "installed_os_acceptance": false,
-  "tests_run": 14,
+  "tests_run": 22,
   "failures": 0,
   "errors": 0,
   "skipped": 0,

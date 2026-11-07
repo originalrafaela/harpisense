@@ -31,6 +31,16 @@ class Transaction:
         self.log('isolated-simulator', 'SIMULATED', result)
         return result
 
+    def review_get(self, kind, decision_id):
+        row = self.conn.execute('SELECT data FROM hs_action_review WHERE kind=%s AND decision_id=%s',
+                                (kind, decision_id)).fetchone()
+        return row[0] if row else None
+
+    def review_put(self, kind, decision_id, data, actor):
+        self.conn.execute('INSERT INTO hs_action_review(kind,decision_id,data,actor) VALUES(%s,%s,%s,%s)',
+                          (kind, decision_id, Jsonb(data), actor))
+        self.log(actor, 'ACTION_' + kind.upper(), {'decision_id': decision_id, **data})
+
 
 class PostgresControls:
     def __init__(self, conninfo):
