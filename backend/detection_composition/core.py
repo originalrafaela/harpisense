@@ -12,7 +12,7 @@ import json
 from harpisense_contracts import fingerprint, validate_links
 from harpisense_contracts.validation import timestamp
 from harpisense_engines.core import decide
-from harpisense_xai.core import detection, kind
+from harpisense_xai.core import detection, kind, check_reference, explain
 from harpisense_rf.random_forest import load_bundle as load_rf
 from harpisense_if.isolation_forest import load_bundle as load_if
 
@@ -52,7 +52,8 @@ def load_artifact(directory, *, expected_sha256, detector):
 
 
 class Composition:
-    def __init__(self, store, *, rf_directory, rf_sha256, if_directory, if_sha256):
+    def __init__(self, store, *, rf_directory, rf_sha256, if_directory, if_sha256,
+                 xai_references=None, xai_permutations=32, xai_seed=42):
         self.store = store
         self.rf, rf = load_artifact(rf_directory, expected_sha256=rf_sha256, detector='random_forest')
         self.iforest, isolation = load_artifact(if_directory, expected_sha256=if_sha256, detector='isolation_forest')
@@ -60,6 +61,14 @@ class Composition:
         for key in ('profile', 'window_seconds', 'feature_schema_version'):
             if self.rf[key] != self.iforest[key]:
                 raise ValueError('RF/IF incompatible: ' + key)
+        self.xai_references = deepcopy(xai_references or {})
+        if set(self.xai_references) - {'random_forest', 'isolation_forest'}:
+            raise ValueError('Unknown XAI reference detector')
+        for name, reference in self.xai_references.items():
+            check_reference(self.rf if name=='random_forest' else self.iforest, reference)
+        if type(xai_permutations) is not int or not 2<=xai_permutations<=256 or type(xai_seed) is not int:
+            raise ValueError('Invalid XAI estimation parameters')
+        self.xai_permutations, self.xai_seed = xai_permutations, xai_seed
 
     def process_p08(self, *, base_dir, session_name, events, window,
                     coverage_records, required_sources, batch_path=None, now=None, mode=1):
@@ -90,6 +99,10 @@ class Composition:
                        target=target, evidence=evidence or [], trusted_sources=trusted_sources or {},
                        config=config, input_origin='synthetic')
         request_hash = fingerprint(request)
+        if self.xai_references:
+            request.update(xai_references={k:v['reference_id'] for k,v in self.xai_references.items()},
+                           xai_permutations=self.xai_permutations, xai_seed=self.xai_seed)
+            request_hash = fingerprint(request)
 
         def produce():
             detections = [detection(b, window, created_at=now) for b in (self.rf, self.iforest)]
@@ -97,16 +110,24 @@ class Composition:
             case = classification['accepted_class']
             if case == 'normal':
                 case = None
-            context = dict(scenario_id=case, detections=detections, explanations=[],
+            explanations = []
+            for bundle, record in zip((self.rf, self.iforest), detections):
+                name = kind(bundle)
+                if name in self.xai_references:
+                    result, _ = explain(bundle, self.xai_references[name], record,
+                        target_class=(case or 'normal') if name=='random_forest' else None,
+                        permutations=self.xai_permutations, seed=self.xai_seed, created_at=now)
+                    explanations.append(result)
+            context = dict(scenario_id=case, detections=detections, explanations=explanations,
                            evidence=evidence or [], asset=asset, target=target,
                            trusted_sources=trusted_sources or {})
             result = decide(context, mode=mode, now=now, config=config)
-            validate_links(detections=detections, explanations=[], incidents=[result['incident']],
+            validate_links(detections=detections, explanations=explanations, incidents=[result['incident']],
                            decisions=[result['decision']])
             # Policy authorization is retained as a canonical result; execution
             # stays false and no executor is imported or called, even in M3.
             return dict(run_id=run_id, input_origin='synthetic', laboratory_validated=False,
                         execution_performed=False, artifacts=self.artifacts,
-                        detections=detections, **result)
+                        detections=detections, explanations=explanations, **result)
 
         return self.store.commit_composition(run_id, request_hash, window, produce)

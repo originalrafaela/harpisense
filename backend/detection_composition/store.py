@@ -31,6 +31,7 @@ class CompositionStore(PostgresStore):
                 return {**deepcopy(previous[0]['composition']), 'replayed': True}
             result = produce()
             rows = [('detection', d['detection_id'], d) for d in result['detections']]
+            rows.extend(('xai', e['explanation_id'], e) for e in result.get('explanations', []))
             incident, decision = result['incident'], result['decision']
             rows.extend([
                 ('incident', incident['incident_id'], incident),

@@ -1,0 +1,816 @@
+{
+  "input_origin": "synthetic",
+  "real_estimators": true,
+  "statistical_validation": false,
+  "available": {
+    "incident_ref": {
+      "id": "inc-5a2d01cf79368fff723b33ed8268b9e82c624c45c7b593a92f13e47ca1d75bc1",
+      "revision": 1
+    },
+    "state": "available",
+    "analyses": [
+      {
+        "detection_id": "det-9cfb3036ed2f87d109d6e8ca610a7c59aabd963ef9648c0b21e71a01a7fd3e7c",
+        "state": "available",
+        "reason_code": null,
+        "explanations": [
+          {
+            "id": "exp-9bcbc21e85c7ddc67865643a3312aa20943c27cc7beab53315151cbce3f8d082",
+            "projection_revision": 1,
+            "in_incident_explanation_refs": true,
+            "record": {
+              "method": "SHAPLEY_PERMUTATION",
+              "target": {
+                "output": "CALIBRATED_CLASS_PROBABILITY",
+                "class_label": "C01"
+              },
+              "window_id": "xai-http-1-C01-0",
+              "base_value": 0.5000000032418745,
+              "created_at": "2026-11-07T03:00:11+00:00",
+              "parameters": {
+                "seed": 42,
+                "permutations": 8,
+                "background_rows": 8
+              },
+              "limitations": [
+                "Estimativa Shapley por permutacoes; nao e TreeSHAP nem prova causal.",
+                "Intervencoes podem quebrar correlacoes entre features derivadas; interpretacao depende do background.",
+                "Erro Monte Carlo nao cobre incerteza do modelo ou representatividade da referencia."
+              ],
+              "record_type": "explanation",
+              "detection_id": "det-9cfb3036ed2f87d109d6e8ca610a7c59aabd963ef9648c0b21e71a01a7fd3e7c",
+              "output_value": 0.9615384552693282,
+              "contributions": [
+                {
+                  "value": 152.0,
+                  "feature": "packet_count",
+                  "contribution": 0.05250585764537041
+                },
+                {
+                  "value": 15808.0,
+                  "feature": "bytes_total",
+                  "contribution": 0.17770910185359862
+                },
+                {
+                  "value": 15.199999809265137,
+                  "feature": "packets_per_second",
+                  "contribution": 0.09843435317413311
+                },
+                {
+                  "value": 0.10000000149011612,
+                  "feature": "connections_per_second",
+                  "contribution": 0.0
+                },
+                {
+                  "value": 1.0,
+                  "feature": "syn_count",
+                  "contribution": 0.0
+                },
+                {
+                  "value": 1.0,
+                  "feature": "rst_count",
+                  "contribution": 0.0
+                },
+                {
+                  "value": 20.0,
+                  "feature": "unique_dst_ports",
+                  "contribution": 0.033999597656579006
+                },
+                {
+                  "value": 104.0,
+                  "feature": "avg_packet_size",
+                  "contribution": 0.0
+                },
+                {
+                  "value": 65.78947448730469,
+                  "feature": "mean_interarrival_ms",
+                  "contribution": 0.09888954169777255
+                }
+              ],
+              "model_version": "rf-a795aebb-9616-4aa5-b8a1-0a015468af11",
+              "reference_ref": "bg-2e4503d56f8371d510ebd92884e707ddc15eb5bf105b4123d2e0173250a5521e",
+              "explanation_id": "exp-9bcbc21e85c7ddc67865643a3312aa20943c27cc7beab53315151cbce3f8d082",
+              "schema_version": "1.0.0",
+              "explainer_version": "harpisense.xai.permutation.v1",
+              "input_fingerprint": "83db310ba97f5cadf259538ee25b408709db3480f06dd2c054b23c89a701fa7b",
+              "additivity_residual": 0.0,
+              "collection_session_id": "xai-http-1"
+            },
+            "output_direction": "positive_increases_class_probability",
+            "coherence": {
+              "reconstructed_output": 0.9615384552693282,
+              "absolute_error": 0.0,
+              "reconstruction_tolerance": 1e-08,
+              "detection_output_tolerance": 1e-06,
+              "residual_tolerance": 1e-05,
+              "causality_or_detector_accuracy_proven": false
+            },
+            "risk_mapping": {
+              "state": "affine_transform",
+              "factor": "detection",
+              "formula": "100 * P(scenario_id)",
+              "scenario_id": "C01",
+              "source_probability": 0.9615384552693282,
+              "scale": 100,
+              "offset": 0,
+              "rounding": {
+                "mode": "ROUND_HALF_UP",
+                "decimal_places": 6
+              },
+              "factor_value": 96.153846,
+              "recorded_factor_value": 96.153846,
+              "matches_recorded_factor": true,
+              "risk_score_explained": false
+            }
+          }
+        ],
+        "rejected_explanations": [],
+        "has_more": false,
+        "detection_revision": 1,
+        "model": {
+          "detector": "random_forest",
+          "input_dtype": "float32",
+          "model_version": "rf-a795aebb-9616-4aa5-b8a1-0a015468af11"
+        },
+        "window": {
+          "end": "2026-11-07T03:00:10+00:00",
+          "start": "2026-11-07T03:00:00+00:00",
+          "sensor_id": "sensor-fixture",
+          "window_id": "xai-http-1-C01-0",
+          "traffic_profile": "demo_tcp_ingress",
+          "collection_session_id": "xai-http-1",
+          "feature_schema_version": "harpisense.if.window.v1"
+        },
+        "observation_ref": {
+          "window_id": "xai-http-1-C01-0",
+          "collection_session_id": "xai-http-1",
+          "sensor_id": "sensor-fixture"
+        },
+        "entity": {
+          "device_id": "poste-1",
+          "source_ip": null,
+          "destination_ip": null,
+          "mqtt_client_id": null
+        },
+        "asset": {
+          "technical_id": "poste-1",
+          "display_name": "Poste de ensaio XAI",
+          "name_state": "available",
+          "name_source": "asset_registry"
+        },
+        "input_fingerprint": "83db310ba97f5cadf259538ee25b408709db3480f06dd2c054b23c89a701fa7b",
+        "incident_ref": {
+          "id": "inc-5a2d01cf79368fff723b33ed8268b9e82c624c45c7b593a92f13e47ca1d75bc1",
+          "revision": 1
+        },
+        "operational_outputs": {
+          "classification": {
+            "confidence": 0.9615384552693282,
+            "needs_review": false,
+            "probabilities": {
+              "C01": 0.9615384552693282,
+              "normal": 0.038461544730671704
+            },
+            "accepted_class": "C01",
+            "predicted_class": "C01",
+            "attack_probability": 0.9615384552693282,
+            "confidence_threshold": 0.7
+          },
+          "anomaly": null
+        }
+      },
+      {
+        "detection_id": "det-9d242e02149c61443a55a88783eb57edea7c26650e451d9019b4f2a5dbab525b",
+        "state": "available",
+        "reason_code": null,
+        "explanations": [
+          {
+            "id": "exp-8769e17da47899721c9c60f7c6c36fb4a00a2f254849ca28d241a2182570a763",
+            "projection_revision": 1,
+            "in_incident_explanation_refs": true,
+            "record": {
+              "method": "SHAPLEY_PERMUTATION",
+              "target": {
+                "output": "ANOMALY_SCORE",
+                "class_label": null
+              },
+              "window_id": "xai-http-1-C01-0",
+              "base_value": 0.5219585103985815,
+              "created_at": "2026-11-07T03:00:11+00:00",
+              "parameters": {
+                "seed": 42,
+                "permutations": 8,
+                "background_rows": 8
+              },
+              "limitations": [
+                "Estimativa Shapley por permutacoes; nao e TreeSHAP nem prova causal.",
+                "Intervencoes podem quebrar correlacoes entre features derivadas; interpretacao depende do background.",
+                "Erro Monte Carlo nao cobre incerteza do modelo ou representatividade da referencia."
+              ],
+              "record_type": "explanation",
+              "detection_id": "det-9d242e02149c61443a55a88783eb57edea7c26650e451d9019b4f2a5dbab525b",
+              "output_value": 0.5584138485946146,
+              "contributions": [
+                {
+                  "value": 152.0,
+                  "feature": "packet_count",
+                  "contribution": 0.012913135293492153
+                },
+                {
+                  "value": 15808.0,
+                  "feature": "bytes_total",
+                  "contribution": 0.0051915335578119615
+                },
+                {
+                  "value": 15.199999809265137,
+                  "feature": "packets_per_second",
+                  "contribution": 0.012150137083955154
+                },
+                {
+                  "value": 0.10000000149011612,
+                  "feature": "connections_per_second",
+                  "contribution": -0.004498399640253101
+                },
+                {
+                  "value": 1.0,
+                  "feature": "syn_count",
+                  "contribution": -0.007631430220547783
+                },
+                {
+                  "value": 1.0,
+                  "feature": "rst_count",
+                  "contribution": -0.0026713193683101377
+                },
+                {
+                  "value": 20.0,
+                  "feature": "unique_dst_ports",
+                  "contribution": 0.0036963490209899474
+                },
+                {
+                  "value": 104.0,
+                  "feature": "avg_packet_size",
+                  "contribution": 0.013219319797206128
+                },
+                {
+                  "value": 65.78947448730469,
+                  "feature": "mean_interarrival_ms",
+                  "contribution": 0.00408601267168876
+                }
+              ],
+              "model_version": "if-2026-11-07T03:24:21.929958+00:00",
+              "reference_ref": "bg-caadbcc0976da37e08a25712fe7cf9dc176c8754f8c35d7fa17d91eb41d72c50",
+              "explanation_id": "exp-8769e17da47899721c9c60f7c6c36fb4a00a2f254849ca28d241a2182570a763",
+              "schema_version": "1.0.0",
+              "explainer_version": "harpisense.xai.permutation.v1",
+              "input_fingerprint": "83db310ba97f5cadf259538ee25b408709db3480f06dd2c054b23c89a701fa7b",
+              "additivity_residual": 0.0,
+              "collection_session_id": "xai-http-1"
+            },
+            "output_direction": "positive_increases_anomaly_score",
+            "coherence": {
+              "reconstructed_output": 0.5584138485946146,
+              "absolute_error": 0.0,
+              "reconstruction_tolerance": 1e-08,
+              "detection_output_tolerance": 1e-06,
+              "residual_tolerance": 1e-05,
+              "causality_or_detector_accuracy_proven": false
+            },
+            "risk_mapping": {
+              "state": "nonlinear_transform_not_additively_mapped",
+              "factor": "anomaly",
+              "formula": "100 * normal_reference_percentile if is_anomaly else 0",
+              "score_direction": "higher_is_more_anomalous",
+              "anomaly_threshold": 0.6263863883482579,
+              "anomaly_margin": -0.06797253975364326,
+              "is_anomaly": false,
+              "normal_reference_percentile": 0.81,
+              "factor_value": 0.0,
+              "recorded_factor_value": 0.0,
+              "matches_recorded_factor": true,
+              "limitation": "Contributions explain -score_samples only, not the gated empirical percentile or total Risk.",
+              "risk_score_explained": false
+            }
+          }
+        ],
+        "rejected_explanations": [],
+        "has_more": false,
+        "detection_revision": 1,
+        "model": {
+          "detector": "isolation_forest",
+          "input_dtype": "float32",
+          "model_version": "if-2026-11-07T03:24:21.929958+00:00"
+        },
+        "window": {
+          "end": "2026-11-07T03:00:10+00:00",
+          "start": "2026-11-07T03:00:00+00:00",
+          "sensor_id": "sensor-fixture",
+          "window_id": "xai-http-1-C01-0",
+          "traffic_profile": "demo_tcp_ingress",
+          "collection_session_id": "xai-http-1",
+          "feature_schema_version": "harpisense.if.window.v1"
+        },
+        "observation_ref": {
+          "window_id": "xai-http-1-C01-0",
+          "collection_session_id": "xai-http-1",
+          "sensor_id": "sensor-fixture"
+        },
+        "entity": {
+          "device_id": "poste-1",
+          "source_ip": null,
+          "destination_ip": null,
+          "mqtt_client_id": null
+        },
+        "asset": {
+          "technical_id": "poste-1",
+          "display_name": "Poste de ensaio XAI",
+          "name_state": "available",
+          "name_source": "asset_registry"
+        },
+        "input_fingerprint": "83db310ba97f5cadf259538ee25b408709db3480f06dd2c054b23c89a701fa7b",
+        "incident_ref": {
+          "id": "inc-5a2d01cf79368fff723b33ed8268b9e82c624c45c7b593a92f13e47ca1d75bc1",
+          "revision": 1
+        },
+        "operational_outputs": {
+          "classification": null,
+          "anomaly": {
+            "is_anomaly": false,
+            "anomaly_score": 0.5584138485946146,
+            "anomaly_margin": -0.06797253975364326,
+            "anomaly_threshold": 0.6263863883482579,
+            "normal_reference_percentile": 0.81
+          }
+        }
+      }
+    ],
+    "read_only": true
+  },
+  "absent": {
+    "incident_ref": {
+      "id": "inc-783974b5265703913edadae8451e872e7fbdeaf7ae72afda4812af165a82feed",
+      "revision": 1
+    },
+    "state": "absent_or_unavailable",
+    "analyses": [
+      {
+        "detection_id": "det-6ba0f26a662dd1ef0e4536413d3ed2e2a1226b8bf0c1714c51493b7341f9eb81",
+        "state": "absent",
+        "reason_code": "EXPLANATION_NOT_PERSISTED",
+        "explanations": [],
+        "rejected_explanations": [],
+        "has_more": false,
+        "detection_revision": 1,
+        "model": {
+          "detector": "random_forest",
+          "input_dtype": "float32",
+          "model_version": "rf-a795aebb-9616-4aa5-b8a1-0a015468af11"
+        },
+        "window": {
+          "end": "2026-11-07T03:00:10+00:00",
+          "start": "2026-11-07T03:00:00+00:00",
+          "sensor_id": "sensor-fixture",
+          "window_id": "xai-http-3-C01-0",
+          "traffic_profile": "demo_tcp_ingress",
+          "collection_session_id": "xai-http-3",
+          "feature_schema_version": "harpisense.if.window.v1"
+        },
+        "observation_ref": {
+          "window_id": "xai-http-3-C01-0",
+          "collection_session_id": "xai-http-3",
+          "sensor_id": "sensor-fixture"
+        },
+        "entity": {
+          "device_id": "poste-1",
+          "source_ip": null,
+          "destination_ip": null,
+          "mqtt_client_id": null
+        },
+        "asset": {
+          "technical_id": "poste-1",
+          "display_name": "Poste de ensaio XAI",
+          "name_state": "available",
+          "name_source": "asset_registry"
+        },
+        "input_fingerprint": "10d50ae867b4c74b9e593690b6311f43f828208246a8ce29a0d739b65aebe529",
+        "incident_ref": {
+          "id": "inc-783974b5265703913edadae8451e872e7fbdeaf7ae72afda4812af165a82feed",
+          "revision": 1
+        },
+        "operational_outputs": {
+          "classification": {
+            "confidence": 0.9615384552693282,
+            "needs_review": false,
+            "probabilities": {
+              "C01": 0.9615384552693282,
+              "normal": 0.038461544730671704
+            },
+            "accepted_class": "C01",
+            "predicted_class": "C01",
+            "attack_probability": 0.9615384552693282,
+            "confidence_threshold": 0.7
+          },
+          "anomaly": null
+        }
+      },
+      {
+        "detection_id": "det-94ee5351f21c2c88829c443227547f3cd75bd677cf29e7e10b97b49d2f74e5b3",
+        "state": "absent",
+        "reason_code": "EXPLANATION_NOT_PERSISTED",
+        "explanations": [],
+        "rejected_explanations": [],
+        "has_more": false,
+        "detection_revision": 1,
+        "model": {
+          "detector": "isolation_forest",
+          "input_dtype": "float32",
+          "model_version": "if-2026-11-07T03:24:21.929958+00:00"
+        },
+        "window": {
+          "end": "2026-11-07T03:00:10+00:00",
+          "start": "2026-11-07T03:00:00+00:00",
+          "sensor_id": "sensor-fixture",
+          "window_id": "xai-http-3-C01-0",
+          "traffic_profile": "demo_tcp_ingress",
+          "collection_session_id": "xai-http-3",
+          "feature_schema_version": "harpisense.if.window.v1"
+        },
+        "observation_ref": {
+          "window_id": "xai-http-3-C01-0",
+          "collection_session_id": "xai-http-3",
+          "sensor_id": "sensor-fixture"
+        },
+        "entity": {
+          "device_id": "poste-1",
+          "source_ip": null,
+          "destination_ip": null,
+          "mqtt_client_id": null
+        },
+        "asset": {
+          "technical_id": "poste-1",
+          "display_name": "Poste de ensaio XAI",
+          "name_state": "available",
+          "name_source": "asset_registry"
+        },
+        "input_fingerprint": "10d50ae867b4c74b9e593690b6311f43f828208246a8ce29a0d739b65aebe529",
+        "incident_ref": {
+          "id": "inc-783974b5265703913edadae8451e872e7fbdeaf7ae72afda4812af165a82feed",
+          "revision": 1
+        },
+        "operational_outputs": {
+          "classification": null,
+          "anomaly": {
+            "is_anomaly": false,
+            "anomaly_score": 0.5693687479800148,
+            "anomaly_margin": -0.05701764036824308,
+            "anomaly_threshold": 0.6263863883482579,
+            "normal_reference_percentile": 0.87
+          }
+        }
+      }
+    ],
+    "read_only": true
+  },
+  "normal": {
+    "incident_ref": {
+      "id": "inc-fd2cd8ae4afb10a67de5e563084b20b7a62d6a885cbe5b7faebe43b7aaa4f5d0",
+      "revision": 1
+    },
+    "state": "available",
+    "analyses": [
+      {
+        "detection_id": "det-73321473c690eb9470f1a8a512aa4f88df443a1cee2428c676b01de9e8106001",
+        "state": "available",
+        "reason_code": null,
+        "explanations": [
+          {
+            "id": "exp-7b25df5b092faecbba5c17180403e6d5c9047e30126998b79865795eaa93ff31",
+            "projection_revision": 1,
+            "in_incident_explanation_refs": true,
+            "record": {
+              "method": "SHAPLEY_PERMUTATION",
+              "target": {
+                "output": "ANOMALY_SCORE",
+                "class_label": null
+              },
+              "window_id": "xai-http-4-normal-0",
+              "base_value": 0.5219585103985815,
+              "created_at": "2026-11-07T03:00:11+00:00",
+              "parameters": {
+                "seed": 42,
+                "permutations": 8,
+                "background_rows": 8
+              },
+              "limitations": [
+                "Estimativa Shapley por permutacoes; nao e TreeSHAP nem prova causal.",
+                "Intervencoes podem quebrar correlacoes entre features derivadas; interpretacao depende do background.",
+                "Erro Monte Carlo nao cobre incerteza do modelo ou representatividade da referencia."
+              ],
+              "record_type": "explanation",
+              "detection_id": "det-73321473c690eb9470f1a8a512aa4f88df443a1cee2428c676b01de9e8106001",
+              "output_value": 0.568614277874306,
+              "contributions": [
+                {
+                  "value": 41.0,
+                  "feature": "packet_count",
+                  "contribution": 0.006672406626545044
+                },
+                {
+                  "value": 2747.0,
+                  "feature": "bytes_total",
+                  "contribution": 0.010979883103168261
+                },
+                {
+                  "value": 4.099999904632568,
+                  "feature": "packets_per_second",
+                  "contribution": -0.0018044091547560343
+                },
+                {
+                  "value": 0.30000001192092896,
+                  "feature": "connections_per_second",
+                  "contribution": -0.0004929587312733907
+                },
+                {
+                  "value": 3.0,
+                  "feature": "syn_count",
+                  "contribution": -0.002670804819075251
+                },
+                {
+                  "value": 2.0,
+                  "feature": "rst_count",
+                  "contribution": -0.003256841398608823
+                },
+                {
+                  "value": 1.0,
+                  "feature": "unique_dst_ports",
+                  "contribution": 0.0031333433375576314
+                },
+                {
+                  "value": 67.0,
+                  "feature": "avg_packet_size",
+                  "contribution": 0.02610878695588377
+                },
+                {
+                  "value": 243.90243530273438,
+                  "feature": "mean_interarrival_ms",
+                  "contribution": 0.007986361556283211
+                }
+              ],
+              "model_version": "if-2026-11-07T03:24:21.929958+00:00",
+              "reference_ref": "bg-caadbcc0976da37e08a25712fe7cf9dc176c8754f8c35d7fa17d91eb41d72c50",
+              "explanation_id": "exp-7b25df5b092faecbba5c17180403e6d5c9047e30126998b79865795eaa93ff31",
+              "schema_version": "1.0.0",
+              "explainer_version": "harpisense.xai.permutation.v1",
+              "input_fingerprint": "88807006080ad0560c48fc545ce87f366da6d3eb950b88b15a17c6ac2b7e66d2",
+              "additivity_residual": 0.0,
+              "collection_session_id": "xai-http-4"
+            },
+            "output_direction": "positive_increases_anomaly_score",
+            "coherence": {
+              "reconstructed_output": 0.568614277874306,
+              "absolute_error": 0.0,
+              "reconstruction_tolerance": 1e-08,
+              "detection_output_tolerance": 1e-06,
+              "residual_tolerance": 1e-05,
+              "causality_or_detector_accuracy_proven": false
+            },
+            "risk_mapping": {
+              "state": "nonlinear_transform_not_additively_mapped",
+              "factor": "anomaly",
+              "formula": "100 * normal_reference_percentile if is_anomaly else 0",
+              "score_direction": "higher_is_more_anomalous",
+              "anomaly_threshold": 0.6263863883482579,
+              "anomaly_margin": -0.05777211047395192,
+              "is_anomaly": false,
+              "normal_reference_percentile": 0.87,
+              "factor_value": 0.0,
+              "recorded_factor_value": 0.0,
+              "matches_recorded_factor": true,
+              "limitation": "Contributions explain -score_samples only, not the gated empirical percentile or total Risk.",
+              "risk_score_explained": false
+            }
+          }
+        ],
+        "rejected_explanations": [],
+        "has_more": false,
+        "detection_revision": 1,
+        "model": {
+          "detector": "isolation_forest",
+          "input_dtype": "float32",
+          "model_version": "if-2026-11-07T03:24:21.929958+00:00"
+        },
+        "window": {
+          "end": "2026-11-07T03:00:10+00:00",
+          "start": "2026-11-07T03:00:00+00:00",
+          "sensor_id": "sensor-fixture",
+          "window_id": "xai-http-4-normal-0",
+          "traffic_profile": "demo_tcp_ingress",
+          "collection_session_id": "xai-http-4",
+          "feature_schema_version": "harpisense.if.window.v1"
+        },
+        "observation_ref": {
+          "window_id": "xai-http-4-normal-0",
+          "collection_session_id": "xai-http-4",
+          "sensor_id": "sensor-fixture"
+        },
+        "entity": {
+          "device_id": "poste-1",
+          "source_ip": null,
+          "destination_ip": null,
+          "mqtt_client_id": null
+        },
+        "asset": {
+          "technical_id": "poste-1",
+          "display_name": "Poste de ensaio XAI",
+          "name_state": "available",
+          "name_source": "asset_registry"
+        },
+        "input_fingerprint": "88807006080ad0560c48fc545ce87f366da6d3eb950b88b15a17c6ac2b7e66d2",
+        "incident_ref": {
+          "id": "inc-fd2cd8ae4afb10a67de5e563084b20b7a62d6a885cbe5b7faebe43b7aaa4f5d0",
+          "revision": 1
+        },
+        "operational_outputs": {
+          "classification": null,
+          "anomaly": {
+            "is_anomaly": false,
+            "anomaly_score": 0.568614277874306,
+            "anomaly_margin": -0.05777211047395192,
+            "anomaly_threshold": 0.6263863883482579,
+            "normal_reference_percentile": 0.87
+          }
+        }
+      },
+      {
+        "detection_id": "det-961bf871f046b94083f4203686e60f699e5b0ddad20ad32916d4501040ac31fb",
+        "state": "available",
+        "reason_code": null,
+        "explanations": [
+          {
+            "id": "exp-c8fee92c86d50e674a482921927123aa07032af31b20ca06979b01bb98a324a9",
+            "projection_revision": 1,
+            "in_incident_explanation_refs": true,
+            "record": {
+              "method": "SHAPLEY_PERMUTATION",
+              "target": {
+                "output": "CALIBRATED_CLASS_PROBABILITY",
+                "class_label": "normal"
+              },
+              "window_id": "xai-http-4-normal-0",
+              "base_value": 0.49999999675812534,
+              "created_at": "2026-11-07T03:00:11+00:00",
+              "parameters": {
+                "seed": 42,
+                "permutations": 8,
+                "background_rows": 8
+              },
+              "limitations": [
+                "Estimativa Shapley por permutacoes; nao e TreeSHAP nem prova causal.",
+                "Intervencoes podem quebrar correlacoes entre features derivadas; interpretacao depende do background.",
+                "Erro Monte Carlo nao cobre incerteza do modelo ou representatividade da referencia."
+              ],
+              "record_type": "explanation",
+              "detection_id": "det-961bf871f046b94083f4203686e60f699e5b0ddad20ad32916d4501040ac31fb",
+              "output_value": 0.961538448785579,
+              "contributions": [
+                {
+                  "value": 41.0,
+                  "feature": "packet_count",
+                  "contribution": 0.05250585700961263
+                },
+                {
+                  "value": 2747.0,
+                  "feature": "bytes_total",
+                  "contribution": 0.17770910470943208
+                },
+                {
+                  "value": 4.099999904632568,
+                  "feature": "packets_per_second",
+                  "contribution": 0.0984343504282523
+                },
+                {
+                  "value": 0.30000001192092896,
+                  "feature": "connections_per_second",
+                  "contribution": 0.0
+                },
+                {
+                  "value": 3.0,
+                  "feature": "syn_count",
+                  "contribution": 0.0
+                },
+                {
+                  "value": 2.0,
+                  "feature": "rst_count",
+                  "contribution": 0.0
+                },
+                {
+                  "value": 1.0,
+                  "feature": "unique_dst_ports",
+                  "contribution": 0.033999595284040424
+                },
+                {
+                  "value": 67.0,
+                  "feature": "avg_packet_size",
+                  "contribution": 0.0
+                },
+                {
+                  "value": 243.90243530273438,
+                  "feature": "mean_interarrival_ms",
+                  "contribution": 0.09888954459611624
+                }
+              ],
+              "model_version": "rf-a795aebb-9616-4aa5-b8a1-0a015468af11",
+              "reference_ref": "bg-2e4503d56f8371d510ebd92884e707ddc15eb5bf105b4123d2e0173250a5521e",
+              "explanation_id": "exp-c8fee92c86d50e674a482921927123aa07032af31b20ca06979b01bb98a324a9",
+              "schema_version": "1.0.0",
+              "explainer_version": "harpisense.xai.permutation.v1",
+              "input_fingerprint": "88807006080ad0560c48fc545ce87f366da6d3eb950b88b15a17c6ac2b7e66d2",
+              "additivity_residual": 1.1102230246251565e-16,
+              "collection_session_id": "xai-http-4"
+            },
+            "output_direction": "positive_increases_class_probability",
+            "coherence": {
+              "reconstructed_output": 0.9615384487855791,
+              "absolute_error": 1.1102230246251565e-16,
+              "reconstruction_tolerance": 1e-08,
+              "detection_output_tolerance": 1e-06,
+              "residual_tolerance": 1e-05,
+              "causality_or_detector_accuracy_proven": false
+            },
+            "risk_mapping": {
+              "state": "affine_transform",
+              "factor": "detection",
+              "formula": "100 * (1 - P(normal))",
+              "scenario_id": null,
+              "source_probability": 0.038461551214420964,
+              "scale": -100,
+              "offset": 100,
+              "rounding": {
+                "mode": "ROUND_HALF_UP",
+                "decimal_places": 6
+              },
+              "factor_value": 3.846155,
+              "recorded_factor_value": 3.846155,
+              "matches_recorded_factor": true,
+              "risk_score_explained": false
+            }
+          }
+        ],
+        "rejected_explanations": [],
+        "has_more": false,
+        "detection_revision": 1,
+        "model": {
+          "detector": "random_forest",
+          "input_dtype": "float32",
+          "model_version": "rf-a795aebb-9616-4aa5-b8a1-0a015468af11"
+        },
+        "window": {
+          "end": "2026-11-07T03:00:10+00:00",
+          "start": "2026-11-07T03:00:00+00:00",
+          "sensor_id": "sensor-fixture",
+          "window_id": "xai-http-4-normal-0",
+          "traffic_profile": "demo_tcp_ingress",
+          "collection_session_id": "xai-http-4",
+          "feature_schema_version": "harpisense.if.window.v1"
+        },
+        "observation_ref": {
+          "window_id": "xai-http-4-normal-0",
+          "collection_session_id": "xai-http-4",
+          "sensor_id": "sensor-fixture"
+        },
+        "entity": {
+          "device_id": "poste-1",
+          "source_ip": null,
+          "destination_ip": null,
+          "mqtt_client_id": null
+        },
+        "asset": {
+          "technical_id": "poste-1",
+          "display_name": "Poste de ensaio XAI",
+          "name_state": "available",
+          "name_source": "asset_registry"
+        },
+        "input_fingerprint": "88807006080ad0560c48fc545ce87f366da6d3eb950b88b15a17c6ac2b7e66d2",
+        "incident_ref": {
+          "id": "inc-fd2cd8ae4afb10a67de5e563084b20b7a62d6a885cbe5b7faebe43b7aaa4f5d0",
+          "revision": 1
+        },
+        "operational_outputs": {
+          "classification": {
+            "confidence": 0.961538448785579,
+            "needs_review": false,
+            "probabilities": {
+              "C01": 0.038461551214420964,
+              "normal": 0.961538448785579
+            },
+            "accepted_class": "normal",
+            "predicted_class": "normal",
+            "attack_probability": 0.038461551214420964,
+            "confidence_threshold": 0.7
+          },
+          "anomaly": null
+        }
+      }
+    ],
+    "read_only": true
+  }
+}

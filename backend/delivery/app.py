@@ -79,6 +79,8 @@ def build_candidate_app(*, installation_id, capabilities, allowed_origins,
         app.state.presentation = presentation
     install_config_api(app, config, installation_id=installation_id,
                        presentation=presentation)
+    from xai_api import install_xai_api
+    install_xai_api(app, store, installation_id=installation_id)
     if asset_catalog is not None:
         from config_manager.assets import install_assets_api
         from .interface import install_interface_api

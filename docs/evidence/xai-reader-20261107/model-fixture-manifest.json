@@ -1,0 +1,9 @@
+{
+  "rf_sha256": "ef97016457f15d58d71514301f2d30e27ad8eaf7713d94469d0238f819946670",
+  "if_sha256": "4bd17057480e7c7875ab435009c040892fa8d7bbc5ee90933da23efbe92e010f",
+  "references": {
+    "random_forest": "bg-2e4503d56f8371d510ebd92884e707ddc15eb5bf105b4123d2e0173250a5521e",
+    "isolation_forest": "bg-caadbcc0976da37e08a25712fe7cf9dc176c8754f8c35d7fa17d91eb41d72c50"
+  },
+  "core_sha256": "ed5509de6a3c857ed87b64bf381ebb370a5c23e42e8b528dbea8e19f7331cc5e"
+}
