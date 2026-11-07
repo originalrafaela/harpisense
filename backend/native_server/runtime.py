@@ -58,6 +58,8 @@ def build_native_app(state, frontend):
     from xai_api import install_xai_api
     install_xai_api(api, store, installation_id=state['installation_id'],
                     asset_identifier_column='device_id')
+    from delivery.incident_dossier import install_incident_api
+    install_incident_api(api, store, state['installation_id'])
     config = ConfigStore(store._connect, capabilities(state))
     from config_manager.presentation import PresentationApplicator
     presentation = PresentationApplicator(config, state['installation_id'],

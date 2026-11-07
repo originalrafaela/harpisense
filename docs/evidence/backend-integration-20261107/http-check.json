@@ -1,0 +1,15 @@
+{
+  "runtime": "native Windows development",
+  "url_tested": "http://127.0.0.1:64077",
+  "authenticated_http": true,
+  "database": "native PostgreSQL",
+  "bitnet_called": false,
+  "fixture_origin": "synthetic",
+  "installed_acceptance": false,
+  "server_lifetime": "test only; stopped after tests",
+  "cases": [
+    200,
+    200,
+    409
+  ]
+}

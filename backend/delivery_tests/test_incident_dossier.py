@@ -47,7 +47,10 @@ class IncidentDossierTests(unittest.TestCase):
             cls.store=PostgresStore(cls.state['dsn'])
             with cls.store._connect() as conn:
                 conn.execute((ROOT/'backend/delivery/003_incident_assessment.sql').read_text())
-            records=json.loads((ROOT/'docs/evidence/model-mount-review/synthetic-records.json').read_text())
+            records=json.loads((ROOT/'docs/evidence/shap-library-20261107/synthetic-records.json').read_text())
+            # Development fixtures contain real library outputs on artificial
+            # inputs. Their origin remains explicitly synthetic in P11.
+            for row in records:row['source']='synthetic'
             for row in records:cls.store.insert(row['kind'],Record(**{k:row[k] for k in ('id','revision','source','data')}))
             cls.ident=next(r['id'] for r in records if r['kind']=='incident')
             cls.sock=socket.socket();cls.sock.bind(('127.0.0.1',0))
@@ -111,10 +114,9 @@ class IncidentDossierTests(unittest.TestCase):
             for source in SOURCES:
                 current=tx.conn.execute('SELECT revision FROM hs_operational_authority WHERE source=%s',(source,)).fetchone()
                 OperationalQueue().report(tx,source,(current[0]+1) if current else 1,[])
-        self.assertTrue(self.controls.get()['pending']['counts']['attack'])
-        with self.assertRaises(Rejected):
-            self.controls.change(value={**before['value'],'autonomy_mode':2},expected_revision=before['revision'],
-                                 reason='Deve recusar ataque confirmado',actor='dossier-owner')
+        self.assertFalse(self.controls.get()['pending']['blockers'])
+        # Assessment is a historical administrative fact, not a live attack.
+        self.assertTrue(self.controls.get()['change_allowed'])
         dossier=self.client.get(self.path+'/dossier?incident_revision=1').json()
         self.assertEqual(dossier['incident_card']['attack_assessment']['state'],'confirmed')
         self.assertEqual(dossier['incident_card']['defense_execution']['state'],'missing')
@@ -130,7 +132,7 @@ class IncidentDossierTests(unittest.TestCase):
         pending=self.controls.get()['pending']
         self.assertFalse(pending['reliable'])
         case=next(b for b in pending['blockers'] if b['id']=='anomaly:still-active')
-        self.assertFalse(case['fresh']);self.assertEqual(pending['counts']['anomaly'],1)
+        self.assertFalse(case['fresh']);self.assertEqual(pending['cases']['known_active_count'],1)
 
 
 if __name__=='__main__':unittest.main()

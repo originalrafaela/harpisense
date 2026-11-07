@@ -1,0 +1,286 @@
+{
+  "incident_ref": {
+    "id": "inc-development-without-xai",
+    "revision": 1
+  },
+  "incident_card": {
+    "incident_id": "inc-development-without-xai",
+    "occurred_at": "2026-11-07T03:00:11+00:00",
+    "asset": {
+      "technical_id": "poste-shap",
+      "display_name": null,
+      "name_state": "unregistered",
+      "name_source": null
+    },
+    "origin": {
+      "value": "synthetic",
+      "source": "incident_projection"
+    },
+    "anomaly": {
+      "state": "recorded",
+      "observations": [
+        {
+          "detection_id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+          "classification": {
+            "confidence": 0.9615384552693282,
+            "needs_review": false,
+            "probabilities": {
+              "C01": 0.9615384552693282,
+              "normal": 0.038461544730671704
+            },
+            "accepted_class": "C01",
+            "predicted_class": "C01",
+            "attack_probability": 0.9615384552693282,
+            "confidence_threshold": 0.7
+          },
+          "anomaly": null
+        },
+        {
+          "detection_id": "det-b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d",
+          "classification": null,
+          "anomaly": {
+            "is_anomaly": false,
+            "anomaly_score": 0.5584138485946146,
+            "anomaly_margin": -0.06797253975364326,
+            "anomaly_threshold": 0.6263863883482579,
+            "normal_reference_percentile": 0.81
+          }
+        }
+      ]
+    },
+    "attack_assessment": {
+      "state": "unassessed",
+      "assessment_id": null,
+      "actor": null,
+      "at": null,
+      "reason": null
+    },
+    "attack_situation": {
+      "state": "recorded",
+      "value": "SUSPECTED",
+      "source": "incident.status"
+    },
+    "defense_decision": {
+      "state": "missing",
+      "records": []
+    },
+    "defense_execution": {
+      "state": "missing",
+      "records": []
+    },
+    "operational_mode": {
+      "state": "unknown",
+      "value": null
+    }
+  },
+  "technical_cards": [],
+  "records": {
+    "detection": [
+      {
+        "id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+        "revision": 1,
+        "source": "synthetic",
+        "data": {
+          "model": {
+            "detector": "random_forest",
+            "input_dtype": "float32",
+            "model_version": "rf-71c7f03b-c7cf-4dba-92df-da613877443e"
+          },
+          "entity": {
+            "device_id": "poste-shap",
+            "source_ip": null,
+            "destination_ip": null,
+            "mqtt_client_id": null
+          },
+          "window": {
+            "end": "2026-11-07T03:00:10+00:00",
+            "start": "2026-11-07T03:00:00+00:00",
+            "sensor_id": "shap-fixture",
+            "window_id": "shap-library-fixture-C01-0",
+            "traffic_profile": "demo_tcp_ingress",
+            "collection_session_id": "shap-library-fixture",
+            "feature_schema_version": "harpisense.if.window.v1"
+          },
+          "anomaly": null,
+          "quality": {
+            "status": "VALID",
+            "valid_until": "2026-11-07T03:01:10+00:00"
+          },
+          "features": {
+            "rst_count": 1.0,
+            "syn_count": 1.0,
+            "bytes_total": 15808.0,
+            "packet_count": 152.0,
+            "avg_packet_size": 104.0,
+            "unique_dst_ports": 20.0,
+            "packets_per_second": 15.199999809265137,
+            "mean_interarrival_ms": 65.78947448730469,
+            "connections_per_second": 0.10000000149011612
+          },
+          "created_at": "2026-11-07T03:00:11+00:00",
+          "provenance": {
+            "source_id": "4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+            "source_schema": "harpisense.detection.rf.v1"
+          },
+          "record_type": "detection",
+          "detection_id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+          "classification": {
+            "confidence": 0.9615384552693282,
+            "needs_review": false,
+            "probabilities": {
+              "C01": 0.9615384552693282,
+              "normal": 0.038461544730671704
+            },
+            "accepted_class": "C01",
+            "predicted_class": "C01",
+            "attack_probability": 0.9615384552693282,
+            "confidence_threshold": 0.7
+          },
+          "schema_version": "1.0.0",
+          "block_authorized": false,
+          "input_fingerprint": "83db310ba97f5cadf259538ee25b408709db3480f06dd2c054b23c89a701fa7b"
+        }
+      },
+      {
+        "id": "det-b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d",
+        "revision": 1,
+        "source": "synthetic",
+        "data": {
+          "model": {
+            "detector": "isolation_forest",
+            "input_dtype": "float32",
+            "model_version": "if-2026-11-07T04:16:12.918049+00:00"
+          },
+          "entity": {
+            "device_id": "poste-shap",
+            "source_ip": null,
+            "destination_ip": null,
+            "mqtt_client_id": null
+          },
+          "window": {
+            "end": "2026-11-07T03:00:10+00:00",
+            "start": "2026-11-07T03:00:00+00:00",
+            "sensor_id": "shap-fixture",
+            "window_id": "shap-library-fixture-C01-0",
+            "traffic_profile": "demo_tcp_ingress",
+            "collection_session_id": "shap-library-fixture",
+            "feature_schema_version": "harpisense.if.window.v1"
+          },
+          "anomaly": {
+            "is_anomaly": false,
+            "anomaly_score": 0.5584138485946146,
+            "anomaly_margin": -0.06797253975364326,
+            "anomaly_threshold": 0.6263863883482579,
+            "normal_reference_percentile": 0.81
+          },
+          "quality": {
+            "status": "VALID",
+            "valid_until": "2026-11-07T03:01:10+00:00"
+          },
+          "features": {
+            "rst_count": 1.0,
+            "syn_count": 1.0,
+            "bytes_total": 15808.0,
+            "packet_count": 152.0,
+            "avg_packet_size": 104.0,
+            "unique_dst_ports": 20.0,
+            "packets_per_second": 15.199999809265137,
+            "mean_interarrival_ms": 65.78947448730469,
+            "connections_per_second": 0.10000000149011612
+          },
+          "created_at": "2026-11-07T03:00:11+00:00",
+          "provenance": {
+            "source_id": "b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d",
+            "source_schema": "harpisense.detection.if.v1"
+          },
+          "record_type": "detection",
+          "detection_id": "det-b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d",
+          "classification": null,
+          "schema_version": "1.0.0",
+          "block_authorized": false,
+          "input_fingerprint": "83db310ba97f5cadf259538ee25b408709db3480f06dd2c054b23c89a701fa7b"
+        }
+      }
+    ],
+    "window": [],
+    "evidence": [],
+    "network_event": [],
+    "decision": [],
+    "approval": [],
+    "execution": [],
+    "verification": [],
+    "profile": [],
+    "policy": []
+  },
+  "logs": [],
+  "log_references": [],
+  "missing_links": [
+    {
+      "kind": "window",
+      "id": "shap-library-fixture-C01-0",
+      "reason": "MISSING_OR_UNPINNED"
+    },
+    {
+      "kind": "operational_mode",
+      "reason": "NO_UNAMBIGUOUS_DECISION_SNAPSHOT"
+    },
+    {
+      "kind": "execution",
+      "reason": "NO_LINKED_EXECUTION_RECORD"
+    },
+    {
+      "kind": "evidence",
+      "reason": "NO_LINKED_RECORD"
+    },
+    {
+      "kind": "network_event",
+      "reason": "NO_LINKED_RECORD"
+    },
+    {
+      "kind": "decision",
+      "reason": "NO_LINKED_RECORD"
+    },
+    {
+      "kind": "approval",
+      "reason": "NO_LINKED_RECORD"
+    },
+    {
+      "kind": "verification",
+      "reason": "NO_LINKED_RECORD"
+    },
+    {
+      "kind": "profile",
+      "reason": "NO_LINKED_RECORD"
+    },
+    {
+      "kind": "policy",
+      "reason": "NO_LINKED_RECORD"
+    },
+    {
+      "kind": "xai",
+      "reason": "EXPLANATION_NOT_AVAILABLE"
+    }
+  ],
+  "assessments": [],
+  "latest_explanations": [],
+  "activity": [],
+  "analysis_states": [
+    {
+      "detection_id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+      "state": "available",
+      "reason_code": null
+    },
+    {
+      "detection_id": "det-b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d",
+      "state": "available",
+      "reason_code": null
+    }
+  ],
+  "commands": {
+    "assessment_available": true,
+    "approval_available": false,
+    "execution_available": false,
+    "defense_unavailable_reason": "Admissão e executor operacional ainda não integrados."
+  },
+  "read_only": true
+}

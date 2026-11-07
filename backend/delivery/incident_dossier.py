@@ -66,6 +66,8 @@ class IncidentDossier:
             cur.execute('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY')
             incident=self.xai.select_incident(cur,identifier,revision)
             revision=incident['revision'];missing=[]
+            incident_row=next(r for r in self.xai.rows(cur,'incident',identifier) if r['revision']==revision)
+            origin=incident_row['source']
             records={kind:[] for kind in ('detection','window','evidence','network_event','decision','approval','execution','verification')}
             detections=self.linked(cur,'detection',incident['detection_refs'],missing)
             for row in detections:
@@ -119,6 +121,24 @@ class IncidentDossier:
             cur.execute("SELECT id,revision,source,data FROM projections WHERE kind='verification' "
                         "AND data->>'execution_id'=ANY(%s) ORDER BY id,revision",(execution_ids,))
             records['verification']=self.unique_rows(cur.fetchall(),'verification',missing)
+            # Exact-revision sidecars, not the current controls/configuration.
+            records['profile']=[];records['policy']=[]
+            for decision in records['decision']:
+                cur.execute('SELECT historical_profile,policy,origin FROM hs_decision_snapshot '
+                            'WHERE decision_id=%s AND decision_revision=%s',
+                            (decision['id'],decision['revision']))
+                snapshot=cur.fetchone()
+                if snapshot and snapshot['origin']==decision['source']:
+                    for kind,key in (('profile','historical_profile'),('policy','policy')):
+                        records[kind].append({'id':decision['id'],'revision':decision['revision'],
+                            'source':snapshot['origin'],'data':snapshot[key]})
+                else:
+                    missing.append({'kind':'decision_snapshot','id':decision['id'],
+                                    'reason':'NO_LINKED_PROFILE_POLICY_SNAPSHOT'})
+            cur.execute('SELECT id,source,source_revision,record_id,origin,data,at FROM hs_activity_event '
+                        "WHERE data->'incident_ref'->>'id'=%s AND data->'incident_ref'->>'revision'=%s ORDER BY id",
+                        (identifier,str(revision)))
+            activity=[json_row(r) for r in cur.fetchall()]
             cur.execute('SELECT * FROM hs_incident_assessment WHERE incident_id=%s AND incident_revision=%s ORDER BY id DESC',
                         (identifier,revision))
             assessments=[json_row(r) for r in cur.fetchall()]
@@ -140,8 +160,14 @@ class IncidentDossier:
                         'output':{'kind':r['target']['output'],'class_label':r['target']['class_label']},
                         'reference':{'ref':r['reference_ref'],'value':r['base_value']},'result':{'value':r['output_value']},
                         'principal_contribution':main,'summary':text,'summary_source':'deterministic',
-                        'explanation':{'id':explanation['id'],'projection_revision':explanation['projection_revision'],'record':r},
+                        'explanation':{'id':explanation['id'],'projection_revision':explanation['projection_revision'],
+                                       'in_incident_explanation_refs':True,'record':r},
+                        'risk_mapping':explanation['risk_mapping'],
                         'source':'persisted_xai'})
+            accepted_ids={c['explanation']['id'] for c in technical}
+            for ref in incident['explanation_refs']:
+                if ref not in accepted_ids:
+                    missing.append({'kind':'xai','id':ref,'reason':'MISSING_INVALID_OR_UNPINNED_EXPLANATION'})
             assets={a['asset']['technical_id']:a['asset'] for a in analysis if isinstance(a.get('asset'),dict)}
             asset=next(iter(assets.values())) if len(assets)==1 else {'technical_id':None,'display_name':None}
             if len(assets)!=1:missing.append({'kind':'asset','reason':'MISSING_OR_MULTIPLE_ASSETS'})
@@ -154,6 +180,7 @@ class IncidentDossier:
                 observations.append({'detection_id':row['id'],'classification':d['classification'],'anomaly':d['anomaly']})
             if not records['execution']:missing.append({'kind':'execution','reason':'NO_LINKED_EXECUTION_RECORD'})
             card={'incident_id':identifier,'occurred_at':incident['created_at'],'asset':asset,
+                'origin':{'value':origin,'source':'incident_projection'},
                 'anomaly':{'state':'recorded' if observations else 'unknown','observations':observations},
                 'attack_assessment':({'state':assessment['assessment'],'assessment_id':str(assessment['id']),
                     'actor':assessment['actor'],'at':assessment['at'],'reason':assessment['reason']} if assessment else
@@ -162,10 +189,16 @@ class IncidentDossier:
                 'defense_decision':{'state':'recorded' if records['decision'] else 'missing','records':records['decision']},
                 'defense_execution':{'state':'recorded' if records['execution'] else 'missing','records':records['execution']},
                 'operational_mode':{'state':'recorded' if mode else 'unknown','value':mode}}
+            for kind in records:
+                if not records[kind] and not any(m['kind']==kind for m in missing):
+                    missing.append({'kind':kind,'reason':'NO_LINKED_RECORD'})
+            if not technical:missing.append({'kind':'xai','reason':'EXPLANATION_NOT_AVAILABLE'})
             latest=sorted(technical,key=lambda c:c['explanation']['record']['created_at'],reverse=True)[:3]
             return {'incident_ref':{'id':identifier,'revision':revision},'incident_card':card,'technical_cards':technical,
                 'records':records,'logs':records['network_event'],'log_references':[r['data'].get('source_ref') for r in records['evidence'] if r['data'].get('source_ref')],
                 'missing_links':missing,'assessments':assessments,'latest_explanations':latest,
+                'activity':activity,'analysis_states':[{'detection_id':a['detection_id'],
+                    'state':a['state'],'reason_code':a['reason_code']} for a in analysis],
                 'commands':{'assessment_available':True,'approval_available':False,'execution_available':False,
                             'defense_unavailable_reason':'Admissão e executor operacional ainda não integrados.'},'read_only':True}
 
@@ -214,5 +247,7 @@ def install_incident_api(app, store, installation_id):
     def assess(incident_id:str,body:Assessment,actor=Depends(app.state.require_admin_session)):
         return invoke(interface.assess,incident_id,body.incident_revision,body.assessment,body.reason,actor)
     app.include_router(router)
+    from .action_api import install_action_api
+    install_action_api(app,store)
     app.state.incident_dossier=interface
     return interface

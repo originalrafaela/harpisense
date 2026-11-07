@@ -1,0 +1,1245 @@
+{
+  "incident_ref": {
+    "id": "inc-0f64bec5da73285dd07de3a1ff3023e0e785d0fe15e1f5ada2cdda64e4ea86e4",
+    "revision": 1
+  },
+  "incident_card": {
+    "incident_id": "inc-0f64bec5da73285dd07de3a1ff3023e0e785d0fe15e1f5ada2cdda64e4ea86e4",
+    "occurred_at": "2026-11-07T03:00:11+00:00",
+    "asset": {
+      "technical_id": "poste-shap",
+      "display_name": null,
+      "name_state": "unregistered",
+      "name_source": null
+    },
+    "origin": {
+      "value": "synthetic",
+      "source": "incident_projection"
+    },
+    "anomaly": {
+      "state": "recorded",
+      "observations": [
+        {
+          "detection_id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+          "classification": {
+            "confidence": 0.9615384552693282,
+            "needs_review": false,
+            "probabilities": {
+              "C01": 0.9615384552693282,
+              "normal": 0.038461544730671704
+            },
+            "accepted_class": "C01",
+            "predicted_class": "C01",
+            "attack_probability": 0.9615384552693282,
+            "confidence_threshold": 0.7
+          },
+          "anomaly": null
+        },
+        {
+          "detection_id": "det-b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d",
+          "classification": null,
+          "anomaly": {
+            "is_anomaly": false,
+            "anomaly_score": 0.5584138485946146,
+            "anomaly_margin": -0.06797253975364326,
+            "anomaly_threshold": 0.6263863883482579,
+            "normal_reference_percentile": 0.81
+          }
+        }
+      ]
+    },
+    "attack_assessment": {
+      "state": "unassessed",
+      "assessment_id": null,
+      "actor": null,
+      "at": null,
+      "reason": null
+    },
+    "attack_situation": {
+      "state": "recorded",
+      "value": "SUSPECTED",
+      "source": "incident.status"
+    },
+    "defense_decision": {
+      "state": "recorded",
+      "records": [
+        {
+          "id": "dec-8b4326cd0cea69bee5257ee3c7b3cb41c35c01f16399c9d3c343e98716b855af",
+          "revision": 1,
+          "source": "synthetic",
+          "data": {
+            "gates": {
+              "scope": "UNKNOWN",
+              "target": "UNKNOWN",
+              "evidence": "FAIL",
+              "freshness": "PASS",
+              "executor_ready": "UNKNOWN",
+              "protected_assets": "UNKNOWN"
+            },
+            "action": null,
+            "status": "OBSERVE_ONLY",
+            "approval": null,
+            "created_at": "2026-11-07T03:00:11+00:00",
+            "risk_level": null,
+            "risk_score": null,
+            "decision_id": "dec-8b4326cd0cea69bee5257ee3c7b3cb41c35c01f16399c9d3c343e98716b855af",
+            "incident_id": "inc-0f64bec5da73285dd07de3a1ff3023e0e785d0fe15e1f5ada2cdda64e4ea86e4",
+            "record_type": "decision",
+            "scenario_id": "C01",
+            "valid_until": "2026-11-07T03:02:11+00:00",
+            "reason_codes": [
+              "INCOMPLETE_RISK",
+              "NOT_CORROBORATED",
+              "GATE_EVIDENCE_FAIL",
+              "GATE_TARGET_UNKNOWN",
+              "GATE_SCOPE_UNKNOWN",
+              "GATE_PROTECTED_ASSETS_UNKNOWN",
+              "GATE_EXECUTOR_READY_UNKNOWN"
+            ],
+            "autonomy_mode": 1,
+            "evidence_refs": [],
+            "detection_refs": [
+              "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+              "det-b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d"
+            ],
+            "policy_version": "harpisense.risk-policy.v1:9a915a2fcc0824374d25",
+            "scenario_group": "Low",
+            "schema_version": "1.0.0",
+            "incident_revision": 1,
+            "action_fingerprint": null,
+            "execution_requested": false,
+            "supersedes_decision_id": null
+          }
+        }
+      ]
+    },
+    "defense_execution": {
+      "state": "missing",
+      "records": []
+    },
+    "operational_mode": {
+      "state": "recorded",
+      "value": "M1"
+    }
+  },
+  "technical_cards": [
+    {
+      "incident_ref": {
+        "id": "inc-0f64bec5da73285dd07de3a1ff3023e0e785d0fe15e1f5ada2cdda64e4ea86e4",
+        "revision": 1
+      },
+      "detection_id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+      "asset": {
+        "technical_id": "poste-shap",
+        "display_name": null,
+        "name_state": "unregistered",
+        "name_source": null
+      },
+      "window": {
+        "id": "shap-library-fixture-C01-0",
+        "start": "2026-11-07T03:00:00+00:00",
+        "end": "2026-11-07T03:00:10+00:00",
+        "collection_session_id": "shap-library-fixture",
+        "sensor_id": "shap-fixture"
+      },
+      "model": {
+        "detector": "random_forest",
+        "input_dtype": "float32",
+        "model_version": "rf-71c7f03b-c7cf-4dba-92df-da613877443e"
+      },
+      "method": "SHAP_PERMUTATION_EXPLAINER",
+      "explainer_version": "harpisense.xai.shap.v1+shap.0.50.0",
+      "output": {
+        "kind": "CALIBRATED_CLASS_PROBABILITY",
+        "class_label": "C01"
+      },
+      "reference": {
+        "ref": "bg-e4c53fe985e5d0237c101d80e6e47fb48d0e0fffb191e23d3bd3c5fd808090ce",
+        "value": 0.5000000032418747
+      },
+      "result": {
+        "value": 0.9615384552693282
+      },
+      "principal_contribution": {
+        "value": 15808.0,
+        "feature": "bytes_total",
+        "contribution": 0.14276574438408074
+      },
+      "summary": "bytes_total: contribuição +0.142766 na saída registrada.",
+      "summary_source": "deterministic",
+      "explanation": {
+        "id": "exp-9397ceb8545417098d80ed601fe687567d6f47c36a404f6674ccabfe3f0a3584",
+        "projection_revision": 1,
+        "in_incident_explanation_refs": true,
+        "record": {
+          "method": "SHAP_PERMUTATION_EXPLAINER",
+          "target": {
+            "output": "CALIBRATED_CLASS_PROBABILITY",
+            "class_label": "C01"
+          },
+          "window_id": "shap-library-fixture-C01-0",
+          "base_value": 0.5000000032418747,
+          "created_at": "2026-11-07T03:00:11+00:00",
+          "parameters": {
+            "seed": 42,
+            "output_space": "operational",
+            "permutations": 4,
+            "background_rows": 8,
+            "library_version": "0.50.0",
+            "operational_output_value": 0.9615384552693282
+          },
+          "limitations": [
+            "Attribution is not proof of causality or detector accuracy.",
+            "Feature interventions may break correlations; interpretation depends on the recorded background.",
+            "PermutationExplainer explains the serving function; contributions do not explain the total Risk score."
+          ],
+          "record_type": "explanation",
+          "detection_id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+          "output_value": 0.9615384552693282,
+          "contributions": [
+            {
+              "value": 152.0,
+              "feature": "packet_count",
+              "contribution": 0.1070505470622351
+            },
+            {
+              "value": 15808.0,
+              "feature": "bytes_total",
+              "contribution": 0.14276574438408074
+            },
+            {
+              "value": 15.199999809265137,
+              "feature": "packets_per_second",
+              "contribution": 0.0756908265668579
+            },
+            {
+              "value": 0.10000000149011612,
+              "feature": "connections_per_second",
+              "contribution": 0.0
+            },
+            {
+              "value": 1.0,
+              "feature": "syn_count",
+              "contribution": 0.0
+            },
+            {
+              "value": 1.0,
+              "feature": "rst_count",
+              "contribution": 0.0
+            },
+            {
+              "value": 20.0,
+              "feature": "unique_dst_ports",
+              "contribution": 0.02331922089778446
+            },
+            {
+              "value": 104.0,
+              "feature": "avg_packet_size",
+              "contribution": 0.0
+            },
+            {
+              "value": 65.78947448730469,
+              "feature": "mean_interarrival_ms",
+              "contribution": 0.11271211311649527
+            }
+          ],
+          "model_version": "rf-71c7f03b-c7cf-4dba-92df-da613877443e",
+          "reference_ref": "bg-e4c53fe985e5d0237c101d80e6e47fb48d0e0fffb191e23d3bd3c5fd808090ce",
+          "explanation_id": "exp-9397ceb8545417098d80ed601fe687567d6f47c36a404f6674ccabfe3f0a3584",
+          "schema_version": "1.0.0",
+          "explainer_version": "harpisense.xai.shap.v1+shap.0.50.0",
+          "input_fingerprint": "83db310ba97f5cadf259538ee25b408709db3480f06dd2c054b23c89a701fa7b",
+          "additivity_residual": 1.1102230246251565e-16,
+          "collection_session_id": "shap-library-fixture"
+        }
+      },
+      "risk_mapping": {
+        "state": "affine_transform",
+        "factor": "detection",
+        "formula": "100 * P(scenario_id)",
+        "scenario_id": "C01",
+        "source_probability": 0.9615384552693282,
+        "scale": 100,
+        "offset": 0,
+        "rounding": {
+          "mode": "ROUND_HALF_UP",
+          "decimal_places": 6
+        },
+        "factor_value": 96.153846,
+        "recorded_factor_value": 96.153846,
+        "matches_recorded_factor": true,
+        "risk_score_explained": false
+      },
+      "source": "persisted_xai"
+    },
+    {
+      "incident_ref": {
+        "id": "inc-0f64bec5da73285dd07de3a1ff3023e0e785d0fe15e1f5ada2cdda64e4ea86e4",
+        "revision": 1
+      },
+      "detection_id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+      "asset": {
+        "technical_id": "poste-shap",
+        "display_name": null,
+        "name_state": "unregistered",
+        "name_source": null
+      },
+      "window": {
+        "id": "shap-library-fixture-C01-0",
+        "start": "2026-11-07T03:00:00+00:00",
+        "end": "2026-11-07T03:00:10+00:00",
+        "collection_session_id": "shap-library-fixture",
+        "sensor_id": "shap-fixture"
+      },
+      "model": {
+        "detector": "random_forest",
+        "input_dtype": "float32",
+        "model_version": "rf-71c7f03b-c7cf-4dba-92df-da613877443e"
+      },
+      "method": "SHAP_TREE_EXPLAINER",
+      "explainer_version": "harpisense.xai.shap.v1+shap.0.50.0",
+      "output": {
+        "kind": "RAW_CLASS_PROBABILITY",
+        "class_label": "C01"
+      },
+      "reference": {
+        "ref": "bg-e4c53fe985e5d0237c101d80e6e47fb48d0e0fffb191e23d3bd3c5fd808090ce",
+        "value": 0.5000000000000001
+      },
+      "result": {
+        "value": 1.0
+      },
+      "principal_contribution": {
+        "value": 15808.0,
+        "feature": "bytes_total",
+        "contribution": 0.15000000223517418
+      },
+      "summary": "bytes_total: contribuição +0.15 na saída registrada.",
+      "summary_source": "deterministic",
+      "explanation": {
+        "id": "exp-97edd7f328a563771006b9361e6de6a443b93731235e5580b28b864894002ef2",
+        "projection_revision": 1,
+        "in_incident_explanation_refs": true,
+        "record": {
+          "method": "SHAP_TREE_EXPLAINER",
+          "target": {
+            "output": "RAW_CLASS_PROBABILITY",
+            "class_label": "C01"
+          },
+          "window_id": "shap-library-fixture-C01-0",
+          "base_value": 0.5000000000000001,
+          "created_at": "2026-11-07T03:00:11+00:00",
+          "parameters": {
+            "seed": 42,
+            "output_space": "raw_pre_calibration",
+            "permutations": null,
+            "background_rows": 8,
+            "library_version": "0.50.0",
+            "operational_output_value": 0.9615384552693282
+          },
+          "limitations": [
+            "Attribution is not proof of causality or detector accuracy.",
+            "Feature interventions may break correlations; interpretation depends on the recorded background.",
+            "TreeExplainer explains the original RF probability before calibration, not the calibrated probability supplied to Risk."
+          ],
+          "record_type": "explanation",
+          "detection_id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+          "output_value": 1.0,
+          "contributions": [
+            {
+              "value": 152.0,
+              "feature": "packet_count",
+              "contribution": 0.07500000111758709
+            },
+            {
+              "value": 15808.0,
+              "feature": "bytes_total",
+              "contribution": 0.15000000223517418
+            },
+            {
+              "value": 15.199999809265137,
+              "feature": "packets_per_second",
+              "contribution": 0.10000000149011612
+            },
+            {
+              "value": 0.10000000149011612,
+              "feature": "connections_per_second",
+              "contribution": 0.0
+            },
+            {
+              "value": 1.0,
+              "feature": "syn_count",
+              "contribution": 0.0
+            },
+            {
+              "value": 1.0,
+              "feature": "rst_count",
+              "contribution": 0.0
+            },
+            {
+              "value": 20.0,
+              "feature": "unique_dst_ports",
+              "contribution": 0.05000000074505806
+            },
+            {
+              "value": 104.0,
+              "feature": "avg_packet_size",
+              "contribution": 0.0
+            },
+            {
+              "value": 65.78947448730469,
+              "feature": "mean_interarrival_ms",
+              "contribution": 0.12500000186264515
+            }
+          ],
+          "model_version": "rf-71c7f03b-c7cf-4dba-92df-da613877443e",
+          "reference_ref": "bg-e4c53fe985e5d0237c101d80e6e47fb48d0e0fffb191e23d3bd3c5fd808090ce",
+          "explanation_id": "exp-97edd7f328a563771006b9361e6de6a443b93731235e5580b28b864894002ef2",
+          "schema_version": "1.0.0",
+          "explainer_version": "harpisense.xai.shap.v1+shap.0.50.0",
+          "input_fingerprint": "83db310ba97f5cadf259538ee25b408709db3480f06dd2c054b23c89a701fa7b",
+          "additivity_residual": -7.45058070794613e-09,
+          "collection_session_id": "shap-library-fixture"
+        }
+      },
+      "risk_mapping": {
+        "state": "raw_output_not_operational",
+        "risk_score_explained": false,
+        "limitation": "Original RF probability before calibration; not the calibrated Risk input."
+      },
+      "source": "persisted_xai"
+    },
+    {
+      "incident_ref": {
+        "id": "inc-0f64bec5da73285dd07de3a1ff3023e0e785d0fe15e1f5ada2cdda64e4ea86e4",
+        "revision": 1
+      },
+      "detection_id": "det-b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d",
+      "asset": {
+        "technical_id": "poste-shap",
+        "display_name": null,
+        "name_state": "unregistered",
+        "name_source": null
+      },
+      "window": {
+        "id": "shap-library-fixture-C01-0",
+        "start": "2026-11-07T03:00:00+00:00",
+        "end": "2026-11-07T03:00:10+00:00",
+        "collection_session_id": "shap-library-fixture",
+        "sensor_id": "shap-fixture"
+      },
+      "model": {
+        "detector": "isolation_forest",
+        "input_dtype": "float32",
+        "model_version": "if-2026-11-07T04:16:12.918049+00:00"
+      },
+      "method": "SHAP_PERMUTATION_EXPLAINER",
+      "explainer_version": "harpisense.xai.shap.v1+shap.0.50.0",
+      "output": {
+        "kind": "ANOMALY_SCORE",
+        "class_label": null
+      },
+      "reference": {
+        "ref": "bg-643734e5bf69f9d12f91eb42c12d3a830f69bf6465c83ec0c39f974743c3910e",
+        "value": 0.5219585103985815
+      },
+      "result": {
+        "value": 0.5584138485946146
+      },
+      "principal_contribution": {
+        "value": 15.199999809265137,
+        "feature": "packets_per_second",
+        "contribution": 0.013987375927203657
+      },
+      "summary": "packets_per_second: contribuição +0.0139874 na saída registrada.",
+      "summary_source": "deterministic",
+      "explanation": {
+        "id": "exp-b2aef3e8fe01aba0af1bf039c76bf5239c671ef4d5f252fa46846e75396d31b3",
+        "projection_revision": 1,
+        "in_incident_explanation_refs": true,
+        "record": {
+          "method": "SHAP_PERMUTATION_EXPLAINER",
+          "target": {
+            "output": "ANOMALY_SCORE",
+            "class_label": null
+          },
+          "window_id": "shap-library-fixture-C01-0",
+          "base_value": 0.5219585103985815,
+          "created_at": "2026-11-07T03:00:11+00:00",
+          "parameters": {
+            "seed": 42,
+            "output_space": "operational",
+            "permutations": 4,
+            "background_rows": 8,
+            "library_version": "0.50.0",
+            "operational_output_value": 0.5584138485946146
+          },
+          "limitations": [
+            "Attribution is not proof of causality or detector accuracy.",
+            "Feature interventions may break correlations; interpretation depends on the recorded background.",
+            "PermutationExplainer explains the serving function; contributions do not explain the total Risk score."
+          ],
+          "record_type": "explanation",
+          "detection_id": "det-b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d",
+          "output_value": 0.5584138485946146,
+          "contributions": [
+            {
+              "value": 152.0,
+              "feature": "packet_count",
+              "contribution": 0.009325397015461354
+            },
+            {
+              "value": 15808.0,
+              "feature": "bytes_total",
+              "contribution": 0.004389421719230985
+            },
+            {
+              "value": 15.199999809265137,
+              "feature": "packets_per_second",
+              "contribution": 0.013987375927203657
+            },
+            {
+              "value": 0.10000000149011612,
+              "feature": "connections_per_second",
+              "contribution": -0.0038360026776682044
+            },
+            {
+              "value": 1.0,
+              "feature": "syn_count",
+              "contribution": -0.007902052607347804
+            },
+            {
+              "value": 1.0,
+              "feature": "rst_count",
+              "contribution": -0.0030012842567821857
+            },
+            {
+              "value": 20.0,
+              "feature": "unique_dst_ports",
+              "contribution": 0.004841565985135715
+            },
+            {
+              "value": 104.0,
+              "feature": "avg_packet_size",
+              "contribution": 0.012109928399731351
+            },
+            {
+              "value": 65.78947448730469,
+              "feature": "mean_interarrival_ms",
+              "contribution": 0.006540988691068325
+            }
+          ],
+          "model_version": "if-2026-11-07T04:16:12.918049+00:00",
+          "reference_ref": "bg-643734e5bf69f9d12f91eb42c12d3a830f69bf6465c83ec0c39f974743c3910e",
+          "explanation_id": "exp-b2aef3e8fe01aba0af1bf039c76bf5239c671ef4d5f252fa46846e75396d31b3",
+          "schema_version": "1.0.0",
+          "explainer_version": "harpisense.xai.shap.v1+shap.0.50.0",
+          "input_fingerprint": "83db310ba97f5cadf259538ee25b408709db3480f06dd2c054b23c89a701fa7b",
+          "additivity_residual": -1.1102230246251565e-16,
+          "collection_session_id": "shap-library-fixture"
+        }
+      },
+      "risk_mapping": {
+        "state": "nonlinear_transform_not_additively_mapped",
+        "factor": "anomaly",
+        "formula": "100 * normal_reference_percentile if is_anomaly else 0",
+        "score_direction": "higher_is_more_anomalous",
+        "anomaly_threshold": 0.6263863883482579,
+        "anomaly_margin": -0.06797253975364326,
+        "is_anomaly": false,
+        "normal_reference_percentile": 0.81,
+        "factor_value": 0.0,
+        "recorded_factor_value": 0.0,
+        "matches_recorded_factor": true,
+        "limitation": "Contributions explain -score_samples only, not the gated empirical percentile or total Risk.",
+        "risk_score_explained": false
+      },
+      "source": "persisted_xai"
+    }
+  ],
+  "records": {
+    "detection": [
+      {
+        "id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+        "revision": 1,
+        "source": "synthetic",
+        "data": {
+          "model": {
+            "detector": "random_forest",
+            "input_dtype": "float32",
+            "model_version": "rf-71c7f03b-c7cf-4dba-92df-da613877443e"
+          },
+          "entity": {
+            "device_id": "poste-shap",
+            "source_ip": null,
+            "destination_ip": null,
+            "mqtt_client_id": null
+          },
+          "window": {
+            "end": "2026-11-07T03:00:10+00:00",
+            "start": "2026-11-07T03:00:00+00:00",
+            "sensor_id": "shap-fixture",
+            "window_id": "shap-library-fixture-C01-0",
+            "traffic_profile": "demo_tcp_ingress",
+            "collection_session_id": "shap-library-fixture",
+            "feature_schema_version": "harpisense.if.window.v1"
+          },
+          "anomaly": null,
+          "quality": {
+            "status": "VALID",
+            "valid_until": "2026-11-07T03:01:10+00:00"
+          },
+          "features": {
+            "rst_count": 1.0,
+            "syn_count": 1.0,
+            "bytes_total": 15808.0,
+            "packet_count": 152.0,
+            "avg_packet_size": 104.0,
+            "unique_dst_ports": 20.0,
+            "packets_per_second": 15.199999809265137,
+            "mean_interarrival_ms": 65.78947448730469,
+            "connections_per_second": 0.10000000149011612
+          },
+          "created_at": "2026-11-07T03:00:11+00:00",
+          "provenance": {
+            "source_id": "4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+            "source_schema": "harpisense.detection.rf.v1"
+          },
+          "record_type": "detection",
+          "detection_id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+          "classification": {
+            "confidence": 0.9615384552693282,
+            "needs_review": false,
+            "probabilities": {
+              "C01": 0.9615384552693282,
+              "normal": 0.038461544730671704
+            },
+            "accepted_class": "C01",
+            "predicted_class": "C01",
+            "attack_probability": 0.9615384552693282,
+            "confidence_threshold": 0.7
+          },
+          "schema_version": "1.0.0",
+          "block_authorized": false,
+          "input_fingerprint": "83db310ba97f5cadf259538ee25b408709db3480f06dd2c054b23c89a701fa7b"
+        }
+      },
+      {
+        "id": "det-b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d",
+        "revision": 1,
+        "source": "synthetic",
+        "data": {
+          "model": {
+            "detector": "isolation_forest",
+            "input_dtype": "float32",
+            "model_version": "if-2026-11-07T04:16:12.918049+00:00"
+          },
+          "entity": {
+            "device_id": "poste-shap",
+            "source_ip": null,
+            "destination_ip": null,
+            "mqtt_client_id": null
+          },
+          "window": {
+            "end": "2026-11-07T03:00:10+00:00",
+            "start": "2026-11-07T03:00:00+00:00",
+            "sensor_id": "shap-fixture",
+            "window_id": "shap-library-fixture-C01-0",
+            "traffic_profile": "demo_tcp_ingress",
+            "collection_session_id": "shap-library-fixture",
+            "feature_schema_version": "harpisense.if.window.v1"
+          },
+          "anomaly": {
+            "is_anomaly": false,
+            "anomaly_score": 0.5584138485946146,
+            "anomaly_margin": -0.06797253975364326,
+            "anomaly_threshold": 0.6263863883482579,
+            "normal_reference_percentile": 0.81
+          },
+          "quality": {
+            "status": "VALID",
+            "valid_until": "2026-11-07T03:01:10+00:00"
+          },
+          "features": {
+            "rst_count": 1.0,
+            "syn_count": 1.0,
+            "bytes_total": 15808.0,
+            "packet_count": 152.0,
+            "avg_packet_size": 104.0,
+            "unique_dst_ports": 20.0,
+            "packets_per_second": 15.199999809265137,
+            "mean_interarrival_ms": 65.78947448730469,
+            "connections_per_second": 0.10000000149011612
+          },
+          "created_at": "2026-11-07T03:00:11+00:00",
+          "provenance": {
+            "source_id": "b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d",
+            "source_schema": "harpisense.detection.if.v1"
+          },
+          "record_type": "detection",
+          "detection_id": "det-b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d",
+          "classification": null,
+          "schema_version": "1.0.0",
+          "block_authorized": false,
+          "input_fingerprint": "83db310ba97f5cadf259538ee25b408709db3480f06dd2c054b23c89a701fa7b"
+        }
+      }
+    ],
+    "window": [],
+    "evidence": [],
+    "network_event": [],
+    "decision": [
+      {
+        "id": "dec-8b4326cd0cea69bee5257ee3c7b3cb41c35c01f16399c9d3c343e98716b855af",
+        "revision": 1,
+        "source": "synthetic",
+        "data": {
+          "gates": {
+            "scope": "UNKNOWN",
+            "target": "UNKNOWN",
+            "evidence": "FAIL",
+            "freshness": "PASS",
+            "executor_ready": "UNKNOWN",
+            "protected_assets": "UNKNOWN"
+          },
+          "action": null,
+          "status": "OBSERVE_ONLY",
+          "approval": null,
+          "created_at": "2026-11-07T03:00:11+00:00",
+          "risk_level": null,
+          "risk_score": null,
+          "decision_id": "dec-8b4326cd0cea69bee5257ee3c7b3cb41c35c01f16399c9d3c343e98716b855af",
+          "incident_id": "inc-0f64bec5da73285dd07de3a1ff3023e0e785d0fe15e1f5ada2cdda64e4ea86e4",
+          "record_type": "decision",
+          "scenario_id": "C01",
+          "valid_until": "2026-11-07T03:02:11+00:00",
+          "reason_codes": [
+            "INCOMPLETE_RISK",
+            "NOT_CORROBORATED",
+            "GATE_EVIDENCE_FAIL",
+            "GATE_TARGET_UNKNOWN",
+            "GATE_SCOPE_UNKNOWN",
+            "GATE_PROTECTED_ASSETS_UNKNOWN",
+            "GATE_EXECUTOR_READY_UNKNOWN"
+          ],
+          "autonomy_mode": 1,
+          "evidence_refs": [],
+          "detection_refs": [
+            "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+            "det-b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d"
+          ],
+          "policy_version": "harpisense.risk-policy.v1:9a915a2fcc0824374d25",
+          "scenario_group": "Low",
+          "schema_version": "1.0.0",
+          "incident_revision": 1,
+          "action_fingerprint": null,
+          "execution_requested": false,
+          "supersedes_decision_id": null
+        }
+      }
+    ],
+    "approval": [],
+    "execution": [],
+    "verification": [],
+    "profile": [],
+    "policy": []
+  },
+  "logs": [],
+  "log_references": [],
+  "missing_links": [
+    {
+      "kind": "window",
+      "id": "shap-library-fixture-C01-0",
+      "reason": "MISSING_OR_UNPINNED"
+    },
+    {
+      "kind": "decision_snapshot",
+      "id": "dec-8b4326cd0cea69bee5257ee3c7b3cb41c35c01f16399c9d3c343e98716b855af",
+      "reason": "NO_LINKED_PROFILE_POLICY_SNAPSHOT"
+    },
+    {
+      "kind": "execution",
+      "reason": "NO_LINKED_EXECUTION_RECORD"
+    },
+    {
+      "kind": "evidence",
+      "reason": "NO_LINKED_RECORD"
+    },
+    {
+      "kind": "network_event",
+      "reason": "NO_LINKED_RECORD"
+    },
+    {
+      "kind": "approval",
+      "reason": "NO_LINKED_RECORD"
+    },
+    {
+      "kind": "verification",
+      "reason": "NO_LINKED_RECORD"
+    },
+    {
+      "kind": "profile",
+      "reason": "NO_LINKED_RECORD"
+    },
+    {
+      "kind": "policy",
+      "reason": "NO_LINKED_RECORD"
+    }
+  ],
+  "assessments": [],
+  "latest_explanations": [
+    {
+      "incident_ref": {
+        "id": "inc-0f64bec5da73285dd07de3a1ff3023e0e785d0fe15e1f5ada2cdda64e4ea86e4",
+        "revision": 1
+      },
+      "detection_id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+      "asset": {
+        "technical_id": "poste-shap",
+        "display_name": null,
+        "name_state": "unregistered",
+        "name_source": null
+      },
+      "window": {
+        "id": "shap-library-fixture-C01-0",
+        "start": "2026-11-07T03:00:00+00:00",
+        "end": "2026-11-07T03:00:10+00:00",
+        "collection_session_id": "shap-library-fixture",
+        "sensor_id": "shap-fixture"
+      },
+      "model": {
+        "detector": "random_forest",
+        "input_dtype": "float32",
+        "model_version": "rf-71c7f03b-c7cf-4dba-92df-da613877443e"
+      },
+      "method": "SHAP_PERMUTATION_EXPLAINER",
+      "explainer_version": "harpisense.xai.shap.v1+shap.0.50.0",
+      "output": {
+        "kind": "CALIBRATED_CLASS_PROBABILITY",
+        "class_label": "C01"
+      },
+      "reference": {
+        "ref": "bg-e4c53fe985e5d0237c101d80e6e47fb48d0e0fffb191e23d3bd3c5fd808090ce",
+        "value": 0.5000000032418747
+      },
+      "result": {
+        "value": 0.9615384552693282
+      },
+      "principal_contribution": {
+        "value": 15808.0,
+        "feature": "bytes_total",
+        "contribution": 0.14276574438408074
+      },
+      "summary": "bytes_total: contribuição +0.142766 na saída registrada.",
+      "summary_source": "deterministic",
+      "explanation": {
+        "id": "exp-9397ceb8545417098d80ed601fe687567d6f47c36a404f6674ccabfe3f0a3584",
+        "projection_revision": 1,
+        "in_incident_explanation_refs": true,
+        "record": {
+          "method": "SHAP_PERMUTATION_EXPLAINER",
+          "target": {
+            "output": "CALIBRATED_CLASS_PROBABILITY",
+            "class_label": "C01"
+          },
+          "window_id": "shap-library-fixture-C01-0",
+          "base_value": 0.5000000032418747,
+          "created_at": "2026-11-07T03:00:11+00:00",
+          "parameters": {
+            "seed": 42,
+            "output_space": "operational",
+            "permutations": 4,
+            "background_rows": 8,
+            "library_version": "0.50.0",
+            "operational_output_value": 0.9615384552693282
+          },
+          "limitations": [
+            "Attribution is not proof of causality or detector accuracy.",
+            "Feature interventions may break correlations; interpretation depends on the recorded background.",
+            "PermutationExplainer explains the serving function; contributions do not explain the total Risk score."
+          ],
+          "record_type": "explanation",
+          "detection_id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+          "output_value": 0.9615384552693282,
+          "contributions": [
+            {
+              "value": 152.0,
+              "feature": "packet_count",
+              "contribution": 0.1070505470622351
+            },
+            {
+              "value": 15808.0,
+              "feature": "bytes_total",
+              "contribution": 0.14276574438408074
+            },
+            {
+              "value": 15.199999809265137,
+              "feature": "packets_per_second",
+              "contribution": 0.0756908265668579
+            },
+            {
+              "value": 0.10000000149011612,
+              "feature": "connections_per_second",
+              "contribution": 0.0
+            },
+            {
+              "value": 1.0,
+              "feature": "syn_count",
+              "contribution": 0.0
+            },
+            {
+              "value": 1.0,
+              "feature": "rst_count",
+              "contribution": 0.0
+            },
+            {
+              "value": 20.0,
+              "feature": "unique_dst_ports",
+              "contribution": 0.02331922089778446
+            },
+            {
+              "value": 104.0,
+              "feature": "avg_packet_size",
+              "contribution": 0.0
+            },
+            {
+              "value": 65.78947448730469,
+              "feature": "mean_interarrival_ms",
+              "contribution": 0.11271211311649527
+            }
+          ],
+          "model_version": "rf-71c7f03b-c7cf-4dba-92df-da613877443e",
+          "reference_ref": "bg-e4c53fe985e5d0237c101d80e6e47fb48d0e0fffb191e23d3bd3c5fd808090ce",
+          "explanation_id": "exp-9397ceb8545417098d80ed601fe687567d6f47c36a404f6674ccabfe3f0a3584",
+          "schema_version": "1.0.0",
+          "explainer_version": "harpisense.xai.shap.v1+shap.0.50.0",
+          "input_fingerprint": "83db310ba97f5cadf259538ee25b408709db3480f06dd2c054b23c89a701fa7b",
+          "additivity_residual": 1.1102230246251565e-16,
+          "collection_session_id": "shap-library-fixture"
+        }
+      },
+      "risk_mapping": {
+        "state": "affine_transform",
+        "factor": "detection",
+        "formula": "100 * P(scenario_id)",
+        "scenario_id": "C01",
+        "source_probability": 0.9615384552693282,
+        "scale": 100,
+        "offset": 0,
+        "rounding": {
+          "mode": "ROUND_HALF_UP",
+          "decimal_places": 6
+        },
+        "factor_value": 96.153846,
+        "recorded_factor_value": 96.153846,
+        "matches_recorded_factor": true,
+        "risk_score_explained": false
+      },
+      "source": "persisted_xai"
+    },
+    {
+      "incident_ref": {
+        "id": "inc-0f64bec5da73285dd07de3a1ff3023e0e785d0fe15e1f5ada2cdda64e4ea86e4",
+        "revision": 1
+      },
+      "detection_id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+      "asset": {
+        "technical_id": "poste-shap",
+        "display_name": null,
+        "name_state": "unregistered",
+        "name_source": null
+      },
+      "window": {
+        "id": "shap-library-fixture-C01-0",
+        "start": "2026-11-07T03:00:00+00:00",
+        "end": "2026-11-07T03:00:10+00:00",
+        "collection_session_id": "shap-library-fixture",
+        "sensor_id": "shap-fixture"
+      },
+      "model": {
+        "detector": "random_forest",
+        "input_dtype": "float32",
+        "model_version": "rf-71c7f03b-c7cf-4dba-92df-da613877443e"
+      },
+      "method": "SHAP_TREE_EXPLAINER",
+      "explainer_version": "harpisense.xai.shap.v1+shap.0.50.0",
+      "output": {
+        "kind": "RAW_CLASS_PROBABILITY",
+        "class_label": "C01"
+      },
+      "reference": {
+        "ref": "bg-e4c53fe985e5d0237c101d80e6e47fb48d0e0fffb191e23d3bd3c5fd808090ce",
+        "value": 0.5000000000000001
+      },
+      "result": {
+        "value": 1.0
+      },
+      "principal_contribution": {
+        "value": 15808.0,
+        "feature": "bytes_total",
+        "contribution": 0.15000000223517418
+      },
+      "summary": "bytes_total: contribuição +0.15 na saída registrada.",
+      "summary_source": "deterministic",
+      "explanation": {
+        "id": "exp-97edd7f328a563771006b9361e6de6a443b93731235e5580b28b864894002ef2",
+        "projection_revision": 1,
+        "in_incident_explanation_refs": true,
+        "record": {
+          "method": "SHAP_TREE_EXPLAINER",
+          "target": {
+            "output": "RAW_CLASS_PROBABILITY",
+            "class_label": "C01"
+          },
+          "window_id": "shap-library-fixture-C01-0",
+          "base_value": 0.5000000000000001,
+          "created_at": "2026-11-07T03:00:11+00:00",
+          "parameters": {
+            "seed": 42,
+            "output_space": "raw_pre_calibration",
+            "permutations": null,
+            "background_rows": 8,
+            "library_version": "0.50.0",
+            "operational_output_value": 0.9615384552693282
+          },
+          "limitations": [
+            "Attribution is not proof of causality or detector accuracy.",
+            "Feature interventions may break correlations; interpretation depends on the recorded background.",
+            "TreeExplainer explains the original RF probability before calibration, not the calibrated probability supplied to Risk."
+          ],
+          "record_type": "explanation",
+          "detection_id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+          "output_value": 1.0,
+          "contributions": [
+            {
+              "value": 152.0,
+              "feature": "packet_count",
+              "contribution": 0.07500000111758709
+            },
+            {
+              "value": 15808.0,
+              "feature": "bytes_total",
+              "contribution": 0.15000000223517418
+            },
+            {
+              "value": 15.199999809265137,
+              "feature": "packets_per_second",
+              "contribution": 0.10000000149011612
+            },
+            {
+              "value": 0.10000000149011612,
+              "feature": "connections_per_second",
+              "contribution": 0.0
+            },
+            {
+              "value": 1.0,
+              "feature": "syn_count",
+              "contribution": 0.0
+            },
+            {
+              "value": 1.0,
+              "feature": "rst_count",
+              "contribution": 0.0
+            },
+            {
+              "value": 20.0,
+              "feature": "unique_dst_ports",
+              "contribution": 0.05000000074505806
+            },
+            {
+              "value": 104.0,
+              "feature": "avg_packet_size",
+              "contribution": 0.0
+            },
+            {
+              "value": 65.78947448730469,
+              "feature": "mean_interarrival_ms",
+              "contribution": 0.12500000186264515
+            }
+          ],
+          "model_version": "rf-71c7f03b-c7cf-4dba-92df-da613877443e",
+          "reference_ref": "bg-e4c53fe985e5d0237c101d80e6e47fb48d0e0fffb191e23d3bd3c5fd808090ce",
+          "explanation_id": "exp-97edd7f328a563771006b9361e6de6a443b93731235e5580b28b864894002ef2",
+          "schema_version": "1.0.0",
+          "explainer_version": "harpisense.xai.shap.v1+shap.0.50.0",
+          "input_fingerprint": "83db310ba97f5cadf259538ee25b408709db3480f06dd2c054b23c89a701fa7b",
+          "additivity_residual": -7.45058070794613e-09,
+          "collection_session_id": "shap-library-fixture"
+        }
+      },
+      "risk_mapping": {
+        "state": "raw_output_not_operational",
+        "risk_score_explained": false,
+        "limitation": "Original RF probability before calibration; not the calibrated Risk input."
+      },
+      "source": "persisted_xai"
+    },
+    {
+      "incident_ref": {
+        "id": "inc-0f64bec5da73285dd07de3a1ff3023e0e785d0fe15e1f5ada2cdda64e4ea86e4",
+        "revision": 1
+      },
+      "detection_id": "det-b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d",
+      "asset": {
+        "technical_id": "poste-shap",
+        "display_name": null,
+        "name_state": "unregistered",
+        "name_source": null
+      },
+      "window": {
+        "id": "shap-library-fixture-C01-0",
+        "start": "2026-11-07T03:00:00+00:00",
+        "end": "2026-11-07T03:00:10+00:00",
+        "collection_session_id": "shap-library-fixture",
+        "sensor_id": "shap-fixture"
+      },
+      "model": {
+        "detector": "isolation_forest",
+        "input_dtype": "float32",
+        "model_version": "if-2026-11-07T04:16:12.918049+00:00"
+      },
+      "method": "SHAP_PERMUTATION_EXPLAINER",
+      "explainer_version": "harpisense.xai.shap.v1+shap.0.50.0",
+      "output": {
+        "kind": "ANOMALY_SCORE",
+        "class_label": null
+      },
+      "reference": {
+        "ref": "bg-643734e5bf69f9d12f91eb42c12d3a830f69bf6465c83ec0c39f974743c3910e",
+        "value": 0.5219585103985815
+      },
+      "result": {
+        "value": 0.5584138485946146
+      },
+      "principal_contribution": {
+        "value": 15.199999809265137,
+        "feature": "packets_per_second",
+        "contribution": 0.013987375927203657
+      },
+      "summary": "packets_per_second: contribuição +0.0139874 na saída registrada.",
+      "summary_source": "deterministic",
+      "explanation": {
+        "id": "exp-b2aef3e8fe01aba0af1bf039c76bf5239c671ef4d5f252fa46846e75396d31b3",
+        "projection_revision": 1,
+        "in_incident_explanation_refs": true,
+        "record": {
+          "method": "SHAP_PERMUTATION_EXPLAINER",
+          "target": {
+            "output": "ANOMALY_SCORE",
+            "class_label": null
+          },
+          "window_id": "shap-library-fixture-C01-0",
+          "base_value": 0.5219585103985815,
+          "created_at": "2026-11-07T03:00:11+00:00",
+          "parameters": {
+            "seed": 42,
+            "output_space": "operational",
+            "permutations": 4,
+            "background_rows": 8,
+            "library_version": "0.50.0",
+            "operational_output_value": 0.5584138485946146
+          },
+          "limitations": [
+            "Attribution is not proof of causality or detector accuracy.",
+            "Feature interventions may break correlations; interpretation depends on the recorded background.",
+            "PermutationExplainer explains the serving function; contributions do not explain the total Risk score."
+          ],
+          "record_type": "explanation",
+          "detection_id": "det-b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d",
+          "output_value": 0.5584138485946146,
+          "contributions": [
+            {
+              "value": 152.0,
+              "feature": "packet_count",
+              "contribution": 0.009325397015461354
+            },
+            {
+              "value": 15808.0,
+              "feature": "bytes_total",
+              "contribution": 0.004389421719230985
+            },
+            {
+              "value": 15.199999809265137,
+              "feature": "packets_per_second",
+              "contribution": 0.013987375927203657
+            },
+            {
+              "value": 0.10000000149011612,
+              "feature": "connections_per_second",
+              "contribution": -0.0038360026776682044
+            },
+            {
+              "value": 1.0,
+              "feature": "syn_count",
+              "contribution": -0.007902052607347804
+            },
+            {
+              "value": 1.0,
+              "feature": "rst_count",
+              "contribution": -0.0030012842567821857
+            },
+            {
+              "value": 20.0,
+              "feature": "unique_dst_ports",
+              "contribution": 0.004841565985135715
+            },
+            {
+              "value": 104.0,
+              "feature": "avg_packet_size",
+              "contribution": 0.012109928399731351
+            },
+            {
+              "value": 65.78947448730469,
+              "feature": "mean_interarrival_ms",
+              "contribution": 0.006540988691068325
+            }
+          ],
+          "model_version": "if-2026-11-07T04:16:12.918049+00:00",
+          "reference_ref": "bg-643734e5bf69f9d12f91eb42c12d3a830f69bf6465c83ec0c39f974743c3910e",
+          "explanation_id": "exp-b2aef3e8fe01aba0af1bf039c76bf5239c671ef4d5f252fa46846e75396d31b3",
+          "schema_version": "1.0.0",
+          "explainer_version": "harpisense.xai.shap.v1+shap.0.50.0",
+          "input_fingerprint": "83db310ba97f5cadf259538ee25b408709db3480f06dd2c054b23c89a701fa7b",
+          "additivity_residual": -1.1102230246251565e-16,
+          "collection_session_id": "shap-library-fixture"
+        }
+      },
+      "risk_mapping": {
+        "state": "nonlinear_transform_not_additively_mapped",
+        "factor": "anomaly",
+        "formula": "100 * normal_reference_percentile if is_anomaly else 0",
+        "score_direction": "higher_is_more_anomalous",
+        "anomaly_threshold": 0.6263863883482579,
+        "anomaly_margin": -0.06797253975364326,
+        "is_anomaly": false,
+        "normal_reference_percentile": 0.81,
+        "factor_value": 0.0,
+        "recorded_factor_value": 0.0,
+        "matches_recorded_factor": true,
+        "limitation": "Contributions explain -score_samples only, not the gated empirical percentile or total Risk.",
+        "risk_score_explained": false
+      },
+      "source": "persisted_xai"
+    }
+  ],
+  "activity": [],
+  "analysis_states": [
+    {
+      "detection_id": "det-4d2e1c5411fef22a33d47f5ecc474981db2b3cd76837796b3741210db7137398",
+      "state": "available",
+      "reason_code": null
+    },
+    {
+      "detection_id": "det-b4fe93e1186e1c9acc59afeaa3b5dd7f64b366a28536655a4a72cffdb3bcfb6d",
+      "state": "available",
+      "reason_code": null
+    }
+  ],
+  "commands": {
+    "assessment_available": true,
+    "approval_available": false,
+    "execution_available": false,
+    "defense_unavailable_reason": "Admissão e executor operacional ainda não integrados."
+  },
+  "read_only": true
+}

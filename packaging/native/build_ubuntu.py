@@ -28,6 +28,11 @@ def main():
                     ignore=shutil.ignore_patterns('__pycache__'))
     shutil.copytree(ROOT/'backend/domain/harpisense_engines', stage/'backend/domain/harpisense_engines',
                     ignore=shutil.ignore_patterns('__pycache__'))
+    for name in ('harpisense_data','harpisense_rf','harpisense_if','harpisense_xai'):
+        shutil.copytree(ROOT/'backend/domain'/name,stage/'backend/domain'/name,
+                        ignore=shutil.ignore_patterns('__pycache__'))
+    shutil.copytree(ROOT/'backend/detection_composition',stage/'backend/detection_composition',
+                    ignore=shutil.ignore_patterns('__pycache__'))
     shutil.copyfile(ROOT/'backend/domain/harpisense_catalog.py', stage/'backend/domain/harpisense_catalog.py')
     (stage/'backend/native_server/build_info.json').write_text(json.dumps({
         'package_version': os.environ.get('HARPISENSE_PACKAGE_VERSION', 'development'),
@@ -36,7 +41,8 @@ def main():
     shutil.copytree(ROOT/'genai/harpia', stage/'genai/harpia', ignore=shutil.ignore_patterns('__pycache__'))
     requirements = []
     for name in ('backend/delivery/requirements.txt', 'backend/config_manager/requirements.txt',
-                 'backend/admin_auth/requirements-mfa.txt'):
+                 'backend/admin_auth/requirements-mfa.txt',
+                 'backend/domain/requirements-scientific.txt'):
         requirements.extend((ROOT/name).read_text().splitlines())
     requirements.append('paho-mqtt==2.1.0')
     (stage/'requirements.lock').write_text('\n'.join(requirements) + '\n')

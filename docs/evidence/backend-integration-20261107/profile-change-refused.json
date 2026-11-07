@@ -1,0 +1,211 @@
+{
+  "detail": {
+    "code": "QUEUE_UNVERIFIED",
+    "message": "Estado das pendências operacionais não verificado.",
+    "pending": {
+      "reliable": false,
+      "blockers": [],
+      "cases": {
+        "status": "unknown",
+        "known_active_count": 0,
+        "count_basis": "source_item",
+        "coverage": "unknown",
+        "sources": [
+          {
+            "source": "anomaly",
+            "source_revision": null,
+            "observed_at": null,
+            "fresh": false,
+            "valid": false,
+            "complete": false
+          },
+          {
+            "source": "incident",
+            "source_revision": null,
+            "observed_at": null,
+            "fresh": false,
+            "valid": false,
+            "complete": false
+          }
+        ],
+        "items": []
+      },
+      "sources": [
+        {
+          "source": "anomaly",
+          "source_revision": null,
+          "observed_at": null,
+          "fresh": false,
+          "valid": false,
+          "complete": false
+        },
+        {
+          "source": "approval",
+          "source_revision": null,
+          "observed_at": null,
+          "fresh": false,
+          "valid": false,
+          "complete": false
+        },
+        {
+          "source": "execution",
+          "source_revision": null,
+          "observed_at": null,
+          "fresh": false,
+          "valid": false,
+          "complete": false
+        },
+        {
+          "source": "incident",
+          "source_revision": null,
+          "observed_at": null,
+          "fresh": false,
+          "valid": false,
+          "complete": false
+        },
+        {
+          "source": "verification",
+          "source_revision": null,
+          "observed_at": null,
+          "fresh": false,
+          "valid": false,
+          "complete": false
+        }
+      ],
+      "dependency": "Fontes autoritativas ausentes, desconhecidas ou desatualizadas: anomaly, approval, execution, incident, verification"
+    },
+    "current_revision": 1,
+    "current": {
+      "value": {
+        "operation": "IDS",
+        "autonomy_mode": 1,
+        "execution_enabled": false
+      },
+      "revision": 1,
+      "emergency_stopped": false,
+      "updated_at": "2026-11-07T15:35:14.360470-03:00",
+      "pending": {
+        "reliable": false,
+        "blockers": [],
+        "cases": {
+          "status": "unknown",
+          "known_active_count": 0,
+          "count_basis": "source_item",
+          "coverage": "unknown",
+          "sources": [
+            {
+              "source": "anomaly",
+              "source_revision": null,
+              "observed_at": null,
+              "fresh": false,
+              "valid": false,
+              "complete": false
+            },
+            {
+              "source": "incident",
+              "source_revision": null,
+              "observed_at": null,
+              "fresh": false,
+              "valid": false,
+              "complete": false
+            }
+          ],
+          "items": []
+        },
+        "sources": [
+          {
+            "source": "anomaly",
+            "source_revision": null,
+            "observed_at": null,
+            "fresh": false,
+            "valid": false,
+            "complete": false
+          },
+          {
+            "source": "approval",
+            "source_revision": null,
+            "observed_at": null,
+            "fresh": false,
+            "valid": false,
+            "complete": false
+          },
+          {
+            "source": "execution",
+            "source_revision": null,
+            "observed_at": null,
+            "fresh": false,
+            "valid": false,
+            "complete": false
+          },
+          {
+            "source": "incident",
+            "source_revision": null,
+            "observed_at": null,
+            "fresh": false,
+            "valid": false,
+            "complete": false
+          },
+          {
+            "source": "verification",
+            "source_revision": null,
+            "observed_at": null,
+            "fresh": false,
+            "valid": false,
+            "complete": false
+          }
+        ],
+        "dependency": "Fontes autoritativas ausentes, desconhecidas ou desatualizadas: anomaly, approval, execution, incident, verification"
+      },
+      "observed_at": "2026-11-07T18:35:19.285999+00:00",
+      "cases": {
+        "status": "unknown",
+        "known_active_count": 0,
+        "count_basis": "source_item",
+        "coverage": "unknown",
+        "sources": [
+          {
+            "source": "anomaly",
+            "source_revision": null,
+            "observed_at": null,
+            "fresh": false,
+            "valid": false,
+            "complete": false
+          },
+          {
+            "source": "incident",
+            "source_revision": null,
+            "observed_at": null,
+            "fresh": false,
+            "valid": false,
+            "complete": false
+          }
+        ],
+        "items": []
+      },
+      "real_execution_blocked": true,
+      "executor": "isolated_simulation_only",
+      "change_allowed": false,
+      "effective_state": {
+        "applied_profile": "M1",
+        "control_revision": 1,
+        "executor": "isolated_simulation_only",
+        "availability": "real_executor_unavailable",
+        "execution_enabled": false,
+        "updated_at": "2026-11-07T15:35:14.360470-03:00",
+        "operational_visibility": "unknown_or_partial",
+        "blockers": [],
+        "change_allowed": false,
+        "containment_confirmed": false,
+        "executor_state": {
+          "status": "not_integrated",
+          "available": false,
+          "observed_at": null,
+          "source": null,
+          "blockers": [
+            "REAL_EXECUTOR_NOT_INTEGRATED"
+          ]
+        }
+      }
+    }
+  }
+}
