@@ -59,6 +59,81 @@ deve persistir essa cópia na decisão. O simulador existente persiste a cópia 
 resultado junto de `trial.simulated=true`, sem alterar incidente/origem global.
 Decisões antigas sem snapshot não devem receber retroativamente o perfil atual.
 
+### Casos, frescor e encerramento explícito
+
+GET de controles e `operational_controls` no health incluem `cases`:
+
+```json
+{
+  "status": "unknown",
+  "known_active_count": 0,
+  "count_basis": "source_item",
+  "coverage": "unknown",
+  "sources": [],
+  "items": []
+}
+```
+
+`status` é `active`, `none_active`, `partial` ou `unknown`. Somente `none_active`
+autoriza o texto “Sem casos ativos”. `active` tem precedência sobre perda de
+cobertura; `coverage` continua mostrando `complete/partial/unknown` separadamente.
+Zero itens conhecidos com cobertura desconhecida não comprova ausência. Quando
+o adapter inteiro está indisponível, `known_active_count=null` explicita a ausência.
+As fontes de casos são `incident` e `anomaly`; um ataque deve ter vínculo real
+com o item do produtor, nunca um seletor global. Aprovação/execução/verificação
+bloqueiam a troca, mas não inflam a contagem de casos.
+
+Cada fonte informa `source/source_revision/observed_at/fresh/valid/complete`.
+Cada item ativo informa `source/record_id/source_revision/state/fresh`; somente
+se o produtor fornecer revisão real do item haverá `record_revision`. Não
+inventar essa revisão a partir da revisão do snapshot. `known_active_count`
+conta itens por fonte; não é contagem deduplicada de incidentes entre fontes.
+Deduplicação exige vínculo explícito de IDs que ainda pertence ao produtor.
+
+A validade atual usa o prazo existente de 30 segundos. Itens ativos de relatório
+vencido continuam em `items` e `blockers`. Um produtor não pode substituir ativo
+por snapshot vazio: `report` recusa `ACTIVE_ITEM_REQUIRES_CLOSURE`. Deve publicar
+o mesmo ID com estado encerrado e revisão de snapshot maior; depois esse histórico
+pode ser omitido. `UNKNOWN`, fonte ausente, inválida ou vencida torna a autoridade
+não confiável e Aplicar recusa. Nenhuma rota browser publica esses snapshots.
+
+`effective_state.executor_state` informa `not_integrated/available=false`,
+`observed_at=null/source=null` e bloqueio `REAL_EXECUTOR_NOT_INTEGRATED` nesta
+composição. É uma ausência explícita: nenhum serviço executor real foi inventado,
+nem um heartbeat de PostgreSQL/MQTT tratado como prontidão de contenção.
+
+Parada não consulta a autoridade operacional: sua resposta marca a visibilidade
+de casos `unknown`, não encerra nenhum item e nunca retorna `none_active` por
+inferência. O consumidor deve conservar os fatos ativos já conhecidos até uma
+leitura autoritativa com encerramento; GET subsequente continua vendo esses itens.
+
+### Empacotamento e aceite por runtime
+
+Não há dependências novas nesta entrega. `delivery` já integra o congelamento
+Windows (`--collect-all delivery`) e a cópia Ubuntu; a migração existente
+`002_operational_authority.sql` já é executada por `prepare_database` e incluída
+em ambos os pacotes. Não há novo serviço, variável de configuração, cron ou
+comando de manutenção para o usuário final. Os produtores reais ainda precisam
+ser conectados pelos responsáveis: não criar um serviço de heartbeat que declare
+atividade vazia sem observar as fontes. Sem integração o painel mostra cobertura
+desconhecida e a troca permanece recusada.
+
+O ensaio `packaging/native/acceptance_controls.py` usa cluster PostgreSQL nativo
+descartável, porta própria e o provisionamento compartilhado dos instaladores,
+incluindo repetição de configuração. Testa contratos HTTP autenticados, transações,
+recusa auditada, concorrência entre conexões, histórico e perda de comunicação.
+Não registra serviços nem altera instalação existente. Evidência sanitizada:
+[resultado](evidence/control-state/native-postgresql.json) e
+[testes](evidence/control-state/tests.txt).
+
+| Alvo de aceite | Evidência desta entrega | Falta para aceite completo |
+| --- | --- | --- |
+| Prévia 5174 | Preservada em a8fef1f; contrato alinhado com Codex | Integrar commit em prévia isolada e validar telas com casos/frescor reais |
+| Windows nativo | PostgreSQL sem Docker, provisionamento/configuração repetida, HTTP e concorrência | Novo EXE, máquina limpa sem Docker, instalação, reboot, serviços automáticos e login admin no painel sem comandos |
+| Ubuntu nativo | Código e dependências existentes contemplam o módulo e SQL | Novo .run, execução Ubuntu limpa sem Docker, instalação, reboot, serviços automáticos e login admin no painel sem comandos |
+
+O resultado não homologa executor real, contenção nem os novos instaladores.
+
 ## Matriz de aceitação para as entregas coordenadas
 
 | Cenário | Resultado exigido |
