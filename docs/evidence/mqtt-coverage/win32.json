@@ -1,0 +1,21 @@
+{
+  "platform": "win32",
+  "docker": false,
+  "clean_os": false,
+  "reboot": false,
+  "services_autostart": "not_tested",
+  "admin_login": "not_tested",
+  "new_dependencies": [],
+  "checks": [
+    "suback_without_message_unknown",
+    "mqtt_to_exact_persisted_projection",
+    "simulated_origin_preserved_in_postgresql",
+    "duplicate_does_not_renew_sample_time",
+    "disconnect_preserves_evidence",
+    "automatic_tls_reconnect_resubscribe",
+    "qos_retries_one_revision",
+    "old_revision_retry_cannot_claim_freshness"
+  ],
+  "result": "passed",
+  "source_sha256": "21cea39ecf6a9640342c0c5015112779b74610ae6536eddb432fb2df3ec3319d"
+}
