@@ -7,6 +7,11 @@ Node e Vite não são requisitos de execução do produto.
 
 ## Artefatos
 
+Atual: [candidata 4](https://github.com/originalrafaela/harpisense/releases/tag/native-installers-20261106-candidate.4),
+fonte `52a61ef`, [hashes verificados](../../docs/evidence/native-installers/published-assets-candidate4.json).
+Corrige espera pela escuta MQTT local. Regressão e builds aprovados;
+instalação/reboot/conta no novo reteste desta versão ainda pendentes.
+
 Reteste manual posterior da candidata 3: **falhou na instalação**, por corrida
 entre início do broker local e verificação MQTT. [Registro](../../docs/evidence/native-installers/ubuntu-candidate3-retest-failure/README.md).
 A candidata 4 aguarda a escuta local com prazo limitado, preservando falhas

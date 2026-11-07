@@ -1,0 +1,33 @@
+{
+  "branch": "feat/native-installers",
+  "commit": "52a61ef803ca090121ceeb0bd6c3aed108d61f3b",
+  "release": "https://github.com/originalrafaela/harpisense/releases/tag/native-installers-20261106-candidate.4",
+  "prerelease": true,
+  "clean_os_installation_approved": false,
+  "assets": [
+    {
+      "name": "HarpiSense-Setup-Windows-x64.exe",
+      "size": 166051261,
+      "sha256": "749b14a06db1a47a4e032d0669145a471d8588430782d7b1a8a0e5345770b8c3",
+      "download": "https://github.com/originalrafaela/harpisense/releases/download/native-installers-20261106-candidate.4/HarpiSense-Setup-Windows-x64.exe"
+    },
+    {
+      "name": "HarpiSense-Setup-Windows-x64.exe.sha256",
+      "size": 100,
+      "sha256": "a81f43d64399537a36420e0ec2933b077efcfc14ded311924fe59682e54da811",
+      "download": "https://github.com/originalrafaela/harpisense/releases/download/native-installers-20261106-candidate.4/HarpiSense-Setup-Windows-x64.exe.sha256"
+    },
+    {
+      "name": "HarpiSense-Setup-Ubuntu-24.04-x86_64.run",
+      "size": 17213910,
+      "sha256": "ec6b3dc27850fa4653a6218c78604023c0e9ee09913022bc02f36c49255ca11d",
+      "download": "https://github.com/originalrafaela/harpisense/releases/download/native-installers-20261106-candidate.4/HarpiSense-Setup-Ubuntu-24.04-x86_64.run"
+    },
+    {
+      "name": "HarpiSense-Setup-Ubuntu-24.04-x86_64.run.sha256",
+      "size": 108,
+      "sha256": "6f8d2aa0b2102185e9415e16b2e14cf13f8ddf1cce17907c21cc5c5aa48b8e1b",
+      "download": "https://github.com/originalrafaela/harpisense/releases/download/native-installers-20261106-candidate.4/HarpiSense-Setup-Ubuntu-24.04-x86_64.run.sha256"
+    }
+  ]
+}

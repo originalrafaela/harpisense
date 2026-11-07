@@ -53,7 +53,28 @@ esgotado e ausência de repetição para erros TLS/autenticação. Isso não sub
 o novo ensaio real da candidata 4. Nenhuma suíte já aprovada foi repetida
 sem relação com a mudança.
 
-Preservação adicional solicitada: snapshot
-`candidate3-install-failed-preserved-20261106`. Aguardar callback de sucesso
-antes de restaurar `Snapshot 1`. Os discos da tentativa anterior e releases
-1–3 permanecem preservados. A próxima instalação deve partir do snapshot limpo.
+Preservação adicional concluída: snapshot
+`candidate3-install-failed-preserved-20261106`, UID 2. Callback de sucesso
+confirmado às 21:40:01 UTC, antes da restauração de `Snapshot 1`.
+Árvore preservada em `snapshots.vmsd`. Os discos da tentativa anterior e
+releases 1–3 permanecem preservados.
+
+## Candidata 4 preparada
+
+Fonte/build: commit `52a61ef`. Release
+[native-installers-20261106-candidate.4](https://github.com/originalrafaela/harpisense/releases/tag/native-installers-20261106-candidate.4).
+Recibo: [published-assets-candidate4.json](../published-assets-candidate4.json),
+quatro digests conferidos contra o GitHub. Windows congelado passou em
+`RUNTIME_IMPORTS_OK`. Builds concluídos; logs locais `.native-build/candidate4-*`.
+
+- SHA-256 Ubuntu: `ec6b3dc27850fa4653a6218c78604023c0e9ee09913022bc02f36c49255ca11d`.
+- SHA-256 Windows: `749b14a06db1a47a4e032d0669145a471d8588430782d7b1a8a0e5345770b8c3`.
+
+VM restaurada somente após preservar a falha, iniciada e reconfirmada por SSH
+com UUID/hostname/IP originais, cloud-init concluído e ausência de
+`/opt/harpisense` e `/var/lib/harpisense`. Candidata 4 baixada por HTTPS em
+`/home/trial/harpisense-teste/candidate4`; hash fixado e checksum publicado
+retornaram OK. **Instalação candidata 4 ainda não executada**: usuário está
+repetindo o fluxo interativamente por SSH. Nenhuma aprovação funcional é
+transferida da candidata anterior. Não criar conta de aceitação em paralelo
+ao primeiro acesso do usuário.

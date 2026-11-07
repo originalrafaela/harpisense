@@ -1,5 +1,12 @@
 # Retomada amanhã — instaladores Ubuntu — pausa em 2026-11-06
 
+Atualização mais recente: reteste manual da candidata 3 revelou corrida MQTT
+na instalação. [Falha preservada e candidata 4 pronta](evidence/native-installers/ubuntu-candidate3-retest-failure/README.md).
+Nova VM `harpisense-ubuntu-reteste`, `192.168.155.149`, restaurada ao snapshot
+limpo `Snapshot 1`; falha guardada em snapshot separado. Candidata 4 baixada
+e conferida em `~/harpisense-teste/candidate4`, aguardando instalação
+interativa pelo usuário. Não executar bootstrap de aceitação em paralelo.
+
 Atualização após retomada autorizada em 2026-11-06:
 [candidata 3 e ensaio Ubuntu aprovado](evidence/native-installers/ubuntu-candidate3-trial/README.md).
 Backend integrado, nova release publicada, VM Ubuntu encerrada e snapshots
