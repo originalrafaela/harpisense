@@ -5,6 +5,7 @@ Never copy broker configuration/passwords or a PostgreSQL data directory.
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -21,6 +22,10 @@ def main():
     parser.add_argument('--winsw', required=True, type=Path)
     parser.add_argument('--vc-redist', required=True, type=Path)
     args = parser.parse_args()
+    info = ROOT/'.native-build/build-info.json'
+    info.parent.mkdir(parents=True,exist_ok=True)
+    info.write_text(json.dumps({'package_version': os.environ.get('HARPISENSE_PACKAGE_VERSION','development'),
+        'source_commit': subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()}),encoding='utf-8')
     stage = ROOT/('.native-build/payload-' + str(time.time_ns()))
     if not (ROOT/'frontend/dist/index.html').is_file():
         raise SystemExit('Build frontend before packaging')
@@ -30,11 +35,12 @@ def main():
               '--paths', str(ROOT/'backend'), '--paths', str(ROOT/'backend/domain'),
               '--paths', str(ROOT/'genai'), '--paths', str(ROOT/'packaging/native')]
     packages = ['native_server', 'delivery', 'admin_auth', 'config_manager',
-                'harpia', 'harpisense_contracts', 'uvicorn', 'psycopg', 'psycopg_binary',
+                'harpia', 'harpisense_contracts', 'harpisense_engines', 'uvicorn', 'psycopg', 'psycopg_binary',
                 'jsonschema', 'qrcode', 'paho.mqtt']
     collect = [item for package in packages for item in ('--collect-all', package)]
     collect += ['--hidden-import', 'harpisense_catalog', '--hidden-import', 'runtime_check']
-    data = ['--add-data', str(ROOT/'frontend/dist') + ';frontend/dist']
+    data = ['--add-data', str(ROOT/'frontend/dist') + ';frontend/dist',
+            '--add-data',str(info)+';native_server']
     for package in ('delivery', 'admin_auth', 'config_manager', 'native_server'):
         for source in (ROOT/'backend'/package).glob('*.sql'):
             data += ['--add-data', str(source) + ';backend/' + package]

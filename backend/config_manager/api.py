@@ -87,8 +87,21 @@ def install_config_api(app, store, *, installation_id, presentation=None, mqtt_o
     if require_admin is None or getattr(app.state, 'config_api_installed', False):
         raise RuntimeError('Existing admin session installation required; install once')
     setup = SetupStore(store)
+    from .assets import AssetStore, SAVE as ASSET_SAVE
+    assets = AssetStore(store)
     router = APIRouter(prefix='/api/v1/config', route_class=SafeRoute,
                        dependencies=[Depends(require_admin)])
+
+    @router.get('/assets')
+    def list_assets():
+        return assets.list(installation_id)
+
+    @router.post('/assets')
+    async def save_asset(request: Request, actor=Depends(require_admin)):
+        value = await body(request, ASSET_SAVE)
+        if isinstance(value, JSONResponse):
+            return value
+        return assets.save(installation_id, actor, value)
 
     def preparation_state(result):
         if presentation:

@@ -57,6 +57,8 @@ class Controls:
 
     def change(self, *, value, expected_revision, reason, actor):
         value = canonical_operation(value)
+        # Executor is derived from the selected operation, never a second switch.
+        value = {**value, 'execution_enabled': value['operation'] == 'SIMULATION'}
         if 'revision' in value or type(expected_revision) is not int or expected_revision < 1:
             raise ValueError('Use expected_revision fora do valor canônico')
         failure = None

@@ -55,14 +55,24 @@ def build_native_app(state, frontend):
         protection_key=Path(state['key_file']).read_bytes().strip(),
         allowed_origins=[state['panel_url']], technical_credentials=credentials)
     store = PostgresStore(state['dsn'])
+    config = ConfigStore(store._connect, capabilities(state))
+    from config_manager.presentation import PresentationApplicator
+    presentation = PresentationApplicator(config, state['installation_id'],
+                                          Path(state['key_file']).parent/'presentation')
+    presentation.recover()
     from .observation import mqtt_observation
-    install_config_api(api, ConfigStore(store._connect, capabilities(state)),
+    install_config_api(api, config,
                        installation_id=state['installation_id'],
+                       presentation=presentation,
                        mqtt_observer=lambda: mqtt_observation(state))
 
     @api.get('/api/v1/native/status', dependencies=[Depends(api.state.require_admin_session)])
     def status():
+        info = Path(__file__).with_name('build_info.json')
+        build = json.loads(info.read_text(encoding='utf-8')) if info.is_file() else {
+            'package_version':'development','source_commit':None}
         return {'server': 'installed', 'platform': os.name, 'mqtt_mode': state['mqtt']['mode'],
+                'build': build,
                 'capture': 'not_verified', 'containment': 'not_available',
                 'rf': 'not_verified', 'if': 'not_verified', 'operational': False}
 

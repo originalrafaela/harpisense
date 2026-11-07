@@ -71,7 +71,7 @@ class Probe:
             return result.fetchall() if result.description else None
 
     def reset(self):
-        self.sql('TRUNCATE hs_admin_mfa_challenge,hs_admin_recovery_code,hs_admin_mfa,hs_admin_local_grant, '
+        self.sql('TRUNCATE hs_admin_password_reset_code,hs_admin_mfa_challenge,hs_admin_recovery_code,hs_admin_mfa,hs_admin_local_grant, '
                  'hs_admin_session,hs_admin_account,hs_admin_audit')
         self.reset_throttle()
 
@@ -320,6 +320,7 @@ class Probe:
         self.check(self.sql("SELECT to_regclass('hs_admin_mfa')")[0][0] is None,
                    'legacy fixture has no MFA tables before first additive migration')
         self.sql((ROOT/'backend/admin_auth/002_admin_mfa.sql').read_text())
+        self.sql((ROOT/'backend/admin_auth/003_password_reset.sql').read_text())
         self.check(before == self.sql('SELECT username,password_hash,credential_revision FROM hs_admin_account') and
                    sessions_before == self.sql('SELECT token_hash,revoked_at FROM hs_admin_session'), 'additive migration preserves existing identity and sessions')
         self.start()

@@ -29,6 +29,13 @@ class EnrollmentAuthorization(BaseModel):
     code: SecretStr | None = Field(default=None, min_length=6, max_length=6)
 
 
+class PasswordReset(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    username: str = Field(pattern=r'^[A-Za-z0-9_.@-]{3,64}$')
+    code: SecretStr = Field(min_length=32, max_length=32)
+    new_password: SecretStr = Field(min_length=8, max_length=128)
+
+
 def install_candidate_admin_auth(app, conninfo, *, protection_key, allowed_origins, technical_credentials=()):
     """Call instead of install_admin_auth, AFTER P11/controls, BEFORE config API.
 
@@ -54,6 +61,15 @@ def install_candidate_admin_auth(app, conninfo, *, protection_key, allowed_origi
     @router.post('/local-recovery')
     def local_recovery(body: Bootstrap):
         return auth.local_recover(body.bootstrap_secret.get_secret_value(), body.username, body.password.get_secret_value())
+
+    @router.post('/password-reset/confirm')
+    def reset_password(body: PasswordReset):
+        return auth.reset_password(body.username, body.code.get_secret_value(), body.new_password.get_secret_value())
+
+    @router.post('/password-reset/codes')
+    def reset_codes(body: EnrollmentAuthorization, token=Depends(app.state.require_admin_token)):
+        return auth.regenerate_password_reset_codes(token, body.current_password.get_secret_value(),
+                                                    body.code.get_secret_value() if body.code else None)
 
     @router.post('/mfa/enrollment/authorize')
     def authorize(body: EnrollmentAuthorization, token=Depends(app.state.require_admin_token)):

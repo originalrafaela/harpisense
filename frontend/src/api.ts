@@ -3,7 +3,7 @@ export type Row = {id:string; revision?:number; source?:string; created_at?:stri
 export type Credentials = {username:string;password:string};
 export type AuthChallenge={challenge_token:string;next_step:'login'|'enroll';expires_at:string};
 export type AdminSession={authenticated:true;username:string;expires_at:string;idle_timeout_seconds:1800;mfa_available:boolean;mfa_enabled?:boolean;mfa_enrollment_available?:boolean;email_recovery_available:boolean};
-export type AuthFlowResult={kind:'challenge';challenge:AuthChallenge}|{kind:'session';session:AdminSession;recoveryCodes?:string[];sessionVerified?:boolean};
+export type AuthFlowResult={kind:'challenge';challenge:AuthChallenge}|{kind:'session';session:AdminSession;recoveryCodes?:string[];passwordResetCodes?:string[];sessionVerified?:boolean};
 export class ApiError extends Error { kind:string; fields:{field:string;code:string}[]; currentRevision:number|null; code:string|null; constructor(kind:string,message:string,fields:{field:string;code:string}[]=[],currentRevision:number|null=null,code:string|null=null){super(message);this.kind=kind;this.fields=fields;this.currentRevision=currentRevision;this.code=code} }
 export const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object' && v!==null && !Array.isArray(v);
 export function adaptRows(value:unknown,profile:Profile):Row[]{
@@ -54,9 +54,11 @@ export class Client {
   if(epoch!==this.epoch)throw new ApiError('cancelled','Autenticação cancelada; recomece o fluxo.');
   this.token=value.access_token;this.expiresAt=Date.parse(value.expires_at);
   if(recoveryCodes!==undefined&&(!Array.isArray(recoveryCodes)||recoveryCodes.length!==10||recoveryCodes.some(code=>typeof code!=='string'||!/^[-_A-Za-z0-9]{32}$/.test(code)))){this.forgetSession();throw new ApiError('invalid','A API retornou códigos de recuperação incompatíveis.');}
-  try{const session=await this.session();return {kind:'session',session,sessionVerified:true,...(recoveryCodes?{recoveryCodes:recoveryCodes as string[]}:{})}}
+  const passwordResetCodes=value.password_reset_codes;
+  if(passwordResetCodes!==undefined&&(!Array.isArray(passwordResetCodes)||passwordResetCodes.length!==10||passwordResetCodes.some(code=>typeof code!=='string'||!/^[-_A-Za-z0-9]{32}$/.test(code)))){this.forgetSession();throw new ApiError('invalid','Códigos de redefinição incompatíveis.');}
+  try{const session=await this.session();return {kind:'session',session,sessionVerified:true,...(recoveryCodes?{recoveryCodes:recoveryCodes as string[]}:{ }),...(passwordResetCodes?{passwordResetCodes:passwordResetCodes as string[]}:{})}}
   catch(error){
-   if(recoveryCodes){return {kind:'session',session:{authenticated:true,username:value.username,expires_at:value.expires_at,idle_timeout_seconds:1800,mfa_available:true,mfa_enabled:true,mfa_enrollment_available:true,email_recovery_available:false},sessionVerified:false,recoveryCodes:recoveryCodes as string[]}}
+   if(recoveryCodes){return {kind:'session',session:{authenticated:true,username:value.username,expires_at:value.expires_at,idle_timeout_seconds:1800,mfa_available:true,mfa_enabled:true,mfa_enrollment_available:true,email_recovery_available:false},sessionVerified:false,recoveryCodes:recoveryCodes as string[],...(passwordResetCodes?{passwordResetCodes:passwordResetCodes as string[]}:{})}}
    this.forgetSession();throw error
   }
  }
@@ -68,6 +70,12 @@ export class Client {
   if(epoch!==this.epoch)throw new ApiError('cancelled','Login cancelado; entre novamente.');
   if(object(value)&&value.challenge_token!==undefined)return {kind:'challenge',challenge:this.challenge(value,value.next_step==='login'?'login':'enroll')};
   return this.completeSession(value,epoch);
+ }
+ async resetPassword(username:string,code:string,newPassword:string){
+  this.requireP11Auth();this.forgetSession();
+  const value=await this.request('/api/v1/admin-auth/password-reset/confirm','POST',{username,code,new_password:newPassword});
+  if(!object(value)||value.status!=='password_reset'||value.mfa_preserved!==true||value.login_required!==true||'access_token' in value)throw new ApiError('invalid','Redefinição não confirmada pelo servidor.');
+  return value;
  }
  private async publicChallenge(path:string,body:unknown,next:'login'|'enroll'):Promise<AuthFlowResult>{
   if(this.profile!=='p11')throw new ApiError('config','Primeiro acesso e MFA exigem o contrato P11 candidato.');

@@ -42,6 +42,7 @@ class MFATests(unittest.TestCase):
             if not conn.execute("SELECT to_regclass('hs_admin_schema_version')").fetchone()[0]:
                 conn.execute((ROOT/'backend/admin_auth/001_admin_auth.sql').read_text())
             conn.execute((ROOT/'backend/admin_auth/002_admin_mfa.sql').read_text())
+            conn.execute((ROOT/'backend/admin_auth/003_password_reset.sql').read_text())
 
     def sql(self, statement, params=()):
         with psycopg.connect(self.dsn) as conn:
@@ -49,7 +50,7 @@ class MFATests(unittest.TestCase):
             return result.fetchall() if result.description else None
 
     def setUp(self):
-        self.sql('TRUNCATE hs_admin_mfa_challenge,hs_admin_recovery_code,hs_admin_mfa,hs_admin_local_grant, '
+        self.sql('TRUNCATE hs_admin_password_reset_code,hs_admin_mfa_challenge,hs_admin_recovery_code,hs_admin_mfa,hs_admin_local_grant, '
                  'hs_admin_session,hs_admin_account,hs_admin_audit')
         self.sql("UPDATE hs_admin_throttle SET failures=0,blocked_until='-infinity'")
         self.key = Fernet.generate_key()

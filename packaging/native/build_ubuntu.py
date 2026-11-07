@@ -1,5 +1,7 @@
 """Create a self-extracting Ubuntu 24.04 installer on any build platform."""
 import hashlib
+import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -24,7 +26,13 @@ def main():
                         ignore=shutil.ignore_patterns('__pycache__'))
     shutil.copytree(ROOT/'backend/domain/harpisense_contracts', stage/'backend/domain/harpisense_contracts',
                     ignore=shutil.ignore_patterns('__pycache__'))
+    shutil.copytree(ROOT/'backend/domain/harpisense_engines', stage/'backend/domain/harpisense_engines',
+                    ignore=shutil.ignore_patterns('__pycache__'))
     shutil.copyfile(ROOT/'backend/domain/harpisense_catalog.py', stage/'backend/domain/harpisense_catalog.py')
+    (stage/'backend/native_server/build_info.json').write_text(json.dumps({
+        'package_version': os.environ.get('HARPISENSE_PACKAGE_VERSION', 'development'),
+        'source_commit': subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+    }),encoding='utf-8')
     shutil.copytree(ROOT/'genai/harpia', stage/'genai/harpia', ignore=shutil.ignore_patterns('__pycache__'))
     requirements = []
     for name in ('backend/delivery/requirements.txt', 'backend/config_manager/requirements.txt',

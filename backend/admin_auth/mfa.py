@@ -271,8 +271,50 @@ class MFAAdminAuth(AdminAuth):
                 conn.execute('INSERT INTO hs_admin_recovery_code(code_hash,account_id) VALUES(%s,1)', (token_hash(value),))
             result = self.issue_verified_session(conn, self.account(conn))
             result['recovery_codes'] = codes
+            result['password_reset_codes'] = self.password_reset_codes(conn)
             self.reset_throttle(conn)
         return result
+
+    @staticmethod
+    def password_reset_codes(conn):
+        conn.execute('DELETE FROM hs_admin_password_reset_code WHERE account_id=1')
+        codes = [secrets.token_urlsafe(24) for _ in range(10)]
+        for code in codes:
+            conn.execute('INSERT INTO hs_admin_password_reset_code(code_hash,account_id) VALUES(%s,1)',
+                         (token_hash(code),))
+        return codes
+
+    def regenerate_password_reset_codes(self, token, password, code):
+        with self.security_transaction('PASSWORD_RESET_CODES') as conn:
+            self.session(conn, token)
+            account = self.account(conn)
+            if not checked_verify(password, account['password_hash']):
+                raise AuthError(403, 'REAUTHENTICATION_REQUIRED')
+            self.totp(conn, code, self.state(conn))
+            result = {'password_reset_codes': self.password_reset_codes(conn)}
+        return result
+
+    def reset_password(self, username, code, password):
+        valid_username(username)
+        valid_password(password)
+        self.separate_credentials(username=username, password=password)
+        if not isinstance(code, str) or not re.fullmatch(r'[A-Za-z0-9_-]{32}', code):
+            raise AuthError(401, 'PASSWORD_RESET_INVALID')
+        with self.security_transaction('PASSWORD_RESET') as conn:
+            account = self.account(conn)
+            row = conn.execute('SELECT used_at FROM hs_admin_password_reset_code '
+                               'WHERE code_hash=%s AND account_id=1 FOR UPDATE', (token_hash(code),)).fetchone()
+            if (not account or not hmac.compare_digest(username.encode(), account['username'].encode())
+                    or not row or row['used_at'] is not None):
+                raise AuthError(401, 'PASSWORD_RESET_INVALID')
+            conn.execute('UPDATE hs_admin_password_reset_code SET used_at=clock_timestamp() WHERE code_hash=%s',
+                         (token_hash(code),))
+            conn.execute('UPDATE hs_admin_account SET password_hash=%s,credential_revision=credential_revision+1 WHERE id=1',
+                         (password_hash(password),))
+            self.revoke(conn)
+            self.reset_throttle(conn)
+        return {'status': 'password_reset', 'login_required': True, 'mfa_preserved': True,
+                'sessions_revoked': 'all'}
 
     def local_recover(self, grant, username, password):
         with self.security_transaction('LOCAL_RECOVER') as conn:

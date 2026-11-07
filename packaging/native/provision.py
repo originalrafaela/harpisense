@@ -180,14 +180,18 @@ def prepare_database(state_file):
         if conn.info.dbname != 'harpisense':
             raise RuntimeError('PRODUCT_DATABASE_NAME_REQUIRED')
         conn.execute((root/'backend/delivery/001_local.sql').read_text(encoding='utf-8'))
+        conn.execute((root/'backend/delivery/002_operational_authority.sql').read_text(encoding='utf-8'))
         if not conn.execute("SELECT to_regclass('hs_admin_schema_version')").fetchone()[0]:
             conn.execute((root/'backend/admin_auth/001_admin_auth.sql').read_text(encoding='utf-8'))
         conn.execute((root/'backend/admin_auth/002_admin_mfa.sql').read_text(encoding='utf-8'))
+        conn.execute((root/'backend/admin_auth/003_password_reset.sql').read_text(encoding='utf-8'))
         conn.execute((root/'backend/native_server/001_mqtt_observer.sql').read_text(encoding='utf-8'))
         present = conn.execute('SELECT 1 FROM hs_admin_account').fetchone()
     connect = lambda: psycopg.connect(state['dsn'])
     migrate(connect)
     migrate_setup(connect)
+    with connect() as conn:
+        conn.execute((root/'backend/config_manager/003_assets.sql').read_text(encoding='utf-8'))
     ConfigStore(connect, capabilities(state)).provision_registry(state['installation_id'])
     # No human identity reset, no grant issuance on API startup or existing account.
     grantfile = Path(state_file).parent/'bootstrap.secret'

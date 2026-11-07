@@ -34,6 +34,18 @@ class EnrollmentDetails(Exact):
 
 class EnrollmentComplete(AdminSession):
     recovery_codes: list[str] = Field(min_length=10, max_length=10)
+    password_reset_codes: list[str] = Field(min_length=10, max_length=10)
+
+
+class PasswordResetResult(Exact):
+    status: Literal['password_reset']
+    login_required: Literal[True]
+    mfa_preserved: Literal[True]
+    sessions_revoked: Literal['all']
+
+
+class PasswordResetCodes(Exact):
+    password_reset_codes: list[str] = Field(min_length=10, max_length=10)
 
 
 class SessionState(Exact):
@@ -65,6 +77,8 @@ RESPONSES = {
     ('post', '/login'): ('AdminSession', 'MFAChallenge'),
     ('post', '/bootstrap'): ('MFAChallenge',),
     ('post', '/local-recovery'): ('MFAChallenge',),
+    ('post', '/password-reset/confirm'): ('PasswordResetResult',),
+    ('post', '/password-reset/codes'): ('PasswordResetCodes',),
     ('post', '/mfa/enrollment/authorize'): ('MFAChallenge',),
     ('post', '/mfa/enrollment/begin'): ('EnrollmentDetails',),
     ('post', '/mfa/enrollment/confirm'): ('EnrollmentComplete',),
@@ -74,7 +88,7 @@ RESPONSES = {
     ('put', '/password'): ('CredentialChange',),
     ('put', '/username'): ('CredentialChange',),
 }
-MODELS = (AdminSession, MFAChallenge, EnrollmentDetails, EnrollmentComplete,
+MODELS = (AdminSession, MFAChallenge, EnrollmentDetails, EnrollmentComplete, PasswordResetResult, PasswordResetCodes,
           SessionState, CredentialChange, AuthFailure)
 
 

@@ -32,9 +32,13 @@ def prepare_fixture(dsn):
         if not conn.execute("SELECT to_regclass('hs_admin_schema_version')").fetchone()[0]:
             conn.execute((ROOT/'backend/admin_auth/001_admin_auth.sql').read_text())
         conn.execute((ROOT/'backend/admin_auth/002_admin_mfa.sql').read_text())
+        conn.execute((ROOT/'backend/admin_auth/003_password_reset.sql').read_text())
     connect = lambda: psycopg.connect(dsn)
     migrate(connect)
     migrate_setup(connect)
+    with connect() as conn:
+        conn.execute((ROOT/'backend/config_manager/003_assets.sql').read_text())
+        conn.execute((ROOT/'backend/delivery/002_operational_authority.sql').read_text())
     ConfigStore(connect, Capabilities(revision='mfa-http-isolated')).provision_registry(INSTALLATION)
 
 
@@ -60,7 +64,7 @@ def main():
     keyfile = args.private_dir/'admin-mfa.key'
     with psycopg.connect(dsn) as conn:
         if args.reset_auth:
-            conn.execute('TRUNCATE hs_admin_mfa_challenge,hs_admin_recovery_code,hs_admin_mfa,hs_admin_local_grant, '
+            conn.execute('TRUNCATE hs_admin_password_reset_code,hs_admin_mfa_challenge,hs_admin_recovery_code,hs_admin_mfa,hs_admin_local_grant, '
                          'hs_admin_session,hs_admin_account,hs_admin_audit')
             conn.execute("UPDATE hs_admin_throttle SET failures=0,blocked_until='-infinity'")
         present = conn.execute('SELECT 1 FROM hs_admin_account').fetchone()
