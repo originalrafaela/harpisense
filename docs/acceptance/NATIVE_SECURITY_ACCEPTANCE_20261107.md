@@ -87,3 +87,7 @@ Cada evidência deve conter ambiente, horário UTC, commit, hash instalador/runt
 3. Responsável do laboratório confirma máquinas/snapshots limpos e recursos. Fixar hash candidato; gerar instalador somente para ensaio funcional do runtime completo.
 4. Instalar e reiniciar exclusivamente a VM identificada. Abrir painel pelo atalho, login admin/MFA e prontidão automática; coletar matriz Ubuntu e Windows separadamente.
 5. Enviar evidências ao Arquiteto com falhas e bloqueios. Aprovação só para versão/ambiente/critério realmente executados; prévia e processo privado não homologam instalação.
+
+## Entrega Maestri
+
+`maestri ask "HarpiSense Arquiteto"` foi tentado com plano, branch e caminhos de evidência, mas retornou `No connection`. `maestri debug` confirmou transporte saudável; `maestri list` identifica o terminal atual como o próprio HarpiSense Arquiteto, sem conexão para esse nome. Portanto o envio ao destinatário solicitado não foi concluído. Backend Data recebeu o levantamento; a tela retornada mostra integração própria de controles em andamento e não constitui resposta sobre SHAP. A solicitação ao Edge Security retornou a tela deste trabalho; não há resposta independente do executor atestada. Não contornar identidade do terminal ou declarar coordenação concluída.
