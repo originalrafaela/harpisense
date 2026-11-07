@@ -32,8 +32,6 @@ class OperationalQueue:
         present = {row[0] for row in rows if row[2]}
         blockers = []
         for source, items, fresh in rows:
-            if not fresh:
-                continue
             if not isinstance(items, list):
                 present.discard(source)
                 continue
@@ -43,7 +41,23 @@ class OperationalQueue:
                     present.discard(source)
                     continue
                 if item['state'] in ACTIVE:
-                    blockers.append({'id': source + ':' + item['id'], 'state': item['state']})
+                    # Visibility loss must not erase a previously identified active case.
+                    blockers.append({'id': source + ':' + item['id'], 'state': item['state'],
+                                     'source': source, 'fresh': fresh})
+        # Human assessments are durable facts, never a claim that source coverage
+        # is complete. Use the same lock as mode changes and preserve a confirmed
+        # attack until explicitly reassessed or its incident is closed.
+        relation = tx.conn.execute("SELECT to_regclass('hs_incident_assessment')").fetchone()[0]
+        if relation:
+            assessed = tx.conn.execute("WITH latest AS (SELECT DISTINCT ON(incident_id) incident_id,assessment "
+                "FROM hs_incident_assessment ORDER BY incident_id,id DESC), incidents AS "
+                "(SELECT DISTINCT ON(id) id,data FROM projections WHERE kind='incident' ORDER BY id,revision DESC) "
+                "SELECT a.incident_id FROM latest a LEFT JOIN incidents i ON i.id=a.incident_id "
+                "WHERE a.assessment='confirmed' AND coalesce(i.data->>'status','UNKNOWN')<>'CLOSED'").fetchall()
+            blockers.extend({'id':'attack:'+row[0], 'state':'CONFIRMED', 'source':'attack', 'fresh':True} for row in assessed)
         missing = sorted(SOURCES - present)
+        counts = {source:sum(b['source']==source for b in blockers) for source in sorted(SOURCES|{'attack'})}
         return {'reliable': not missing, 'blockers': blockers,
+                'counts':counts,'missing_sources':missing,
+                'coverage':'current' if not missing else ('partial' if present else 'unknown'),
                 **({'dependency': 'Fontes autoritativas ausentes ou desatualizadas: ' + ', '.join(missing)} if missing else {})}
