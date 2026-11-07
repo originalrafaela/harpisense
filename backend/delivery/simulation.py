@@ -24,6 +24,8 @@ def simulate(controls, bundle, context, *, expected_revision, now):
         validate(execution)
         # Replay prevention is durable in the same PostgreSQL transaction as controls.
         result = {'status': 'SIMULATED', 'decision_id': decision['decision_id'],
+                  'historical_profile': state['historical_profile'],
+                  'trial': {'simulated': True},
                   'control_revision': state['revision'], 'executor': 'isolated_simulation',
                   'mitigation_confirmed': False, 'simulated_at': now, 'execution': execution}
         return tx.simulation_once(decision['decision_id'], result)

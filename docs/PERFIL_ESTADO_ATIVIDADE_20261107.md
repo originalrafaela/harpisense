@@ -26,6 +26,39 @@ suficiente. Visibilidade insuficiente resulta em desconhecido/parcial. Perda
 de comunicação preserva o ataque conhecido até encerramento explícito; a idade
 da observação e a disponibilidade devem permanecer visíveis separadamente.
 
+## Contrato reutilizado de controles
+
+Rotas existentes, autenticadas: `GET/PUT /api/v1/security/settings/mode/default`,
+`POST /api/v1/security/emergency-stop`, `GET /api/v1/security/audit`.
+Aplicar mantém o corpo existente: `value` canônico com `autonomy_mode: 1|2|3`,
+`operation` e `execution_enabled`, mais `expected_revision` e `reason`.
+M1/M2/M3 são exclusivamente `autonomy_mode`; o campo legado `operation=SIMULATION`
+descreve o executor de ensaio e não cria um quarto perfil. A avaliação de registros
+não deve chamar Aplicar nem modificar esse campo.
+
+A resposta mantém os campos legados e acrescenta `effective_state`:
+`applied_profile`, `control_revision`, `executor`, `availability`,
+`execution_enabled`, `updated_at`, `operational_visibility`, `blockers`,
+`change_allowed`, `containment_confirmed`. Nesta composição sem executor real,
+contenção permanece falsa; disponibilidade não é inferida de M2/M3.
+Recusa HTTP 409 mantém `code/message/pending/current_revision` e acrescenta
+`current`, a mesma representação do estado vigente (sem executar nova consulta
+da autoridade). A recusa é auditada e não altera a revisão vigente.
+
+O adapter existente `queue.snapshot(tx)` fornece `{reliable: bool, blockers:
+[{id, state}], dependency?: str}`. `reliable=true` significa cobertura atual e
+completa de atividade e pendências, não apenas lista vazia de projeções. Todos
+os escritores autoritativos precisam usar `Controls.decision_transaction` e a
+conexão recebida, com o mesmo advisory lock PostgreSQL `72611027`. Sem isso, a
+integração deve permanecer não confiável. O adapter e os produtores de atividade
+pertencem à entrega Backend Data, não a um serviço novo.
+
+`decision_transaction` fornece `current.historical_profile` com
+`applied_profile/autonomy_mode/control_revision/control_updated_at`; o produtor
+deve persistir essa cópia na decisão. O simulador existente persiste a cópia no
+resultado junto de `trial.simulated=true`, sem alterar incidente/origem global.
+Decisões antigas sem snapshot não devem receber retroativamente o perfil atual.
+
 ## Matriz de aceitação para as entregas coordenadas
 
 | Cenário | Resultado exigido |
