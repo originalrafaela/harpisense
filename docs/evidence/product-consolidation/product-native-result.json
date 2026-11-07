@@ -3,7 +3,7 @@
   "docker": false,
   "service_registration": false,
   "machine_reboot": false,
-  "runtime": "python_source",
+  "runtime": "frozen_executable",
   "checks": [
     "fresh_product_migrations_and_protected_grant",
     "real_broker_tls_authentication_and_suback",
@@ -25,6 +25,8 @@
     "presentation_applied_with_reauthentication",
     "real_api_unavailability_visible_no_fake_success",
     "repeated_preparation_preserves_account",
+    "installed_build_identity_and_real_containment_blocked",
+    "frozen_runtime_reports_actual_candidate_version",
     "new_browser_login_requires_real_totp_after_process_restart",
     "permanent_presentation_preserved_after_process_restart",
     "setup_preserved_after_process_restart",
@@ -50,21 +52,23 @@
     "new_password_still_requires_totp",
     "new_password_totp_session_confirmed",
     "assets_preserved_after_password_reset",
+    "password_reset_code_cannot_recover_mfa",
     "mfa_recovery_remains_separate_enrollment_only",
     "lost_authenticator_replacement_confirmed",
     "replacement_authenticator_issues_full_session_only_after_totp",
+    "password_reset_codes_regenerated_with_password_and_totp",
     "closed_authoritative_history_does_not_block",
     "executor_derived_from_mode_backend",
-    "active_anomaly_blocks_mode_change",
-    "authoritative_anomaly_transition_refused",
-    "active_incident_blocks_mode_change",
-    "authoritative_incident_transition_refused",
-    "active_execution_blocks_mode_change",
-    "authoritative_execution_transition_refused",
-    "active_approval_blocks_mode_change",
-    "authoritative_approval_transition_refused",
     "active_verification_blocks_mode_change",
     "authoritative_verification_transition_refused",
+    "active_anomaly_blocks_mode_change",
+    "authoritative_anomaly_transition_refused",
+    "active_approval_blocks_mode_change",
+    "authoritative_approval_transition_refused",
+    "active_execution_blocks_mode_change",
+    "authoritative_execution_transition_refused",
+    "active_incident_blocks_mode_change",
+    "authoritative_incident_transition_refused",
     "stale_authority_blocks_effective_change",
     "emergency_stop_persisted_disables_executor",
     "emergency_stop_preserves_api_consultation",
@@ -74,15 +78,15 @@
     "schema_version": "1.0.0",
     "component": {
       "state": "installed",
-      "observed_at": "2026-11-07T02:53:29.813476+00:00"
+      "observed_at": "2026-11-07T03:07:46.288973+00:00"
     },
     "broker": {
       "state": "available",
-      "observed_at": "2026-11-06T23:53:58.152731-03:00"
+      "observed_at": "2026-11-07T00:09:02.000672-03:00"
     },
     "consumer": {
       "state": "connected",
-      "observed_at": "2026-11-06T23:53:58.152731-03:00"
+      "observed_at": "2026-11-07T00:09:02.000672-03:00"
     },
     "devices": [],
     "device_observation": "observed",
@@ -95,22 +99,22 @@
     "schema_version": "1.0.0",
     "component": {
       "state": "installed",
-      "observed_at": "2026-11-07T02:53:29.813476+00:00"
+      "observed_at": "2026-11-07T03:07:46.288973+00:00"
     },
     "broker": {
       "state": "available",
-      "observed_at": "2026-11-06T23:53:58.152731-03:00"
+      "observed_at": "2026-11-07T00:09:02.000672-03:00"
     },
     "consumer": {
       "state": "connected",
-      "observed_at": "2026-11-06T23:53:58.152731-03:00"
+      "observed_at": "2026-11-07T00:09:02.000672-03:00"
     },
     "devices": [
       {
         "device_id": "poste2",
-        "message_id": "native-acceptance-78ec0afd26fa48daae35b07c2ba59f89",
-        "projection_id": "poste2-bb55476802cbb59251271d5995f26e8767aaafb67d3102a931aa8e26fd8fbb3e",
-        "observed_at": "2026-11-06T23:54:04.007974-03:00",
+        "message_id": "native-acceptance-f967eb7ef1b8441eb8a11ce5ecadd241",
+        "projection_id": "poste2-e320854747d543ad53cc9a404dcab65d30db4d782e724ebc5589a0a05746f448",
+        "observed_at": "2026-11-07T00:09:05.802415-03:00",
         "origin": "authenticated_mqtt_consumer"
       }
     ],

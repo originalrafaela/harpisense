@@ -11,8 +11,10 @@ export function p11Transport(target) {
   const prefix = '/p11-api';
   const allowed = new Set(['health','asset','telemetry','network_event','window','detection','xai','evidence','incident','risk','decision','approval','execution','verification','bitnet'].map(kind=>`/api/v1/p11/${kind}`));
   allowed.add('/api/v1/security/settings/mode/default');allowed.add('/api/v1/security/audit');
+  allowed.add('/api/v1/native/status');
   const configReads=new Set(['/api/v1/config/current','/api/v1/config/setup','/api/v1/config/catalog','/api/v1/config/history','/api/v1/config/presentation','/api/v1/config/mqtt/status']);
-  const configWrite=(path,method)=>method==='PUT'&&path==='/api/v1/config/setup'||method==='POST'&&path==='/api/v1/config/proposals';
+  configReads.add('/api/v1/config/assets');
+  const configWrite=(path,method)=>method==='PUT'&&path==='/api/v1/config/setup'||method==='POST'&&['/api/v1/config/proposals','/api/v1/config/assets'].includes(path);
   const configOperation=path=>/^\/api\/v1\/config\/proposals\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(path);
   const configValidation=path=>/^\/api\/v1\/config\/proposals\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/(validate|apply)$/.test(path);
   const projectionHistory=path=>/^\/api\/v1\/p11\/(asset|telemetry|network_event|window|detection|xai|evidence|incident|risk|decision|approval|execution|verification|bitnet)\/(?:[A-Za-z0-9_.:@-]|%[0-9A-Fa-f]{2}){1,384}\/history$/.test(path);
@@ -27,6 +29,8 @@ export function p11Transport(target) {
       return response.end('{"detail":"Origem não permitida no transporte local"}');
     }
     const authRoutes = new Map([['/api/v1/admin-auth/login','POST'],['/api/v1/admin-auth/session','GET'],['/api/v1/admin-auth/logout','POST'],['/api/v1/admin-auth/password','PUT'],['/api/v1/admin-auth/username','PUT'],['/api/v1/admin-auth/bootstrap','POST'],['/api/v1/admin-auth/local-recovery','POST'],['/api/v1/admin-auth/mfa/enrollment/authorize','POST'],['/api/v1/admin-auth/mfa/enrollment/begin','POST'],['/api/v1/admin-auth/mfa/enrollment/confirm','POST'],['/api/v1/admin-auth/mfa/verify','POST'],['/api/v1/admin-auth/mfa/recover','POST'],['/api/v1/admin-auth/mfa/cancel','POST']]);
+    authRoutes.set('/api/v1/admin-auth/password-reset/confirm','POST');
+    authRoutes.set('/api/v1/admin-auth/password-reset/codes','POST');
     const auth = authRoutes.get(path) === request.method;
     // The browser transport has no technical Basic or service-ingestion path.
     if (request.headers.authorization && !/^Bearer [A-Za-z0-9_-]{43}$/.test(request.headers.authorization)) {

@@ -7,6 +7,14 @@ Node e Vite não são requisitos de execução do produto.
 
 ## Artefatos
 
+Consolidação funcional: [candidata 5](https://github.com/originalrafaela/harpisense/releases/tag/native-installers-20261106-candidate.5),
+build `8b9c9ef`. Recuperação de senha separada de MFA, ativos persistentes,
+apresentação permanente e controles com autoridade explícita.
+[68 verificações reais com runtime congelado](../../docs/evidence/product-consolidation/README.md)
+aprovadas; [hashes publicados](../../docs/evidence/native-installers/published-assets-candidate5.json).
+Não é homologação de sistemas limpos nem integração completa das entregas
+externas de XAI/Backend/Gerenciador. A VM do usuário continua na candidata 4.
+
 Atual: [candidata 4](https://github.com/originalrafaela/harpisense/releases/tag/native-installers-20261106-candidate.4),
 fonte `52a61ef`, [hashes verificados](../../docs/evidence/native-installers/published-assets-candidate4.json).
 Corrige espera pela escuta MQTT local. Regressão e builds aprovados;

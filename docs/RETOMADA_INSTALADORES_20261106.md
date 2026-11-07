@@ -1,5 +1,11 @@
 # Retomada amanhã — instaladores Ubuntu — pausa em 2026-11-06
 
+Prioridade atual: [consolidação do produto](PRODUCT_CONSOLIDATION_20261106.md).
+Candidata 5 publicada, build `8b9c9ef`, 68 verificações reais com runtime
+congelado aprovadas; Windows limpo e novo aceite Ubuntu continuam pendentes.
+A VM do usuário permanece na candidata 4, sem migração ou alteração dos dados.
+Entregas externas conflitantes e XAI sem hash final ainda não incorporados.
+
 Atualização mais recente: reteste manual da candidata 3 revelou corrida MQTT
 na instalação. [Falha preservada e candidata 4 pronta](evidence/native-installers/ubuntu-candidate3-retest-failure/README.md).
 Nova VM `harpisense-ubuntu-reteste`, `192.168.155.149`, restaurada ao snapshot

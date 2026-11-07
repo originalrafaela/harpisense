@@ -44,6 +44,35 @@ a partir de `96511ee`; entregar commits, arquivos, contratos, testes e pontos
 de montagem. Não integrar em `mqtt`; Arquiteto incorpora após revisar.
 Não presumir edição ativa de um Gerenciador cujo agente falhou.
 
+### Entregas externas identificadas depois da primeira composição
+
+Foram encontrados por inspeção Git (fora dos agentes internos que falharam):
+Backend `c44bd6f551b43db8b4d478930cf366ab24422f39` em
+`harpisense-worktrees/reusable-software`, branch `feat/reusable-software`;
+Gerenciador `ac2b3b698cea90609b9c1e4241eb1091e869cbbb` em
+`harpisense-worktrees/permanent-config-manager`, branch `feat/permanent-config-manager`.
+Não estão incorporados nesta composição. Suas bases divergem do instalador;
+substituir a árvore inteira perderia correções e evidências posteriores.
+
+Há colisão real de contratos: Backend usa `/password-recovery/validate|reset`
+com autorização intermediária e `/config/assets/{technical_id}` PUT, enquanto
+esta composição usa `/password-reset/confirm` e `/config/assets` POST. O esquema
+de `hs_config.asset` também difere (`technical_id` versus `device_id`). Não
+compor os dois stores ou duas recuperações em paralelo. Integração posterior
+exige escolher contrato canônico, adaptar os consumidores, migração preservando
+dados e nova rodada de testes. Não sobrescrever nenhuma das worktrees.
+
+Encaminhamento manual XAI aceito: preservar IDs `ai`/`#ai` e `harpia`/`#harpia`;
+componente novo `model-analysis.tsx`/CSS, recebendo GET autenticado e incidente
+com revisão. Backend prepara `/p11/incidents/{incident_id}/explanations` e
+`/p11/detections/{detection_id}/explanations`. Na inspeção, `backend/xai_api`
+e alterações de composição ainda não estavam commitados. Aguardar hash final;
+validar vínculos de revisão/modelo/janela/ativo antes de integrar. Proxy somente
+GET explícitos dessas rotas, sem wildcard de escrita. HarpIA não é substituída.
+
+Base funcional própria publicada: `e103510`; ajuste de proveniência do
+empacotamento: `8b9c9ef`. Não transferir aceite de VM para esses commits.
+
 ## Contratos e fluxos
 
 Todos os caminhos abaixo recebem prefixo `/p11-api` no software instalado.
@@ -82,5 +111,34 @@ conta, não reseta identidade e não migra banco automaticamente no startup.
 - Conexões externas, captura e backup não são aplicados por um botão fictício.
 - Microsoft Authenticator é o aplicativo TOTP de referência. Não há OAuth Microsoft.
 
-Validação real e versão empacotada serão registradas após conclusão das
-verificações em ambiente isolado; nenhum resultado pendente é declarado aprovado.
+## Validação e candidata 5
+
+Fonte funcional: `e103510`; fonte exata dos pacotes: `8b9c9efe9eb5cd01b0be6812777da7ed08f0df4a`.
+Versão embutida: `native-installers-20261106-candidate.5`, disponível em
+`GET /p11-api/api/v1/native/status` autenticado.
+
+- 64 verificações de composição fonte passaram com Chromium, HTTP,
+  PostgreSQL e Mosquitto nativos exclusivos de teste.
+- 68 verificações passaram com o **executável congelado distribuído**,
+  incluindo versão real do runtime, recuperação de senha de uso único,
+  preservação/reinscrição MFA, ativos, conflitos de revisão, persistência após
+  reinício de API/consumidor/banco, nome/fuso efetivos e erro de API encerrada.
+- Autoridades ausentes/vencidas e cada categoria ativa impediram troca;
+  histórico encerrado não impediu. Executor derivado do modo e parada de
+  emergência persistida foram conferidos; API permaneceu consultável.
+- 51 testes frontend passaram. Regressão de controles: 14 passaram e quatro
+  testes PostgreSQL antigos foram pulados por não configurar sua fixture;
+  a aceitação acima exercitou PostgreSQL real e não equivale a esses skips.
+- Ambos os builds concluídos; imports do runtime Windows aprovados. O próprio
+  `.run` Ubuntu teve checksum, origem, migrações e módulos comparados à fonte Git.
+- Transporte Vite permite somente endpoints novos explícitos; métodos e
+  parâmetros indevidos continuam recusados. Não habilita rotas XAI ainda sem
+  contrato final incorporado. Esse transporte de desenvolvimento não é o
+  servidor do produto instalado.
+
+[Relatório e limites](evidence/product-consolidation/README.md).
+[Recibo da candidata 5](evidence/native-installers/published-assets-candidate5.json).
+Esses resultados não são ensaio de instalação/reboot de uma nova VM Ubuntu
+nem Windows limpo. O usuário permanece na candidata 4, sem migração ou alteração
+de seus dados. A consolidação completa aguarda reconciliação e integração das
+entregas externas descritas acima e os produtores operacionais autoritativos.

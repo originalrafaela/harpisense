@@ -5,4 +5,4 @@
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1537.5931
+ℹ duration_ms 1903.815
