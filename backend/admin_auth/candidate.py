@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, SecretStr
 
 from .api import PrivateRoute, install_admin_auth
-from .mfa import MFAAdminAuth
+from .password_recovery import RecoverableAdminAuth
 from .service import AuthError
 
 
@@ -29,13 +29,25 @@ class EnrollmentAuthorization(BaseModel):
     code: SecretStr | None = Field(default=None, min_length=6, max_length=6)
 
 
+class PasswordRecovery(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    username: str = Field(min_length=1, max_length=64)
+    code: SecretStr = Field(min_length=1, max_length=128)
+
+
+class PasswordReset(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    reset_token: SecretStr = Field(min_length=1, max_length=128)
+    new_password: SecretStr = Field(min_length=8, max_length=128)
+
+
 def install_candidate_admin_auth(app, conninfo, *, protection_key, allowed_origins, technical_credentials=()):
     """Call instead of install_admin_auth, AFTER P11/controls, BEFORE config API.
 
-    Requires both explicit migrations. Does not run migrations or create accounts.
+    Requires explicit migrations 001, 002, 003. No startup migration or account.
     Same existing auth HTTP paths and app.state hooks; no second auth layer.
     """
-    auth = MFAAdminAuth(conninfo, protection_key=protection_key, technical_credentials=technical_credentials)
+    auth = RecoverableAdminAuth(conninfo, protection_key=protection_key, technical_credentials=technical_credentials)
     origins = tuple(allowed_origins)
     install_admin_auth(app, auth, allowed_origins=origins)
 
@@ -46,6 +58,19 @@ def install_candidate_admin_auth(app, conninfo, *, protection_key, allowed_origi
             raise AuthError(403, 'ORIGIN_DENIED')
 
     router = APIRouter(prefix='/api/v1/admin-auth', route_class=PrivateRoute, dependencies=[Depends(private)])
+
+    @router.post('/password-recovery/codes')
+    def issue_password_codes(body: EnrollmentAuthorization, token=Depends(app.state.require_admin_token)):
+        return auth.issue_password_codes(token, body.current_password.get_secret_value(),
+                                         body.code.get_secret_value() if body.code else None)
+
+    @router.post('/password-recovery/validate')
+    def validate_password_code(body: PasswordRecovery):
+        return auth.validate_password_code(body.username, body.code.get_secret_value())
+
+    @router.post('/password-recovery/reset')
+    def reset_password(body: PasswordReset):
+        return auth.reset_password(body.reset_token.get_secret_value(), body.new_password.get_secret_value())
 
     @router.post('/bootstrap')
     def bootstrap(body: Bootstrap):

@@ -53,6 +53,17 @@ class CredentialChange(Exact):
     sessions_revoked: Literal['all']
 
 
+class PasswordCodes(Exact):
+    password_recovery_codes: list[str] = Field(min_length=10, max_length=10)
+    expires_in_seconds: Literal[31536000]
+
+
+class PasswordGrant(Exact):
+    reset_token: str = Field(pattern=r'^[A-Za-z0-9_-]{43}$')
+    next_step: Literal['reset_password']
+    expires_at: datetime
+
+
 class ErrorDetail(Exact):
     code: str
 
@@ -62,6 +73,9 @@ class AuthFailure(Exact):
 
 
 RESPONSES = {
+    ('post', '/password-recovery/codes'): ('PasswordCodes',),
+    ('post', '/password-recovery/validate'): ('PasswordGrant',),
+    ('post', '/password-recovery/reset'): ('CredentialChange',),
     ('post', '/login'): ('AdminSession', 'MFAChallenge'),
     ('post', '/bootstrap'): ('MFAChallenge',),
     ('post', '/local-recovery'): ('MFAChallenge',),
@@ -75,7 +89,7 @@ RESPONSES = {
     ('put', '/username'): ('CredentialChange',),
 }
 MODELS = (AdminSession, MFAChallenge, EnrollmentDetails, EnrollmentComplete,
-          SessionState, CredentialChange, AuthFailure)
+          SessionState, CredentialChange, PasswordCodes, PasswordGrant, AuthFailure)
 
 
 def install_http_contract(app):

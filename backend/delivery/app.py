@@ -14,7 +14,7 @@ from .controls import Controls
 from .routes import install_controls
 
 
-def build_app():
+def build_app(*, operational_sources=None):
     dsn = os.environ['DATABASE_URL']
     if not dsn.startswith(('postgresql://', 'postgres://', 'host=')):
         raise RuntimeError('PostgreSQL required')
@@ -33,13 +33,18 @@ def build_app():
 
     health.dependant.call = checked_health
     install_deterministic_harpia(app, store)
-    install_controls(app, Controls(PostgresControls(dsn)))
+    queue = None
+    if operational_sources is not None:
+        from .operational_queue import AuthorityQueue
+        queue = AuthorityQueue(operational_sources)
+    install_controls(app, Controls(PostgresControls(dsn), queue))
     return app
 
 
 def build_candidate_app(*, installation_id, capabilities, allowed_origins,
                         technical_credentials=(), presentation_directory=None,
-                        presentation_fault=None):
+                        presentation_fault=None, protection_key=None, asset_catalog=None,
+                        operational_sources=None):
     """Installer-supplied scope and trusted manifest; no migrations or seeds.
 
     Explicit candidate factory: existing build_app callers remain compatible.
@@ -51,11 +56,16 @@ def build_candidate_app(*, installation_id, capabilities, allowed_origins,
 
     if not installation_id:
         raise ValueError('Installer installation identity required')
-    app = build_app()
+    app = build_app(operational_sources=operational_sources)
     dsn = os.environ['DATABASE_URL']
     store = PostgresStore(dsn)
-    install_admin_auth(app, AdminAuth(dsn, technical_credentials=technical_credentials),
-                       allowed_origins=allowed_origins)
+    if protection_key is not None:
+        from admin_auth.candidate import install_candidate_admin_auth
+        install_candidate_admin_auth(app, dsn, protection_key=protection_key,
+                                     technical_credentials=technical_credentials, allowed_origins=allowed_origins)
+    else:
+        install_admin_auth(app, AdminAuth(dsn, technical_credentials=technical_credentials),
+                           allowed_origins=allowed_origins)
     config = ConfigStore(store._connect, capabilities)
     presentation = None
     if presentation_directory is not None:
@@ -69,4 +79,9 @@ def build_candidate_app(*, installation_id, capabilities, allowed_origins,
         app.state.presentation = presentation
     install_config_api(app, config, installation_id=installation_id,
                        presentation=presentation)
+    if asset_catalog is not None:
+        from config_manager.assets import install_assets_api
+        from .interface import install_interface_api
+        install_assets_api(app, config, installation_id, asset_catalog)
+        install_interface_api(app, store)
     return app

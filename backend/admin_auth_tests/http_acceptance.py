@@ -71,7 +71,7 @@ class Probe:
             return result.fetchall() if result.description else None
 
     def reset(self):
-        self.sql('TRUNCATE hs_admin_mfa_challenge,hs_admin_recovery_code,hs_admin_mfa,hs_admin_local_grant, '
+        self.sql('TRUNCATE hs_admin_password_code,hs_admin_password_grant,hs_admin_mfa_challenge,hs_admin_recovery_code,hs_admin_mfa,hs_admin_local_grant, '
                  'hs_admin_session,hs_admin_account,hs_admin_audit')
         self.reset_throttle()
 

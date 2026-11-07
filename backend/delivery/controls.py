@@ -46,7 +46,15 @@ class Controls:
     def view(self, tx):
         current = tx.read()
         pending = self.pending(tx)
+        reasons = []
+        if not pending['reliable']:
+            reasons.append({'code': 'QUEUE_UNVERIFIED', 'detail': pending.get('dependency', QUEUE_DEPENDENCY)})
+        if pending['blockers']:
+            reasons.append({'code': 'OPERATIONAL_PENDING', 'items': pending['blockers']})
+        if current['emergency_stopped']:
+            reasons.append({'code': 'EMERGENCY_STOPPED'})
         return {**current, 'pending': pending, 'observed_at': stamp(),
+                'effective_profile': current['value'], 'blocking_reasons': reasons,
                 'real_execution_blocked': True,
                 'executor': 'isolated_simulation_only',
                 'change_allowed': pending['reliable'] and not pending['blockers']}
