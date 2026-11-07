@@ -1,0 +1,13 @@
+"""Send the authorized acceptance coordination through Maestri without shell quoting."""
+import os
+import subprocess
+import sys
+
+messages = {
+    'backend': ('Backend Data', 'Levanto aceite nativo em branch audit/native-security-acceptance-20261107 baseada em a8fef1f. Informe commits, locks Windows/Ubuntu para SHAP Tree e Permutation, contrato de registro/revisao e servicos hoje restritos a Docker. Precisamos ficha/grafico/tabela do mesmo registro, troca para ID sem explicacao sem dado residual e BitNet off. Nao altere native-installers nem previa 5174; nao gerar instalador para design. Reporte evidencias e lacunas com maestri ask "HarpiSense Arquiteto".'),
+    'edge': ('Edge Security', 'Preparacao aceite seguranca/executor em audit/native-security-acceptance-20261107, base a8fef1f preservada. Informe contrato/commits/testes: confirmar avaliacao M1 mantem M1 e nao dispara defesa; aprovacao especifica e resultado auditados separados; repetir simulado com prova de zero contencao real. Informe executor disponivel, servicos/dependencias restritos Docker e caminho nativo Windows/Ubuntu. Somente levantamento e testes isolados, nenhuma contencao real ou alteracao da instalacao/previa 5174. Responda com maestri ask "HarpiSense Arquiteto".'),
+    'report': ('HarpiSense Arquiteto', 'Plano e matriz preparados na branch audit/native-security-acceptance-20261107, worktree harpisense-worktrees/native-security-acceptance, base a8fef1f5810ad5077658a29fe2aa407ffd21df6d. Leia docs/acceptance/NATIVE_SECURITY_ACCEPTANCE_20261107.md e evidence-index.json. native-installers HEAD preservado; possui alteracoes locais de outro trabalho, nao tocadas. Previa 5174 preservada. Evidencia historica: 68 checks runtime congelado em processos privados, NAO Windows instalado limpo/reboot; model-mount-review tem 12 checks HTTP/PostgreSQL/Chromium com incidentes sinteticos, NAO Tree/Permutation calculados no payload instalado. Diretórios VMs ubuntu2404/windows11 localizados; disponibilidade e limpeza atuais nao confirmadas. Solicitados contratos e locks ao Backend Data e aceite M1/executor ao Edge Security. Sequencia: fechar contratos/locks e servicos -> runtime import-only -> ensaio simulado com auditoria e zero efeito real -> VM limpa identificada por OS -> instalar/reboot apenas VM -> painel/login/servicos/SHAP/ID/BitNet off. Nao gerar instalador apenas para design. Nenhuma homologacao alegada; veja matriz para bloqueios e evidencias exigidas.'),
+}
+target, message = messages[sys.argv[1]]
+result = subprocess.run([os.environ.get('MAESTRI_CLI', 'maestri'), 'ask', target, message], check=False)
+raise SystemExit(result.returncode)
