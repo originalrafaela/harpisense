@@ -26,7 +26,9 @@ class Rejected(Exception):
 
 class UnknownQueue:
     def snapshot(self, tx):
-        return {'reliable': False, 'blockers': [], 'dependency': QUEUE_DEPENDENCY}
+        return {'reliable': False, 'blockers': [], 'dependency': QUEUE_DEPENDENCY,
+                'cases': {'status': 'unknown', 'known_active_count': None, 'coverage': 'unknown',
+                          'count_basis': 'source_item', 'sources': [], 'items': []}}
 
 
 class Controls:
@@ -53,6 +55,7 @@ class Controls:
         """Independent axes: a selected autonomy mode never attests containment."""
         allowed = pending['reliable'] and not pending['blockers']
         return {**current, 'pending': pending, 'observed_at': stamp(),
+                'cases': deepcopy(pending.get('cases', UnknownQueue().snapshot(None)['cases'])),
                 'real_execution_blocked': True,
                 'executor': 'isolated_simulation_only',
                 'change_allowed': allowed,
@@ -67,6 +70,9 @@ class Controls:
                     'blockers': deepcopy(pending['blockers']),
                     'change_allowed': allowed,
                     'containment_confirmed': False,
+                    'executor_state': {'status': 'not_integrated', 'available': False,
+                                       'observed_at': None, 'source': None,
+                                       'blockers': ['REAL_EXECUTOR_NOT_INTEGRATED']},
                 }}
 
     def get(self):
