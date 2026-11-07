@@ -18,7 +18,7 @@ BOOLEAN={'type':'boolean'}
 IDREF=obj({'id':TEXT,'revision':{'type':'integer','minimum':1}})
 REASON=nullable(TEXT)
 RISK=obj({
-    'state':{'enum':['incident_not_selected','affine_transform','different_class_not_additively_mapped','nonlinear_transform_not_additively_mapped']},
+    'state':{'enum':['incident_not_selected','affine_transform','different_class_not_additively_mapped','nonlinear_transform_not_additively_mapped','raw_output_not_operational']},
     'risk_score_explained':{'const':False}, 'factor':{'enum':['detection','anomaly']}, 'formula':TEXT,
     'scenario_id':nullable(TEXT), 'source_probability':NUMBER, 'scale':nullable(NUMBER), 'offset':nullable(NUMBER),
     'rounding':obj({'mode':{'const':'ROUND_HALF_UP'},'decimal_places':{'const':6}}),
@@ -33,7 +33,7 @@ PROPERTIES=SCHEMAS['detection']['properties']
 ITEM=obj({'id':TEXT,'projection_revision':{'type':'integer','minimum':1},
     'in_incident_explanation_refs':nullable(BOOLEAN),
     'record':{'$ref':'#/components/schemas/XAIExplanationRecord'},
-    'output_direction':{'enum':['positive_increases_class_probability','positive_increases_anomaly_score']},
+    'output_direction':{'enum':['positive_increases_class_probability','positive_increases_anomaly_score','positive_increases_raw_class_probability']},
     'coherence':obj({'reconstructed_output':NUMBER,'absolute_error':NUMBER,
         'reconstruction_tolerance':{'const':1e-8},'detection_output_tolerance':{'const':1e-6},
         'residual_tolerance':{'const':1e-5},'causality_or_detector_accuracy_proven':{'const':False}}),

@@ -1,0 +1,14 @@
+{
+  "input_origin": "synthetic",
+  "real_estimators": true,
+  "real_library": "0.50.0",
+  "statistical_validation": false,
+  "execution_performed": false,
+  "methods": [
+    "SHAP_TREE_EXPLAINER",
+    "SHAP_PERMUTATION_EXPLAINER"
+  ],
+  "rf_raw_output": 1.0,
+  "rf_calibrated_output": 0.9615384552693282,
+  "if_operational_score": 0.5584138485946146
+}

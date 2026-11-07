@@ -178,7 +178,21 @@ def validate_links(*,detections,explanations,incidents,decisions,executions=()):
             require(abs(e['output_value']-c['probabilities'][target['class_label']])<1e-6,'Explicacao nao reconstrói probabilidade operacional')
         elif target['output']=='ANOMALY_SCORE':
             require(a is not None and abs(e['output_value']-a['anomaly_score'])<1e-6,'Explicacao nao reconstrói score IF')
-        else: raise ContractError('RAW_CLASS_PROBABILITY exige deteccao bruta separada; nao ligar a deteccao calibrada')
+        elif target['output']=='RAW_CLASS_PROBABILITY':
+            require(e['method']=='SHAP_TREE_EXPLAINER' and c is not None and target['class_label'] in c['probabilities'],
+                    'Saida RF bruta exige TreeExplainer e classe vinculada')
+            require(0 <= e['base_value'] <= 1 and 0 <= e['output_value'] <= 1,'Probabilidade RF bruta invalida')
+        else: raise ContractError('Saida de explicacao desconhecida')
+        if e['method'] in ('SHAP_TREE_EXPLAINER','SHAP_PERMUTATION_EXPLAINER'):
+            p=e['parameters']
+            require(isinstance(p.get('library_version'),str) and bool(p['library_version']), 'Versao SHAP ausente')
+            require(p.get('output_space')==('raw_pre_calibration' if e['method']=='SHAP_TREE_EXPLAINER' else 'operational'),
+                    'Espaco da saida SHAP inconsistente')
+            require((e['method']=='SHAP_TREE_EXPLAINER')==(target['output']=='RAW_CLASS_PROBABILITY'),
+                    'Metodo SHAP e saida incompatíveis')
+            operational=c['probabilities'].get(target['class_label']) if c else a['anomaly_score']
+            require(type(p.get('operational_output_value')) in (int,float) and
+                    abs(p['operational_output_value']-operational)<1e-6,'Snapshot da saida operacional divergente')
     for i in ins.values():
         require(set(i['detection_refs'])<=set(ds),'Incidente referencia deteccao inexistente')
         require(set(i['explanation_refs'])<=set(xs),'Incidente referencia explicacao inexistente')
