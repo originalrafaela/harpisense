@@ -210,6 +210,9 @@ def main():
             installed_status = http.get(prefix+'/native/status',headers=headers).json()
             check('package_version' in installed_status['build'] and installed_status['containment']=='not_available',
                   'installed_build_identity_and_real_containment_blocked')
+            if args.runtime:
+                check(installed_status['build']['package_version']=='native-installers-20261106-candidate.5',
+                      'frozen_runtime_reports_actual_candidate_version')
             expect(page.get_by_role('button', name='Sair', exact=True)).to_be_visible()
             check(True, 'new_browser_login_requires_real_totp_after_process_restart')
             presented = http.get(prefix+'/config/presentation',headers=headers).json()

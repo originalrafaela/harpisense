@@ -22,7 +22,7 @@ def main():
     parser.add_argument('--winsw', required=True, type=Path)
     parser.add_argument('--vc-redist', required=True, type=Path)
     args = parser.parse_args()
-    info = ROOT/'.native-build/build-info.json'
+    info = ROOT/'.native-build/build_info.json'
     info.parent.mkdir(parents=True,exist_ok=True)
     info.write_text(json.dumps({'package_version': os.environ.get('HARPISENSE_PACKAGE_VERSION','development'),
         'source_commit': subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()}),encoding='utf-8')
