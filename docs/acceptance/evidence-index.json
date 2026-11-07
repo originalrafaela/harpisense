@@ -1,0 +1,10 @@
+{
+  "base_commit": "a8fef1f5810ad5077658a29fe2aa407ffd21df6d",
+  "branch": "audit/native-security-acceptance-20261107",
+  "installed_acceptance": "not_executed",
+  "preview_5174": "preserved_not_retested",
+  "security_fixture_result": "security-fixture-result.json",
+  "executor": "isolated_simulation_only_no_operational_executor_attested",
+  "vm_availability": {"ubuntu2404": "files_exist_readiness_unconfirmed", "windows11": "files_exist_readiness_unconfirmed"},
+  "pending": ["M1_evaluation_confirmation_end_to_end", "specific_approval_separate_audit", "installed_SHAP_Tree_Permutation", "clean_OS_reboot_services_admin_login", "OS_zero_containment_measurement"]
+}
