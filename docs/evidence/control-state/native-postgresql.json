@@ -1,0 +1,25 @@
+{
+  "runtime": "native-postgresql",
+  "docker": false,
+  "platform": "win32",
+  "tests_run": 39,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "clean_os": false,
+  "installer_run": false,
+  "reboot": false,
+  "autostart": "not_tested",
+  "admin_login": "not_tested",
+  "native_provisioning": true,
+  "native_configuration_repeated": true,
+  "source_sha256": {
+    "backend/delivery/controls.py": "9e2086512e31e6c2349ce1b87452e5573f9aa3cc8cf8f955d89b2beaa03a90a1",
+    "backend/delivery/routes.py": "cc5bc040b6b147a36b1811673551d7e36bd80f0c11b387363726854eee96655d",
+    "backend/delivery/operational_queue.py": "170aa630c7dc24029f412e2853ba9ec038301b036da4478bef8da00fba6d0cc3",
+    "backend/delivery/simulation.py": "ada6e946ba1228d8ecbb5bc711a5dab76137afccbcb4efddaab8e7ec4962c305",
+    "packaging/native/provision.py": "a27253167ec9892b45915f5c2de31a2d8cfcfbafd2c99427ec794e38dfc16077"
+  },
+  "new_dependencies": [],
+  "passed": true
+}

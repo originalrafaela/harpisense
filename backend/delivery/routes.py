@@ -59,6 +59,7 @@ def install_controls(app, controls):
             value['operational_controls'] = {**state['value'], 'revision': state['revision'],
                   'emergency_stopped': state['emergency_stopped'], 'updated_at': state['updated_at'],
                   'effective_state': state['effective_state'],
+                  'cases': state['cases'],
                   'real_execution_blocked': True}
         except Exception:
             value['operational_controls'] = {'status': 'unavailable', 'real_execution_blocked': True}
