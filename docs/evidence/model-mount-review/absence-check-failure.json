@@ -1,0 +1,17 @@
+{
+  "transport": "real native HTTP/PostgreSQL/Chromium",
+  "synthetic_incidents": true,
+  "xai_backend_integrated": true,
+  "live_traffic": false,
+  "checks": [
+    "reader_uses_existing_native_asset_name",
+    "reader_requires_admin_session",
+    "dashboard_model_button_available_without_harpia_text",
+    "authenticated_client_uses_revision_bound_get",
+    "actual_authenticated_persisted_xai_rendered",
+    "random_forest_rendered",
+    "isolation_forest_rendered"
+  ],
+  "result": "failed",
+  "failure_type": "AssertionError"
+}

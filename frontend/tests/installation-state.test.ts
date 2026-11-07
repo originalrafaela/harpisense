@@ -7,6 +7,14 @@ const current={desired_revision:0,effective_revision:null,state:'not_started',pr
 const applied={...current,desired_revision:2,effective_revision:2,state:'applied_verified',proposed_status:'APPLIED',effective:{parameters:{timezone:'America/Sao_Paulo',display_name:'Laboratório'}},presentation:{verified:true}};
 const draft={...setup,version:3,state:'draft_saved',document:{step:'mqtt',parameters:{display_name:'Laboratório',timezone:'America/Sao_Paulo'}}};
 
+test('cloud planning is optional and cannot assert connectivity or carry credentials',()=>{
+ const cloud={mode:'draft',provider:'azure_blob',destination:'oficina/backup',include:['configuration'],periodicity:'weekly',retention_days:30};
+ assert.equal(parseSetupProgress({...draft,document:{...draft.document,cloud_backup:cloud}}).document?.cloud_backup?.provider,'azure_blob');
+ assert.equal(parseSetupProgress({...draft,document:{...draft.document,cloud_backup:{mode:'deferred'}}}).document?.cloud_backup?.mode,'deferred');
+ for(const invalid of [{...cloud,provider:'unknown'},{...cloud,password:'example'},{...cloud,destination:'https://cloud.invalid/?token=example'},{...cloud,retention_days:0}])
+  assert.throws(()=>parseSetupProgress({...draft,document:{...draft.document,cloud_backup:invalid}}));
+});
+
 test('new requires no saved draft and no configuration revision',()=>{
  assert.equal(installationSnapshot(setup,current).status,'new');
  assert.equal(installationSnapshot(draft,current).status,'pending');

@@ -77,6 +77,10 @@ test('proxy real Vite: caminho, Bearer, status, leitura restrita e logs sem cred
   assert.equal((await fetch(config+'/assets',{method:'POST',headers})).status,200);
   assert.equal((await fetch(config+'/assets',{method:'DELETE',headers})).status,405);
   assert.equal((await fetch(config+'/assets?password=forbidden',{method:'POST',headers})).status,400);
+  assert.equal((await fetch(base+'/incidents/incident-1/explanations?incident_revision=1',{headers})).status,200);
+  for(const suffix of ['', '?incident_revision=0','?incident_revision=1&incident_revision=2','?limit=1'])
+    assert.equal((await fetch(base+'/incidents/incident-1/explanations'+suffix,{headers})).status,400);
+  assert.equal((await fetch(base+'/incidents/incident-1/explanations?incident_revision=1',{method:'POST',headers})).status,405);
 });
 
 test('proxy libera somente as rotas candidatas de primeiro acesso/MFA e não envia Basic',async t=>{

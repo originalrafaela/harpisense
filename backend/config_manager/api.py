@@ -12,6 +12,7 @@ from .schema import ConfigError, REQUEST_SCHEMA, checked, obj, text
 from .store import Conflict
 from .setup import FIRMWARE, SAVE_SCHEMA, SetupStore
 from .mqtt import mqtt_capabilities, mqtt_status
+from .cloud_backup import CLOUD_BACKUP_CATALOG
 
 
 class SafeRoute(APIRoute):
@@ -175,6 +176,7 @@ def install_config_api(app, store, *, installation_id, presentation=None, mqtt_o
                 'application_scope': ['display_name', 'timezone'] if presentation else [],
                 'reauthentication_required': bool(presentation),
                 'backup': 'not_applicable', 'bootstrap_managed': False,
+                'backup_catalog': CLOUD_BACKUP_CATALOG,
                 'mqtt': mqtt_capabilities(store.capabilities)}
 
     @router.get('/mqtt/status')

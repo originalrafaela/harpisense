@@ -9,7 +9,7 @@ def check_runtime():
     for module in ('harpisense_catalog', 'harpisense_contracts',
                    'harpisense_contracts.canonical', 'config_manager.setup',
                    'config_manager.store', 'admin_auth.mfa', 'native_server.runtime',
-                   'delivery.app', 'delivery.mqtt_consumer', 'provision'):
+                   'delivery.app', 'delivery.mqtt_consumer', 'xai_api.native', 'provision'):
         loaded = importlib.import_module(module)
         origin = Path(loaded.__file__).resolve()
         if not origin.is_relative_to(root):

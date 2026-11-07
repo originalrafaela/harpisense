@@ -29,6 +29,15 @@ SETUP_SCHEMA = obj({
         'firmware_version': {'const': '1.0.0'}})},
     'parameters': PARTIAL_PARAMETERS,
     'backup': {'enum': ['deferred', 'external_reference']},
+    'cloud_backup': obj({
+        'mode': {'enum': ['deferred', 'draft']},
+        'provider': {'enum': ['s3', 'azure_blob', 'gcs', 's3_compatible']},
+        'destination': text(200, r'^[A-Za-z0-9][A-Za-z0-9_. /-]{0,199}$'),
+        'include': {'type': 'array', 'uniqueItems': True, 'maxItems': 4,
+                    'items': {'enum': ['configuration', 'inventory', 'telemetry', 'audit']}},
+        'periodicity': {'enum': ['manual', 'daily', 'weekly']},
+        'retention_days': {'type': 'integer', 'minimum': 1, 'maximum': 3650},
+    }, ['mode']),
 }, ['step', 'parameters'])
 SAVE_SCHEMA = obj({
     'expected_version': {'type': 'integer', 'minimum': 0},
@@ -81,7 +90,6 @@ class SetupStore:
             ('devices', bool(document.get('devices'))),
             ('mqtt', bool(parameters.get('mqtt_broker_host'))),
             ('capture', bool(parameters.get('network_cidrs') and parameters.get('sensor_bindings'))),
-            ('backup', document.get('backup') == 'external_reference' and bool(parameters.get('external_credential_ref'))),
         ):
             if not present:
                 missing.append({'section': section, 'code': 'PREPARATION_PENDING'})

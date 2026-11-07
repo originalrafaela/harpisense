@@ -1,0 +1,13 @@
+{
+  "transport": "real native HTTP/PostgreSQL/Chromium",
+  "synthetic_incidents": true,
+  "xai_backend_integrated": false,
+  "checks": [
+    "dashboard_model_button_available_without_harpia_text",
+    "authenticated_client_uses_revision_bound_get",
+    "missing_backend_route_reported_without_fake_explanation",
+    "incident_selection_preserved_after_ai_return",
+    "dashboard_selection_preserved_after_detail_return"
+  ],
+  "result": "passed"
+}

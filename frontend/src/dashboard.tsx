@@ -1,6 +1,6 @@
 import {formatTime} from './presentation';
 import {useEffect, useState} from 'react';
-import {object, type Row, type ControlState} from './api';
+import {object, type Row, type ControlState, type Client} from './api';
 import {Badge, Empty, Panel, show} from './components';
 import {selectExplanation, originLabel as origin, incidentRevision, explanationRevision, explanationTime, explanationFreshness} from './harpia';
 
@@ -11,6 +11,10 @@ export type ControlValues = {
 };
 export const unknownControls: ControlValues = {autonomy: null, operation: null, execution: null};
 export type DashboardContext = {
+  modelClient?:Pick<Client,'get'>;
+  selectedModelIncidentId?:string|null;
+  onModelIncidentChange?:(id:string)=>void;
+  openModelAnalysis?:(id:string)=>void;
   demonstration: boolean;
   demoControls: ControlValues;
   onDemoControls: (values: ControlValues) => void;
@@ -50,8 +54,10 @@ export function HarpiaCard({incidents, explanations, failure, health, context}: 
   incidents: Row[]; explanations: Row[]; failure?: string; health: Record<string, unknown> | null; context: DashboardContext;
 }) {
   const ordered = newest(incidents);
-  const [selection, setSelection] = useState('');
-  const selected = ordered.find(row => incidentId(row) === selection) || ordered[0];
+  const [localSelection, setLocalSelection] = useState('');
+  const selection = context.selectedModelIncidentId ?? localSelection;
+  const setSelection = (id:string) => {setLocalSelection(id);context.onModelIncidentChange?.(id)};
+  const selected = ordered.find(row => incidentId(row) === selection) || (!selection ? ordered[0] : undefined);
   const selectedId = selected ? incidentId(selected) : null;
   const [consultation, setConsultation] = useState<{key: string; rows: Row[]; error?: string} | null>(null);
   const [requested, setRequested] = useState<{key: string; id: string} | null>(null);
@@ -107,6 +113,7 @@ export function HarpiaCard({incidents, explanations, failure, health, context}: 
         </select></label>
         {!selection && selected && <small>Incidente mais recente da página consultada. Sem horário, preservada a ordem da API.</small>}
         {selected && <small>Incidente {selectedId} · revisão do incidente {show(incidentRevision(selected))}</small>}
+        {selectedId && <button type="button" disabled={!context.openModelAnalysis} onClick={()=>context.openModelAnalysis?.(selectedId)}>Ver explicação do modelo</button>}
         {(context.loading || consulting) && <p role="status">Carregando explicações…</p>}
         {selectedId && <button disabled={Boolean(context.loading || consulting || notIntegrated || !context.loadExplanations)}
           onClick={() => {setConsultation(null);setRequested({key: selectionKey, id: selectedId})}}>{deterministicAvailable ? 'Consultar explicação determinística' : 'Consultar explicações registradas'}</button>}

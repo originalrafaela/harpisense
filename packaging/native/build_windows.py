@@ -34,7 +34,7 @@ def main():
               '--specpath', str(ROOT/'.native-build'),
               '--paths', str(ROOT/'backend'), '--paths', str(ROOT/'backend/domain'),
               '--paths', str(ROOT/'genai'), '--paths', str(ROOT/'packaging/native')]
-    packages = ['native_server', 'delivery', 'admin_auth', 'config_manager',
+    packages = ['native_server', 'delivery', 'admin_auth', 'config_manager', 'xai_api',
                 'harpia', 'harpisense_contracts', 'harpisense_engines', 'uvicorn', 'psycopg', 'psycopg_binary',
                 'jsonschema', 'qrcode', 'paho.mqtt']
     collect = [item for package in packages for item in ('--collect-all', package)]

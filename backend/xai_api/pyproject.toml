@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "harpisense-xai-reader"
+version = "1.0.0"
+description = "Read-only adapter for persisted canonical HarpiSense XAI records"
+requires-python = ">=3.12"
+
+[tool.setuptools]
+packages = ["xai_api"]
+package-dir = {xai_api = "."}

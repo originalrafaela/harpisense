@@ -55,6 +55,9 @@ def build_native_app(state, frontend):
         protection_key=Path(state['key_file']).read_bytes().strip(),
         allowed_origins=[state['panel_url']], technical_credentials=credentials)
     store = PostgresStore(state['dsn'])
+    from xai_api import install_xai_api
+    install_xai_api(api, store, installation_id=state['installation_id'],
+                    asset_identifier_column='device_id')
     config = ConfigStore(store._connect, capabilities(state))
     from config_manager.presentation import PresentationApplicator
     presentation = PresentationApplicator(config, state['installation_id'],

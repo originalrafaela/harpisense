@@ -1,0 +1,28 @@
+{
+  "environment": "Product integration: isolated native PostgreSQL/Mosquitto/HTTP/Chromium; not clean OS",
+  "docker": false,
+  "service_registration": false,
+  "machine_reboot": false,
+  "runtime": "python_source",
+  "checks": [
+    "fresh_product_migrations_and_protected_grant",
+    "real_broker_tls_authentication_and_suback",
+    "external_mode_validates_tls_and_suback_without_administering_broker",
+    "anonymous_p11_denied",
+    "anonymous_mqtt_status_denied",
+    "dns_rebinding_denied",
+    "cross_origin_bootstrap_denied",
+    "invalid_totp_does_not_activate",
+    "ten_recovery_codes_browser",
+    "separate_password_reset_codes_browser",
+    "browser_bootstrap_totp_confirmation_dashboard",
+    "cloud_no_credential_fields_or_active_operations",
+    "cloud_defer_saved_existing_setup_endpoint",
+    "cloud_optional_no_required_pending",
+    "setup_save_http_200",
+    "browser_saved_setup_in_real_postgresql",
+    "cloud_four_providers_planned_neutral_catalog"
+  ],
+  "result": "failed",
+  "first_failure": "TimeoutError"
+}

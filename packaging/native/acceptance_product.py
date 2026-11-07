@@ -45,6 +45,7 @@ def main():
     parser.add_argument('--postgres-bin', required=True, type=Path)
     parser.add_argument('--mosquitto', required=True, type=Path)
     parser.add_argument('--runtime', type=Path, help='Test frozen product runtime instead of Python source')
+    parser.add_argument('--cloud-review', action='store_true', help='Planning-only cloud UI review; never connects a provider')
     args = parser.parse_args()
     evidence = {'environment': 'Product integration: isolated native PostgreSQL/Mosquitto/HTTP/Chromium; not clean OS',
                 'docker': False, 'service_registration': False, 'machine_reboot': False,
@@ -68,7 +69,7 @@ def main():
     env = dict(os.environ, PYTHONPATH=os.pathsep.join(str(ROOT/p) for p in ('backend', 'backend/domain', 'genai')))
     processes, handles = [], []
     pg_started = False
-    evidence_dir = ROOT/'docs/evidence/product-consolidation'
+    evidence_dir = ROOT/('docs/evidence/cloud-backup-review' if args.cloud_review else 'docs/evidence/product-consolidation')
     evidence_dir.mkdir(parents=True, exist_ok=True)
     api_command = [str(args.runtime)] if args.runtime else [sys.executable, str(ROOT/'packaging/native/entry.py')]
     def process(command, name):
@@ -141,6 +142,19 @@ def main():
             expect(page.get_by_role('button', name='Sair', exact=True)).to_be_visible()
             check(True, 'browser_bootstrap_totp_confirmation_dashboard')
             page.get_by_role('button', name='Iniciar assistente', exact=True).click()
+            if args.cloud_review:
+                cloud = page.get_by_role('region',name='Backup em nuvem',exact=True)
+                expect(cloud.get_by_role('status')).to_have_text('Backup em nuvem: não configurado')
+                for label in ('Conectar provedor','Executar backup','Restaurar backup'):
+                    expect(cloud.get_by_role('button',name=label,exact=True)).to_be_disabled()
+                check(cloud.locator('input[type=password]').count()==0,'cloud_no_credential_fields_or_active_operations')
+                cloud.get_by_role('button',name='Configurar depois',exact=True).click()
+                with page.expect_response(lambda r:r.url.endswith('/config/setup') and r.request.method=='PUT') as deferred:
+                    page.get_by_role('button',name='Salvar rascunho de backup',exact=True).click()
+                check(deferred.value.status==200,'cloud_defer_saved_existing_setup_endpoint')
+                deferred_setup=http.get(prefix+'/config/setup',headers=enrolled_headers).json()
+                check(deferred_setup['document']['cloud_backup']['mode']=='deferred' and
+                      not any(p['section']=='backup' for p in deferred_setup['pending']), 'cloud_optional_no_required_pending')
             page.get_by_label('Nome da instalação', exact=True).fill('Central nativa — ensaio isolado')
             with page.expect_response(lambda r: r.url.endswith('/config/setup') and r.request.method == 'PUT') as saved:
                 page.get_by_role('button', name='Salvar e continuar', exact=True).click()
@@ -149,6 +163,30 @@ def main():
             with psycopg.connect(state['dsn']) as conn:
                 account_before = conn.execute('SELECT username,password_hash,credential_revision FROM hs_admin_account').fetchone()
             check(True, 'browser_saved_setup_in_real_postgresql')
+            if args.cloud_review:
+                cloud.get_by_role('button',name='Preparar rascunho',exact=True).click()
+                for label in ('Amazon S3','Azure Blob Storage','Google Cloud Storage','Compatível com a API S3'):
+                    expect(cloud.get_by_role('option',name=label,exact=False)).to_have_count(1)
+                check(True,'cloud_four_providers_planned_neutral_catalog')
+                cloud.get_by_label('Provedor',exact=True).select_option('azure_blob')
+                cloud.get_by_label('Destino do backup',exact=True).fill('oficina/backup')
+                cloud.get_by_label('Configurações',exact=True).check()
+                cloud.get_by_label('Inventário e vínculos',exact=True).check()
+                cloud.get_by_label('Periodicidade',exact=True).select_option('weekly')
+                cloud.get_by_label('Retenção em dias',exact=True).fill('30')
+                with page.expect_response(lambda r:r.url.endswith('/config/setup') and r.request.method=='PUT') as cloud_saved:
+                    page.get_by_role('button',name='Salvar rascunho de backup',exact=True).click()
+                check(cloud_saved.value.status==200,'cloud_draft_saved_real_http')
+                expect(cloud.get_by_role('status')).to_have_text('Rascunho salvo')
+                with psycopg.connect(state['dsn']) as conn:
+                    plan=conn.execute('SELECT document->\'cloud_backup\' FROM hs_config.setup_progress').fetchone()[0]
+                check(plan['provider']=='azure_blob' and plan['retention_days']==30,'cloud_draft_persisted_in_existing_setup_postgresql')
+                page.set_viewport_size({'width':1440,'height':1000})
+                cloud.screenshot(path=str(evidence_dir/'cloud-desktop.png'))
+                page.set_viewport_size({'width':390,'height':844})
+                cloud.screenshot(path=str(evidence_dir/'cloud-mobile.png'))
+                check(cloud.bounding_box()['width']<=390,'cloud_mobile_layout_fits_viewport')
+                page.set_viewport_size({'width':1440,'height':1000})
             page.get_by_label('Identificador do ativo', exact=True).fill('poste-extra')
             page.get_by_label('Nome do ativo', exact=True).fill('Ativo cadastrado no produto')
             page.get_by_label('Tópico MQTT do ativo', exact=True).fill('harpisense/poste2/telemetry')
@@ -222,6 +260,11 @@ def main():
             check(setup['document']['parameters']['display_name'] == 'Central nativa — ensaio isolado', 'setup_preserved_after_process_restart')
             page.get_by_role('button', name='Retomar assistente', exact=True).click()
             expect(page.get_by_label('Perfil de implantação', exact=False)).to_be_visible()
+            if args.cloud_review:
+                restored_cloud=page.get_by_role('region',name='Backup em nuvem',exact=True)
+                expect(restored_cloud.get_by_role('status')).to_have_text('Rascunho salvo')
+                expect(restored_cloud.get_by_label('Destino do backup',exact=True)).to_have_value('oficina/backup')
+                check(True,'cloud_draft_restored_after_new_login_and_process_restart')
             expect(page.get_by_text('Ativo cadastrado no produto', exact=True)).to_be_visible()
             assets = http.get(prefix + '/config/assets', headers=headers).json()
             check(len(assets) == 1 and assets[0]['device_id'] == 'poste-extra', 'asset_preserved_after_reload_and_process_restart')

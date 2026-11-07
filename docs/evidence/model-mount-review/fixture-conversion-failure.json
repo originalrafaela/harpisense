@@ -1,0 +1,9 @@
+{
+  "transport": "real native HTTP/PostgreSQL/Chromium",
+  "synthetic_incidents": true,
+  "xai_backend_integrated": true,
+  "live_traffic": false,
+  "checks": [],
+  "result": "failed",
+  "failure_type": "ContractError"
+}

@@ -21,7 +21,7 @@ def main():
     scripts.mkdir(parents=True)
     for name in ('entry.py', 'provision.py', 'ubuntu_install.py', 'runtime_check.py'):
         shutil.copyfile(ROOT/'packaging/native'/name, scripts/name)
-    for name in ('delivery', 'admin_auth', 'config_manager', 'native_server'):
+    for name in ('delivery', 'admin_auth', 'config_manager', 'native_server', 'xai_api'):
         shutil.copytree(ROOT/'backend'/name, stage/'backend'/name,
                         ignore=shutil.ignore_patterns('__pycache__'))
     shutil.copytree(ROOT/'backend/domain/harpisense_contracts', stage/'backend/domain/harpisense_contracts',

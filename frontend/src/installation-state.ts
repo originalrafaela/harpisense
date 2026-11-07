@@ -6,7 +6,9 @@ export type SetupDraft = {
  step:string; deployment_profile?:string;
  devices?:{device_id:string;firmware_id:string;firmware_version:string}[];
  parameters:Record<string,unknown>; backup?:string;
+ cloud_backup?:CloudBackupDraft;
 };
+export type CloudBackupDraft={mode:'deferred'|'draft';provider?:string;destination?:string;include?:string[];periodicity?:'manual'|'daily'|'weekly';retention_days?:number};
 export type SetupProgress = {
  version:number; document:SetupDraft|null; state:string; operational:boolean;
  pending:{section:string;code:string}[]; updated_at?:string;
@@ -25,6 +27,16 @@ export function parseSetupProgress(value:unknown):SetupProgress {
     !value.pending.every(p=>record(p)&&typeof p.section==='string'&&typeof p.code==='string'))
   throw new Error('Resposta do progresso de configuração incompatível.');
  const d=value.document;
+ if(record(d)&&d.cloud_backup!==undefined){
+  const c=d.cloud_backup;
+  if(!record(c)||Object.keys(c).some(k=>!['mode','provider','destination','include','periodicity','retention_days'].includes(k))||!['draft','deferred'].includes(String(c.mode))||
+    (c.provider!==undefined&&!['s3','azure_blob','gcs','s3_compatible'].includes(String(c.provider)))||
+    (c.destination!==undefined&&(typeof c.destination!=='string'||!/^[A-Za-z0-9][A-Za-z0-9_. /-]{0,199}$/.test(c.destination)))||
+    (c.include!==undefined&&(!Array.isArray(c.include)||!c.include.every(v=>typeof v==='string'&&['configuration','inventory','telemetry','audit'].includes(v))))||
+    (c.periodicity!==undefined&&!['manual','daily','weekly'].includes(String(c.periodicity)))||
+    (c.retention_days!==undefined&&(typeof c.retention_days!=='number'||!Number.isInteger(c.retention_days)||c.retention_days<1||c.retention_days>3650)))
+   throw new Error('Rascunho de backup em nuvem incompatível.');
+ }
  if(d!==null&&(!record(d)||typeof d.step!=='string'||!steps.includes(d.step)||!record(d.parameters)||
     (d.devices!==undefined&&(!Array.isArray(d.devices)||!d.devices.every(v=>record(v)&&
      typeof v.device_id==='string'&&typeof v.firmware_id==='string'&&typeof v.firmware_version==='string')))))
