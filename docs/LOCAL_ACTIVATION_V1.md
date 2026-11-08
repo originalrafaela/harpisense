@@ -37,8 +37,11 @@ Conta migration_required mantém login backend preexistente e não libera novo c
 `WindowsHandoff(name, adapter, service_sid, installer_sids).start()` cria pipe
 com ACL explícita, rejeita cliente remoto e valida SID por impersonação.
 `UnixHandoff(path, adapter, allowed_uids).start()` exige diretório privado do dono,
-socket 0600 e SO_PEERCRED. `.close()` encerra o endpoint. Não remove endpoint
-preexistente ao iniciar. O launcher Ubuntu precisa executar IPC como o dono/root;
+socket 0600 e SO_PEERCRED. `.close()` encerra somente o endpoint da própria
+instância. Endpoint existente só é removido sob lock exclusivo, se for socket
+privado do mesmo dono, recusar conexão e conservar o mesmo inode na revalidação.
+Listener ativo, symlink, arquivo comum e socket com permissão pública são preservados
+e recusados. O launcher Ubuntu precisa executar IPC como o dono/root;
 somente incluir UID na lista não concede acesso a um socket 0600.
 
 Cliente instalador: `request_windows_handoff(..., expected_server_sid=...)` ou
@@ -109,3 +112,36 @@ blobs para outro usuário/máquina depende da proteção OS; teste cruzado real 
 Clonagem INTEGRAL de VM pode incluir perfil DPAPI, chave host systemd e identidade;
 NÃO há alegação de resistência. Não existe binding TPM/vTPM implementado.
 Não declarar aceite de VM, browser real ou integração servidor antes dessas rodadas.
+
+## Complemento lifecycle Unix e navegador (08/11/2026)
+
+O Gerenciador definiu `state.handoff_directory=/run/harpisense-api`, com
+`RuntimeDirectory=harpisense-api`, `RuntimeDirectoryMode=0700` e
+`RuntimeDirectoryPreserve=no` na unit systemd. Isso mantém socket fora do estado
+persistente. Esta biblioteca também recupera conservadoramente um socket stale
+após morte do processo, inclusive quando não houve limpeza pelo supervisor.
+Não modifica runtime/units do Gerenciador.
+
+`UnixHandoff` mantém flock durante toda a vida do listener. `close()` compara
+dispositivo/inode antes de unlink e não remove endpoint substituído por outra
+instância. O arquivo de lock permanece privado, sem segredos, e o kernel libera
+o lock quando o processo morre. Fechar a janela durante navegação ou espera
+termina o launcher normalmente; falha real de driver ainda é propagada.
+
+Validação complementar executada:
+
+* Debian WSL, Python 3.13: **5 testes Linux reais passaram**, incluindo processo
+  filho encerrado por `os._exit(71)`, recuperação do inode stale, preservação de
+  listener ativo com/sem flock, preservação de endpoint substituído em `close()`
+  e recusa de arquivo comum/symlink/socket público. Comando: `python3 -m unittest
+  backend.local_activation_tests.test_unix_ipc -v` na worktree.
+* Windows: descoberta local executou **14 testes com sucesso e pulou os 5 testes
+  Linux**. Os 3 testes novos de navegador usam driver fixture para simular
+  fechamento da página/janela e falha de driver; não executam Chromium.
+* Para testar IPC sem instalar cryptography no Debian, o carregamento de identidade
+  e verificador criptográfico passou a ser sob demanda. Não há alteração de algoritmo
+  ou fallback: operações criptográficas continuam exigindo a dependência instalada.
+
+Não se repetiram os 17 testes de integração do Backend. Debian WSL não comprova
+Ubuntu/systemd, reboot do SO, VMware ou instalação limpa. Chromium real e integração
+do `RuntimeDirectory` continuam sujeitos ao aceite do pacote do Gerenciador.

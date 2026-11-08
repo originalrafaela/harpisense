@@ -4,8 +4,6 @@ import hashlib
 import json
 import re
 
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-
 LIMIT = 16 * 1024
 PURPOSES = {'challenge', 'activation-proof', 'receipt', 'first-use'}
 
@@ -82,6 +80,7 @@ def sign(identity, purpose, document):
 
 
 def verify(envelope, purpose, trusted_keys, fields):
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
     exact(envelope, dict(version=int, key_id=str, payload=str, signature=str))
     if len(json.dumps(envelope).encode('utf8')) > LIMIT:
         raise ActivationError('INVALID_ENVELOPE')

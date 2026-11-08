@@ -1,7 +1,9 @@
 """Authenticated local handoff. No HTTP endpoint can create first-use sessions."""
 import json
+import errno
 import os
 import socket
+import stat
 import struct
 import threading
 from pathlib import Path
@@ -34,6 +36,33 @@ class UnixHandoff:
         self.socket = None
         self.thread = None
         self.stopping = threading.Event()
+        self._lock_fd = None
+        self._endpoint_identity = None
+
+    def _remove_stale(self):
+        try:
+            before = self.path.lstat()
+        except FileNotFoundError:
+            return
+        if (not stat.S_ISSOCK(before.st_mode) or before.st_uid != os.geteuid()
+                or before.st_mode & 0o077):
+            raise RuntimeError('UNSAFE_EXISTING_IPC_ENDPOINT')
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as probe:
+            probe.settimeout(0.5)
+            try:
+                probe.connect(str(self.path))
+            except OSError as exc:
+                if exc.errno != errno.ECONNREFUSED:
+                    raise RuntimeError('IPC_ENDPOINT_NOT_PROVEN_STALE') from None
+            else:
+                raise RuntimeError('IPC_ENDPOINT_ACTIVE')
+        # Private parent + lifetime lock serialize legitimate owners. Never unlink
+        # a replaced endpoint, regular file, symlink or endpoint of another UID.
+        after = self.path.lstat()
+        if (before.st_dev, before.st_ino, before.st_uid, before.st_mode) != (
+                after.st_dev, after.st_ino, after.st_uid, after.st_mode):
+            raise RuntimeError('IPC_ENDPOINT_CHANGED')
+        self.path.unlink()
 
     def start(self):
         if os.name != 'posix' or not hasattr(socket, 'SO_PEERCRED'):
@@ -42,15 +71,38 @@ class UnixHandoff:
         info = parent.stat()
         if parent.is_symlink() or info.st_mode & 0o077 or info.st_uid != os.geteuid():
             raise RuntimeError('PRIVATE_IPC_DIRECTORY_REQUIRED')
-        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        if self.socket is not None:
+            raise RuntimeError('IPC_ALREADY_STARTED')
+        self.stopping.clear()
+        import fcntl
+        lock_fd = os.open(str(self.path) + '.lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
         try:
-            sock.bind(str(self.path))  # Never unlink a preexisting endpoint.
+            lock_info = os.fstat(lock_fd)
+            if (not stat.S_ISREG(lock_info.st_mode) or lock_info.st_uid != os.geteuid()
+                    or lock_info.st_mode & 0o077):
+                raise RuntimeError('UNSAFE_IPC_LOCK')
+            fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            self._remove_stale()
+        except Exception:
+            os.close(lock_fd)
+            raise
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        bound = False
+        try:
+            sock.bind(str(self.path))
+            bound = True
             os.chmod(self.path, 0o600)
             sock.listen(4)
             sock.settimeout(0.5)
+            endpoint = self.path.lstat()
+            self._endpoint_identity = (endpoint.st_dev, endpoint.st_ino)
         except Exception:
             sock.close()
+            if bound:
+                self.path.unlink(missing_ok=True)
+            os.close(lock_fd)
             raise
+        self._lock_fd = lock_fd
         self.socket = sock
         self.thread = threading.Thread(target=self._serve, daemon=True)
         self.thread.start()
@@ -85,7 +137,18 @@ class UnixHandoff:
             self.socket.close()
             if self.thread:
                 self.thread.join(timeout=4)
-            self.path.unlink(missing_ok=True)
+            try:
+                endpoint = self.path.lstat()
+                if (stat.S_ISSOCK(endpoint.st_mode) and endpoint.st_uid == os.geteuid()
+                        and (endpoint.st_dev, endpoint.st_ino) == self._endpoint_identity):
+                    self.path.unlink()
+            except FileNotFoundError:
+                pass
+            finally:
+                if self._lock_fd is not None:
+                    os.close(self._lock_fd)
+                    self._lock_fd = None
+                self.socket = None
 
 
 class WindowsHandoff:
@@ -179,7 +242,7 @@ def launch_first_use(handoff, *, chromium_executable):
     Cookie travels through browser automation pipe, never URL, argv or profile disk.
     Blocks until user closes the isolated browser; caller may run a UI thread.
     """
-    from playwright.sync_api import sync_playwright
+    from playwright.sync_api import sync_playwright, Error as PlaywrightError
     from urllib.parse import urlsplit
     origin = handoff['origin']
     url = urlsplit(origin)
@@ -187,6 +250,7 @@ def launch_first_use(handoff, *, chromium_executable):
         raise ValueError('INVALID_NATIVE_ORIGIN')
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(executable_path=str(chromium_executable), headless=False)
+        context = None
         try:
             context = browser.new_context()
             context.add_cookies([dict(name=handoff['cookie_name'], value=handoff['cookie_value'],
@@ -194,10 +258,25 @@ def launch_first_use(handoff, *, chromium_executable):
                 secure=url.scheme == 'https', sameSite='Strict', expires=handoff['expires_at'])])
             page = context.new_page()
             page.goto(origin + '/')
-            while context.pages:
-                page.wait_for_timeout(250)
+            while browser.is_connected() and context.pages:
+                try:
+                    context.pages[0].wait_for_timeout(250)
+                except PlaywrightError:
+                    # Closing the last page/browser is normal completion. Preserve
+                    # other driver errors so CLI can report only its stable code.
+                    if not browser.is_connected() or not context.pages:
+                        break
+                    raise
+        except PlaywrightError:
+            if browser.is_connected() and (context is None or context.pages):
+                raise
         finally:
-            browser.close()
+            if browser.is_connected():
+                try:
+                    browser.close()
+                except PlaywrightError:
+                    if browser.is_connected():
+                        raise
 
 
 def request_unix_handoff(path, *, expected_server_uid):
