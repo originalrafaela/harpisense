@@ -1,0 +1,559 @@
+{
+  "schema": 1,
+  "source_commit": "fb0f8e993cd3eeb4bb5dc005d6f8c56f607780f3",
+  "scan_scope": "explicit local development artifact directories; no credential/state/config files scanned",
+  "approved_operational_models": [],
+  "approved_models_identified": false,
+  "model_artifacts": [
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\detection-composition\\local-evidence\\detection-composition\\25a843dd9343d35b\\if\\model.joblib",
+      "present": true,
+      "bytes": 437298,
+      "sha256": "455f5dfad40aa4136f6424114c907258798065f629bdce9497cffeb83f4f1e35",
+      "kind": "if",
+      "status": "development_synthetic_test_only",
+      "approved_for_operational_use": false,
+      "packaged": false,
+      "declared_license": null,
+      "metadata_sha256": "36d7e6fcbbe7d07e7f44af8702b03a2f33211d7179ad0089a68ae944a329804c",
+      "model_metadata": {
+        "model_version": "if-2026-11-05T00:00:13.953491+00:00",
+        "features": [
+          "packet_count",
+          "bytes_total",
+          "packets_per_second",
+          "connections_per_second",
+          "syn_count",
+          "rst_count",
+          "unique_dst_ports",
+          "avg_packet_size",
+          "mean_interarrival_ms"
+        ],
+        "profile": "demo_tcp_ingress",
+        "window_seconds": 10.0,
+        "feature_schema_version": "harpisense.if.window.v1",
+        "versions": {
+          "python": "3.12.15",
+          "scikit_learn": "1.8.0",
+          "scipy": "1.17.0",
+          "numpy": "2.3.5",
+          "pandas": "2.2.3",
+          "joblib": "1.5.3"
+        },
+        "threshold": 0.6263863883482579,
+        "artifact_sha256": "455f5dfad40aa4136f6424114c907258798065f629bdce9497cffeb83f4f1e35",
+        "dataset_sha256": {
+          "train": "f47682c7c4f88223bf65c4b2b51c2f33ff01a6be5bbc1a92ce181faf65234212",
+          "calibration": "67dc6b15954736a4d10ce876774be9e29770a5187c92ad15cce3259807a53662"
+        }
+      },
+      "references": []
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\detection-composition\\local-evidence\\detection-composition\\25a843dd9343d35b\\rf\\model.joblib",
+      "present": true,
+      "bytes": 22435,
+      "sha256": "b6019ca76685ebfbd6b0947f891b2a9c5cefc30e88a97a63e42e1daaf7e11af0",
+      "kind": "rf",
+      "status": "development_synthetic_test_only",
+      "approved_for_operational_use": false,
+      "packaged": false,
+      "declared_license": null,
+      "metadata_sha256": "f9f69139e65a3ec29f247c3fa43461fd8ee9aafd8479503b5b7bb427cf8753ed",
+      "model_metadata": {
+        "model_version": "rf-0dae2297-3310-42a0-af86-3c290222dba3",
+        "features": [
+          "packet_count",
+          "bytes_total",
+          "packets_per_second",
+          "connections_per_second",
+          "syn_count",
+          "rst_count",
+          "unique_dst_ports",
+          "avg_packet_size",
+          "mean_interarrival_ms"
+        ],
+        "profile": "demo_tcp_ingress",
+        "window_seconds": 10.0,
+        "feature_schema_version": "harpisense.if.window.v1",
+        "versions": {
+          "python": "3.12.15",
+          "scikit_learn": "1.8.0",
+          "scipy": "1.17.0",
+          "numpy": "2.3.5",
+          "pandas": "2.2.3",
+          "joblib": "1.5.3"
+        },
+        "classes": [
+          "C01",
+          "normal"
+        ],
+        "artifact_sha256": "b6019ca76685ebfbd6b0947f891b2a9c5cefc30e88a97a63e42e1daaf7e11af0",
+        "dataset_sha256": {
+          "train": "9efd6bbac87e0c1e798687808e4750a0c00e0c1fe8de5d7e0dfb597b3b100433",
+          "calibration": "d387337858cfc992a66fa940595b3f1f0c7c1f5cffcb4d66af67e316cb63443a"
+        }
+      },
+      "references": []
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\detection-composition\\local-evidence\\detection-composition\\6cb2cb316974299b\\if\\model.joblib",
+      "present": true,
+      "bytes": 437298,
+      "sha256": "2bf789ed403942135660c185d2d3201d0447a7213d13f938bfdd95c01a6c9fd9",
+      "kind": "if",
+      "status": "development_synthetic_test_only",
+      "approved_for_operational_use": false,
+      "packaged": false,
+      "declared_license": null,
+      "metadata_sha256": "231e26bc4b755bdaa7d2749c1731844750c4f2e81988e37c6632d6fdc40a1cb0",
+      "model_metadata": {
+        "model_version": "if-2026-11-04T23:57:51.049083+00:00",
+        "features": [
+          "packet_count",
+          "bytes_total",
+          "packets_per_second",
+          "connections_per_second",
+          "syn_count",
+          "rst_count",
+          "unique_dst_ports",
+          "avg_packet_size",
+          "mean_interarrival_ms"
+        ],
+        "profile": "demo_tcp_ingress",
+        "window_seconds": 10.0,
+        "feature_schema_version": "harpisense.if.window.v1",
+        "versions": {
+          "python": "3.12.15",
+          "scikit_learn": "1.8.0",
+          "scipy": "1.17.0",
+          "numpy": "2.3.5",
+          "pandas": "2.2.3",
+          "joblib": "1.5.3"
+        },
+        "threshold": 0.6263863883482579,
+        "artifact_sha256": "2bf789ed403942135660c185d2d3201d0447a7213d13f938bfdd95c01a6c9fd9",
+        "dataset_sha256": {
+          "train": "f47682c7c4f88223bf65c4b2b51c2f33ff01a6be5bbc1a92ce181faf65234212",
+          "calibration": "67dc6b15954736a4d10ce876774be9e29770a5187c92ad15cce3259807a53662"
+        }
+      },
+      "references": []
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\detection-composition\\local-evidence\\detection-composition\\6cb2cb316974299b\\rf\\model.joblib",
+      "present": true,
+      "bytes": 22435,
+      "sha256": "9a54fd65e61b63a976bf8ff8f0bb78947c607a4de9397743d027775604e28185",
+      "kind": "rf",
+      "status": "development_synthetic_test_only",
+      "approved_for_operational_use": false,
+      "packaged": false,
+      "declared_license": null,
+      "metadata_sha256": "aef6f067b027d11be43511685b985853c1a2a8c7d47c136de9065e0e64b966b6",
+      "model_metadata": {
+        "model_version": "rf-e6fb9361-79a4-4df4-9756-bf73635381c0",
+        "features": [
+          "packet_count",
+          "bytes_total",
+          "packets_per_second",
+          "connections_per_second",
+          "syn_count",
+          "rst_count",
+          "unique_dst_ports",
+          "avg_packet_size",
+          "mean_interarrival_ms"
+        ],
+        "profile": "demo_tcp_ingress",
+        "window_seconds": 10.0,
+        "feature_schema_version": "harpisense.if.window.v1",
+        "versions": {
+          "python": "3.12.15",
+          "scikit_learn": "1.8.0",
+          "scipy": "1.17.0",
+          "numpy": "2.3.5",
+          "pandas": "2.2.3",
+          "joblib": "1.5.3"
+        },
+        "classes": [
+          "C01",
+          "normal"
+        ],
+        "artifact_sha256": "9a54fd65e61b63a976bf8ff8f0bb78947c607a4de9397743d027775604e28185",
+        "dataset_sha256": {
+          "train": "9efd6bbac87e0c1e798687808e4750a0c00e0c1fe8de5d7e0dfb597b3b100433",
+          "calibration": "d387337858cfc992a66fa940595b3f1f0c7c1f5cffcb4d66af67e316cb63443a"
+        }
+      },
+      "references": []
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\detection-composition\\local-evidence\\detection-composition\\7bf7b4968144d04d\\if\\model.joblib",
+      "present": true,
+      "bytes": 437298,
+      "sha256": "8dbcac01a4fa373f7f63ac0dd624cfbd2d7347a0d5cc424a8a952bf960cd2103",
+      "kind": "if",
+      "status": "development_synthetic_test_only",
+      "approved_for_operational_use": false,
+      "packaged": false,
+      "declared_license": null,
+      "metadata_sha256": "b318520006f1d5b4a36e52a11ab453374c34738dc513e84406d9a0f28ed5f105",
+      "model_metadata": {
+        "model_version": "if-2026-11-05T00:12:37.666900+00:00",
+        "features": [
+          "packet_count",
+          "bytes_total",
+          "packets_per_second",
+          "connections_per_second",
+          "syn_count",
+          "rst_count",
+          "unique_dst_ports",
+          "avg_packet_size",
+          "mean_interarrival_ms"
+        ],
+        "profile": "demo_tcp_ingress",
+        "window_seconds": 10.0,
+        "feature_schema_version": "harpisense.if.window.v1",
+        "versions": {
+          "python": "3.12.15",
+          "scikit_learn": "1.8.0",
+          "scipy": "1.17.0",
+          "numpy": "2.3.5",
+          "pandas": "2.2.3",
+          "joblib": "1.5.3"
+        },
+        "threshold": 0.6263863883482579,
+        "artifact_sha256": "8dbcac01a4fa373f7f63ac0dd624cfbd2d7347a0d5cc424a8a952bf960cd2103",
+        "dataset_sha256": {
+          "train": "f47682c7c4f88223bf65c4b2b51c2f33ff01a6be5bbc1a92ce181faf65234212",
+          "calibration": "67dc6b15954736a4d10ce876774be9e29770a5187c92ad15cce3259807a53662"
+        }
+      },
+      "references": []
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\detection-composition\\local-evidence\\detection-composition\\7bf7b4968144d04d\\rf\\model.joblib",
+      "present": true,
+      "bytes": 22435,
+      "sha256": "49c9383191294edabe1076da5f6c23791c2ba574367501fa9f6a175a8d2bc0c8",
+      "kind": "rf",
+      "status": "development_synthetic_test_only",
+      "approved_for_operational_use": false,
+      "packaged": false,
+      "declared_license": null,
+      "metadata_sha256": "2353ecc3c931dae5b601273595b310a3c6b28cdf0afc89a0f5a54940bea83ca7",
+      "model_metadata": {
+        "model_version": "rf-d028bf7e-175a-4d62-a7a5-0690e66d007c",
+        "features": [
+          "packet_count",
+          "bytes_total",
+          "packets_per_second",
+          "connections_per_second",
+          "syn_count",
+          "rst_count",
+          "unique_dst_ports",
+          "avg_packet_size",
+          "mean_interarrival_ms"
+        ],
+        "profile": "demo_tcp_ingress",
+        "window_seconds": 10.0,
+        "feature_schema_version": "harpisense.if.window.v1",
+        "versions": {
+          "python": "3.12.15",
+          "scikit_learn": "1.8.0",
+          "scipy": "1.17.0",
+          "numpy": "2.3.5",
+          "pandas": "2.2.3",
+          "joblib": "1.5.3"
+        },
+        "classes": [
+          "C01",
+          "normal"
+        ],
+        "artifact_sha256": "49c9383191294edabe1076da5f6c23791c2ba574367501fa9f6a175a8d2bc0c8",
+        "dataset_sha256": {
+          "train": "9efd6bbac87e0c1e798687808e4750a0c00e0c1fe8de5d7e0dfb597b3b100433",
+          "calibration": "d387337858cfc992a66fa940595b3f1f0c7c1f5cffcb4d66af67e316cb63443a"
+        }
+      },
+      "references": []
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\detection-composition\\local-evidence\\detection-composition\\c27e43085be6e4be\\if\\model.joblib",
+      "present": true,
+      "bytes": 437298,
+      "sha256": "1d70c4696e385fe7d2c728b680851b372ab504edf07a73476462694522d1efba",
+      "kind": "if",
+      "status": "development_synthetic_test_only",
+      "approved_for_operational_use": false,
+      "packaged": false,
+      "declared_license": null,
+      "metadata_sha256": "26f567231aa8960662a5e542fc90ea23e24b69ec471e4b5dc9eb45ef89570e15",
+      "model_metadata": {
+        "model_version": "if-2026-11-05T00:51:00.081221+00:00",
+        "features": [
+          "packet_count",
+          "bytes_total",
+          "packets_per_second",
+          "connections_per_second",
+          "syn_count",
+          "rst_count",
+          "unique_dst_ports",
+          "avg_packet_size",
+          "mean_interarrival_ms"
+        ],
+        "profile": "demo_tcp_ingress",
+        "window_seconds": 10.0,
+        "feature_schema_version": "harpisense.if.window.v1",
+        "versions": {
+          "python": "3.12.15",
+          "scikit_learn": "1.8.0",
+          "scipy": "1.17.0",
+          "numpy": "2.3.5",
+          "pandas": "2.2.3",
+          "joblib": "1.5.3"
+        },
+        "threshold": 0.6263863883482579,
+        "artifact_sha256": "1d70c4696e385fe7d2c728b680851b372ab504edf07a73476462694522d1efba",
+        "dataset_sha256": {
+          "train": "f47682c7c4f88223bf65c4b2b51c2f33ff01a6be5bbc1a92ce181faf65234212",
+          "calibration": "67dc6b15954736a4d10ce876774be9e29770a5187c92ad15cce3259807a53662"
+        }
+      },
+      "references": []
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\detection-composition\\local-evidence\\detection-composition\\c27e43085be6e4be\\rf\\model.joblib",
+      "present": true,
+      "bytes": 22435,
+      "sha256": "11f30e77c376f314ff40c1f4d759955a5dbf61b2a10807b0356c475a2ff1ca10",
+      "kind": "rf",
+      "status": "development_synthetic_test_only",
+      "approved_for_operational_use": false,
+      "packaged": false,
+      "declared_license": null,
+      "metadata_sha256": "f30beab342cb17abfd1cca49ca69561fc652124d7fb49bf16e1d2cc7fe77b6ea",
+      "model_metadata": {
+        "model_version": "rf-6970a2ce-3545-415f-ad75-67ae50a2dfc3",
+        "features": [
+          "packet_count",
+          "bytes_total",
+          "packets_per_second",
+          "connections_per_second",
+          "syn_count",
+          "rst_count",
+          "unique_dst_ports",
+          "avg_packet_size",
+          "mean_interarrival_ms"
+        ],
+        "profile": "demo_tcp_ingress",
+        "window_seconds": 10.0,
+        "feature_schema_version": "harpisense.if.window.v1",
+        "versions": {
+          "python": "3.12.15",
+          "scikit_learn": "1.8.0",
+          "scipy": "1.17.0",
+          "numpy": "2.3.5",
+          "pandas": "2.2.3",
+          "joblib": "1.5.3"
+        },
+        "classes": [
+          "C01",
+          "normal"
+        ],
+        "artifact_sha256": "11f30e77c376f314ff40c1f4d759955a5dbf61b2a10807b0356c475a2ff1ca10",
+        "dataset_sha256": {
+          "train": "9efd6bbac87e0c1e798687808e4750a0c00e0c1fe8de5d7e0dfb597b3b100433",
+          "calibration": "d387337858cfc992a66fa940595b3f1f0c7c1f5cffcb4d66af67e316cb63443a"
+        }
+      },
+      "references": []
+    }
+  ],
+  "runtime_artifacts": [
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\harpia-bitnet\\.local-harpia\\models\\ggml-model-i2_s.gguf",
+      "present": true,
+      "bytes": 1187801280,
+      "sha256": "4221b252fdd5fd25e15847adfeb5ee88886506ba50b8a34548374492884c2162",
+      "kind": "bitnet_weights",
+      "declared_license": "MIT",
+      "pinned_revision": "a1f2f1c765812aa8af3f6eda4a313707064bba15",
+      "expected_sha256": "4221b252fdd5fd25e15847adfeb5ee88886506ba50b8a34548374492884c2162",
+      "platform": "shared-data",
+      "packaged": false,
+      "integrity_matches": true
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\harpia-bitnet\\.local-harpia\\runtime\\BitNet\\build\\bin\\Release\\llama-cli.exe",
+      "present": true,
+      "bytes": 10986496,
+      "sha256": "bbbad2ebbf86f8b10892b4b8960ef630d5b222407350bf82e809bb5ac14d0b46",
+      "kind": "bitnet_runtime",
+      "platform": "Windows x64",
+      "declared_license": "MIT",
+      "pinned_revision": "0b341e582afbf9e1011f24744b554c96a3477eb5",
+      "dependency_portability_verified": false,
+      "packaged": false
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\harpia-bitnet\\.local-harpia\\runtime\\BitNet\\build\\bin\\Release\\llama-server.exe",
+      "present": true,
+      "bytes": 20994048,
+      "sha256": "a90d9162fbf6c150a850dbe510be63eee5921a0fe4b8389a45570195d854b9b7",
+      "kind": "bitnet_runtime",
+      "platform": "Windows x64",
+      "declared_license": "MIT",
+      "pinned_revision": "0b341e582afbf9e1011f24744b554c96a3477eb5",
+      "dependency_portability_verified": false,
+      "packaged": false
+    },
+    {
+      "kind": "bitnet_runtime",
+      "platform": "Ubuntu 24.04 x86_64",
+      "present": false,
+      "packaged": false,
+      "status": "linux_binary_not_found_in_scanned_payload"
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\harpia-bitnet\\.local-harpia\\runtime\\BitNet\\LICENSE",
+      "present": true,
+      "bytes": 1162,
+      "sha256": "9906940f61b1f0b533fa7d99baf55178b2808fbe113ea51dfbfad8572ccd5f2b",
+      "kind": "runtime_license",
+      "platform": "shared-data"
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\harpia-bitnet\\.local-harpia\\runtime\\BitNet\\3rdparty\\llama.cpp\\LICENSE",
+      "present": true,
+      "bytes": 1099,
+      "sha256": "bcd8ec749126d45cb06737d0690295d73df4b6e7e194205bcf91190368f27285",
+      "kind": "runtime_license",
+      "platform": "shared-data"
+    },
+    {
+      "path": "D:\\Programas\\PostgreSQL\\bin\\postgres.exe",
+      "present": true,
+      "bytes": 10241536,
+      "sha256": "ed1fa062cea44b0d200d2e10099ebc85faff7ef27df75a2e813ffd56d8a60868",
+      "kind": "development_postgresql_binary",
+      "platform": "Windows x64",
+      "packaged_by_this_delivery": false,
+      "license_notice_audit": "pending"
+    },
+    {
+      "path": "D:\\Programas\\PostgreSQL\\bin\\pg_ctl.exe",
+      "present": true,
+      "bytes": 133120,
+      "sha256": "89da264e7d7094b1594c978cc8f846a516cfd6434ef5bcba3f2c7fecbf909e12",
+      "kind": "development_postgresql_binary",
+      "platform": "Windows x64",
+      "packaged_by_this_delivery": false,
+      "license_notice_audit": "pending"
+    },
+    {
+      "path": "D:\\Programas\\PostgreSQL\\bin\\initdb.exe",
+      "present": true,
+      "bytes": 246784,
+      "sha256": "7489222c95d6cf48e110896f74a32572487bd23b7c7398eac33bdd05d06d0956",
+      "kind": "development_postgresql_binary",
+      "platform": "Windows x64",
+      "packaged_by_this_delivery": false,
+      "license_notice_audit": "pending"
+    }
+  ],
+  "sources": [
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\backend-incident-shap-integration\\backend\\domain\\requirements-scientific.txt",
+      "present": true,
+      "bytes": 171,
+      "sha256": "f21dcb86d4360e109b84f83b86b5f1a98033ab3857e18b018c371b1370b805da",
+      "kind": "source_or_lock"
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\backend-incident-shap-integration\\backend\\domain\\requirements-scientific.lock",
+      "present": true,
+      "bytes": 313,
+      "sha256": "68e1d2d2e7434d1e59d395b663c76f45e649ea9d0e31cba973c0ef40d1b2c59f",
+      "kind": "source_or_lock"
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\backend-incident-shap-integration\\backend\\domain\\harpisense_rf\\random_forest.py",
+      "present": true,
+      "bytes": 8033,
+      "sha256": "5b073e712bebe1710780bce054c22a25a0ed5744f5a05bf88309afcabbc002c8",
+      "kind": "source_or_lock"
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\backend-incident-shap-integration\\backend\\domain\\harpisense_if\\isolation_forest.py",
+      "present": true,
+      "bytes": 11172,
+      "sha256": "dedd1848f4757652b6b9fc98835919367e67b25fd065c4f397a080fec81e1325",
+      "kind": "source_or_lock"
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\backend-incident-shap-integration\\backend\\domain\\harpisense_xai\\shap_library.py",
+      "present": true,
+      "bytes": 8050,
+      "sha256": "f6f6006d8de86658576d78c46c7c2e8c968e6b1d706494deb3d6404d2529bf1b",
+      "kind": "source_or_lock"
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\backend-incident-shap-integration\\backend\\detection_composition\\ORIGINS.json",
+      "present": true,
+      "bytes": 4010,
+      "sha256": "968da7a426f93580950540473b7fe08722aa6f8d0e1625a0483842f76d987dd2",
+      "kind": "source_or_lock"
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\backend-incident-shap-integration\\backend\\admin_auth\\004_first_access.sql",
+      "present": true,
+      "bytes": 1474,
+      "sha256": "1283aebff4a50c873043ce6fd3c65409c183322fa2ccd1f99b8c2352bbf672d8",
+      "kind": "source_or_lock"
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\backend-incident-shap-integration\\backend\\delivery\\003_incident_assessment.sql",
+      "present": true,
+      "bytes": 700,
+      "sha256": "ebfe835d33da7fae993f670dab2bab8f8eacccde6e0f48651646cc9d3f8a06bb",
+      "kind": "source_or_lock"
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\backend-incident-shap-integration\\backend\\delivery\\004_activity_decision_snapshot.sql",
+      "present": true,
+      "bytes": 1243,
+      "sha256": "254430ddee8b339bf7404b03d3bdd0debb0d57e3c4fc11bcbc4533d57dd5b209",
+      "kind": "source_or_lock"
+    },
+    {
+      "path": "D:\\Projetos\\tcc - harpisense\\harpisense-worktrees\\backend-incident-shap-integration\\genai\\artifacts.lock.json",
+      "present": true,
+      "bytes": 1081,
+      "sha256": "4b085ee46d8fb445f87de31d6620e8284e68981b2027e9408926f98747da40f6",
+      "kind": "source_or_lock"
+    }
+  ],
+  "offline_installation_verified": {
+    "Windows": false,
+    "Ubuntu": false
+  },
+  "ubuntu_installer_network_dependency": {
+    "path": "packaging/native/ubuntu_install.py",
+    "operations": [
+      "apt-get update",
+      "apt-get install python3-venv python3-pip postgresql-16 ca-certificates (and mosquitto in local_managed)"
+    ],
+    "offline_deb_payload_verified": false
+  },
+  "blockers": [
+    "APPROVED_RF_IF_ARTIFACT_MANIFEST_MISSING",
+    "APPROVED_REFERENCE_TRANSFORM_MANIFEST_MISSING",
+    "NATIVE_SCIENTIFIC_WHEELS_PER_PLATFORM_NOT_VALIDATED",
+    "BITNET_NOT_IN_NATIVE_PAYLOAD",
+    "UBUNTU_BITNET_RUNTIME_MISSING",
+    "NATIVE_BITNET_UI_OPERATION_NOT_INTEGRATED",
+    "CAPTURE_TO_MODEL_OPERATIONAL_PRODUCERS_NOT_CERTIFIED",
+    "CLEAN_OFFLINE_REBOOT_ACCEPTANCE_MISSING"
+  ]
+}

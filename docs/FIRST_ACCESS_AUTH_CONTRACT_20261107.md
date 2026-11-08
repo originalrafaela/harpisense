@@ -2,6 +2,7 @@
 
 Branch `feat/backend-incident-shap-integration`; base `a8fef1f` com integração de
 fichas/SHAP independente. Não alterar native-installers nem a prévia 5174.
+Implementação publicada no commit `071d052`.
 
 ## O que já existia
 
@@ -46,7 +47,7 @@ acrescentar `/p11-api` antes de `/api/v1/...`. Não existe um segundo login.
   "password_reset_generation": 1,
   "password_reset_purpose": "password_reset",
   "codes_issued": true,
-  "issued_at": "<horário UTC do PostgreSQL>",
+  "issued_at": "<timestamp ISO8601 com offset do PostgreSQL>",
   "completed_at": null
 }
 ```
@@ -96,6 +97,19 @@ um pacote novo para aceite instalado; nenhum instalador foi gerado nesta rodada.
 
 Testes nativos de HTTP/PostgreSQL estão em
 `backend/admin_auth_tests/test_first_access_native.py`, sem imprimir originais.
+Onze testes aprovados. E2E real browser5176 → proxy → API18082 → PostgreSQL
+reportado pelo Codex também passou, sem traces/screenshot/vídeo das telas de auth.
+Consulta direta ao mesmo banco encontrou completed, geração 2 e as duas listas
+com dez verificadores da geração 1 revogados e dez da geração 2 ativos.
+Processos API A/B independentes foram reiniciados contra esse MESMO banco, sem
+recriar cluster: estado, geração, segredo MFA e setup permaneceram iguais.
+Ver `docs/evidence/backend-integration-20261107/process-restart.json` para a
+metodologia e seus limites. PID real do servidor, identidade de boot e fechamento
+da porta entre processos foram verificados. O runner original 18082 não foi
+interrompido; o teste usa porta livre indicada na evidência e foi encerrado,
+preservando também a API V2 de 18083. Não houve novo login browser nesse
+teste de restart, nem consumo de código do administrador do E2E; reset/replay/MFA
+foram verificados separadamente nos onze testes nativos.
 TOTP via biblioteca testa protocolo, QR gerado e replay; não comprova ensaio no
 aplicativo Microsoft Authenticator. Esse ensaio precisa ocorrer no dispositivo
 do administrador sem enviar QR, segredo ou códigos ao chat.

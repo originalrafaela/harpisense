@@ -1,7 +1,8 @@
 # Contrato comum: implementação e lacunas
 
 Branch `feat/backend-incident-shap-integration`: controles finais `2aa0ca4`,
-SHAP real `a3eb885`, fichas/produtores/resolver `dd7d813`.
+SHAP real `a3eb885`, fichas/produtores/resolver `dd7d813`, primeiro acesso `071d052`,
+aprovação/resultados `10acba5` e casos distintos v2 `5608399` + `fb0f8e9`.
 Nenhuma mudança em native-installers ou na prévia 5174.
 
 ## Rotas existentes testadas por HTTP/PostgreSQL
@@ -25,17 +26,26 @@ da API sobre fixtures artificiais em `docs/evidence/backend-integration-20261107
 `incident-with-explanation.json`, `incident-without-explanation.json`,
 `profile-change-refused.json`. Não contêm credenciais ou códigos de recuperação.
 O servidor do teste é encerrado ao final; `http-check.json.url_tested` não é URL
-de serviço permanente. A porta 18081 do runner ainda não foi validada ao publicar
-este documento. Não apontar a interface para ela sem confirmação HTTP posterior.
+de serviço permanente. As fixtures raiz de recusa refletem cases v1 histórico;
+as fixtures v2 atuais estão no subdiretório cases-v2.
+Runner auth confirmado em 18082 com origem 5176; E2E real reportado pelo Codex
+concluiu primeiro acesso. API cases v2 em 18083 usa o MESMO banco, sem provisionar
+nem reiniciar 18082, e permite origem 5176 (sem sessão retorna 401 esperado).
+O proxy Vite remove /p11-api: escolher alvo 18082 ou 18083 conforme a versão,
+sem mudar 5174/5175. Não declarar cases v2 no processo antigo de 18082.
 
 ## Casos: campos atuais, sem implementar a proposta por suposição
 
 `cases.status`: active|none_active|partial|unknown.
 `cases.coverage`: complete|partial|unknown.
-`cases.known_active_count`: número conhecido ou null quando adapter indisponível.
-`cases.count_basis`: **source_item**, não total de casos distintos.
+`cases.known_active_count`: número distinto conhecido; null quando não se pode
+identificar casos por vínculos verificáveis ou o adapter está indisponível.
+`cases.count_basis`: **distinct_incident_id** na versão 2. Regras e campos exatos
+em CASES_V2_CONTRACT_20261107.md. A projeção antiga source_item fica apenas em
+pending.source_cases para diagnóstico.
 `cases.sources`: source/source_revision/observed_at/fresh/valid/complete.
-`cases.items`: source/record_id/source_revision/state/fresh e record_revision
+`cases.items`: grupos por case_id com incident_refs/links e fatos em items;
+cada fato preserva source/record_id/source_revision/state/fresh e record_revision
 apenas quando fornecida pelo produtor. Casos contam incident/anomaly; pendências
 approval/execution/verification estão em pending.blockers. Todas as fontes devem
 estar atuais e verificadas para permitir Aplicar.
@@ -44,12 +54,12 @@ TTL de snapshot: 30s. Ativos conhecidos continuam visíveis depois de vencer.
 Omissão exige encerramento explícito anterior do ID. UNKNOWN nunca é confiável.
 Somente none_active permite "Sem casos ativos"; 0 com cobertura desconhecida não.
 
-**Ainda não implementado:** totais distintos e contagens deduplicadas por
-anomalia/ataque/incidente, classificação de ataque ativo por ciclo de vida e
-links navegáveis de todas as fontes. O produtor aceita `incident_ref:{id,revision}`
-explícito, mas a projeção de controles atual não o expõe como chave de caso.
-Não fabricar IDs de incidente a partir de record_id nem somar source_item como
-total distinto. Essa extensão depende de contrato do responsável por controles.
+Totais distintos, classificação sustentada por ciclo de vida e avaliação e
+navegação exata estão implementados em 5608399 e passaram nove testes HTTP/PG.
+Ausência de vínculo ainda impede total completo: total_active_count é null,
+nunca uma soma presumida de itens fonte. Não fabricar IDs a partir de record_id.
+As contagens por classe se sobrepõem; não somá-las. Cobertura operacional real
+completa continua não certificada: as evidências de casos são fixtures controladas.
 Avaliação histórica confirmed não atesta atividade atual; ensaio não entra na
 autoridade operacional. Não há cobertura operacional real completa publicada.
 

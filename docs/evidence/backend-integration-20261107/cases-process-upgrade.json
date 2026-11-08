@@ -1,0 +1,77 @@
+{
+  "result": "PASS",
+  "old_api_pid": 12916,
+  "new_api_pid": 21268,
+  "port_closed_between_processes": true,
+  "same_database_metadata": true,
+  "mfa_secret_unchanged": true,
+  "setup_draft_unchanged": true,
+  "database_metadata": {
+    "database": {
+      "name": "harpisense",
+      "port": 65316,
+      "installation_id": "3853d19f-8318-4507-9b92-f281b62f7aea"
+    },
+    "account_count": 1,
+    "first_access": [
+      {
+        "account_id": 1,
+        "password_reset_generation": 2,
+        "codes_issued": true,
+        "status": "completed",
+        "issued_at": "2026-11-07T23:12:31.968226-03:00",
+        "completed_at": "2026-11-07T23:12:32.292245-03:00"
+      }
+    ],
+    "mfa": [
+      {
+        "account_id": 1,
+        "required": true,
+        "enabled": true
+      }
+    ],
+    "code_metadata": {
+      "password_reset": [
+        {
+          "purpose": "password_reset",
+          "generation": 1,
+          "verifier_count": 10,
+          "used_count": 0,
+          "revoked_count": 10,
+          "sha256_verifiers_only": true
+        },
+        {
+          "purpose": "password_reset",
+          "generation": 2,
+          "verifier_count": 10,
+          "used_count": 0,
+          "revoked_count": 0,
+          "sha256_verifiers_only": true
+        }
+      ],
+      "authenticator_recovery": [
+        {
+          "purpose": "authenticator_recovery",
+          "generation": 1,
+          "verifier_count": 10,
+          "used_count": 0,
+          "revoked_count": 10,
+          "sha256_verifiers_only": true
+        },
+        {
+          "purpose": "authenticator_recovery",
+          "generation": 2,
+          "verifier_count": 10,
+          "used_count": 0,
+          "revoked_count": 0,
+          "sha256_verifiers_only": true
+        }
+      ]
+    },
+    "setup_version": 0,
+    "setup_state": "not_started"
+  },
+  "source_commit": "fb0f8e993cd3eeb4bb5dc005d6f8c56f607780f3",
+  "installed": false,
+  "os_reboot_tested": false
+}

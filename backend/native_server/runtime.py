@@ -46,14 +46,15 @@ def capabilities(state):
         secret_refs=frozenset(['secret://native/mqtt-consumer']))
 
 
-def build_native_app(state, frontend):
+def build_native_api(state, *, allowed_origins, runtime_kind='installed'):
+    """Reuse the native composition for installed and isolated review transports."""
     environment(state)
     api = build_app()
     credentials = [(state['technical_user'], state['technical_password']),
                    (state['mqtt']['username'], state['mqtt']['password'])]
     install_candidate_admin_auth(api, state['dsn'],
         protection_key=Path(state['key_file']).read_bytes().strip(),
-        allowed_origins=[state['panel_url']], technical_credentials=credentials)
+        allowed_origins=allowed_origins, technical_credentials=credentials)
     store = PostgresStore(state['dsn'])
     from xai_api import install_xai_api
     install_xai_api(api, store, installation_id=state['installation_id'],
@@ -76,11 +77,16 @@ def build_native_app(state, frontend):
         info = Path(__file__).with_name('build_info.json')
         build = json.loads(info.read_text(encoding='utf-8')) if info.is_file() else {
             'package_version':'development','source_commit':None}
-        return {'server': 'installed', 'platform': os.name, 'mqtt_mode': state['mqtt']['mode'],
+        return {'server': runtime_kind, 'platform': os.name, 'mqtt_mode': state['mqtt']['mode'],
                 'build': build,
                 'capture': 'not_verified', 'containment': 'not_available',
                 'rf': 'not_verified', 'if': 'not_verified', 'operational': False}
 
+    return api
+
+
+def build_native_app(state, frontend):
+    api=build_native_api(state,allowed_origins=[state['panel_url']])
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
     @app.middleware('http')

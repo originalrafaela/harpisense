@@ -1,0 +1,101 @@
+{
+  "result": "PASS",
+  "checks": {
+    "different_process_ids": true,
+    "same_database_metadata": true,
+    "different_server_pids": true,
+    "different_boot_ids": true,
+    "port_closed_between_processes": true,
+    "mfa_secret_unchanged": true,
+    "setup_draft_unchanged": true,
+    "mfa_required_and_enabled": true,
+    "completed_persisted": true,
+    "unauthenticated_access_denied": true
+  },
+  "methodology": "Owned API process A terminated, independent process B started against the SAME existing browser-E2E PostgreSQL cluster. No provisioning, cluster recreation, account mutation or reset-code consumption.",
+  "database_metadata": {
+    "database": {
+      "name": "harpisense",
+      "port": 65316,
+      "installation_id": "3853d19f-8318-4507-9b92-f281b62f7aea"
+    },
+    "account_count": 1,
+    "first_access": [
+      {
+        "account_id": 1,
+        "password_reset_generation": 2,
+        "codes_issued": true,
+        "status": "completed",
+        "issued_at": "2026-11-07T23:12:31.968226-03:00",
+        "completed_at": "2026-11-07T23:12:32.292245-03:00"
+      }
+    ],
+    "mfa": [
+      {
+        "account_id": 1,
+        "required": true,
+        "enabled": true
+      }
+    ],
+    "code_metadata": {
+      "password_reset": [
+        {
+          "purpose": "password_reset",
+          "generation": 1,
+          "verifier_count": 10,
+          "used_count": 0,
+          "revoked_count": 10,
+          "sha256_verifiers_only": true
+        },
+        {
+          "purpose": "password_reset",
+          "generation": 2,
+          "verifier_count": 10,
+          "used_count": 0,
+          "revoked_count": 0,
+          "sha256_verifiers_only": true
+        }
+      ],
+      "authenticator_recovery": [
+        {
+          "purpose": "authenticator_recovery",
+          "generation": 1,
+          "verifier_count": 10,
+          "used_count": 0,
+          "revoked_count": 10,
+          "sha256_verifiers_only": true
+        },
+        {
+          "purpose": "authenticator_recovery",
+          "generation": 2,
+          "verifier_count": 10,
+          "used_count": 0,
+          "revoked_count": 0,
+          "sha256_verifiers_only": true
+        }
+      ]
+    },
+    "setup_version": 0,
+    "setup_state": "not_started"
+  },
+  "api_test_url": "http://127.0.0.1:18084",
+  "browser_runner_preserved": "http://127.0.0.1:18082",
+  "process_ids": [
+    22372,
+    30984
+  ],
+  "actual_server_pids": [
+    20272,
+    40264
+  ],
+  "source_fingerprints": {
+    "backend/admin_auth/mfa.py": "7cdf36517e397162ae7312bdac916a0d129c6a151e2be0deac89648fc3779344",
+    "backend/delivery/linked_cases.py": "a75138a78f9063307176c5ab89624e5e32ac845dc6395bab79e29a26bc7ec56d"
+  },
+  "installed": false,
+  "os_reboot_tested": false,
+  "full_browser_login_after_this_restart": false,
+  "login_reset_totp_protocol": "11 native HTTP/PostgreSQL first-access tests passed separately on the same auth code version",
+  "source_commit": "560839936d6d9f9c656722f0df8c06ca36016b8d",
+  "test_listener_stopped_after_verification": true
+}

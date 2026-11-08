@@ -1,0 +1,17 @@
+{
+  "url": "http://127.0.0.1:18083",
+  "allowed_origin": "http://127.0.0.1:5176",
+  "unauthenticated_session_http": 401,
+  "source_commit": "fb0f8e993cd3eeb4bb5dc005d6f8c56f607780f3",
+  "source_fingerprints": {
+    "backend/admin_auth/mfa.py": "7cdf36517e397162ae7312bdac916a0d129c6a151e2be0deac89648fc3779344",
+    "backend/delivery/linked_cases.py": "a75138a78f9063307176c5ab89624e5e32ac845dc6395bab79e29a26bc7ec56d"
+  },
+  "cases_contract_version": 2,
+  "shares_browser_e2e_database": true,
+  "provisioning_performed": false,
+  "api_pid": 21268,
+  "launcher_pid": 1280,
+  "installed": false,
+  "original_runner_preserved": "http://127.0.0.1:18082"
+}
