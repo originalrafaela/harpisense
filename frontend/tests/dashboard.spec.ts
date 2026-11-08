@@ -24,6 +24,22 @@ async function login(page: Page, health: Record<string, unknown> = {}, records: 
   await expect(page.getByRole('button', {name: 'M1 — Supervisionado', exact: true})).toBeVisible();
 }
 
+test('consulta operacional busca telemetria periodicamente e para ao sair', async ({page}) => {
+  await page.clock.install();
+  let reads = 0;
+  page.on('request', request => {if (new URL(request.url()).pathname === '/api/v1/p11/telemetry') reads++});
+  await login(page);
+  await expect(page.getByRole('button', {name: '↻ Atualizar consulta'})).toBeEnabled();
+  const initial = reads;
+  await page.clock.runFor(10050);
+  await expect.poll(() => reads).toBeGreaterThan(initial);
+  await expect(page.getByRole('button', {name: '↻ Atualizar consulta'})).toBeEnabled();
+  await page.getByRole('button', {name: 'Sair', exact: true}).click();
+  const stopped = reads;
+  await page.clock.runFor(20050);
+  expect(reads).toBe(stopped);
+});
+
 test('demonstração alterna controles independentes sem nenhuma chamada operacional', async ({page}) => {
   const calls: string[] = [];
   page.on('request', request => {if (request.url().includes('/api/')) calls.push(request.url())});
