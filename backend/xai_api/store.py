@@ -56,6 +56,9 @@ class XAIStore:
 
     @staticmethod
     def risk_mapping(detection, explanation, incident):
+        if explanation['target']['output']=='RAW_CLASS_PROBABILITY':
+            return {'state':'raw_output_not_operational','risk_score_explained':False,
+                    'limitation':'Original RF probability before calibration; not the calibrated Risk input.'}
         if incident is None:
             return {'state': 'incident_not_selected', 'risk_score_explained': False}
         rf = detection['classification']
@@ -132,7 +135,7 @@ class XAIStore:
                     raise ValueError('Numerical reconstruction failed')
                 base['explanations'].append({'id':row['id'], 'projection_revision':row['revision'],
                     'in_incident_explanation_refs':None if incident is None else row['id'] in incident['explanation_refs'],
-                    'record':explanation, 'output_direction': 'positive_increases_class_probability' if detection['classification'] else 'positive_increases_anomaly_score',
+                    'record':explanation, 'output_direction': 'positive_increases_raw_class_probability' if explanation['target']['output']=='RAW_CLASS_PROBABILITY' else ('positive_increases_class_probability' if detection['classification'] else 'positive_increases_anomaly_score'),
                     'coherence':{'reconstructed_output':reconstructed,'absolute_error':error,
                         'reconstruction_tolerance':RECONSTRUCTION_TOLERANCE,
                         'detection_output_tolerance':OUTPUT_TOLERANCE,'residual_tolerance':RESIDUAL_TOLERANCE,

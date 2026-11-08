@@ -65,9 +65,9 @@ SCHEMAS={
  'explanation':obj({**common('explanation','explanation_id'),
     'detection_id':string(),'window_id':string(),'collection_session_id':string(),
     'model_version':string(),'input_fingerprint':HASH,
-    'method':enum(['SHAPLEY_PERMUTATION','SHAP_MODEL_AGNOSTIC']),
+    'method':enum(['SHAPLEY_PERMUTATION','SHAP_MODEL_AGNOSTIC','SHAP_TREE_EXPLAINER','SHAP_PERMUTATION_EXPLAINER']),
     'explainer_version':string(),'reference_ref':string(),
-    'target':obj(dict(output=enum(['CALIBRATED_CLASS_PROBABILITY','ANOMALY_SCORE']),
+    'target':obj(dict(output=enum(['CALIBRATED_CLASS_PROBABILITY','ANOMALY_SCORE','RAW_CLASS_PROBABILITY']),
                        class_label=nullable(enum(CLASSES)))),
     'base_value':nullable(number()),'output_value':nullable(number()),
     'contributions':array(obj(dict(feature=string(),value=number(),contribution=number())),0),
@@ -94,6 +94,11 @@ SCHEMAS={
     'approval':nullable(APPROVAL),'valid_until':STAMP,
     'execution_requested':const(False)})
 }
+# Additive extension: old historical records keep their exact fields and IDs.
+# Library provenance is mandatory semantically only for the new library methods.
+SCHEMAS['explanation']['properties']['parameters']['properties'].update(
+    library_version=string(), output_space=enum(['operational','raw_pre_calibration']),
+    operational_output_value=number())
 # Adotado do HarpiSense_Gerenciador_Execucao_v1/execution.schema.json.
 # Mantém versão 1.0.0 e conjunto de campos do contrato público de referência.
 EXECUTION_STATES=['QUEUED','APPLYING','COMMAND_ACCEPTED','VERIFYING',
