@@ -1,0 +1,81 @@
+{
+  "date": "2026-11-08",
+  "source_commit": "8d9154891848f4075c11f90be04867ba7ee176d4",
+  "all_features_active": false,
+  "scope": "read-only live gateway inspection plus isolated scientific/control tests",
+  "production_changes": false,
+  "attacks_executed": false,
+  "live_gateway": {
+    "hostname": "gateway",
+    "vpn_ip": "100.66.89.7",
+    "observed_utc": "2026-11-08 22:49:22 UTC",
+    "working_directory": "/opt/harpisense/staging/p11-postgresql",
+    "services_running": ["harpisense-p11", "harpisense-mqtt", "postgresql@18-main", "tailscaled"],
+    "oneshot_services_active": ["harpisense-firewall", "ufw"],
+    "ipv4_forwarding": 0,
+    "api_listens_on": "127.0.0.1:8000",
+    "api_health_unauthenticated": 401,
+    "admin_session_unauthenticated": 401,
+    "operational_settings_endpoint": 404,
+    "mfa_verify_empty_request": 404,
+    "mfa_enrollment_begin_empty_request": 404,
+    "activation_status_endpoint": 404,
+    "native_status_endpoint": 404,
+    "config_catalog_unauthenticated": 401,
+    "incident_xai_endpoint_unauthenticated": 404,
+    "mfa_routes_announced": false,
+    "operational_routes_announced": false,
+    "applied_operational_mode": "not_observable_via_current_api",
+    "dynamic_defense_executor_verified": false,
+    "firewall_rules_inspection": "sudo requires interactive authentication; effective rules not inspected",
+    "entry_source_sha256": "d8dc01de8ee14ca4daa31d34408882ef2a22a1d7858cad46abdd308bb0e957a9"
+  },
+  "local_tcp_ports": {
+    "8000": "closed", "18000": "closed", "18080": "closed",
+    "5174": "closed", "5176": "closed", "8091": "closed", "8092": "closed"
+  },
+  "tests_executed_this_audit": {
+    "shap_library_real_estimators_synthetic_windows": {"passed": 7, "failed": 0},
+    "operational_control_policy_and_simulation_isolated": {"passed": 39, "failed": 0},
+    "argon2_individual_salts_and_legacy_password_verification": {"passed": 1, "failed": 0}
+  },
+  "integration_runtime_contract": {
+    "executor": "isolated_simulation_only",
+    "real_execution_blocked": true,
+    "real_executor_status": "not_integrated",
+    "containment_available": false,
+    "rf_status": "not_verified",
+    "if_status": "not_verified",
+    "operational": false,
+    "harpia_mode": "deterministic_only",
+    "bitnet_generation_enabled": false,
+    "config_applicators": ["presentation"],
+    "config_application_scope": ["display_name", "timezone"]
+  },
+  "models": {
+    "approved_operational_rf_if_identified": false,
+    "existing_inventory": "docs/evidence/backend-integration-20261107/payload-inventory.json",
+    "existing_inventory_artifacts": "8 development/synthetic RF-IF artifacts, not approved as operational models",
+    "bitnet_local_file": "../harpia-bitnet/.local-harpia/models/ggml-model-i2_s.gguf",
+    "bitnet_bytes": 1187801280,
+    "bitnet_sha256": "4221b252fdd5fd25e15847adfeb5ee88886506ba50b8a34548374492884c2162",
+    "bitnet_integrity_matches_lock": true,
+    "runtime_version_checked": "9918 (390c30775), Clang 19.1.5 x64",
+    "runtime_server_sha256": "a90d9162fbf6c150a850dbe510be63eee5921a0fe4b8389a45570195d854b9b7",
+    "runtime_cli_sha256": "bbbad2ebbf86f8b10892b4b8960ef630d5b222407350bf82e809bb5ac14d0b46",
+    "generation_executed_this_audit": false,
+    "free_memory_mib_observed": 2855,
+    "configured_start_memory_mib": 3584,
+    "historical_semantic_validation": "genai/RODADA7_VALIDACAO_PATCH.md reports failed fidelity, not re-evaluated today"
+  },
+  "microsoft_authenticator": {
+    "qr_and_totp_protocol_validated_in_previous_native_test": true,
+    "physical_mobile_app_tested_by_agent": false,
+    "deployed_gateway_mfa_verified": false
+  },
+  "hashes": {
+    "password": "Argon2id, individual random salts; direct test passed",
+    "activation_license": "SHA256 UNIQUE in issuer registry; validated in prior isolated PostgreSQL suite, no production issuer availability claim",
+    "model": "SHA256 validates byte integrity, not inference correctness"
+  }
+}
