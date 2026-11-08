@@ -4,8 +4,15 @@
   "clean_machine": false,
   "checks": [
     "migrations_idempotent_no_manual_grant",
-    "bootstrap_without_ipc_cookie_denied"
+    "bootstrap_without_ipc_cookie_denied",
+    "real_named_pipe_peer_identity_and_cookie_handoff",
+    "bootstrap_only_username_password",
+    "real_ui_bootstrap_totp_three_codes_and_completed",
+    "launcher_ready_after_completed",
+    "restart_launcher_ready",
+    "real_login_no_cookie_no_welcome_ready",
+    "restart_launcher_migration_required",
+    "real_login_no_cookie_no_welcome_migration_required"
   ],
-  "result": "failed",
-  "failure_type": "error"
+  "result": "passed"
 }

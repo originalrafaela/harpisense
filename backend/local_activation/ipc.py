@@ -166,6 +166,7 @@ class WindowsHandoff:
         self.stopping = threading.Event()
         self.thread = None
         self.handle = None
+        self.diagnostic_callback = None
 
     def start(self):
         if os.name != 'nt':
@@ -203,7 +204,7 @@ class WindowsHandoff:
                     if getattr(exc, 'winerror', None) != 535:  # ERROR_PIPE_CONNECTED
                         raise
                 _, raw = win32file.ReadFile(self.handle, LIMIT + 1)
-                win32pipe.ImpersonateNamedPipeClient(self.handle)
+                win32security.ImpersonateNamedPipeClient(self.handle)
                 token = None
                 try:
                     token = win32security.OpenThreadToken(win32api.GetCurrentThread(),
@@ -218,8 +219,16 @@ class WindowsHandoff:
                     continue
                 reply = _reply(self.adapter, 'sid:' + sid, raw)
                 win32file.WriteFile(self.handle, reply)
-            except Exception:
-                pass
+            except Exception as error:
+                # Optional installer-owned diagnostic sink receives only stable metadata.
+                if self.diagnostic_callback:
+                    trace = error.__traceback__
+                    while trace and trace.tb_next:
+                        trace = trace.tb_next
+                    self.diagnostic_callback({'error_type': type(error).__name__,
+                        'os_error': getattr(error, 'winerror', None),
+                        'source_line': trace.tb_lineno if trace else None,
+                        'source_file': Path(trace.tb_frame.f_code.co_filename).name if trace else None})
             finally:
                 try:
                     win32pipe.DisconnectNamedPipe(self.handle)
@@ -230,9 +239,19 @@ class WindowsHandoff:
         self.stopping.set()
         if self.handle:
             import win32file
-            win32file.CloseHandle(self.handle)
+            # Wake synchronous ConnectNamedPipe before closing its server handle.
+            # An empty, immediately closed client cannot mint a first-use session.
+            try:
+                wake = win32file.CreateFile(self.name,
+                    win32file.GENERIC_READ | win32file.GENERIC_WRITE,
+                    0, None, win32file.OPEN_EXISTING, 0, None)
+                win32file.CloseHandle(wake)
+            except Exception:
+                pass
             if self.thread:
                 self.thread.join(timeout=4)
+            win32file.CloseHandle(self.handle)
+            self.handle = None
 
 
 def launch_first_use(handoff, *, chromium_executable):

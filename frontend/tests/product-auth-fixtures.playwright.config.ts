@@ -1,6 +1,6 @@
 import {defineConfig} from '@playwright/test';
 
-const baseURL='http://127.0.0.1:52177';
+const baseURL='http://127.0.0.1:52178';
 process.env.HARPISENSE_TEST_URL=baseURL;
 // Isolated sink only: browser specs must never contact a developer's backend.
 process.env.HARPI_API_TUNNEL_TARGET='http://127.0.0.1:9';
@@ -12,5 +12,5 @@ export default defineConfig({
  reporter:'list',
  outputDir:'test-results/product-auth-fixtures',
  use:{baseURL,headless:true,screenshot:'off',video:'off',trace:'off'},
- webServer:{command:'npm.cmd run dev -- --host 127.0.0.1 --port 52177 --strictPort',url:baseURL,reuseExistingServer:false,timeout:30_000},
+ webServer:{cwd:process.cwd(),command:'node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 52178 --strictPort',url:baseURL,reuseExistingServer:false,timeout:30_000},
 });

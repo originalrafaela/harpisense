@@ -75,6 +75,8 @@ if __name__ == '__main__':
     from urllib.parse import urlsplit
     state = load_state(sys.argv[3])
     with NativeActivationRuntime(state, Path(sys.argv[3]).parent) as runtime:
+        if runtime.handoff:
+            runtime.handoff.diagnostic_callback = lambda data: (Path(sys.argv[3]).parent/'ipc-diagnostic.json').write_text(json.dumps(data), encoding='ascii')
         frontend = Path(os.environ.get('HARPISENSE_ACCEPTANCE_FRONTEND', root/'frontend/dist'))
         app = build_native_app(state, frontend, initial_access=runtime.adapter,
                                protection_key=runtime.totp_key)

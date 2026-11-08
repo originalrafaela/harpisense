@@ -9,16 +9,77 @@
     "passed": 22,
     "failed": 0,
     "warnings": 3,
-    "elapsed_seconds": 26.60,
-    "coverage": ["cryptographic issuance", "forced collision", "concurrent issuance", "simultaneous activation", "real TLS and DPAPI interoperability", "lost activation response", "receipt-only copy rejected", "offline activation verification", "interrupted registration", "three-code emission concurrency", "explicit reissue", "concurrent password reset", "TOTP replay", "MFA enforcement", "administrative Basic rejected", "legacy migration", "late failure rollback"]
+    "elapsed_seconds": 26.6,
+    "coverage": [
+      "cryptographic issuance",
+      "forced collision",
+      "concurrent issuance",
+      "simultaneous activation",
+      "real TLS and DPAPI interoperability",
+      "lost activation response",
+      "receipt-only copy rejected",
+      "offline activation verification",
+      "interrupted registration",
+      "three-code emission concurrency",
+      "explicit reissue",
+      "concurrent password reset",
+      "TOTP replay",
+      "MFA enforcement",
+      "administrative Basic rejected",
+      "legacy migration",
+      "late failure rollback"
+    ]
   },
-  "frontend_unit": {"passed": 76, "failed": 0},
-  "frontend_browser": {"passed": 11, "failed": 0, "backend": "intercepted HTTP fixtures", "screenshots": false, "videos": false, "traces": false},
-  "frontend_build": {"passed": true, "modules": 55},
+  "frontend_unit": {
+    "passed": 76,
+    "failed": 0
+  },
+  "frontend_browser": {
+    "passed": 11,
+    "failed": 0,
+    "backend": "intercepted HTTP fixtures",
+    "screenshots": false,
+    "videos": false,
+    "traces": false
+  },
+  "frontend_build": {
+    "passed": true,
+    "modules": 55
+  },
   "clean_install_windows": "not_validated",
   "clean_install_ubuntu": "not_validated",
   "argon2_clean_machine_windows": "not_validated",
   "argon2_clean_machine_ubuntu": "not_validated",
   "vmware_clone_resistance": "not_implemented",
-  "lost_authenticator_policy": "not_approved"
+  "lost_authenticator_policy": "not_approved",
+  "native_runtime_windows": {
+    "passed": true,
+    "checks": 10,
+    "receipt": "explicit issuer fixture",
+    "database": "real native PostgreSQL",
+    "browser": "real Chromium",
+    "ipc": "real authenticated Windows named pipe",
+    "process_restart": true,
+    "os_reboot": false,
+    "service_registration": false,
+    "clean_machine": false
+  },
+  "local_activation_windows": {
+    "passed": 17,
+    "skipped_linux": 5
+  },
+  "native_compatibility": {
+    "passed": 5
+  },
+  "operational_browser_fixtures": {
+    "passed": 11,
+    "backend": "intercepted HTTP fixtures"
+  },
+  "runtime_self_check": {
+    "passed": true,
+    "output": "RUNTIME_IMPORTS_OK",
+    "argon2id_hash_and_verify": true,
+    "ed25519_sign_and_verify": true,
+    "clean_machine": false
+  }
 }

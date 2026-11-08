@@ -26,7 +26,9 @@ def check_runtime():
     digest = hash_secret_raw(b'native-runtime-check', b'0123456789abcdef',
                              time_cost=1, memory_cost=8192, parallelism=1,
                              hash_len=32, type=Type.ID)
-    if len(digest) != 32 or PasswordHasher().type != Type.ID:
+    hasher = PasswordHasher()
+    verifier = hasher.hash('native-runtime-check')
+    if len(digest) != 32 or hasher.type != Type.ID or not hasher.verify(verifier, 'native-runtime-check'):
         raise RuntimeError('ARGON2ID_RUNTIME_UNAVAILABLE')
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
     key = Ed25519PrivateKey.generate()

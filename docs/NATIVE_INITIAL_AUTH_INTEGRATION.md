@@ -98,3 +98,9 @@ Startup mantém API disponível em LICENSE_ALREADY_ACTIVATED e falhas transitór
 Retry traduz ActivationError para AuthError: conflito409 e rede/emissor503, com
 código estável e sem imprimir exceção bruta. A UI consome o código de conflito e
 apresenta `Esta licença já foi ativada em outra instalação.`
+
+## Fechamento pela integração principal
+
+A branch integration/initial-auth-20261108 corrigiu a chamada de impersonação para win32security.ImpersonateNamedPipeClient e o shutdown do pipe. O novo ensaio acceptance_initial_auth.py passou com PG/HTTP/Chromium/IPC reais, cadastro/TOTP/três códigos e login após restart dos processos nos estados ready e migration_required. O recibo desse ensaio é fixture explícita; a ativação HTTPS real está coberta separadamente pela suíte22. Não foi feito reboot do SO ou instalação limpa. A evidência result.json agora registra a execução aprovada.
+
+A integração repetiu17 testes Windows de ativação/IPC (5 Linux ignorados),5 de compatibilidade e o autocheck de criação/verificação Argon2id. Relatório consolidado: docs/INITIAL_AUTH_INTEGRATION_REPORT_20261108.md.

@@ -1,6 +1,6 @@
 # Autenticação inicial — integração e cobertura
 
-Registro de trabalho em 08/11/2026. Este documento distingue implementação, ensaios de desenvolvimento e homologação do artefato instalado. Não houve implantação no gateway operacional nem alteração de VPN/MQTT/firewall de produção.
+Relatório consolidado em 08/11/2026. Este documento distingue implementação, ensaios de desenvolvimento e homologação do artefato instalado. Não houve implantação no gateway operacional nem alteração de VPN/MQTT/firewall de produção.
 
 ## Branch e preservação
 
@@ -11,6 +11,8 @@ Registro de trabalho em 08/11/2026. Este documento distingue implementação, en
 - Backend humano: `feat/issuer-local-auth`, fonte `cb6545b`, integrado como `18e8a3f`.
 - Emissor, migração repetível, fechamento da composição antiga e testes: fonte `ff2d43f`, integrado como `1598ed4`.
 - Lifecycle IPC/navegador: fonte `9464d4f`, integrado como `610c32d`.
+- Composição nativa final: fonte `b1c927e`, integrada como `010f6f5`; correções adicionais do IPC Windows e evidência final nesta branch.
+- Specs operacionais migradas: fonte `6458c5b`, integrada como `12df8b9` (somente testes; worktree fonte preservada).
 - Dependências nativas: `feat/native-initial-auth`, fonte `bf23098`, integrado como `d13a8ee`, preservando módulos científicos/action_review na resolução dos conflitos.
 - `integration/primeira-entrega` histórica contém alterações locais e não foi sobrescrita. Fontes backend/frontend/native anteriores preservadas. A worktree `frontend-auth-label` e suas seis alterações locais do usuário não foram editadas ou commitadas.
 
@@ -40,9 +42,13 @@ Os originais dos códigos existem somente na resposta de emissão e na memória 
 | Comando / ensaio | Resultado | Limite |
 |---|---|---|
 | frontend: npm test | 76 aprovados | Unidade/contratos e proxy local com fixtures |
+| runtime: entry.py check-runtime | Passou: RUNTIME_IMPORTS_OK | Exercita criação/verificação Argon2id e Ed25519 no ambiente de desenvolvimento; não é máquina limpa |
 | frontend: npm run build | Passou, 55 módulos | Inclui typecheck; não é pacote instalado |
 | Playwright tests/initial-auth.playwright.config.ts | 11 aprovados | Navegador Chromium com HTTP interceptado, sem serviço/banco operacional |
-| unittest backend/local_activation_tests | 11 aprovados no Windows | DPAPI real; emissor fixture; sem instalador/VM limpa |
+| unittest backend/local_activation_tests | 17 aprovados; 5 específicos Linux ignorados nesta execução Windows | DPAPI e named pipe Windows reais; inclui três testes novos de identidade/ACL IPC |
+| unittest packaging/native/test_native_activation.py | 5 aprovados | Compatibilidade e launcher; presença de conta fixture, DPAPI real |
+| Playwright product-auth-fixtures.playwright.config.ts | 11 testes passaram | Gerenciador/configurações/Cases V2 com fixtures; sem backend operacional |
+| acceptance_initial_auth.py | Passou, 10 verificações do fluxo real | Windows existente, PG/HTTP/Chromium/IPC reais, receipt de emissor fixture, restart de processos |
 | Backend: run_native_postgres.py --edge-backend backend | **22 aprovados na própria branch integrada**, 26,60 s | PG18 nativo descartável, HTTPS real com CA de teste e DPAPI; não instalação limpa |
 
 Playwright cobre: ativação sem conexão, mensagem exata de licença já ativada, conta existente, cadastro/QR/primeiro TOTP, dashboard com três códigos, clipboard, ausência de códigos em local/sessionStorage, reload real com novo login e conjunto pendente, resposta perdida, conflito de emissão, confirmação e recuperação com TOTP. Não houve screenshots, vídeos ou traces de segredos. Os materiais dos testes são sintéticos.
@@ -55,13 +61,14 @@ Falhas encontradas e corrigidas na interface: label acessível da senha incluía
 
 ## Revisões de integração
 
-Foram identificados e encaminhados para correção: preservar a chave que cifra o MFA existente; separar login comum de autorização para primeiro cadastro no launcher; parametrizar porta nativa pelo panel_url; evitar socket Unix stale bloquear a API após crash/reboot; fechar a composição antiga que permitia sessão humana sem MFA. Os commits/testes finais dessas correções devem constar no fechamento.
+Foram identificados e encaminhados para correção: preservar a chave que cifra o MFA existente; separar login comum de autorização para primeiro cadastro no launcher; parametrizar porta nativa pelo panel_url; evitar socket Unix stale bloquear a API após crash/reboot; fechar a composição antiga que permitia sessão humana sem MFA. As correções foram incorporadas. O primeiro ensaio nativo revelou uma chamada incorreta a ImpersonateNamedPipeClient no módulo win32pipe; foi corrigida para win32security, com três testes reais de named pipe. Corrigiu-se também o fechamento do pipe, acordando ConnectNamedPipe antes de fechar seu handle. A execução seguinte do fluxo nativo passou. Os diagnósticos de falha incluem somente etapa, tipo e códigos de sistema, sem corpos ou segredos. Referência da correção: módulo win32security em https://github.com/mhammond/pywin32/blob/main/win32/src/win32security.i .
 
 ## Windows versus Ubuntu
 
 | Critério | Windows | Ubuntu |
 |---|---|---|
-| Interface e protocolo em desenvolvimento | Validado nas suítes acima | Mesmo frontend; não equivale a execução Ubuntu |
+| Interface e protocolo em desenvolvimento | Validado com PostgreSQL/HTTP/Chromium/IPC reais | Mesmo frontend; não equivale a execução Ubuntu |
+| Restart do processo + login sem novo cookie/sem emissor | Validado: conta pronta e migration_required; pop-up não reabre | Não executado no Ubuntu |
 | Chave protegida por mecanismo real | DPAPI CurrentUser exercitado em desenvolvimento | Systemd credential implementada; aceite Ubuntu pendente |
 | Argon2id em máquina limpa, sem downloads | Não comprovado | Não comprovado |
 | Instalador completo sem checkout/Docker | Não comprovado nesta rodada | Não comprovado nesta rodada |
@@ -76,4 +83,12 @@ O distribuidor deve provisionar seu emissor HTTPS, registro compartilhado e chav
 
 ## Fechamento
 
-Integração dos commits complementares, repetição das suítes finais e cobertura do runtime nativo serão acrescentadas neste documento. Até então, este registro não declara o fluxo homologado em máquina limpa.
+As três frentes foram incorporadas e o fluxo foi exercitado com backend/interface reais em desenvolvimento Windows. Evidência nativa: docs/evidence/native-initial-auth/result.json. O ensaio cria sua própria receipt fixture para isolar o runtime local; a emissão/ativação HTTPS real é exercitada separadamente pelos 22 testes PostgreSQL. Não foi feito ensaio único desde um instalador assinado contendo licença emitida pelo distribuidor até reboot do SO.
+
+**Aceite completo de distribuição permanece pendente em Windows e Ubuntu**, incluindo criação/verificação Argon2id no pacote final em máquina limpa, sem checkout/Docker/download. Não foram gerados, assinados ou entregues novos instaladores de produção nesta rodada.
+
+Specs históricas ainda incompatíveis com o contrato v2 (não contabilizadas como aprovadas): admin-mfa.spec.ts, admin-session.spec.ts, auth-defense-availability.spec.ts, visual-preview.spec.ts, recovery-welcome.spec.ts, incident-defense.spec.ts e helpers que ainda importam session-fixture.ts. As specs migradas e as initial-auth-ui.spec.ts são as suítes válidas executadas nesta entrega; a suíte Playwright histórica completa não foi homologada.
+
+Inventário completo de arquivos modificados em relação à base: docs/evidence/initial-auth-integration/changed-files.txt. Verificação git diff --check aprovada. Os arquivos privados de teste são ignorados pelo Git e não integram esse inventário.
+
+Os binários e dependências usados nesta estação já existiam ou foram preparados nas worktrees de desenvolvimento. Esse ambiente não comprova fechamento offline do instalador. Para distribuir faltam configuração HTTPS/chaves públicas reais, assinatura final por cópia e os ensaios limpos acima. Política para perda do autenticador continua explicitamente pendente.

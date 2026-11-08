@@ -75,6 +75,7 @@ def main():
         if logfile:
             logfile.close()
         api, logfile = None, None
+    stage = 'postgres-start'
     try:
         run([pg/'initdb.exe', '-D', private/'postgres', '-U', 'native_installer',
              '--encoding=UTF8', '--auth=scram-sha-256', '--pwfile', private/'pg-init.secret'])
@@ -91,11 +92,14 @@ def main():
         username, password = 'native-initial-owner', secrets.token_urlsafe(32)
         denied = http.post(prefix+'/admin-auth/bootstrap', json=dict(username=username, password=password))
         check(denied.status_code == 403, 'bootstrap_without_ipc_cookie_denied')
+        stage = 'chromium-launch'
         with sync_playwright() as pw:
             browser = pw.chromium.launch()
             try:
                 page = browser.new_page()
+                stage = 'named-pipe-handoff'
                 authorize_browser(page, state)
+                stage = 'browser-registration'
                 check(True, 'real_named_pipe_peer_identity_and_cookie_handoff')
                 initial = page.get_by_role('button', name='Autenticação inicial', exact=True)
                 if initial.is_visible():
@@ -143,7 +147,14 @@ def main():
                     browser.close()
         result['result'] = 'passed'
     except Exception as error:
-        result.update(result='failed', failure_type=type(error).__name__)
+        result.update(result='failed', failure_type=type(error).__name__, failure_stage=stage)
+        if isinstance(getattr(error, 'winerror', None), int):
+            result['os_error'] = error.winerror
+        if getattr(error, 'funcname', None) in ('ReadFile','WriteFile','WaitNamedPipe','CreateFile','OpenProcess','OpenProcessToken','OpenThreadToken','ImpersonateNamedPipeClient'):
+            result['os_operation'] = error.funcname
+        diagnostic = private/'ipc-diagnostic.json'
+        if diagnostic.is_file():
+            result['ipc_diagnostic'] = json.loads(diagnostic.read_text())
         if isinstance(error, AssertionError) and str(error).replace('_', '').isalnum():
             result['failure'] = str(error)
     finally:
