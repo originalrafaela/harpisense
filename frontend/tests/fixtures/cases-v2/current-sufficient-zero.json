@@ -1,0 +1,213 @@
+{
+  "fixture_notice": "Controlled trusted-service transport fixtures in a disposable native PostgreSQL cluster. No real traffic, real attack, approved model or containment is attested.",
+  "response": {
+    "value": {
+      "operation": "IDS",
+      "autonomy_mode": 1,
+      "execution_enabled": false
+    },
+    "revision": 1,
+    "emergency_stopped": false,
+    "updated_at": "2026-11-07T23:30:14.265830-03:00",
+    "pending": {
+      "reliable": true,
+      "blockers": [],
+      "cases": {
+        "contract_version": 2,
+        "status": "none_active",
+        "coverage": "complete",
+        "count_basis": "distinct_incident_id",
+        "known_active_count": 0,
+        "total_active_count": 0,
+        "classification_counts": {
+          "anomaly": 0,
+          "confirmed_attack": 0,
+          "incident": 0
+        },
+        "classification_count_basis": "distinct_incident_id_per_class",
+        "classification_overlap": true,
+        "unlinked_active_item_count": 0,
+        "observation_sufficient": true,
+        "observed_at": "2026-11-07T23:30:19.518984-03:00",
+        "observation_basis": "oldest_required_source_report",
+        "sources": [
+          {
+            "source": "anomaly",
+            "source_revision": 3,
+            "observed_at": "2026-11-07T23:30:19.571666-03:00",
+            "fresh": true,
+            "valid": true,
+            "complete": true,
+            "reason_codes": [],
+            "freshness_policy": {
+              "version": "operational-authority.v1",
+              "max_age_seconds": 30,
+              "clock": "postgresql"
+            }
+          },
+          {
+            "source": "incident",
+            "source_revision": 3,
+            "observed_at": "2026-11-07T23:30:19.518984-03:00",
+            "fresh": true,
+            "valid": true,
+            "complete": true,
+            "reason_codes": [],
+            "freshness_policy": {
+              "version": "operational-authority.v1",
+              "max_age_seconds": 30,
+              "clock": "postgresql"
+            }
+          }
+        ],
+        "items": [],
+        "unlinked_items": [],
+        "reason_codes": []
+      },
+      "sources": [
+        {
+          "source": "anomaly",
+          "source_revision": 3,
+          "observed_at": "2026-11-07T23:30:19.571666-03:00",
+          "fresh": true,
+          "valid": true,
+          "complete": true
+        },
+        {
+          "source": "approval",
+          "source_revision": 1,
+          "observed_at": "2026-11-07T23:30:18.865801-03:00",
+          "fresh": true,
+          "valid": true,
+          "complete": true
+        },
+        {
+          "source": "execution",
+          "source_revision": 1,
+          "observed_at": "2026-11-07T23:30:18.663633-03:00",
+          "fresh": true,
+          "valid": true,
+          "complete": true
+        },
+        {
+          "source": "incident",
+          "source_revision": 3,
+          "observed_at": "2026-11-07T23:30:19.518984-03:00",
+          "fresh": true,
+          "valid": true,
+          "complete": true
+        },
+        {
+          "source": "verification",
+          "source_revision": 1,
+          "observed_at": "2026-11-07T23:30:19.086842-03:00",
+          "fresh": true,
+          "valid": true,
+          "complete": true
+        }
+      ],
+      "source_cases": {
+        "status": "none_active",
+        "known_active_count": 0,
+        "count_basis": "source_item",
+        "coverage": "complete",
+        "sources": [
+          {
+            "source": "anomaly",
+            "source_revision": 3,
+            "observed_at": "2026-11-07T23:30:19.571666-03:00",
+            "fresh": true,
+            "valid": true,
+            "complete": true
+          },
+          {
+            "source": "incident",
+            "source_revision": 3,
+            "observed_at": "2026-11-07T23:30:19.518984-03:00",
+            "fresh": true,
+            "valid": true,
+            "complete": true
+          }
+        ],
+        "items": []
+      }
+    },
+    "observed_at": "2026-11-08T02:30:19.680658+00:00",
+    "cases": {
+      "contract_version": 2,
+      "status": "none_active",
+      "coverage": "complete",
+      "count_basis": "distinct_incident_id",
+      "known_active_count": 0,
+      "total_active_count": 0,
+      "classification_counts": {
+        "anomaly": 0,
+        "confirmed_attack": 0,
+        "incident": 0
+      },
+      "classification_count_basis": "distinct_incident_id_per_class",
+      "classification_overlap": true,
+      "unlinked_active_item_count": 0,
+      "observation_sufficient": true,
+      "observed_at": "2026-11-07T23:30:19.518984-03:00",
+      "observation_basis": "oldest_required_source_report",
+      "sources": [
+        {
+          "source": "anomaly",
+          "source_revision": 3,
+          "observed_at": "2026-11-07T23:30:19.571666-03:00",
+          "fresh": true,
+          "valid": true,
+          "complete": true,
+          "reason_codes": [],
+          "freshness_policy": {
+            "version": "operational-authority.v1",
+            "max_age_seconds": 30,
+            "clock": "postgresql"
+          }
+        },
+        {
+          "source": "incident",
+          "source_revision": 3,
+          "observed_at": "2026-11-07T23:30:19.518984-03:00",
+          "fresh": true,
+          "valid": true,
+          "complete": true,
+          "reason_codes": [],
+          "freshness_policy": {
+            "version": "operational-authority.v1",
+            "max_age_seconds": 30,
+            "clock": "postgresql"
+          }
+        }
+      ],
+      "items": [],
+      "unlinked_items": [],
+      "reason_codes": []
+    },
+    "real_execution_blocked": true,
+    "executor": "isolated_simulation_only",
+    "change_allowed": true,
+    "effective_state": {
+      "applied_profile": "M1",
+      "control_revision": 1,
+      "executor": "isolated_simulation_only",
+      "availability": "real_executor_unavailable",
+      "execution_enabled": false,
+      "updated_at": "2026-11-07T23:30:14.265830-03:00",
+      "operational_visibility": "current",
+      "blockers": [],
+      "change_allowed": true,
+      "containment_confirmed": false,
+      "executor_state": {
+        "status": "not_integrated",
+        "available": false,
+        "observed_at": null,
+        "source": null,
+        "blockers": [
+          "REAL_EXECUTOR_NOT_INTEGRATED"
+        ]
+      }
+    }
+  }
+}

@@ -6,3 +6,8 @@
 .account-flow .password-field input{min-width:0}
 .account-flow input[readonly]{font-family:ui-monospace,Consolas,monospace;letter-spacing:.08em}
 @media(max-width:620px){.mfa-enrollment{grid-template-columns:1fr}.mfa-qr{margin:auto}.recovery-codes{grid-template-columns:1fr}}
+.recovery-modal-backdrop{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:1rem;background:rgba(3,9,18,.78);backdrop-filter:blur(4px)}
+.recovery-modal{width:min(640px,100%);max-height:min(820px,calc(100dvh - 2rem));overflow:auto;overscroll-behavior:contain;margin:0;padding:1.05rem 1.15rem;background:#17283c;border:1px solid #53708e;border-radius:12px;box-shadow:0 20px 70px rgba(0,0,0,.55)}
+.recovery-modal:focus{outline:3px solid #56c99a;outline-offset:3px}.recovery-modal header h2{margin:.15rem 0 .5rem;font-size:1.3rem}.recovery-modal header p{margin:.2rem 0 .9rem;color:#c4d4e6}
+.recovery-code-group{margin:.65rem 0;padding:.7rem .8rem;border:1px solid #344e68;border-radius:8px;background:#102035}.recovery-code-group h3{margin:.1rem 0 .35rem;font-size:1rem}.recovery-code-group p{margin:.25rem 0 .5rem;font-size:.85rem}.recovery-code-group ol{margin:.5rem 0}.recovery-modal .flow-actions{display:flex;flex-wrap:wrap;gap:.45rem}.recovery-modal .flow-actions button{width:auto;flex:0 1 auto}.recovery-modal>.primary{width:auto;min-width:220px;margin-top:.35rem}
+@media(max-width:620px){.recovery-modal-backdrop{padding:.4rem;align-items:center}.recovery-modal{max-height:calc(100dvh - .8rem);padding:.8rem}.recovery-modal .flow-actions button{flex:1 1 140px}.recovery-modal>.primary{width:100%}}

@@ -25,6 +25,7 @@ test('proxy real Vite: caminho, Bearer, status, leitura restrita e logs sem cred
     if(request.url?.startsWith('/api/v1/config/setup')&&request.method==='PUT')return response.end('{"version":1,"state":"draft_saved","operational":false,"pending":[]}');
     if(request.url?.startsWith('/api/v1/config/catalog'))return response.end('{"firmware_profiles":[],"deployment_profiles":[],"applicators":[]}');
     if(request.url?.startsWith('/api/v1/config/history'))return response.end('[]');
+    if(request.url==='/api/v1/p11/incidents/incident-1/dossier?incident_revision=3')return response.end('{"incident_ref":{"id":"incident-1","revision":3},"incident_card":{}}');
     if(request.url?.startsWith('/api/v1/config/proposals/')&&request.url.endsWith('/validate'))return response.end('{"status":"VALIDATED"}');
     if(request.url?.startsWith('/api/v1/config/proposals/'))return response.end('{"status":"DRAFT"}');
     if(request.url==='/api/v1/config/proposals')return response.end('{"operation_id":"123e4567-e89b-12d3-a456-426614174000","revision":1,"status":"DRAFT"}');
@@ -52,6 +53,8 @@ test('proxy real Vite: caminho, Bearer, status, leitura restrita e logs sem cred
   assert.equal(calls[3].url,'/api/v1/p11/explain/synthetic-fixture');assert.equal(calls[3].authorization,headers.Authorization);
   const incidentHistory=await fetch(base+'/incident/incident-1/history',{headers});assert.equal(incidentHistory.status,200);assert.equal((await incidentHistory.json())[0].revision,1);
   assert.equal(calls[4].url,'/api/v1/p11/incident/incident-1/history');assert.equal(calls[4].authorization,headers.Authorization);
+  const dossier=await fetch(base+'/incidents/incident-1/dossier?incident_revision=3',{headers});assert.equal(dossier.status,200);assert.equal((await dossier.json()).incident_ref.revision,3);
+  assert.equal(calls[5].url,'/api/v1/p11/incidents/incident-1/dossier?incident_revision=3');assert.equal(calls[5].authorization,headers.Authorization);
   const count=calls.length;
   assert.equal((await fetch(base+'/health',{headers:{Authorization:'Basic '+btoa('technical:fixture')}})).status,401);
   assert.equal((await fetch(base+'/ingest/telemetry',{method:'POST',headers})).status,405);
@@ -60,6 +63,9 @@ test('proxy real Vite: caminho, Bearer, status, leitura restrita e logs sem cred
   assert.equal((await fetch(base+'/incident',{headers})).status,200);
   assert.equal((await fetch(base+'/unknown-kind/id/history',{headers})).status,404);
   assert.equal((await fetch(base+'/incident/incident-1/history?limit=10',{headers})).status,400);
+  assert.equal((await fetch(base+'/incidents/incident-1/dossier',{headers})).status,400);
+  assert.equal((await fetch(base+'/incidents/incident-1/dossier?incident_revision=0',{headers})).status,400);
+  assert.equal((await fetch(base+'/incidents/incident-1/dossier?incident_revision=3&other=bad',{headers})).status,400);
   assert.equal((await fetch(base+'/health',{headers:{...headers,Origin:'https://foreign.example'}})).status,403);
   assert.equal((await fetch(base+'/telemetry?password=forbidden',{headers})).status,400);
   assert.equal(calls.length,count+1);
@@ -104,4 +110,12 @@ test('proxy libera somente as rotas candidatas de primeiro acesso/MFA e não env
   assert.equal((await fetch(`${origin}/p11-api/api/v1/admin-auth/${route}`,{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:'{}'})).status,200);
   assert.equal((await fetch(`${origin}/p11-api/api/v1/admin-auth/${route}`,{method:'GET'})).status,404);
  }
+ const privateAuth=`${origin}/p11-api/api/v1/admin-auth`;const bearer='Bearer '+'a'.repeat(43);
+ for(const [path,method,body] of [['/first-access','GET',undefined],['/first-access/codes','POST',{current_password:'fixture-only-password',code:'123456'}],['/first-access/confirm','POST',{password_reset_generation:2}]] as const){
+  const response=await fetch(privateAuth+path,{method,headers:{Origin:origin,Authorization:bearer,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
+  assert.equal(response.status,200,`${method} ${path}`);assert.equal(response.headers.get('set-cookie'),null);
+  assert.equal(calls.at(-1)?.url,`/api/v1/admin-auth${path}`);assert.equal(calls.at(-1)?.method,method);assert.equal(calls.at(-1)?.authorization,bearer);
+ }
+ assert.equal((await fetch(`${privateAuth}/first-access/codes`,{method:'GET',headers:{Authorization:bearer}})).status,404);
+ assert.equal((await fetch(`${privateAuth}/first-access/confirm?generation=2`,{method:'POST',headers:{Authorization:bearer}})).status,400);
 });

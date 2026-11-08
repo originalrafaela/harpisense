@@ -1,0 +1,240 @@
+{
+  "fixture_notice": "Controlled trusted-service transport fixtures in a disposable native PostgreSQL cluster. No real traffic, real attack, approved model or containment is attested.",
+  "response": {
+    "value": {
+      "operation": "IDS",
+      "autonomy_mode": 2,
+      "execution_enabled": false
+    },
+    "revision": 2,
+    "emergency_stopped": false,
+    "updated_at": "2026-11-07T23:30:19.732367-03:00",
+    "pending": {
+      "reliable": false,
+      "blockers": [],
+      "cases": {
+        "contract_version": 2,
+        "status": "unknown",
+        "coverage": "unknown",
+        "count_basis": "distinct_incident_id",
+        "known_active_count": 0,
+        "total_active_count": null,
+        "classification_counts": {
+          "anomaly": 0,
+          "confirmed_attack": 0,
+          "incident": 0
+        },
+        "classification_count_basis": "distinct_incident_id_per_class",
+        "classification_overlap": true,
+        "unlinked_active_item_count": 0,
+        "observation_sufficient": false,
+        "observed_at": null,
+        "observation_basis": "oldest_required_source_report",
+        "sources": [
+          {
+            "source": "anomaly",
+            "source_revision": null,
+            "observed_at": null,
+            "fresh": false,
+            "valid": false,
+            "complete": false,
+            "reason_codes": [
+              "SOURCE_NOT_OBSERVED"
+            ],
+            "freshness_policy": {
+              "version": "operational-authority.v1",
+              "max_age_seconds": 30,
+              "clock": "postgresql"
+            }
+          },
+          {
+            "source": "incident",
+            "source_revision": null,
+            "observed_at": null,
+            "fresh": false,
+            "valid": false,
+            "complete": false,
+            "reason_codes": [
+              "SOURCE_NOT_OBSERVED"
+            ],
+            "freshness_policy": {
+              "version": "operational-authority.v1",
+              "max_age_seconds": 30,
+              "clock": "postgresql"
+            }
+          }
+        ],
+        "items": [],
+        "unlinked_items": [],
+        "reason_codes": [
+          {
+            "code": "SOURCE_NOT_OBSERVED",
+            "source": "anomaly"
+          },
+          {
+            "code": "SOURCE_NOT_OBSERVED",
+            "source": "incident"
+          }
+        ]
+      },
+      "sources": [
+        {
+          "source": "anomaly",
+          "source_revision": null,
+          "observed_at": null,
+          "fresh": false,
+          "valid": false,
+          "complete": false
+        },
+        {
+          "source": "approval",
+          "source_revision": null,
+          "observed_at": null,
+          "fresh": false,
+          "valid": false,
+          "complete": false
+        },
+        {
+          "source": "execution",
+          "source_revision": null,
+          "observed_at": null,
+          "fresh": false,
+          "valid": false,
+          "complete": false
+        },
+        {
+          "source": "incident",
+          "source_revision": null,
+          "observed_at": null,
+          "fresh": false,
+          "valid": false,
+          "complete": false
+        },
+        {
+          "source": "verification",
+          "source_revision": null,
+          "observed_at": null,
+          "fresh": false,
+          "valid": false,
+          "complete": false
+        }
+      ],
+      "dependency": "Fontes autoritativas ausentes, desconhecidas ou desatualizadas: anomaly, approval, execution, incident, verification",
+      "source_cases": {
+        "status": "unknown",
+        "known_active_count": 0,
+        "count_basis": "source_item",
+        "coverage": "unknown",
+        "sources": [
+          {
+            "source": "anomaly",
+            "source_revision": null,
+            "observed_at": null,
+            "fresh": false,
+            "valid": false,
+            "complete": false
+          },
+          {
+            "source": "incident",
+            "source_revision": null,
+            "observed_at": null,
+            "fresh": false,
+            "valid": false,
+            "complete": false
+          }
+        ],
+        "items": []
+      }
+    },
+    "observed_at": "2026-11-08T02:30:23.064675+00:00",
+    "cases": {
+      "contract_version": 2,
+      "status": "unknown",
+      "coverage": "unknown",
+      "count_basis": "distinct_incident_id",
+      "known_active_count": 0,
+      "total_active_count": null,
+      "classification_counts": {
+        "anomaly": 0,
+        "confirmed_attack": 0,
+        "incident": 0
+      },
+      "classification_count_basis": "distinct_incident_id_per_class",
+      "classification_overlap": true,
+      "unlinked_active_item_count": 0,
+      "observation_sufficient": false,
+      "observed_at": null,
+      "observation_basis": "oldest_required_source_report",
+      "sources": [
+        {
+          "source": "anomaly",
+          "source_revision": null,
+          "observed_at": null,
+          "fresh": false,
+          "valid": false,
+          "complete": false,
+          "reason_codes": [
+            "SOURCE_NOT_OBSERVED"
+          ],
+          "freshness_policy": {
+            "version": "operational-authority.v1",
+            "max_age_seconds": 30,
+            "clock": "postgresql"
+          }
+        },
+        {
+          "source": "incident",
+          "source_revision": null,
+          "observed_at": null,
+          "fresh": false,
+          "valid": false,
+          "complete": false,
+          "reason_codes": [
+            "SOURCE_NOT_OBSERVED"
+          ],
+          "freshness_policy": {
+            "version": "operational-authority.v1",
+            "max_age_seconds": 30,
+            "clock": "postgresql"
+          }
+        }
+      ],
+      "items": [],
+      "unlinked_items": [],
+      "reason_codes": [
+        {
+          "code": "SOURCE_NOT_OBSERVED",
+          "source": "anomaly"
+        },
+        {
+          "code": "SOURCE_NOT_OBSERVED",
+          "source": "incident"
+        }
+      ]
+    },
+    "real_execution_blocked": true,
+    "executor": "isolated_simulation_only",
+    "change_allowed": false,
+    "effective_state": {
+      "applied_profile": "M2",
+      "control_revision": 2,
+      "executor": "isolated_simulation_only",
+      "availability": "real_executor_unavailable",
+      "execution_enabled": false,
+      "updated_at": "2026-11-07T23:30:19.732367-03:00",
+      "operational_visibility": "unknown_or_partial",
+      "blockers": [],
+      "change_allowed": false,
+      "containment_confirmed": false,
+      "executor_state": {
+        "status": "not_integrated",
+        "available": false,
+        "observed_at": null,
+        "source": null,
+        "blockers": [
+          "REAL_EXECUTOR_NOT_INTEGRATED"
+        ]
+      }
+    }
+  }
+}

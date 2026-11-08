@@ -27,14 +27,14 @@ test('primeiro cadastro → TOTP → códigos de recuperação → sessão autor
  await page.goto('http://127.0.0.1:5174');await page.getByRole('button',{name:'Primeira configuração'}).click();
  await page.getByLabel('Grant local de uso único').fill('g'.repeat(43));await page.getByLabel('Usuário',{exact:true}).fill('fixture-owner');await page.getByLabel('Senha da conta administrativa').fill('isolated-new-password');
  await page.getByRole('button',{name:'Criar conta e configurar MFA'}).click();
- await expect(page.getByRole('heading',{name:'Configurar aplicativo autenticador'})).toBeVisible();await page.getByRole('button',{name:'Mostrar QR e chave manual'}).click();
+ await expect(page.getByRole('heading',{name:'Configurar Microsoft Authenticator'})).toBeVisible();await page.getByRole('button',{name:'Mostrar QR e chave manual'}).click();
  await expect(page.getByRole('img',{name:'QR code TOTP emitido pelo backend'})).toBeVisible();await expect(page.getByLabel('Chave manual')).toHaveValue(key);
  await page.getByLabel('Código de 6 dígitos').fill('123456');await page.getByRole('button',{name:'Confirmar MFA'}).click();
- await expect(page.getByRole('heading',{name:'Guarde seus códigos de recuperação'})).toBeVisible();await expect(page.locator('.recovery-codes li')).toHaveCount(10);
+ await expect(page.getByRole('heading',{name:'Boas-vindas ao HarpiSense, fixture-owner!'})).toBeVisible();await expect(page.locator('.recovery-codes li')).toHaveCount(10);
  expect(await page.evaluate(()=>localStorage.length)).toBe(0);
  expect(calls.filter(x=>x.path.endsWith('/bootstrap')||x.path.endsWith('/enrollment/begin')||x.path.endsWith('/enrollment/confirm')).every(x=>!x.auth)).toBe(true);
  expect(calls.every(x=>!x.url.includes(key)&&!x.url.includes(codes[0])&&!x.url.includes('g'.repeat(43)))).toBe(true);
- await page.getByLabel('Guardei os códigos em local seguro.').check();await page.getByRole('button',{name:'Concluir e continuar'}).click();
+ await page.getByLabel('Guardei meus códigos em um local seguro.').check();await page.getByRole('button',{name:'Continuar para o dashboard'}).click();
  await expect(page.getByRole('button',{name:'Sair',exact:true})).toBeVisible();
  await page.getByRole('button',{name:'Sair',exact:true}).click();await expect(page.getByRole('heading',{name:'Acesso administrativo'})).toBeVisible();
  expect(calls.some(x=>x.path.endsWith('/admin-auth/logout')&&x.method==='POST'&&x.auth===`Bearer ${token}`)).toBe(true);
@@ -78,7 +78,7 @@ test('código de recuperação retorna apenas enrollment e requer novo cadastro 
  });
  await page.goto('http://127.0.0.1:5174');await page.getByLabel('Usuário',{exact:true}).fill('fixture-owner');await page.getByLabel('Senha',{exact:true}).fill('isolated-password');await page.getByRole('button',{name:'Entrar na central'}).click();
  await page.getByRole('button',{name:'Usar código de recuperação'}).click();await page.getByLabel('Código de recuperação').fill('R'.repeat(32));await page.getByRole('button',{name:'Usar código de recuperação'}).click();
- await expect(page.getByRole('heading',{name:'Configurar aplicativo autenticador'})).toBeVisible();await expect(page.getByRole('button',{name:'Sair',exact:true})).toHaveCount(0);
+ await expect(page.getByRole('heading',{name:'Configurar Microsoft Authenticator'})).toBeVisible();await expect(page.getByRole('button',{name:'Sair',exact:true})).toHaveCount(0);
  expect(calls.some(path=>path.endsWith('/mfa/recover'))).toBe(true);expect(calls.some(path=>path.endsWith('/admin-auth/session'))).toBe(false);
 });
 
@@ -98,6 +98,6 @@ test('adesão de conta existente só troca sessão após confirmação e não bl
  await expect(page.getByRole('button',{name:'Ativar aplicativo autenticador'})).toBeVisible();
  await page.getByLabel('Senha atual').fill('wrong-password');await page.getByRole('button',{name:'Ativar aplicativo autenticador'}).click();await expect(page.getByRole('alert').filter({hasText:'conta existente permanece ativa'})).toBeVisible();await expect(page.getByRole('button',{name:'Sair',exact:true})).toBeVisible();
  await page.getByLabel('Senha atual').fill('isolated-current-password');await page.getByRole('button',{name:'Ativar aplicativo autenticador'}).click();await page.getByRole('button',{name:'Mostrar QR e chave manual'}).click();await page.getByLabel('Código de 6 dígitos').fill('123456');await page.getByRole('button',{name:'Confirmar MFA'}).click();
- await expect(page.getByRole('heading',{name:'Guarde seus códigos de recuperação'})).toBeVisible();expect(calls.find(x=>x.path.endsWith('/enrollment/authorize'))?.auth).toBe(`Bearer ${token}`);
- await page.getByLabel('Guardei os códigos em local seguro.').check();await page.getByRole('button',{name:'Concluir e continuar'}).click();await expect(page.getByText(/MFA: habilitado/)).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Guarde seus códigos de segurança'})).toBeVisible();expect(calls.find(x=>x.path.endsWith('/enrollment/authorize'))?.auth).toBe(`Bearer ${token}`);
+ await page.getByLabel('Guardei meus códigos em um local seguro.').check();await page.getByRole('button',{name:'Continuar para o dashboard'}).click();await expect(page.getByText(/MFA: habilitado/)).toBeVisible();
 });

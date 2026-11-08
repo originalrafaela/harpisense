@@ -22,6 +22,7 @@ export type DashboardContext = {
   onDemoEmergencyStopped:(value:boolean)=>void;
   loadHistory: (id: string) => Promise<Row[]>;
   loadRecordHistory?: (kind: string, id: string) => Promise<Row[]>;
+  loadCaseDossier?: (path:string,ref:{id:string;revision:number})=>Promise<Record<string,unknown>>;
   loadExplanations?: (id: string) => Promise<Row[]>;
   loading?: boolean;
   loadControls?:()=>Promise<ControlState>;
@@ -50,8 +51,8 @@ export function newest(rows: Row[]): Row[] {
     return Number.isFinite(x) && Number.isFinite(y) ? y - x : 0;
   });
 }
-export function HarpiaCard({incidents, explanations, failure, health, context}: {
-  incidents: Row[]; explanations: Row[]; failure?: string; health: Record<string, unknown> | null; context: DashboardContext;
+export function HarpiaCard({incidents, explanations, failure, health, context,records}: {
+  incidents: Row[]; explanations: Row[]; failure?: string; health: Record<string, unknown> | null; context: DashboardContext; records?:Record<string,Row[]>;
 }) {
   const ordered = newest(incidents);
   const [localSelection, setLocalSelection] = useState('');
@@ -65,6 +66,7 @@ export function HarpiaCard({incidents, explanations, failure, health, context}: 
   const selectionKey = JSON.stringify([selectedId, selected && incidentRevision(selected)]);
   const currentConsultation = consultation?.key === selectionKey ? consultation : null;
   const explanation = selectExplanation(currentConsultation?.rows ?? explanations, selectedId);
+  const recentExplanations=(currentConsultation?.rows??explanations).filter(row=>row.data.incident_id===selectedId&&typeof row.data.text==='string'&&row.data.text.trim()).sort((a,b)=>(Date.parse(explanationTime(b)??'')||0)-(Date.parse(explanationTime(a)??'')||0)).slice(0,3);
   const freshness = selected && explanation ? explanationFreshness(selected, explanation) : 'unknown';
   const deterministicAvailable = object(health?.harpia) && health.harpia.mode === 'deterministic_only' && health.harpia.contract_version === 1 && health.harpia.generation_enabled === false;
   useEffect(() => {
@@ -98,47 +100,55 @@ export function HarpiaCard({incidents, explanations, failure, health, context}: 
   }, [historyRequested, explanation?.id, selectedId]);
   const notIntegrated = failure?.startsWith('Não integrado:') || failure?.startsWith('Não configurado:');
   const unavailable = Boolean(failure && !notIntegrated) || (!object(health?.harpia) || health.harpia.mode !== 'deterministic_only') && ['unavailable', 'not_configured'].includes(String(health?.bitnet));
+  const recordData=records||{};const decisions=(recordData.decision||[]).filter(row=>row.data.incident_id===selectedId);const latestDecision=[...decisions].sort((a,b)=>(Date.parse(String(b.data.created_at||b.created_at||''))||0)-(Date.parse(String(a.data.created_at||a.created_at||''))||0))[0];
+  const decisionId=String(latestDecision?.data.decision_id||latestDecision?.id||'');const approvals=(recordData.approval||[]).filter(row=>String(row.data.decision_id||'')===decisionId);const executions=(recordData.execution||[]).filter(row=>String(row.data.decision_id||'')===decisionId);
+  const detections=(recordData.detection||[]).filter(row=>selected&&(Array.isArray(selected.data.detection_refs)?selected.data.detection_refs.includes(row.id):row.data.incident_id===selectedId));
+  const detection=detections[0];const anomaly=object(detection?.data.anomaly)?detection.data.anomaly:null;const classification=object(detection?.data.classification)?detection.data.classification:null;
+  const originalClass=classification?(typeof classification.predicted_class==='string'?classification.predicted_class:typeof classification.accepted_class==='string'?classification.accepted_class:null):null;const probabilities=object(classification?.probabilities)?classification.probabilities:null;const originalProbability=originalClass&&typeof probabilities?.[originalClass]==='number'?new Intl.NumberFormat('pt-BR',{style:'percent',maximumFractionDigits:2}).format(probabilities[originalClass] as number):null;
+  const entity=object(detection?.data.entity)?detection.data.entity:null;const assetId=typeof selected?.data.target_ref==='string'?selected.data.target_ref:typeof entity?.device_id==='string'?entity.device_id:'';
+  const asset=(recordData.asset||[]).find(row=>row.id===assetId||row.data.device_id===assetId);const assetName=typeof asset?.data.display_name==='string'?asset.data.display_name:typeof asset?.data.name==='string'?asset.data.name:'Não informado';
+  const historical=object(latestDecision?.data.historical_profile)?latestDecision?.data.historical_profile:null;const historicalProfile=typeof historical?.applied_profile==='string'?historical.applied_profile:[1,2,3].includes(Number(historical?.autonomy_mode))?`M${Number(historical?.autonomy_mode)}`:null;
+  const simulated=object(latestDecision?.data.trial)&&latestDecision.data.trial.simulated===true||object(selected?.data.trial)&&selected?.data.trial.simulated===true;
+  const assessment=object(selected?.data.attack_assessment)?selected.data.attack_assessment:object(selected?.data.assessment)?selected.data.assessment:null;
+  const decisionAction=object(latestDecision?.data.action)?latestDecision.data.action:null;
+  const executionText=executions.length?executions.map(row=>`${String(row.data.action||'Ação não informada')} · ${String(row.data.status||'resultado não informado')}${row.data.trial&&object(row.data.trial)&&row.data.trial.simulated===true?' · simulação':''}`).join('; '):'Sem registro de execução';
   return <Panel title="HarpIA · explicação do incidente">
     <div className="harpia-card">
       <img className="harpia-avatar" src="/assets/harpy.png" alt="Harpia mecânica · HarpIA"/>
       <div className="harpia-body">
-        <p className="muted">Explicações com contexto. HarpIA não decide nem executa comandos.</p>
-        <p className="muted">Disponibilidade técnica: {show(health?.bitnet)}. Geração operacional não habilitada nesta integração.</p>
-        <button disabled title="Habilitação operacional e contrato de geração pelo backend ainda pendentes">Gerar explicação</button>
-        <small>{context.demonstration?'A explicação abaixo é um exemplo fictício identificado como demonstração; nenhuma consulta foi enviada. BitNet não é indicado como habilitado.':'Geração indisponível: health não autoriza uso operacional. Esta tela consulta a API do HarpiServer; o modo determinístico não chama o BitNet.'}</small>
+        <small>{context.demonstration?'Demonstração visual · nenhum comando enviado':`BitNet: ${show(health?.bitnet)} · geração operacional não confirmada`}</small>
         <label>Incidente selecionado<select value={selectedId ?? ''} disabled={!ordered.length}
           onChange={e => setSelection(e.target.value)}>
           {!ordered.length && <option value="">Sem incidente disponível</option>}
           {ordered.map(row => <option key={row.id} value={incidentId(row)}>{incidentId(row)} · {show(row.data.scenario_id)}</option>)}
         </select></label>
-        {!selection && selected && <small>Incidente mais recente da página consultada. Sem horário, preservada a ordem da API.</small>}
-        {selected && <small>Incidente {selectedId} · revisão do incidente {show(incidentRevision(selected))}</small>}
-        {selectedId && <button type="button" disabled={!context.openModelAnalysis} onClick={()=>context.openModelAnalysis?.(selectedId)}>Ver explicação do modelo</button>}
+        {selected && <dl className="harpia-dossier"><dt>Incidente</dt><dd>{selectedId} · rev. {show(incidentRevision(selected))}</dd><dt>Data</dt><dd>{typeof selected.data.created_at==='string'?formatTime(selected.data.created_at):typeof selected.created_at==='string'?formatTime(selected.created_at):'Não informada'}</dd><dt>Ativo</dt><dd>{assetName}{assetId&&<small> · {assetId}</small>}</dd><dt>Origem</dt><dd>{context.demonstration?'Demonstração visual':simulated?'Simulação':typeof selected.data.origin==='string'?selected.data.origin:'Não informada'}</dd><dt>Anomalia observada</dt><dd>{anomaly?(anomaly.is_anomaly===true?'Detectada':anomaly.is_anomaly===false?'Não detectada':'Resultado do modelo não informado'):'Não informada'}</dd>{classification&&<><dt>Classificação original</dt><dd>{originalClass||'Classe não informada'}{originalProbability?` · probabilidade calibrada desta classe ${originalProbability}`:''}</dd></>}<dt>Avaliação do ataque</dt><dd>{assessment?String(assessment.status||'Não informada'):'Não informado pela API'}</dd><dt>Estado do incidente</dt><dd>{String(selected.data.status||'Não informado')}</dd><dt>Perfil efetivo na decisão</dt><dd>{historicalProfile||'Não registrado'}</dd><dt>Defesa recomendada</dt><dd>{decisionAction?`${String(decisionAction.name||decisionAction.action_id||decisionAction.type||'Ação não informada')}${typeof latestDecision?.data.reason==='string'?` · ${latestDecision.data.reason}`:''}`:'Não informada'}</dd><dt>Decisão de política</dt><dd>{String(latestDecision?.data.status||'Sem registro de decisão')}</dd><dt>Aprovação administrativa</dt><dd>{approvals.length?approvals.map(row=>String(row.data.status||'Estado não informado')).join(', '):'Sem registro de aprovação'}</dd><dt>Execução de defesa</dt><dd>{executionText}</dd></dl>}
+        {selectedId && <button type="button" disabled={!context.openModelAnalysis} onClick={()=>context.openModelAnalysis?.(selectedId)}>Ver análise técnica</button>}
         {(context.loading || consulting) && <p role="status">Carregando explicações…</p>}
         {selectedId && <button disabled={Boolean(context.loading || consulting || notIntegrated || !context.loadExplanations)}
           onClick={() => {setConsultation(null);setRequested({key: selectionKey, id: selectedId})}}>{deterministicAvailable ? 'Consultar explicação determinística' : 'Consultar explicações registradas'}</button>}
-        <small>{deterministicAvailable ? 'A API declarou modo determinístico; a consulta resume os campos estruturados da revisão atual e não chama o BitNet.' : 'Sem capacidade determinística declarada, somente projeções de explicação já registradas são consultadas; o endpoint histórico de geração não é chamado.'}</small>
         {currentConsultation?.error && <p role="alert" className="error">Erro ao consultar explicações: {currentConsultation.error}</p>}
         {notIntegrated && <p className="muted">Explicações não integradas nesta conexão. {failure}</p>}
         {unavailable && <p className="error" role="status">Serviço indisponível.{failure ? ` ${failure}` : ' BitNet não está disponível; uma alternativa recebida pode ser exibida abaixo.'}</p>}
         {explanation ? <>
           <div className="explanation-meta"><Badge>{origin(explanation)}</Badge><small>Incidente {selectedId} · revisão da explicação {show(explanation.revision)}</small></div>
-          <small>Revisão do incidente explicada: {show(explanationRevision(explanation))} · Horário da explicação: {explanationTime(explanation) ? formatTime(explanationTime(explanation)!) : 'Não informado'}{explanationTime(explanation) && !explanation.data.generated_at ? ' (registro na API; horário de geração não informado)' : ''}</small>
+          <small>Vínculo rev. {show(explanationRevision(explanation))} · {explanationTime(explanation) ? formatTime(explanationTime(explanation)!) : 'Horário não informado'}</small>
           {freshness === 'stale' && <p role="status" className="error">Explicação desatualizada: pertence a outra revisão do incidente. Não representa a revisão selecionada.</p>}
           {freshness === 'unknown' && <p role="status">Atualidade da explicação não verificada: revisão de vínculo não informada.</p>}
           {explanation.data.persisted === false && <small>Explicação calculada nesta consulta; não é uma revisão persistida de texto. Evidências originais permanecem no backend.</small>}
           <p className="explanation-text">{String(explanation.data.text)}</p>
           <div className="harpia-actions"><button onClick={() => setDetails(value => !value)} aria-expanded={details}>Detalhes da explicação</button>
             <button disabled={loading || explanation.data.persisted === false} onClick={() => setHistoryRequested({key: historyKey})}>Histórico da explicação</button></div>
-          {details && <section className="detail" aria-label="Detalhes da explicação"><p>ID: {explanation.id} · origem da projeção: {show(explanation.source)}</p><pre>{JSON.stringify(explanation.data, null, 2)}</pre></section>}
+          {details && <section className="detail" aria-label="Detalhes da explicação"><p>ID: {explanation.id} · origem: {show(explanation.source)}</p></section>}
         </> : !context.loading && !consulting && <Empty>Sem explicação disponível{selectedId ? ` para o incidente ${selectedId}` : ''}.</Empty>}
         {loading && <p role="status">Carregando histórico…</p>}
         {historyError && <p className="error" role="alert">Histórico indisponível: {historyError}</p>}
         {history !== null && <section className="explanation-history" aria-label="Histórico da explicação"><h3>Histórico da explicação</h3>
-          {!history.length ? <Empty>Sem revisões disponíveis para este incidente.</Empty> : history.map(row => <article key={row.id}>
+          {!history.length ? <Empty>Sem revisões disponíveis para este incidente.</Empty> : history.slice(0,3).map(row => <article key={row.id}>
             <Badge>{origin(row)}</Badge><p>Revisão {show(row.revision)} · {show(row.data.text)}</p>
           </article>)}
         </section>}
+        <section className="harpia-mini-feed" aria-label="Três últimas explicações"><h3>Últimas explicações disponíveis</h3>{recentExplanations.length?recentExplanations.map(row=><article key={row.id}><Badge>{origin(row)}</Badge><small>Rev. {show(row.revision)} · {explanationTime(row)?formatTime(explanationTime(row)!):'Horário não informado'}</small><p>{String(row.data.text).slice(0,180)}{String(row.data.text).length>180?'…':''}</p></article>):<small>Sem explicações recentes para este incidente.</small>}</section>
         <a href="#harpia">Abrir HarpIA — Explicações</a>
       </div>
     </div>

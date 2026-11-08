@@ -8,7 +8,7 @@ export function Telemetry({rows, assets, compact=false}: {rows: Row[]; assets: R
   const list = rows.filter(row => !device || telemetry(row).device === device);
   const devices = [...new Set(list.map(row => telemetry(row).device))];
   return <>
-    <Panel title="Postes · última leitura conhecida">
+    <Panel title="Ativos · última leitura conhecida">
       <label>Dispositivo<select value={device} onChange={event => setDevice(event.target.value)}>
         <option value="">Todos os dispositivos</option>
         {[...new Set(rows.map(row => telemetry(row).device))].map(id => <option key={id}>{id}</option>)}
@@ -37,11 +37,9 @@ export function Telemetry({rows, assets, compact=false}: {rows: Row[]; assets: R
             {typeof row.data.tipo === 'string' && <><dt>Tipo do payload</dt><dd>{row.data.tipo}</dd></>}
           </dl>
           <p>{stale(value.observed) ? '◷ Leitura desatualizada ou horário de observação desconhecido' : '◷ Leitura recente'}</p>
-          <small>Estado atual não confirmado. O horário da projeção não substitui o horário da medição. Histórico limitado à página consultada.</small>
         </article>;
       })}</div>
       {!list.length && <Empty/>}
-      <p className="muted">LDR bruto não é lux. O campo luminosity sem unidade é exibido como recebido, sem conversão. Temperatura provisória não representa luminosidade. Identificadores são preservados como recebidos, sem renomear poste2.</p>
     </Panel>
     {!compact&&<Panel title="Histórico de telemetria"><Records rows={list} columns={[
       ['id', 'ID do registro'], ['device_id', 'Dispositivo'], ['created_at', 'Registrado na projeção'],
