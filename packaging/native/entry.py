@@ -9,6 +9,9 @@ for path in ('backend', 'backend/domain', 'genai', 'packaging/native'):
 
 
 def main():
+    if len(sys.argv)>1 and sys.argv[1]=='xai':
+        from harpisense_xai.__main__ import main as xai_main
+        return xai_main(sys.argv[2:])
     parser = argparse.ArgumentParser()
     parser.add_argument('operation', choices=['check-runtime', 'api', 'consumer', 'prepare', 'probe', 'preflight', 'grant'])
     parser.add_argument('--state', type=Path)

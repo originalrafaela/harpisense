@@ -1,4 +1,5 @@
 -r ../../backend/delivery/requirements.txt
 -r ../../backend/config_manager/requirements.txt
 -r ../../backend/admin_auth/requirements-mfa.txt
+-r ../../backend/domain/requirements-scientific.txt
 paho-mqtt==2.1.0

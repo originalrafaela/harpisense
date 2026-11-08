@@ -181,6 +181,7 @@ def prepare_database(state_file):
             raise RuntimeError('PRODUCT_DATABASE_NAME_REQUIRED')
         conn.execute((root/'backend/delivery/001_local.sql').read_text(encoding='utf-8'))
         conn.execute((root/'backend/delivery/002_operational_authority.sql').read_text(encoding='utf-8'))
+        conn.execute((root/'backend/delivery/003_incident_assessment.sql').read_text(encoding='utf-8'))
         if not conn.execute("SELECT to_regclass('hs_admin_schema_version')").fetchone()[0]:
             conn.execute((root/'backend/admin_auth/001_admin_auth.sql').read_text(encoding='utf-8'))
         conn.execute((root/'backend/admin_auth/002_admin_mfa.sql').read_text(encoding='utf-8'))
