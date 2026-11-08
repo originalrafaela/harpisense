@@ -1,58 +1,39 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ApiError,Client,firstAccessState} from '../src/api.ts';
+import {sessionResponse} from './session-response.ts';
+const state=(status='not_issued',generation=0)=>({contract_version:2,status,generation,codes_remaining:generation?3:0,installation_id:'installation-fixture',account_id:1});
+const codes=['A'.repeat(32),'B'.repeat(32),'C'.repeat(32)];
 
-const expiry=()=>new Date(Date.now()+3_600_000).toISOString();
-const issuedAt=()=>new Date().toISOString();
-const pending=(generation:number)=>({status:'pending',password_reset_generation:generation,password_reset_purpose:'password_reset',codes_issued:generation>0,issued_at:generation>0?issuedAt():null,completed_at:null});
-const completed=(generation:number)=>({...pending(generation),status:'completed',completed_at:issuedAt()});
-const currentSession=(state:unknown)=>({authenticated:true,username:'admin-operador',expires_at:expiry(),idle_timeout_seconds:1800,mfa_available:true,mfa_enabled:true,mfa_enrollment_available:true,email_recovery_available:false,first_access:state});
-const codes=(prefix:string)=>Array.from({length:10},(_,i)=>`${prefix}${String(i).padStart(31,'0')}`);
-
-test('first_access valida propósito, geração e timestamps sem tratar códigos como status',()=>{
- assert.equal(firstAccessState(pending(0)).status,'pending');
- assert.equal(firstAccessState(completed(2)).password_reset_generation,2);
- assert.throws(()=>firstAccessState({...pending(0),codes_issued:true}),ApiError);
- assert.throws(()=>firstAccessState({...pending(1),password_reset_purpose:'authenticator_recovery'}),ApiError);
+test('v2 valida três slots e rejeita contrato antigo',()=>{
+ assert.equal(firstAccessState(state()).status,'not_issued');assert.equal(firstAccessState(state('pending',1)).generation,1);
+ for(const bad of [{status:'pending',password_reset_generation:1},{...state(),codes_remaining:4},{...state(),generation:1},state('completed',0)])assert.throws(()=>firstAccessState(bad),ApiError);
 });
-
-test('emissão autenticada substitui ambos os conjuntos e confirmação só envia a geração',async()=>{
- const token='A'.repeat(43);let state:unknown=pending(1);const calls:{path:string;method:string;auth:string|null;body:unknown}[]=[];
- const client=new Client('https://harpi.example','p11',async(input,init)=>{
-  const url=new URL(String(input));let body:unknown=null;try{body=JSON.parse(String(init?.body))}catch{}
-  calls.push({path:url.pathname,method:init?.method||'GET',auth:new Headers(init?.headers).get('authorization'),body});
-  if(url.pathname.endsWith('/admin-auth/login'))return new Response(JSON.stringify({access_token:token,token_type:'Bearer',expires_at:expiry(),idle_timeout_seconds:1800,username:'admin-operador'}),{headers:{'content-type':'application/json'}});
-  if(url.pathname.endsWith('/admin-auth/session'))return new Response(JSON.stringify(currentSession(state)),{headers:{'content-type':'application/json'}});
-  if(url.pathname.endsWith('/admin-auth/first-access'))return new Response(JSON.stringify({username:'admin-operador',first_access:state}),{headers:{'content-type':'application/json'}});
-  if(url.pathname.endsWith('/admin-auth/first-access/codes')){state=pending(2);return new Response(JSON.stringify({username:'admin-operador',recovery_codes:codes('R'),password_reset_codes:codes('P'),first_access:state}),{headers:{'content-type':'application/json'}})}
-  if(url.pathname.endsWith('/admin-auth/first-access/confirm')){assert.deepEqual(body,{password_reset_generation:2});state=completed(2);return new Response(JSON.stringify({username:'admin-operador',first_access:state}),{headers:{'content-type':'application/json'}})}
-  return new Response(JSON.stringify({error:{code:'NOT_FOUND'}}),{status:404,headers:{'content-type':'application/json'}});
- });
- const login=await client.login({username:'admin-operador',password:'fixture-password'});assert.equal(login.kind,'session');
- if(login.kind!=='session')throw new Error('fixture login did not return a session');
- assert.equal(login.firstAccess?.status,'pending');
- const initial=await client.firstAccess();assert.equal(initial.firstAccess.password_reset_generation,1);
- const emission=await client.issueFirstAccessCodes('fixture-password','123456');
- assert.equal(emission.firstAccess.password_reset_generation,2);assert.equal(emission.recoveryCodes.length,10);assert.equal(emission.passwordResetCodes.length,10);
- assert.equal((await client.confirmFirstAccess(2)).status,'completed');
- assert.ok(calls.some(call=>call.path.endsWith('/admin-auth/first-access/codes')&&call.method==='POST'&&call.auth===`Bearer ${token}`&&JSON.stringify(call.body).includes('current_password')));
- const confirmation=calls.find(call=>call.path.endsWith('/admin-auth/first-access/confirm'))!;
- assert.equal(confirmation.auth,`Bearer ${token}`);assert.deepEqual(confirmation.body,{password_reset_generation:2});
- assert.ok(calls.every(call=>!call.path.includes('123456')&&!call.path.includes(codes('R')[0])&&!call.path.includes(codes('P')[0])));
- client.forgetSession();
+test('emissão corpo vazio, reemissão senha+MFA e confirmação apenas geração',async()=>{
+ const calls:{path:string;body:unknown}[]=[];let current=state();
+ const c=new Client('/p11-api','p11',async(url,init)=>{const path=String(url),body=init?.body?JSON.parse(String(init.body)):null;calls.push({path,body});
+ if(path.endsWith('/first-access/codes')||path.endsWith('/first-access/reissue')){current=state('pending',current.generation+1);return new Response(JSON.stringify({first_access:current,recovery_codes:codes}));}
+ if(path.endsWith('/first-access/confirm')){current=state('completed',current.generation);return new Response(JSON.stringify({first_access:current}));}
+ return sessionResponse(url)||new Response(JSON.stringify({first_access:current}));});
+ await c.login({username:'fixture-owner',password:'fixture-password'});assert.deepEqual((await c.issueFirstAccessCodes()).recoveryCodes,codes);await c.reissueFirstAccessCodes('fixture-password','123456');await c.confirmFirstAccess(2);
+ assert.deepEqual(calls.find(x=>x.path.endsWith('/first-access/codes'))?.body,{});assert.deepEqual(calls.find(x=>x.path.endsWith('/first-access/reissue'))?.body,{current_password:'fixture-password',code:'123456'});assert.deepEqual(calls.find(x=>x.path.endsWith('/first-access/confirm'))?.body,{generation:2});
+ assert.ok(calls.every(c=>!c.path.includes('123456')&&!c.path.includes('fixture-password')));
 });
-
-test('conflito de geração é preservado para o modal solicitar nova emissão',async()=>{
- const token='B'.repeat(43);let state:unknown=pending(3);
- const client=new Client('https://harpi.example','p11',async(input,init)=>{
-  const path=new URL(String(input)).pathname;
-  if(path.endsWith('/admin-auth/login'))return new Response(JSON.stringify({access_token:token,token_type:'Bearer',expires_at:expiry(),idle_timeout_seconds:1800,username:'admin-operador'}),{headers:{'content-type':'application/json'}});
-  if(path.endsWith('/admin-auth/session'))return new Response(JSON.stringify(currentSession(state)),{headers:{'content-type':'application/json'}});
-  if(path.endsWith('/admin-auth/first-access/confirm'))return new Response(JSON.stringify({error:{code:'FIRST_ACCESS_GENERATION_CONFLICT'}}),{status:409,headers:{'content-type':'application/json'}});
-  if(path.endsWith('/admin-auth/first-access'))return new Response(JSON.stringify({username:'admin-operador',first_access:state}),{headers:{'content-type':'application/json'}});
-  return new Response(JSON.stringify({error:{code:'NOT_FOUND'}}),{status:404,headers:{'content-type':'application/json'}});
- });
- await client.login({username:'admin-operador',password:'fixture-password'});
- await assert.rejects(()=>client.confirmFirstAccess(2),error=>error instanceof ApiError&&error.kind==='conflict'&&error.code==='FIRST_ACCESS_GENERATION_CONFLICT');
- assert.equal((await client.firstAccess()).firstAccess.password_reset_generation,3);client.forgetSession();
+test('rejeita conjunto dez, duplicados e segunda finalidade',async()=>{
+ for(const payload of [{recovery_codes:Array(10).fill('A'.repeat(32))},{recovery_codes:[codes[0],codes[0],codes[2]]},{recovery_codes:codes,password_reset_codes:codes}]){
+ const c=new Client('/p11-api','p11',async url=>sessionResponse(url)||new Response(JSON.stringify({first_access:state('pending',1),...payload})));await c.login({username:'fixture-owner',password:'fixture-password'});await assert.rejects(()=>c.issueFirstAccessCodes(),/exatamente três/);
+ }
+});
+test('conflito entre abas não repete emissão automaticamente',async()=>{
+ let attempts=0;const c=new Client('/p11-api','p11',async url=>sessionResponse(url)||(()=>{attempts++;return new Response(JSON.stringify({error:{code:'CODES_ALREADY_ISSUED'}}),{status:409})})());await c.login({username:'fixture-owner',password:'fixture-password'});
+ await assert.rejects(()=>c.issueFirstAccessCodes(),e=>e instanceof ApiError&&e.code==='CODES_ALREADY_ISSUED');assert.equal(attempts,1);
+});
+test('recuperação envia código e TOTP juntos sem obter sessão',async()=>{
+ let sent:unknown;const c=new Client('/p11-api','p11',async(_url,init)=>{sent=JSON.parse(String(init?.body));return new Response(JSON.stringify({status:'password_reset',login_required:true,mfa_preserved:true}));});await c.resetPassword('owner',codes[0],'new-password','123456');assert.deepEqual(sent,{username:'owner',code:codes[0],new_password:'new-password',totp_code:'123456'});await assert.rejects(()=>c.health(),/Não autorizado/);
+});
+test('ativação usa cookie mesma origem e não envia licença pelo browser',async()=>{
+ const calls:RequestInit[]=[];const c=new Client('/p11-api','p11',async(_url,init)=>{calls.push(init!);return new Response(JSON.stringify({contract_version:1,status:'connection_required',administrator:'absent',retry_allowed:true,first_use_authorized:true,loss_of_authenticator_policy:'not_approved'}));});await c.activationStatus();await c.retryActivation();assert.ok(calls.every(c=>c.credentials==='same-origin'));assert.deepEqual(JSON.parse(String(calls[1].body)),{});
+});
+test('sessão sem MFA não libera APIs administrativas',async()=>{
+ const c=new Client('/p11-api','p11',async url=>String(url).endsWith('/session')?new Response(JSON.stringify({authenticated:true,username:'owner',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,mfa_available:false,email_recovery_available:false})):sessionResponse(url)!);await assert.rejects(()=>c.login({username:'owner',password:'password'}),/MFA obrigatório/);await assert.rejects(()=>c.health(),/Não autorizado/);
 });

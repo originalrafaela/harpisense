@@ -2,15 +2,16 @@ export type Profile = 'p11' | 'legacy';
 export type Row = {id:string; revision?:number; source?:string; created_at?:string; data:Record<string,unknown>};
 export type Credentials = {username:string;password:string};
 export type AuthChallenge={challenge_token:string;next_step:'login'|'enroll';expires_at:string};
-export type FirstAccessState={status:'pending'|'completed';password_reset_generation:number;password_reset_purpose:'password_reset';codes_issued:boolean;issued_at:string|null;completed_at:string|null};
-export type FirstAccessEmission={username:string;firstAccess:FirstAccessState;recoveryCodes:string[];passwordResetCodes:string[]};
+export type FirstAccessState={contract_version:2;status:'not_issued'|'pending'|'completed';generation:number;codes_remaining:number;installation_id:string;account_id:string|number};
+export type FirstAccessEmission={firstAccess:FirstAccessState;recoveryCodes:string[]};
+export type ActivationState={contract_version:1;status:'not_activated'|'activation_pending'|'activated'|'invalid_local_identity'|'connection_required';administrator:'absent'|'mfa_pending'|'ready'|'migration_required';retry_allowed:boolean;first_use_authorized:boolean;loss_of_authenticator_policy:'not_approved'};
 export type AdminSession={authenticated:true;username:string;expires_at:string;idle_timeout_seconds:1800;mfa_available:boolean;mfa_enabled?:boolean;mfa_enrollment_available?:boolean;email_recovery_available:boolean;first_access?:FirstAccessState};
 export type AuthFlowResult={kind:'challenge';challenge:AuthChallenge}|{kind:'session';session:AdminSession;firstAccess?:FirstAccessState;recoveryCodes?:string[];passwordResetCodes?:string[];sessionVerified?:boolean};
 export class ApiError extends Error { kind:string; fields:{field:string;code:string}[]; currentRevision:number|null; code:string|null; currentState:ControlState|null; constructor(kind:string,message:string,fields:{field:string;code:string}[]=[],currentRevision:number|null=null,code:string|null=null,currentState:ControlState|null=null){super(message);this.kind=kind;this.fields=fields;this.currentRevision=currentRevision;this.code=code;this.currentState=currentState} }
 export const object=(v:unknown):v is Record<string,unknown>=>typeof v==='object' && v!==null && !Array.isArray(v);
 export function firstAccessState(value:unknown):FirstAccessState{
- if(!object(value)||!['pending','completed'].includes(String(value.status))||!Number.isSafeInteger(value.password_reset_generation)||Number(value.password_reset_generation)<0||value.password_reset_purpose!=='password_reset'||typeof value.codes_issued!=='boolean'||!(value.issued_at===null||typeof value.issued_at==='string'&&Number.isFinite(Date.parse(value.issued_at)))||!(value.completed_at===null||typeof value.completed_at==='string'&&Number.isFinite(Date.parse(value.completed_at))))throw new ApiError('invalid','Estado de primeiro acesso incompatível.');
- const generation=Number(value.password_reset_generation);if((generation===0&&(value.codes_issued||value.issued_at!==null))||(generation>0&&(!value.codes_issued||value.issued_at===null))||(value.status==='pending'&&value.completed_at!==null)||(value.status==='completed'&&(generation===0||value.completed_at===null)))throw new ApiError('invalid','Geração e estado de primeiro acesso inconsistentes.');
+ if(!object(value)||value.contract_version!==2||!['not_issued','pending','completed'].includes(String(value.status))||!Number.isSafeInteger(value.generation)||Number(value.generation)<0||!Number.isInteger(value.codes_remaining)||Number(value.codes_remaining)<0||Number(value.codes_remaining)>3||typeof value.installation_id!=='string'||!value.installation_id||!['string','number'].includes(typeof value.account_id))throw new ApiError('invalid','Estado de primeiro acesso incompatível com três códigos.');
+ if(value.status==='not_issued'&&(value.generation!==0||value.codes_remaining!==0)||value.status!=='not_issued'&&Number(value.generation)<1)throw new ApiError('invalid','Geração de primeiro acesso inconsistente.');
  return value as FirstAccessState;
 }
 export function adaptRows(value:unknown,profile:Profile):Row[]{
@@ -61,16 +62,10 @@ export class Client {
   if(!object(value)||typeof value.access_token!=='string'||!/^[-_A-Za-z0-9]{43}$/.test(value.access_token)||value.token_type!=='Bearer'||typeof value.expires_at!=='string'||!Number.isFinite(Date.parse(value.expires_at))||Date.parse(value.expires_at)<=Date.now()||value.idle_timeout_seconds!==1800||typeof value.username!=='string')throw new ApiError('invalid','Resposta de sessão inválida.');
   if(epoch!==this.epoch)throw new ApiError('cancelled','Autenticação cancelada; recomece o fluxo.');
   this.token=value.access_token;this.authenticatedUsername=value.username;this.expiresAt=Date.parse(value.expires_at);
-  if(recoveryCodes!==undefined&&(!Array.isArray(recoveryCodes)||recoveryCodes.length!==10||recoveryCodes.some(code=>typeof code!=='string'||!/^[-_A-Za-z0-9]{32}$/.test(code)))){this.forgetSession();throw new ApiError('invalid','A API retornou códigos de recuperação incompatíveis.');}
-  const passwordResetCodes=value.password_reset_codes;
-  if(passwordResetCodes!==undefined&&(!Array.isArray(passwordResetCodes)||passwordResetCodes.length!==10||passwordResetCodes.some(code=>typeof code!=='string'||!/^[-_A-Za-z0-9]{32}$/.test(code)))){this.forgetSession();throw new ApiError('invalid','Códigos de redefinição incompatíveis.');}
-  const emittedFirstAccess=value.first_access===undefined?undefined:firstAccessState(value.first_access);
-  try{const session=await this.session();const firstAccess=session.first_access??emittedFirstAccess;return {kind:'session',session,sessionVerified:true,...(firstAccess?{firstAccess}:{}),...(recoveryCodes?{recoveryCodes:recoveryCodes as string[]}:{ }),...(passwordResetCodes?{passwordResetCodes:passwordResetCodes as string[]}:{})}}
-  catch(error){
-   if(recoveryCodes||passwordResetCodes){return {kind:'session',session:{authenticated:true,username:value.username,expires_at:value.expires_at,idle_timeout_seconds:1800,mfa_available:true,mfa_enabled:true,mfa_enrollment_available:true,email_recovery_available:false,...(emittedFirstAccess?{first_access:emittedFirstAccess}:{})},...(emittedFirstAccess?{firstAccess:emittedFirstAccess}:{}),sessionVerified:false,...(recoveryCodes?{recoveryCodes:recoveryCodes as string[]}:{ }),...(passwordResetCodes?{passwordResetCodes:passwordResetCodes as string[]}:{})}}
-   this.forgetSession();throw error
-  }
+  try{const session=await this.session();return {kind:'session',session,sessionVerified:true,...(session.first_access?{firstAccess:session.first_access}:{})}}
+  catch(error){this.forgetSession();throw error}
  }
+
  async login(credentials:Credentials):Promise<AuthFlowResult>{
   this.forgetSession();const epoch=this.epoch;
   if(this.profile!=='p11')throw new ApiError('config','O acesso administrativo exige P11 com conta e sessão. O contrato legado não oferece esse login.');
@@ -80,9 +75,9 @@ export class Client {
   if(object(value)&&value.challenge_token!==undefined)return {kind:'challenge',challenge:this.challenge(value,value.next_step==='login'?'login':'enroll')};
   return this.completeSession(value,epoch);
  }
- async resetPassword(username:string,code:string,newPassword:string){
+ async resetPassword(username:string,code:string,newPassword:string,totpCode:string){
   this.requireP11Auth();this.forgetSession();
-  const value=await this.request('/api/v1/admin-auth/password-reset/confirm','POST',{username,code,new_password:newPassword});
+  const value=await this.request('/api/v1/admin-auth/password-reset/confirm','POST',{username,code,totp_code:totpCode,new_password:newPassword});
   if(!object(value)||value.status!=='password_reset'||value.mfa_preserved!==true||value.login_required!==true||'access_token' in value)throw new ApiError('invalid','Redefinição não confirmada pelo servidor.');
   return value;
  }
@@ -92,10 +87,10 @@ export class Client {
   if(epoch!==this.epoch)throw new ApiError('cancelled','Fluxo cancelado; recomece a autenticação.');
   return {kind:'challenge',challenge:this.challenge(value,next)};
  }
- bootstrap(bootstrapSecret:string,username:string,password:string){return this.publicChallenge('/api/v1/admin-auth/bootstrap',{bootstrap_secret:bootstrapSecret,username,password},'enroll')}
- localRecovery(bootstrapSecret:string,username:string,password:string){return this.publicChallenge('/api/v1/admin-auth/local-recovery',{bootstrap_secret:bootstrapSecret,username,password},'enroll')}
+ bootstrap(username:string,password:string){return this.publicChallenge('/api/v1/admin-auth/bootstrap',{username,password},'enroll')}
+ async localRecovery(..._args:string[]):Promise<AuthFlowResult>{throw new ApiError('forbidden','Política de perda do autenticador ainda não aprovada.')} 
  async verifyMfa(challengeToken:string,code:string){this.requireP11Auth();const epoch=this.epoch;const value=await this.request('/api/v1/admin-auth/mfa/verify','POST',{challenge_token:challengeToken,code});return this.completeSession(value,epoch)}
- recoverMfa(challengeToken:string,code:string){return this.publicChallenge('/api/v1/admin-auth/mfa/recover',{challenge_token:challengeToken,code},'enroll')}
+ async recoverMfa(..._args:string[]):Promise<AuthFlowResult>{throw new ApiError('forbidden','Código de recuperação não permite substituir o autenticador.')} 
  async authorizeMfaEnrollment(currentPassword:string,code?:string){
   this.requireP11Auth();
   const body={current_password:currentPassword,...(code?{code}:{})};const value=await this.get('/api/v1/admin-auth/mfa/enrollment/authorize','POST',body);
@@ -112,30 +107,31 @@ export class Client {
  async confirmMfaEnrollment(challengeToken:string,code:string):Promise<AuthFlowResult>{
   this.requireP11Auth();
   const epoch=this.epoch;const value=await this.request('/api/v1/admin-auth/mfa/enrollment/confirm','POST',{challenge_token:challengeToken,code});
-  if(!object(value)||!Array.isArray(value.recovery_codes))throw new ApiError('invalid','A confirmação MFA não retornou os códigos de recuperação esperados.');
-  return this.completeSession(value,epoch,value.recovery_codes);
+  return this.completeSession(value,epoch);
  }
- async firstAccess():Promise<{username:string;firstAccess:FirstAccessState}>{
-  this.requireP11Auth();const value=await this.get('/api/v1/admin-auth/first-access');
-  if(!object(value)||typeof value.username!=='string')throw new ApiError('invalid','Resposta de primeiro acesso incompatível.');
-  const reported=firstAccessState(value.first_access);if(value.username!==this.authenticatedUsername)throw new ApiError('invalid','Primeiro acesso pertence a outra conta.');
-  return {username:value.username,firstAccess:reported};
+ async activationStatus():Promise<ActivationState>{return this.parseActivation(await this.request('/api/v1/activation/status'))}
+ async retryActivation():Promise<ActivationState>{return this.parseActivation(await this.request('/api/v1/activation/retry','POST',{}))}
+ private parseActivation(value:unknown):ActivationState{
+  if(!object(value)||value.contract_version!==1||!['not_activated','activation_pending','activated','invalid_local_identity','connection_required'].includes(String(value.status))||!['absent','mfa_pending','ready','migration_required'].includes(String(value.administrator))||typeof value.retry_allowed!=='boolean'||typeof value.first_use_authorized!=='boolean'||value.loss_of_authenticator_policy!=='not_approved')throw new ApiError('invalid','Estado de ativação incompatível.');return value as ActivationState;
  }
- async issueFirstAccessCodes(currentPassword:string,code:string):Promise<FirstAccessEmission>{
-  this.requireP11Auth();const value=await this.get('/api/v1/admin-auth/first-access/codes','POST',{current_password:currentPassword,code});
-  const validCodes=(codes:unknown)=>Array.isArray(codes)&&codes.length===10&&codes.every(item=>typeof item==='string'&&/^[-_A-Za-z0-9]{32}$/.test(item));
-  if(!object(value)||typeof value.username!=='string'||!validCodes(value.recovery_codes)||!validCodes(value.password_reset_codes))throw new ApiError('invalid','Emissão de códigos de primeiro acesso incompatível.');
-  const firstAccess=firstAccessState(value.first_access);if(value.username!==this.authenticatedUsername)throw new ApiError('invalid','Códigos emitidos para outra conta.');
-  if(firstAccess.status!=='pending'||!firstAccess.codes_issued||firstAccess.password_reset_generation<1)throw new ApiError('invalid','A emissão não abriu uma geração pendente.');
-  return {username:value.username,firstAccess,recoveryCodes:value.recovery_codes as string[],passwordResetCodes:value.password_reset_codes as string[]};
+ async firstAccess():Promise<{firstAccess:FirstAccessState}>{
+  const value=await this.get('/api/v1/admin-auth/first-access');
+  return {firstAccess:firstAccessState(object(value)&&value.first_access!==undefined?value.first_access:value)};
  }
+ private async emission(path:string,body:unknown):Promise<FirstAccessEmission>{
+  const value=await this.get(path,'POST',body);
+  if(!object(value)||!Array.isArray(value.recovery_codes)||value.recovery_codes.length!==3||new Set(value.recovery_codes).size!==3||value.recovery_codes.some(c=>typeof c!=='string'||!/^[-_A-Za-z0-9]{32}$/.test(c))||value.password_reset_codes!==undefined)throw new ApiError('invalid','O servidor deve emitir exatamente três códigos independentes.');
+  const firstAccess=firstAccessState(value.first_access);
+  if(firstAccess.status!=='pending'||firstAccess.codes_remaining!==3)throw new ApiError('invalid','Emissão sem conjunto pendente de três códigos.');
+  return {firstAccess,recoveryCodes:value.recovery_codes as string[]};
+ }
+ issueFirstAccessCodes(){return this.emission('/api/v1/admin-auth/first-access/codes',{})}
+ reissueFirstAccessCodes(currentPassword:string,code:string){return this.emission('/api/v1/admin-auth/first-access/reissue',{current_password:currentPassword,code})}
  async confirmFirstAccess(generation:number):Promise<FirstAccessState>{
-  this.requireP11Auth();if(!Number.isSafeInteger(generation)||generation<1)throw new ApiError('config','Geração de códigos inválida.');
-  const value=await this.get('/api/v1/admin-auth/first-access/confirm','POST',{password_reset_generation:generation});
-  if(!object(value)||typeof value.username!=='string')throw new ApiError('invalid','Confirmação de primeiro acesso incompatível.');
-  const firstAccess=firstAccessState(value.first_access);if(value.username!==this.authenticatedUsername)throw new ApiError('invalid','Confirmação pertence a outra conta.');
-  if(firstAccess.status!=='completed'||firstAccess.password_reset_generation!==generation)throw new ApiError('invalid','O servidor não confirmou a geração exibida.');
-  return firstAccess;
+  if(!Number.isSafeInteger(generation)||generation<1)throw new ApiError('config','Geração de códigos inválida.');
+  const value=await this.get('/api/v1/admin-auth/first-access/confirm','POST',{generation});
+  const state=firstAccessState(object(value)?value.first_access:undefined);
+  if(state.status!=='completed'||state.generation!==generation)throw new ApiError('invalid','O servidor não confirmou a geração exibida.');return state;
  }
  async cancelMfaChallenge(challengeToken:string){this.requireP11Auth();await this.request('/api/v1/admin-auth/mfa/cancel','POST',{challenge_token:challengeToken})}
  path(kind:string){return this.profile==='p11'?`/api/v1/p11/${kind}`:`/api/v1/${kind==='network_event'?'network-events':kind}`}
@@ -148,18 +144,18 @@ export class Client {
   if(!this.base)throw new ApiError('config','API não configurada. Informe a URL acessível ao navegador.');
   const c=new AbortController();if(!detached){if(path.startsWith('/api/v1/config/'))this.configActive.add(c);else this.active.add(c)}const timer=setTimeout(()=>c.abort(),this.timeout);
   try{
-   const response=await this.fetcher(this.base.replace(/\/$/,'')+path,{method,body:body===undefined?undefined:JSON.stringify(body),headers:{...(token?{Authorization:`Bearer ${token}`} : {}),...(body===undefined?{}:{'Content-Type':'application/json'})},signal:c.signal,cache:'no-store',credentials:'omit',redirect:'error'});
+   const response=await this.fetcher(this.base.replace(/\/$/,'')+path,{method,body:body===undefined?undefined:JSON.stringify(body),headers:{...(token?{Authorization:`Bearer ${token}`} : {}),...(body===undefined?{}:{'Content-Type':'application/json'})},signal:c.signal,cache:'no-store',credentials:(path.startsWith('/api/v1/activation/')||path==='/api/v1/admin-auth/bootstrap')?'same-origin':'omit',redirect:'error'});
    if(response.status===409){let message='Conflito de revisão. O estado salvo mudou; consulte a versão atual antes de tentar novamente.';let currentRevision:number|null=null;let currentState:ControlState|null=null;let code:string|null=null;try{const v=await response.json();const detail=object(v)&&object(v.detail)?v.detail:object(v)&&object(v.error)?v.error:null;if(detail){if(typeof detail.message==='string')message=detail.message;if(typeof detail.current_revision==='number')currentRevision=detail.current_revision;if(typeof detail.code==='string')code=detail.code;if(object(detail.current)){try{currentState=controlState(detail.current)}catch{/* keep only the safe conflict message */}}}}catch{}throw new ApiError('conflict',message,[],currentRevision,code,currentState)}
    if(!response.ok){let code='';let fields:{field:string;code:string}[]=[];const retryHeader=response.headers.get('retry-after');const retryAfter=retryHeader&&/^\d+$/.test(retryHeader)?Number(retryHeader):0;try{const value=await response.json();if(object(value)&&object(value.error)){if(typeof value.error.code==='string')code=value.error.code;if(Array.isArray(value.error.fields))fields=value.error.fields.filter((f):f is {field:string;code:string}=>object(f)&&typeof f.field==='string'&&typeof f.code==='string')}}catch{}
     if(response.status===401&&token===this.token)this.forgetSession();
     const kind=response.status===401?'unauthorized':response.status===403?(code==='REAUTHENTICATION_REQUIRED'?'reauthentication':'forbidden'):response.status===404?'unavailable':response.status===429?'throttled':'error';
-    throw new ApiError(kind,response.status===401?(code==='SESSION_EXPIRED'?'Sessão expirada. Entre novamente.':code==='SESSION_REVOKED'||code==='SESSION_INVALID'||code==='AUTH_REQUIRED'?'Sessão inválida ou encerrada. Entre novamente.':code==='CHALLENGE_INVALID'?'Desafio inválido ou expirado. Recomece o fluxo.':code==='FACTOR_INVALID'?'Código de verificação inválido ou já utilizado.':code==='INVALID_CREDENTIALS'?'Usuário ou senha inválidos.':code==='GRANT_INVALID'?'Grant local inválido, expirado ou consumido. Solicite um novo ao operador autorizado.':'Credenciais inválidas ou sessão não autorizada.'):response.status===403?(code==='REAUTHENTICATION_REQUIRED'?'Senha atual inválida; a conta existente permanece ativa.':'Acesso negado pela política de origem da API.'):response.status===404?'Endpoint indisponível nesta API, ou recurso ausente.':response.status===413?'Documento acima do limite permitido.':response.status===422?(code==='INVALID_USERNAME'?'Nome de usuário inválido; use 3 a 64 letras, números, ponto, sublinhado, hífen ou @.':code==='INVALID_PASSWORD'?'Senha inválida; use de 8 a 128 caracteres e não reutilize credencial técnica.':code==='TECHNICAL_CREDENTIAL_REUSE'?'A conta não pode reutilizar credenciais técnicas da API, banco ou MQTT.':'A API recusou os campos enviados; revise as instruções do formulário.'):response.status===429?(retryAfter?`Muitas tentativas. Aguarde ${retryAfter} segundos antes de tentar novamente.`:'Muitas tentativas. Aguarde antes de tentar novamente.'):response.status===409?(code==='ALREADY_PROVISIONED'?'Esta instalação já tem uma conta administrativa; entre pela tela de login.':`Estado de autenticação incompatível (${code||'CONFLICT'}). Consulte a instalação antes de repetir.`):`API indisponível (HTTP ${response.status}).`,fields,null,code||null)}
+    throw new ApiError(kind,response.status===401?(code==='SESSION_EXPIRED'?'Sessão expirada. Entre novamente.':code==='SESSION_REVOKED'||code==='SESSION_INVALID'||code==='AUTH_REQUIRED'?'Sessão inválida ou encerrada. Entre novamente.':code==='CHALLENGE_INVALID'?'Desafio inválido ou expirado. Recomece o fluxo.':code==='FACTOR_INVALID'?'Código de verificação inválido ou já utilizado.':code==='INVALID_CREDENTIALS'?'Usuário ou senha inválidos.':code==='GRANT_INVALID'?'Autenticação inicial expirada. Reabra pelo instalador.':'Credenciais inválidas ou sessão não autorizada.'):response.status===403?(code==='REAUTHENTICATION_REQUIRED'?'Senha atual inválida; a conta existente permanece ativa.':'Acesso negado pela política de origem da API.'):response.status===404?'Endpoint indisponível nesta API, ou recurso ausente.':response.status===413?'Documento acima do limite permitido.':response.status===422?(code==='INVALID_USERNAME'?'Nome de usuário inválido; use 3 a 64 letras, números, ponto, sublinhado, hífen ou @.':code==='INVALID_PASSWORD'?'Senha inválida; use de 8 a 128 caracteres e não reutilize credencial técnica.':code==='TECHNICAL_CREDENTIAL_REUSE'?'A conta não pode reutilizar credenciais técnicas da API, banco ou MQTT.':'A API recusou os campos enviados; revise as instruções do formulário.'):response.status===429?(retryAfter?`Muitas tentativas. Aguarde ${retryAfter} segundos antes de tentar novamente.`:'Muitas tentativas. Aguarde antes de tentar novamente.'):response.status===409?(code==='ALREADY_PROVISIONED'?'Esta instalação já tem uma conta administrativa; entre pela tela de login.':`Estado de autenticação incompatível (${code||'CONFLICT'}). Consulte a instalação antes de repetir.`):`API indisponível (HTTP ${response.status}).`,fields,null,code||null)}
    if(response.status===204)return null;
    try{return await response.json()}catch{throw new ApiError('invalid','A API retornou JSON inválido.')}
   }catch(e){if(e instanceof ApiError)throw e;throw new ApiError('network',c.signal.aborted?'Consulta cancelada ou tempo limite excedido.':'Falha de rede/configuração. Verifique URL, proxy, HTTPS e CORS. Não foi possível consultar a API.');}
   finally{clearTimeout(timer);this.active.delete(c);this.configActive.delete(c)}
  }
- async session():Promise<AdminSession>{const value=await this.get('/api/v1/admin-auth/session');const common=object(value)&&value.authenticated===true&&typeof value.username==='string'&&typeof value.expires_at==='string'&&typeof value.idle_timeout_seconds==='number'&&Number.isFinite(Date.parse(value.expires_at));const legacy=object(value)&&value.mfa_available===false&&value.email_recovery_available===false;const candidate=object(value)&&value.mfa_available===true&&typeof value.mfa_enabled==='boolean'&&value.mfa_enrollment_available===true&&value.email_recovery_available===false;if(!common||(!legacy&&!candidate))throw new ApiError('invalid','Estado de sessão incompatível.');if(candidate&&value.first_access===undefined)throw new ApiError('unavailable','O backend ainda não fornece o estado persistido de primeiro acesso.');if(object(value)&&value.first_access!==undefined)firstAccessState(value.first_access);if(this.authenticatedUsername&&value.username!==this.authenticatedUsername)throw new ApiError('invalid','A sessão retornou uma conta diferente da autenticada.');this.authenticatedUsername=String(value.username);return value as AdminSession}
+ async session():Promise<AdminSession>{const value=await this.get('/api/v1/admin-auth/session');const common=object(value)&&value.authenticated===true&&typeof value.username==='string'&&typeof value.expires_at==='string'&&typeof value.idle_timeout_seconds==='number'&&Number.isFinite(Date.parse(value.expires_at));const legacy=object(value)&&value.mfa_available===false&&value.email_recovery_available===false;const candidate=object(value)&&value.mfa_available===true&&typeof value.mfa_enabled==='boolean'&&value.mfa_enrollment_available===true&&value.email_recovery_available===false;if(!common||!candidate||value.mfa_enabled!==true)throw new ApiError('invalid','Estado de sessão incompatível: MFA obrigatório.');if(candidate&&value.first_access===undefined)throw new ApiError('unavailable','O backend ainda não fornece o estado persistido de primeiro acesso.');if(object(value)&&value.first_access!==undefined)firstAccessState(value.first_access);if(this.authenticatedUsername&&value.username!==this.authenticatedUsername)throw new ApiError('invalid','A sessão retornou uma conta diferente da autenticada.');this.authenticatedUsername=String(value.username);return value as AdminSession}
  async rows(kind:string,offset=0,limit=50){return adaptRows(await this.get(`${this.path(kind)}?limit=${limit}${this.profile==='p11'?`&offset=${offset}`:''}`),this.profile)}
  async controls(){return controlState(await this.get('/api/v1/security/settings/mode/default'))}
  async changeControls(value:ControlState['value'],revision:number,reason:string){return controlState(await this.get('/api/v1/security/settings/mode/default','PUT',{value,expected_revision:revision,reason}))}

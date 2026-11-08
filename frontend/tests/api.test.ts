@@ -83,7 +83,7 @@ test('histórico com esquema inválido não é apresentado como vazio',async()=>
 
 test('login com segundo fator retorna desafio temporário sem criar sessão administrativa',async()=>{
  const calls:{path:string;method:string;authorization:string|undefined;body:unknown}[]=[];
- const candidateSession={authenticated:true,username:'fixture-owner',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,mfa_available:true,mfa_enabled:true,mfa_enrollment_available:true,email_recovery_available:false,first_access:{status:'completed',password_reset_generation:1,password_reset_purpose:'password_reset',codes_issued:true,issued_at:new Date(Date.now()-60_000).toISOString(),completed_at:new Date(Date.now()-30_000).toISOString()}};
+ const candidateSession={authenticated:true,username:'fixture-owner',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,mfa_available:true,mfa_enabled:true,mfa_enrollment_available:true,email_recovery_available:false,first_access:{contract_version:2,status:'completed',generation:1,codes_remaining:3,installation_id:'fixture-installation',account_id:1}};
  const fetcher=(async(url,init)=>{const path=new URL(String(url),'http://local').pathname;const headers=init?.headers as Record<string,string>|undefined;let body:unknown;try{body=JSON.parse(String(init?.body))}catch{}calls.push({path,method:init?.method||'GET',authorization:headers?.Authorization,body});
   if(path.endsWith('/admin-auth/login'))return new Response(JSON.stringify({challenge_token:'c'.repeat(43),next_step:'login',expires_at:new Date(Date.now()+300000).toISOString()}));
   if(path.endsWith('/mfa/verify'))return new Response(JSON.stringify({access_token:'b'.repeat(43),token_type:'Bearer',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,username:'fixture-owner'}));
@@ -99,38 +99,22 @@ test('login com segundo fator retorna desafio temporário sem criar sessão admi
  assert.equal(calls[2].authorization,'Bearer '+'b'.repeat(43));
 });
 
-test('bootstrap, QR, confirmação e códigos de recuperação ficam em memória e validam sessão',async()=>{
- const calls:{path:string;authorization:string|undefined;body:unknown}[]=[];const recovery=Array.from({length:10},(_,i)=>String(i).padStart(32,'a'));
- const session={authenticated:true,username:'new-owner',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,mfa_available:true,mfa_enabled:true,mfa_enrollment_available:true,email_recovery_available:false,first_access:{status:'pending',password_reset_generation:1,password_reset_purpose:'password_reset',codes_issued:true,issued_at:new Date().toISOString(),completed_at:null}};
- const fetcher=(async(url,init)=>{const path=new URL(String(url),'http://local').pathname;const headers=init?.headers as Record<string,string>|undefined;let body:unknown;try{body=JSON.parse(String(init?.body))}catch{}calls.push({path,authorization:headers?.Authorization,body});
-  if(path.endsWith('/bootstrap'))return new Response(JSON.stringify({challenge_token:'e'.repeat(43),next_step:'enroll',expires_at:new Date(Date.now()+300000).toISOString()}));
-  if(path.endsWith('/enrollment/begin'))return new Response(JSON.stringify({manual_key:'JBSWY3DPEHPK3PXP',provisioning_uri:'otpauth://totp/HarpiSense:owner?secret=JBSWY3DPEHPK3PXP',qr_svg:'<svg viewBox="0 0 21 21"><path fill="#000000" d="M0 0h1v1z"/></svg>',expires_at:new Date(Date.now()+300000).toISOString()}));
-  if(path.endsWith('/enrollment/confirm'))return new Response(JSON.stringify({access_token:'f'.repeat(43),token_type:'Bearer',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,username:'new-owner',recovery_codes:recovery}));
-  if(path.endsWith('/admin-auth/session'))return new Response(JSON.stringify(session));
-  return new Response('{}',{status:404});
- }) as typeof fetch;
- const client=new Client('/p11-api','p11',fetcher);const begun=await client.bootstrap('g'.repeat(43),'new-owner','new-password-is-temporary');assert.equal(begun.kind,'challenge');if(begun.kind!=='challenge')return;
- const material=await client.beginMfaEnrollment(begun.challenge.challenge_token);assert.equal(material.manualKey,'JBSWY3DPEHPK3PXP');assert.deepEqual(Object.keys(material).sort(),['expiresAt','manualKey','qrSvg']);assert.equal(JSON.stringify(material).includes('otpauth://'),false);
- const confirmed=await client.confirmMfaEnrollment(begun.challenge.challenge_token,'123456');assert.equal(confirmed.kind,'session');if(confirmed.kind!=='session')return;
- assert.deepEqual(confirmed.recoveryCodes,recovery);assert.equal(confirmed.session.mfa_enabled,true);
- assert.ok(calls.slice(0,3).every(call=>call.authorization===undefined));assert.deepEqual(calls[0].body,{bootstrap_secret:'g'.repeat(43),username:'new-owner',password:'new-password-is-temporary'});
- assert.deepEqual(calls[1].body,{challenge_token:'e'.repeat(43)});assert.deepEqual(calls[2].body,{challenge_token:'e'.repeat(43),code:'123456'});
- assert.equal(calls[3].authorization,'Bearer '+'f'.repeat(43));
+test('bootstrap usa sessão local, QR em memória e MFA não emite códigos',async()=>{
+ const calls:{path:string;body:unknown;credentials:unknown}[]=[];
+ const fetcher=(async(url,init)=>{const path=String(url);const body=init?.body?JSON.parse(String(init.body)):null;calls.push({path,body,credentials:init?.credentials});
+ if(path.endsWith('/bootstrap'))return new Response(JSON.stringify({challenge_token:'e'.repeat(43),next_step:'enroll',expires_at:new Date(Date.now()+300000).toISOString()}));
+ if(path.endsWith('/enrollment/begin'))return new Response(JSON.stringify({manual_key:'JBSWY3DPEHPK3PXP',provisioning_uri:'otpauth://totp/HarpiSense:owner?secret=JBSWY3DPEHPK3PXP',qr_svg:'<svg viewBox="0 0 21 21"><path d="M0 0h1v1z"/></svg>',expires_at:new Date(Date.now()+300000).toISOString()}));
+ if(path.endsWith('/enrollment/confirm'))return sessionResponse('/admin-auth/login')!;
+ return sessionResponse(url)||new Response('{}',{status:404});}) as typeof fetch;
+ const client=new Client('/p11-api','p11',fetcher);const begun=await client.bootstrap('new-owner','new-password');assert.equal(begun.kind,'challenge');if(begun.kind!=='challenge')return;
+ const qr=await client.beginMfaEnrollment(begun.challenge.challenge_token);assert.equal(qr.manualKey,'JBSWY3DPEHPK3PXP');assert.equal(JSON.stringify(qr).includes('otpauth://'),false);
+ const complete=await client.confirmMfaEnrollment(begun.challenge.challenge_token,'123456');assert.equal(complete.kind,'session');if(complete.kind==='session')assert.equal(complete.recoveryCodes,undefined);
+ assert.deepEqual(calls[0].body,{username:'new-owner',password:'new-password'});assert.equal(calls[0].credentials,'same-origin');assert.equal(calls.filter(c=>c.path.endsWith('/first-access/codes')).length,0);
 });
-
-test('código de recuperação emite somente enrollment; adesão existente exige sessão Bearer',async()=>{
- const calls:{path:string;authorization:string|undefined;body:unknown}[]=[];
- const fetcher=(async(url,init)=>{const path=new URL(String(url),'http://local').pathname;const headers=init?.headers as Record<string,string>|undefined;let body:unknown;try{body=JSON.parse(String(init?.body))}catch{}calls.push({path,authorization:headers?.Authorization,body});
-  if(path.endsWith('/admin-auth/login'))return new Response(JSON.stringify({challenge_token:'l'.repeat(43),next_step:'login',expires_at:new Date(Date.now()+300000).toISOString()}));
-  if(path.endsWith('/mfa/recover'))return new Response(JSON.stringify({challenge_token:'n'.repeat(43),next_step:'enroll',expires_at:new Date(Date.now()+300000).toISOString()}));
-  if(path.endsWith('/enrollment/authorize'))return new Response(JSON.stringify({challenge_token:'o'.repeat(43),next_step:'enroll',expires_at:new Date(Date.now()+300000).toISOString()}));
-  return new Response('{}',{status:404});
- }) as typeof fetch;const client=new Client('/p11-api','p11',fetcher);
- const login=await client.login(credentials);assert.equal(login.kind,'challenge');if(login.kind!=='challenge')return;
- const enroll=await client.recoverMfa(login.challenge.challenge_token,'R'.repeat(32));assert.equal(enroll.kind,'challenge');if(enroll.kind==='challenge')assert.equal(enroll.challenge.next_step,'enroll');
- assert.equal(calls[1].authorization,undefined);assert.deepEqual(calls[1].body,{challenge_token:'l'.repeat(43),code:'R'.repeat(32)});
- await assert.rejects(()=>client.authorizeMfaEnrollment('current-password'),/Não autorizado/);
- assert.equal(calls.length,2);
+test('código de recuperação e grant não autorizam recadastro de MFA',async()=>{
+ let calls=0;const client=new Client('/p11-api','p11',async()=>{calls++;return new Response('{}')});
+ await assert.rejects(()=>client.recoverMfa('c'.repeat(43),'r'.repeat(32)),/não permite substituir/);
+ await assert.rejects(()=>client.localRecovery('g'.repeat(43),'admin','password'),/não aprovada/);assert.equal(calls,0);
 });
 
 test('desafio MFA malformado ou expirado não é tratado como sessão',async()=>{

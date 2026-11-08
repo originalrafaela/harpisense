@@ -36,6 +36,12 @@ export function p11Transport(target) {
     authRoutes.set('/api/v1/admin-auth/first-access/confirm','POST');
     authRoutes.set('/api/v1/admin-auth/password-reset/confirm','POST');
     authRoutes.set('/api/v1/admin-auth/password-reset/codes','POST');
+    authRoutes.set('/api/v1/admin-auth/first-access/reissue','POST');
+    authRoutes.set('/api/v1/activation/status','GET');
+    authRoutes.set('/api/v1/activation/retry','POST');
+    authRoutes.delete('/api/v1/admin-auth/mfa/recover');
+    authRoutes.delete('/api/v1/admin-auth/local-recovery');
+    authRoutes.delete('/api/v1/admin-auth/password-reset/codes');
     const auth = authRoutes.get(path) === request.method;
     // The browser transport has no technical Basic or service-ingestion path.
     if (request.headers.authorization && !/^Bearer [A-Za-z0-9_-]{43}$/.test(request.headers.authorization)) {

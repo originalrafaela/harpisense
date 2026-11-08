@@ -106,7 +106,7 @@ test('proxy libera somente as rotas candidatas de primeiro acesso/MFA e não env
  assert.equal((await fetch(`${origin}/p11-api/api/v1/admin-auth/mfa/verify?code=123456`,{method:'POST',headers:{Origin:origin}})).status,400);
  assert.equal((await fetch(endpoint,{method:'POST',headers:{Origin:origin,Authorization:'Basic dGVjaDpzZWNyZXQ='}})).status,401);
  assert.equal(calls.length,1);
- for(const route of ['password-reset/confirm','password-reset/codes']){
+ for(const route of ['password-reset/confirm','first-access/reissue']){
   assert.equal((await fetch(`${origin}/p11-api/api/v1/admin-auth/${route}`,{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:'{}'})).status,200);
   assert.equal((await fetch(`${origin}/p11-api/api/v1/admin-auth/${route}`,{method:'GET'})).status,404);
  }
