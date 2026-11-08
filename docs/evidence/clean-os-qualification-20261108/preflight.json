@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-08",
+  "requested_source": "385b363725479767fc7c61523003cfba10ae285e",
+  "branch": "integration/initial-auth-20261108",
+  "result": "blocked_before_installer_execution",
+  "reason": "Available artifacts are candidate.5 from source 8b9c9ef; final initial-auth artifacts and real issuer delivery configuration have not been located.",
+  "windows": {
+    "artifact": "harpisense-worktrees/native-installers/dist/HarpiSense-Setup-Windows-x64.exe",
+    "sha256": "102ad86dd89d578237451cbe1e457e529510812b2d070b7815e946041b8069ff",
+    "bytes": 166071966,
+    "matches_historical_candidate5_manifest": true,
+    "authenticode": "NotSigned",
+    "eligible_for_final_auth_qualification": false,
+    "clean_os_installer_run": false,
+    "offline_argon2_hash_verify": "not_run",
+    "os_reboot_and_login": "not_run",
+    "clean_test_vmx": "harpisense-worktrees/native-installers/.native-test/clean-os/windows11/HarpiSense-Clean.vmx",
+    "os_installation": "historical report says not installed; sparse disk remains 8454144 bytes"
+  },
+  "ubuntu": {
+    "artifact": "harpisense-worktrees/native-installers/dist/HarpiSense-Setup-Ubuntu-24.04-x86_64.run",
+    "sha256": "9c01092be0c3246fb90e0c6916af5b22c1cc789487eec8935409c8e9b711a3d8",
+    "bytes": 17225396,
+    "embedded_build": {
+      "package_version": "native-installers-20261106-candidate.5",
+      "source_commit": "8b9c9efe9eb5cd01b0be6812777da7ed08f0df4a"
+    },
+    "argon2_wheel_present": false,
+    "local_activation_module_present": false,
+    "native_activation_configuration_present": false,
+    "signature_sidecar_found": false,
+    "eligible_for_final_auth_qualification": false,
+    "clean_os_installer_run": false,
+    "offline_argon2_hash_verify": "not_run",
+    "os_reboot_and_login": "not_run",
+    "clean_baseline_snapshot_metadata": "clean-before-candidate2-20261106",
+    "snapshot_boot_and_cleanliness_verified_this_run": false
+  },
+  "vmware_inventory": {
+    "running_lab_vms": 2,
+    "lab_vms_modified": false,
+    "test_vms_started_or_reverted": false,
+    "snapshots_modified": false
+  },
+  "required_inputs": [
+    "Final personalized and signed Windows/Ubuntu artifacts with source identity and checksums, or the distributor's approved inputs to build and sign them",
+    "Real HTTPS issuer endpoint, public trust bundle and issuer-issued delivery licenses supplied through private local files/pipeline"
+  ],
+  "secrets_requested_in_chat": false,
+  "loss_of_authenticator_policy": "not_approved_unchanged",
+  "qualification_granted": false
+}
