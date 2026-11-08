@@ -1,0 +1,20 @@
+{
+  "environment": "Product integration: isolated native PostgreSQL/Mosquitto/HTTP/Chromium; not clean OS",
+  "docker": false,
+  "service_registration": false,
+  "machine_reboot": false,
+  "runtime": "python_source",
+  "checks": [
+    "fresh_migrations_without_manual_grant",
+    "real_broker_tls_authentication_and_suback",
+    "external_mode_validates_tls_and_suback_without_administering_broker",
+    "anonymous_p11_denied",
+    "anonymous_mqtt_status_denied",
+    "dns_rebinding_denied",
+    "cross_origin_bootstrap_denied",
+    "invalid_totp_does_not_activate"
+  ],
+  "result": "failed",
+  "first_failure": "three_distinct_password_recovery_codes_browser",
+  "last_completed_check": "invalid_totp_does_not_activate"
+}

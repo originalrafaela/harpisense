@@ -46,6 +46,7 @@ def main():
     parser.add_argument('--postgres-bin', required=True, type=Path)
     parser.add_argument('--mosquitto', required=True, type=Path)
     parser.add_argument('--runtime', type=Path, help='Test frozen product runtime instead of Python source')
+    parser.add_argument('--evidence-dir', type=Path, help='Workspace-local sanitized output directory for this test run')
     parser.add_argument('--cloud-review', action='store_true', help='Planning-only cloud UI review; never connects a provider')
     args = parser.parse_args()
     if args.runtime:
@@ -74,6 +75,10 @@ def main():
     processes, handles = [], []
     pg_started = False
     evidence_dir = ROOT/('docs/evidence/cloud-backup-review' if args.cloud_review else 'docs/evidence/product-consolidation')
+    if args.evidence_dir:
+        evidence_dir = (ROOT/args.evidence_dir).resolve()
+        if not evidence_dir.is_relative_to(ROOT):
+            raise ValueError('EVIDENCE_MUST_STAY_IN_WORKSPACE')
     evidence_dir.mkdir(parents=True, exist_ok=True)
     api_command = [str(args.runtime)] if args.runtime else [sys.executable, str(ROOT/'packaging/native/entry.py')]
     def process(command, name):
@@ -121,7 +126,9 @@ def main():
             page = browser.new_page()
             authorize_browser(page, state)
             page.goto(base)
-            page.get_by_role('button', name='Autenticação inicial', exact=True).click()
+            initial = page.get_by_role('button', name='Autenticação inicial', exact=True)
+            if initial.is_visible():
+                initial.click()
             page.get_by_label('Usuário', exact=True).fill(username)
             page.get_by_label('Senha da conta administrativa', exact=True).fill(password)
             page.get_by_role('button', name='Criar conta e configurar MFA', exact=True).click()
@@ -138,6 +145,7 @@ def main():
                 page.get_by_role('button', name='Confirmar MFA', exact=True).click()
             enrolled_headers = {'Authorization':'Bearer '+enrollment_confirmed.value.json()['access_token']}
             expect(page.get_by_role('heading', name='Guarde seus 3 códigos de recuperação')).to_be_visible()
+            expect(page.locator('.recovery-codes li')).to_have_count(3)
             reset_codes = page.locator('.recovery-codes li').all_text_contents()
             check(len(reset_codes) == 3 and len(set(reset_codes)) == 3, 'three_distinct_password_recovery_codes_browser')
             page.get_by_role('button', name='Já guardei os códigos', exact=True).click()
@@ -420,7 +428,8 @@ def main():
         # Stable assertions only; Playwright exception messages could include page contents.
         if isinstance(error, AssertionError) and str(error).replace('_', '').isalnum():
             evidence['first_failure'] = str(error)
-        raise
+        evidence['last_completed_check'] = evidence['checks'][-1] if evidence['checks'] else None
+        # Never emit exception text/traceback that may contain form contents.
     finally:
         for proc in processes:
             if proc.poll() is None:
@@ -433,7 +442,8 @@ def main():
         (evidence_dir/'product-native-result.json').write_text(json.dumps(evidence, indent=2), encoding='utf-8')
         print(json.dumps({'result': evidence.get('result'), 'checks': len(evidence['checks']),
                           'evidence': str(evidence_dir/'product-native-result.json')}))
+    return 0 if evidence.get('result') == 'passed' else 1
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())
