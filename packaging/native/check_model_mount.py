@@ -23,6 +23,7 @@ from delivery.postgres_store import PostgresStore
 from delivery.projections import Record
 from xai_api.store import XAIStore
 from acceptance_product import wait_for
+from acceptance_first_use import prepare_first_use, authorize_browser
 
 
 def main():
@@ -37,6 +38,7 @@ def main():
     for port in (25433,28081):
         with socket.socket() as probe: probe.bind(('127.0.0.1',port))
     state=create_state(private)
+    prepare_first_use(state,private)
     state['dsn']=state['dsn'].replace(':15432/',':25433/')
     state['panel_url']='http://127.0.0.1:28081'
     (private/'state.json').write_text(json.dumps(state),encoding='utf-8')
@@ -66,7 +68,7 @@ def main():
               'reader_uses_existing_native_asset_name')
         handle=(private/'api.log').open('ab')
         env=dict(os.environ,PYTHONPATH=os.pathsep.join(str(ROOT/p) for p in ('backend','backend/domain','genai')))
-        api=subprocess.Popen([sys.executable,str(ROOT/'packaging/native/entry.py'),'api','--state',str(private/'state.json')],
+        api=subprocess.Popen([sys.executable,str(ROOT/'packaging/native/acceptance_first_use.py'),'api','--state',str(private/'state.json')],
                              env=env,stdout=handle,stderr=subprocess.STDOUT,creationflags=subprocess.CREATE_NO_WINDOW)
         http=httpx.Client(base_url=state['panel_url'],trust_env=False,timeout=5)
         wait_for(lambda:http.get('/').status_code==200)
@@ -75,9 +77,9 @@ def main():
         with sync_playwright() as pw:
             browser=pw.chromium.launch()
             page=browser.new_page(viewport={'width':1440,'height':1000})
+            authorize_browser(page,state)
             page.goto(state['panel_url'])
-            page.get_by_role('button',name='Primeira configuração',exact=True).click()
-            page.get_by_label('Grant local de uso único',exact=True).fill((private/'bootstrap.secret').read_text())
+            page.get_by_role('button',name='Autenticação inicial',exact=True).click()
             page.get_by_label('Usuário',exact=True).fill('model-mount-owner')
             page.get_by_label('Senha da conta administrativa',exact=True).fill(secrets.token_urlsafe(32))
             page.get_by_role('button',name='Criar conta e configurar MFA',exact=True).click()
@@ -85,8 +87,7 @@ def main():
             key=page.get_by_label('Chave manual',exact=True).input_value()
             page.get_by_label('Código de 6 dígitos',exact=True).fill(pyotp.TOTP(key).now())
             page.get_by_role('button',name='Confirmar MFA',exact=True).click()
-            page.get_by_label('Guardei os códigos em local seguro.').check()
-            page.get_by_role('button',name='Concluir e continuar',exact=True).click()
+            page.get_by_role('button',name='Já guardei os códigos',exact=True).click()
             expect(page.get_by_role('button',name='Sair',exact=True)).to_be_visible()
             expect(page.get_by_text('Sem explicação disponível',exact=False)).to_be_visible()
             page.get_by_label('Incidente selecionado',exact=False).select_option(ident)

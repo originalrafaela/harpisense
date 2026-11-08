@@ -26,6 +26,7 @@ import pyotp
 from playwright.sync_api import sync_playwright, expect
 from provision import create_state, initialize_database, prepare_database, preflight, run
 from native_server.runtime import probe_broker
+from acceptance_first_use import prepare_first_use, authorize_browser
 
 
 def wait_for(predicate, timeout=20):
@@ -47,6 +48,8 @@ def main():
     parser.add_argument('--runtime', type=Path, help='Test frozen product runtime instead of Python source')
     parser.add_argument('--cloud-review', action='store_true', help='Planning-only cloud UI review; never connects a provider')
     args = parser.parse_args()
+    if args.runtime:
+        parser.error('Frozen clean-machine acceptance requires the installed IPC launcher; this script is an explicit source fixture')
     evidence = {'environment': 'Product integration: isolated native PostgreSQL/Mosquitto/HTTP/Chromium; not clean OS',
                 'docker': False, 'service_registration': False, 'machine_reboot': False,
                 'runtime': 'frozen_executable' if args.runtime else 'python_source', 'checks': []}
@@ -60,6 +63,7 @@ def main():
     private = ROOT/'.native-test'/str(uuid.uuid4())
     private.parent.mkdir(exist_ok=True)
     state = create_state(private)
+    prepare_first_use(state, private)
     state['dsn'] = state['dsn'].replace(':15432/', ':25432/')
     state['panel_url'] = 'http://127.0.0.1:28080'
     state['mqtt']['port'] = 28883
@@ -91,7 +95,7 @@ def main():
             run(api_command + ['prepare', '--state', private/'state.json'])
         else:
             prepare_database(private/'state.json')
-        check(True, 'fresh_product_migrations_and_protected_grant')
+        check(not (private/'bootstrap.secret').exists(), 'fresh_migrations_without_manual_grant')
         process([args.mosquitto, '-c', config], 'broker')
         wait_for(lambda: probe_broker(state) == {'connected': True, 'subscribed': True})
         check(True, 'real_broker_tls_authentication_and_suback')
@@ -99,10 +103,11 @@ def main():
         probe_broker(dict(state, mqtt=dict(state['mqtt'], mode='external')))
         check(hashlib.sha256(config.read_bytes()).hexdigest() == original_broker_config,
               'external_mode_validates_tls_and_suback_without_administering_broker')
-        api = process(api_command + ['api', '--state', str(private/'state.json')], 'api')
+        native_api_command = [sys.executable, str(ROOT/'packaging/native/acceptance_first_use.py')]
+        api = process(native_api_command + ['api', '--state', str(private/'state.json')], 'api')
         consumer = process(api_command + ['consumer', '--state', str(private/'state.json')], 'consumer')
         base = state['panel_url']
-        http = httpx.Client(base_url=base, timeout=10, trust_env=False)
+        http = httpx.Client(base_url=base, timeout=10, trust_env=False, headers={'Origin': base})
         wait_for(lambda: http.get('/').status_code == 200)
         prefix = '/p11-api/api/v1'
         check(http.get(prefix + '/p11/telemetry').status_code == 401, 'anonymous_p11_denied')
@@ -114,9 +119,9 @@ def main():
         with sync_playwright() as pw:
             browser = pw.chromium.launch()
             page = browser.new_page()
+            authorize_browser(page, state)
             page.goto(base)
-            page.get_by_role('button', name='Primeira configuração', exact=True).click()
-            page.get_by_label('Grant local de uso único', exact=True).fill((private/'bootstrap.secret').read_text())
+            page.get_by_role('button', name='Autenticação inicial', exact=True).click()
             page.get_by_label('Usuário', exact=True).fill(username)
             page.get_by_label('Senha da conta administrativa', exact=True).fill(password)
             page.get_by_role('button', name='Criar conta e configurar MFA', exact=True).click()
@@ -132,13 +137,10 @@ def main():
             with page.expect_response(lambda r: r.url.endswith('/mfa/enrollment/confirm') and r.status == 200) as enrollment_confirmed:
                 page.get_by_role('button', name='Confirmar MFA', exact=True).click()
             enrolled_headers = {'Authorization':'Bearer '+enrollment_confirmed.value.json()['access_token']}
-            expect(page.get_by_role('heading', name='Guarde seus códigos de recuperação')).to_be_visible()
-            check(page.locator('.recovery-codes li').count() == 10, 'ten_recovery_codes_browser')
-            reset_codes = page.locator('.password-reset-codes li').all_text_contents()
-            mfa_codes = page.locator('.recovery-codes li').all_text_contents()
-            check(len(reset_codes) == 10 and not set(reset_codes) & set(mfa_codes), 'separate_password_reset_codes_browser')
-            page.get_by_label('Guardei os códigos em local seguro.').check()
-            page.get_by_role('button', name='Concluir e continuar', exact=True).click()
+            expect(page.get_by_role('heading', name='Guarde seus 3 códigos de recuperação')).to_be_visible()
+            reset_codes = page.locator('.recovery-codes li').all_text_contents()
+            check(len(reset_codes) == 3 and len(set(reset_codes)) == 3, 'three_distinct_password_recovery_codes_browser')
+            page.get_by_role('button', name='Já guardei os códigos', exact=True).click()
             expect(page.get_by_role('button', name='Sair', exact=True)).to_be_visible()
             check(True, 'browser_bootstrap_totp_confirmation_dashboard')
             page.get_by_role('button', name='Iniciar assistente', exact=True).click()
@@ -224,7 +226,7 @@ def main():
                 run(api_command + ['prepare', '--state', private/'state.json'])
             else:
                 prepare_database(private/'state.json')
-            api = process(api_command + ['api', '--state', str(private/'state.json')], 'api-restarted')
+            api = process(native_api_command + ['api', '--state', str(private/'state.json')], 'api-restarted')
             consumer = process(api_command + ['consumer', '--state', str(private/'state.json')], 'consumer-restarted')
             wait_for(lambda: http.get('/').status_code == 200)
             with psycopg.connect(state['dsn']) as conn:
@@ -346,20 +348,20 @@ def main():
             recovery_page.goto(base)
             recovery_page.get_by_role('button',name='Esqueci minha senha',exact=True).click()
             recovery_page.get_by_label('Usuário',exact=True).fill(username)
-            recovery_page.get_by_label('Código de redefinição de senha',exact=True).fill(reset_codes[0])
+            recovery_page.get_by_label('Código de recuperação',exact=True).fill(reset_codes[0])
+            previous = pyotp.TOTP(key).now()
+            wait_for(lambda: pyotp.TOTP(key).now() != previous, timeout=35)
+            recovery_page.get_by_label('Código atual do Microsoft Authenticator',exact=True).fill(pyotp.TOTP(key).now())
             recovery_page.get_by_label('Nova senha',exact=True).fill(replacement)
             recovery_page.get_by_role('button',name='Redefinir senha',exact=True).click()
             expect(recovery_page.get_by_role('status')).to_contain_text('Senha redefinida')
             check(True,'browser_password_reset_without_administrative_session')
             recovery_browser.close()
         check(http.get(prefix + '/config/setup', headers=headers).status_code == 401, 'reset_revokes_existing_session')
-        retry = http.post(prefix + '/admin-auth/password-reset/confirm',json=dict(username=username,code=reset_codes[0],new_password=replacement))
+        retry = http.post(prefix + '/admin-auth/password-reset/confirm',json=dict(username=username,code=reset_codes[0],totp_code=pyotp.TOTP(key).now(),new_password=replacement))
         check(retry.status_code == 401, 'password_reset_code_one_use')
-        wrong_purpose = http.post(prefix + '/admin-auth/password-reset/confirm',json=dict(username=username,code=mfa_codes[0],new_password=replacement))
-        check(wrong_purpose.status_code == 401, 'mfa_recovery_code_cannot_reset_password')
         with psycopg.connect(state['dsn']) as conn:
             check(conn.execute('SELECT secret_cipher,enabled_at FROM hs_admin_mfa').fetchone() == mfa_before, 'password_reset_preserves_totp_secret_and_enabled_state')
-            check(conn.execute('SELECT count(*) FROM hs_admin_recovery_code WHERE used_at IS NULL').fetchone()[0] == 10, 'password_reset_preserves_mfa_recovery_codes')
         next_login = http.post(prefix + '/admin-auth/login',json=dict(username=username,password=replacement)).json()
         check(next_login.get('next_step') == 'login' and 'access_token' not in next_login,'new_password_still_requires_totp')
         old_step = pyotp.TOTP(key).now()
@@ -368,25 +370,16 @@ def main():
         check(verified_reset.status_code == 200,'new_password_totp_session_confirmed')
         recovered_headers = {'Authorization':'Bearer '+verified_reset.json()['access_token']}
         check(http.get(prefix+'/config/assets',headers=recovered_headers).json()[0]['device_id']=='poste-extra','assets_preserved_after_password_reset')
-        # Existing MFA recovery continues to issue enrollment only.
+        # Recovery codes never authorize replacement of an authenticator.
         recovery_login = http.post(prefix+'/admin-auth/login',json=dict(username=username,password=replacement)).json()
-        wrong_mfa_purpose = http.post(prefix+'/admin-auth/mfa/recover',json=dict(challenge_token=recovery_login['challenge_token'],code=reset_codes[1]))
-        check(wrong_mfa_purpose.status_code==401,'password_reset_code_cannot_recover_mfa')
-        mfa_recover = http.post(prefix+'/admin-auth/mfa/recover',json=dict(challenge_token=recovery_login['challenge_token'],code=mfa_codes[0]))
-        check(mfa_recover.status_code==200 and mfa_recover.json().get('next_step')=='enroll' and 'access_token' not in mfa_recover.json(),'mfa_recovery_remains_separate_enrollment_only')
-        recovered_challenge = mfa_recover.json()['challenge_token']
-        enrollment = http.post(prefix+'/admin-auth/mfa/enrollment/begin',json=dict(challenge_token=recovered_challenge)).json()
-        confirmed = http.post(prefix+'/admin-auth/mfa/enrollment/confirm',json=dict(challenge_token=recovered_challenge,code=pyotp.TOTP(enrollment['manual_key']).now()))
-        check(confirmed.status_code == 200, 'lost_authenticator_replacement_confirmed')
-        recovered_headers = {'Authorization':'Bearer '+confirmed.json()['access_token']}
-        check(http.get(prefix+'/config/assets',headers=recovered_headers).status_code == 200,'replacement_authenticator_issues_full_session_only_after_totp')
-        new_key = enrollment['manual_key']
-        old_step = pyotp.TOTP(new_key).now()
-        wait_for(lambda: pyotp.TOTP(new_key).now()!=old_step,timeout=35)
-        regenerated = http.post(prefix+'/admin-auth/password-reset/codes',headers=recovered_headers,
-                               json={'current_password':replacement,'code':pyotp.TOTP(new_key).now()})
-        check(regenerated.status_code==200 and len(regenerated.json()['password_reset_codes'])==10,
-              'password_reset_codes_regenerated_with_password_and_totp')
+        denied = http.post(prefix+'/admin-auth/mfa/recover',json=dict(challenge_token=recovery_login['challenge_token'],code=reset_codes[1]))
+        check(denied.status_code == 403, 'password_recovery_cannot_replace_authenticator')
+        old_step = pyotp.TOTP(key).now()
+        wait_for(lambda: pyotp.TOTP(key).now() != old_step, timeout=35)
+        regenerated = http.post(prefix+'/admin-auth/first-access/reissue', headers=recovered_headers,
+            json={'current_password': replacement, 'code': pyotp.TOTP(key).now()})
+        check(regenerated.status_code == 200 and len(regenerated.json()['recovery_codes']) == 3,
+              'three_codes_reissued_with_password_and_fresh_totp')
         # Trusted worker hook exercises authoritative state on isolated real DB.
         from delivery.operational_queue import OperationalQueue,SOURCES
         from delivery.control_store import PostgresControls

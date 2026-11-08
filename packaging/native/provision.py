@@ -189,6 +189,8 @@ def prepare_database(state_file):
         conn.execute((root/'backend/admin_auth/002_admin_mfa.sql').read_text(encoding='utf-8'))
         conn.execute((root/'backend/admin_auth/003_password_reset.sql').read_text(encoding='utf-8'))
         conn.execute((root/'backend/admin_auth/004_first_access.sql').read_text(encoding='utf-8'))
+        if not conn.execute("SELECT to_regclass('hs_admin_recovery_set_v2')").fetchone()[0]:
+            conn.execute((root/'backend/admin_auth/005_initial_auth_v2.sql').read_text(encoding='utf-8'))
         conn.execute((root/'backend/native_server/001_mqtt_observer.sql').read_text(encoding='utf-8'))
         present = conn.execute('SELECT 1 FROM hs_admin_account').fetchone()
     connect = lambda: psycopg.connect(state['dsn'])
@@ -197,8 +199,4 @@ def prepare_database(state_file):
     with connect() as conn:
         conn.execute((root/'backend/config_manager/003_assets.sql').read_text(encoding='utf-8'))
     ConfigStore(connect, capabilities(state)).provision_registry(state['installation_id'])
-    # No human identity reset, no grant issuance on API startup or existing account.
-    grantfile = Path(state_file).parent/'bootstrap.secret'
-    if not present and not grantfile.exists():
-        grant = MFAAdminAuth(state['dsn'], protection_key=Path(state['key_file']).read_bytes()).issue_local_grant()
-        write_private(grantfile, grant)
+    # First-use authorization is issued only through authenticated native IPC.

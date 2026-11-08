@@ -1,0 +1,11 @@
+{
+  "environment": "existing Windows workstation, disposable native processes",
+  "issuer": "signed receipt fixture; human authentication Backend is real",
+  "clean_machine": false,
+  "checks": [
+    "migrations_idempotent_no_manual_grant",
+    "bootstrap_without_ipc_cookie_denied"
+  ],
+  "result": "failed",
+  "failure_type": "error"
+}

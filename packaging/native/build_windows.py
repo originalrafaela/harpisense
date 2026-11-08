@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import sys
 import time
+from activation_payload import add_arguments, stage_activation
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -21,6 +22,7 @@ def main():
     parser.add_argument('--mosquitto-dir', required=True, type=Path)
     parser.add_argument('--winsw', required=True, type=Path)
     parser.add_argument('--vc-redist', required=True, type=Path)
+    add_arguments(parser)
     args = parser.parse_args()
     info = ROOT/'.native-build/build_info.json'
     info.parent.mkdir(parents=True,exist_ok=True)
@@ -40,7 +42,8 @@ def main():
                 'shap','sklearn','numpy','pandas','scipy','joblib','numba','llvmlite',
                 'uvicorn', 'psycopg', 'psycopg_binary',
                 'jsonschema', 'qrcode', 'paho.mqtt', 'argon2', '_argon2_cffi_bindings',
-                'cryptography', 'cffi', '_cffi_backend']
+                'cryptography', 'cffi', '_cffi_backend', 'local_activation', 'playwright',
+                'win32security', 'win32pipe', 'win32file', 'win32api', 'pywintypes']
     collect = [item for package in packages for item in ('--collect-all', package)]
     collect += ['--hidden-import', 'harpisense_catalog', '--hidden-import', 'runtime_check']
     data = ['--add-data', str(ROOT/'frontend/dist') + ';frontend/dist',
@@ -55,7 +58,9 @@ def main():
                    cwd=ROOT.parent, env={k: v for k, v in __import__('os').environ.items()
                                         if k not in ('PYTHONPATH', 'PYTHONHOME')}, check=True)
     stage.mkdir(parents=True)
+    stage_activation(args, stage, windows=True)
     shutil.copytree(ROOT/'.native-build/runtime/HarpiSense', stage/'runtime')
+    shutil.copyfile(stage/'native-activation.json', stage/'runtime/_internal/native-activation.json')
     pg = stage/'vendor/postgresql'
     # Only binaries and their supporting distribution files, NEVER data/installer.
     for name in ('bin', 'lib', 'share'):

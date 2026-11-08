@@ -9,7 +9,6 @@ import threading
 import time
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
-import webbrowser
 from xml.sax.saxutils import escape
 
 from provision import preflight, create_state, initialize_database, run
@@ -22,16 +21,19 @@ DATA = Path(os.environ.get('ProgramData', 'C:/ProgramData'))/'HarpiSense'
 def service(name, executable, arguments, dependencies=()):
     wrapper = APP/(name + '.exe')
     shutil.copyfile(APP/'vendor/WinSW-x64.exe', wrapper)
+    account = r'NT SERVICE\HarpiSenseApi' if name == 'HarpiSenseApi' else r'NT AUTHORITY\LocalService'
     xml = f'''<service><id>{name}</id><name>{name}</name>
 <description>HarpiSense native central</description>
 <executable>{escape(str(executable))}</executable><arguments>{escape(arguments)}</arguments>
 <workingdirectory>{escape(str(APP))}</workingdirectory><startmode>Automatic</startmode>
-<serviceaccount><username>NT AUTHORITY\\LocalService</username></serviceaccount>
+<serviceaccount><username>{account}</username></serviceaccount>
 <logpath>{escape(str(DATA/'logs'))}</logpath><log mode="roll-by-size"><sizeThreshold>1024</sizeThreshold><keepFiles>3</keepFiles></log>
 <onfailure action="restart" delay="10 sec"/>
 {''.join('<depend>' + escape(d) + '</depend>' for d in dependencies)}</service>'''
     wrapper.with_suffix('.xml').write_text(xml, encoding='utf-8')
     run([wrapper, 'install'])
+    if name == 'HarpiSenseApi':
+        run(['sc.exe', 'sidtype', name, 'unrestricted'])
     run([wrapper, 'start'])
 
 
@@ -49,7 +51,8 @@ def install(mode, external=None):
         from native_server.runtime import probe_broker
         probe_broker({'installation_id': 'installer-preflight', 'mqtt': dict(external,
                      topics=['harpisense/poste2/telemetry'])})
-    shutil.copytree(PAYLOAD, APP)
+    activation_key = (PAYLOAD/'delivery-license.secret').read_text(encoding='ascii').strip()
+    shutil.copytree(PAYLOAD, APP, ignore=shutil.ignore_patterns('delivery-license.secret'))
     # Offline prerequisite, after preflight; 3010 requests a later reboot.
     import subprocess
     prerequisite = run([APP/'vendor/VC_redist.x64.exe', '/install', '/quiet', '/norestart'], check=False)
@@ -58,6 +61,8 @@ def install(mode, external=None):
     run([APP/'runtime/HarpiSense.exe', 'check-runtime'])
     state = create_state(DATA, mode=mode, external=external)
     (DATA/'logs').mkdir()
+    from service_identity import prepare_windows_activation
+    prepare_windows_activation(state, DATA, activation_key)
     pg = APP/'vendor/postgresql/bin'
     pgdata = DATA/'postgres'
     run([pg/'initdb.exe', '-D', pgdata, '-U', 'native_installer', '--encoding=UTF8',
@@ -118,32 +123,12 @@ def main():
     root.geometry('660x470')
     if '--first-access' in sys.argv:
         from native_server.runtime import load_state
-        from admin_auth.mfa import MFAAdminAuth
-        import psycopg
+        from native_activation import launch_installer_browser
         try:
-            state = load_state(DATA/'state.json')
-            with psycopg.connect(state['dsn']) as conn:
-                present = conn.execute('SELECT 1 FROM hs_admin_account').fetchone()
-            if present:
-                messagebox.showinfo('HarpiSense', 'A conta administrativa já existe. Use seu login e autenticador.')
-                webbrowser.open(state['panel_url'])
-                root.destroy()
-                return
-            grant = MFAAdminAuth(state['dsn'], protection_key=(DATA/'admin-mfa.key').read_bytes()).issue_local_grant()
-            # Trusted elevated helper, explicit renewal; never invoked by API startup.
-            with (DATA/'bootstrap.secret').open('w', encoding='ascii') as stream:
-                stream.write(grant)
-            ttk.Label(root, text='Primeiro acesso protegido\nCopie o segredo local no formulário. Validade: 10 minutos.').pack(padx=20, pady=25)
-            entry = ttk.Entry(root, width=65)
-            entry.insert(0, grant)
-            entry.config(state='readonly')
-            entry.pack(padx=20)
-            ttk.Button(root, text='Abrir painel', command=lambda: webbrowser.open(state['panel_url'])).pack(pady=20)
+            launch_installer_browser(load_state(DATA/'state.json'), APP)
         except Exception:
-            messagebox.showerror('HarpiSense', 'Primeiro acesso indisponível. Verifique os serviços; os dados foram preservados.')
-            root.destroy()
-            return
-        root.mainloop()
+            messagebox.showerror('HarpiSense', 'Autenticação inicial indisponível; dados preservados.')
+        root.destroy()
         return
     ttk.Label(root, text='HarpiSense — central local', font=('', 18)).pack(pady=15)
     ttk.Label(root, text='Instala PostgreSQL, painel/API e consumidor como serviços automáticos.\nNão instala sensores de captura nem habilita contenção.', justify='left').pack()
@@ -191,14 +176,8 @@ def main():
                 return
             def complete():
                 status.set('Serviços iniciados. Abra HarpiSense pelo menu Iniciar nos próximos usos.')
-                dialog = tk.Toplevel(root)
-                dialog.title('Primeiro acesso protegido — válido por 10 minutos')
-                ttk.Label(dialog, text='Copie o segredo local no formulário de criação da conta.\nCadastre o TOTP e guarde os códigos de recuperação.').pack(padx=15, pady=15)
-                grant = ttk.Entry(dialog, width=65)
-                grant.insert(0, (DATA/'bootstrap.secret').read_text())
-                grant.config(state='readonly')
-                grant.pack(padx=15)
-                ttk.Button(dialog, text='Abrir painel', command=lambda: webbrowser.open(state['panel_url'])).pack(pady=15)
+                from native_activation import launch_installer_browser
+                threading.Thread(target=launch_installer_browser, args=(state, APP), daemon=True).start()
             root.after(0, complete)
         threading.Thread(target=worker, daemon=True).start()
     button = ttk.Button(root, text='Instalar', command=start)

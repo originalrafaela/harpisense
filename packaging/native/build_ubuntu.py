@@ -8,31 +8,47 @@ import subprocess
 import sys
 import tarfile
 import time
+import argparse
+from activation_payload import add_arguments, stage_activation
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def read_requirements(path):
+    requirements = []
+    for line in path.read_text().splitlines():
+        if line.strip().startswith('-r '):
+            requirements.extend(read_requirements(path.parent/line.strip()[3:].strip()))
+        else:
+            requirements.append(line)
+    return requirements
+
+
 def main():
+    parser = argparse.ArgumentParser()
+    add_arguments(parser)
+    parser.add_argument('--ubuntu-debs-dir', type=Path, required=True,
+                        help='Complete offline Ubuntu 24.04 package dependency closure, including Chromium libraries')
+    args = parser.parse_args()
     stage = ROOT/('.native-build/ubuntu-' + str(time.time_ns()))
     stage.mkdir(parents=True)
+    stage_activation(args, stage, windows=False)
+    if not list(args.ubuntu_debs_dir.glob('*.deb')):
+        raise RuntimeError('OFFLINE_UBUNTU_DEBS_REQUIRED')
+    shutil.copytree(args.ubuntu_debs_dir, stage/'vendor/debs')
     for source, target in [('frontend/dist', 'frontend/dist')]:
         shutil.copytree(ROOT/source, stage/target, ignore=shutil.ignore_patterns('__pycache__'))
     scripts = stage/'packaging/native'
     scripts.mkdir(parents=True)
-    for name in ('entry.py', 'provision.py', 'ubuntu_install.py', 'runtime_check.py'):
+    for name in ('entry.py', 'provision.py', 'ubuntu_install.py', 'runtime_check.py', 'native_activation.py'):
         shutil.copyfile(ROOT/'packaging/native'/name, scripts/name)
-    for name in ('delivery', 'admin_auth', 'config_manager', 'native_server', 'xai_api'):
+    for name in ('delivery', 'admin_auth', 'config_manager', 'native_server', 'xai_api', 'detection_composition', 'local_activation'):
         shutil.copytree(ROOT/'backend'/name, stage/'backend'/name,
                         ignore=shutil.ignore_patterns('__pycache__'))
-    shutil.copytree(ROOT/'backend/domain/harpisense_contracts', stage/'backend/domain/harpisense_contracts',
-                    ignore=shutil.ignore_patterns('__pycache__'))
-    shutil.copytree(ROOT/'backend/domain/harpisense_engines', stage/'backend/domain/harpisense_engines',
-                    ignore=shutil.ignore_patterns('__pycache__'))
-    for name in ('harpisense_data','harpisense_rf','harpisense_if','harpisense_xai'):
-        shutil.copytree(ROOT/'backend/domain'/name,stage/'backend/domain'/name,
+    for package in ('harpisense_contracts','harpisense_engines','harpisense_data',
+                    'harpisense_rf','harpisense_if','harpisense_xai'):
+        shutil.copytree(ROOT/'backend/domain'/package, stage/'backend/domain'/package,
                         ignore=shutil.ignore_patterns('__pycache__'))
-    shutil.copytree(ROOT/'backend/detection_composition',stage/'backend/detection_composition',
-                    ignore=shutil.ignore_patterns('__pycache__'))
     shutil.copyfile(ROOT/'backend/domain/harpisense_catalog.py', stage/'backend/domain/harpisense_catalog.py')
     (stage/'backend/native_server/build_info.json').write_text(json.dumps({
         'package_version': os.environ.get('HARPISENSE_PACKAGE_VERSION', 'development'),
@@ -43,7 +59,7 @@ def main():
     for name in ('backend/delivery/requirements.txt', 'backend/config_manager/requirements.txt',
                  'backend/admin_auth/requirements-mfa.txt', 'backend/domain/requirements-scientific.txt',
                  'packaging/native/requirements-activation.txt'):
-        requirements.extend((ROOT/name).read_text().splitlines())
+        requirements.extend(read_requirements(ROOT/name))
     requirements.append('paho-mqtt==2.1.0')
     (stage/'requirements.lock').write_text('\n'.join(requirements) + '\n')
     subprocess.run([sys.executable, '-m', 'pip', 'download', '--dest', str(stage/'wheels'),

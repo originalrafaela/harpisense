@@ -46,14 +46,16 @@ def capabilities(state):
         secret_refs=frozenset(['secret://native/mqtt-consumer']))
 
 
-def build_native_api(state, *, allowed_origins, runtime_kind='installed'):
+def build_native_api(state, *, allowed_origins, runtime_kind='installed',
+                     initial_access=None, protection_key=None):
     """Reuse the native composition for installed and isolated review transports."""
     environment(state)
     api = build_app()
     credentials = [(state['technical_user'], state['technical_password']),
                    (state['mqtt']['username'], state['mqtt']['password'])]
     install_candidate_admin_auth(api, state['dsn'],
-        protection_key=Path(state['key_file']).read_bytes().strip(),
+        protection_key=protection_key if protection_key is not None else Path(state['key_file']).read_bytes().strip(),
+        initial_access=initial_access,
         allowed_origins=allowed_origins, technical_credentials=credentials)
     store = PostgresStore(state['dsn'])
     from xai_api import install_xai_api
@@ -85,8 +87,9 @@ def build_native_api(state, *, allowed_origins, runtime_kind='installed'):
     return api
 
 
-def build_native_app(state, frontend):
-    api=build_native_api(state,allowed_origins=[state['panel_url']])
+def build_native_app(state, frontend, *, initial_access=None, protection_key=None):
+    api=build_native_api(state,allowed_origins=[state['panel_url']],
+                         initial_access=initial_access, protection_key=protection_key)
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
     @app.middleware('http')
@@ -96,7 +99,8 @@ def build_native_app(state, frontend):
         if request.headers.get('host') != expected:
             return JSONResponse({'error': {'code': 'HOST_DENIED'}}, status_code=403)
         origin = request.headers.get('origin')
-        if origin and origin != state['panel_url']:
+        if (origin and origin != state['panel_url']) or (
+                request.method not in ('GET', 'HEAD', 'OPTIONS') and origin != state['panel_url']):
             return JSONResponse({'error': {'code': 'ORIGIN_DENIED'}}, status_code=403)
         if request.url.path.startswith('/p11-api/'):
             # Technical ingestion has no browser transport, as in the Vite guard.

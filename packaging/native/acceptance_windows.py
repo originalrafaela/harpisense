@@ -26,6 +26,7 @@ import pyotp
 from playwright.sync_api import sync_playwright, expect
 from provision import create_state, initialize_database, prepare_database, preflight, run
 from native_server.runtime import probe_broker
+from acceptance_first_use import prepare_first_use, authorize_browser
 
 
 def wait_for(predicate, timeout=20):
@@ -46,6 +47,8 @@ def main():
     parser.add_argument('--mosquitto', required=True, type=Path)
     parser.add_argument('--runtime', type=Path, help='Test frozen product runtime instead of Python source')
     args = parser.parse_args()
+    if args.runtime:
+        parser.error('Frozen clean-machine acceptance requires the installed IPC launcher; this script is an explicit source fixture')
     evidence = {'environment': 'Windows native disposable processes; existing workstation, not clean OS',
                 'docker': False, 'service_registration': False, 'machine_reboot': False,
                 'runtime': 'frozen_executable' if args.runtime else 'python_source', 'checks': []}
@@ -59,6 +62,7 @@ def main():
     private = ROOT/'.native-test'/str(uuid.uuid4())
     private.parent.mkdir(exist_ok=True)
     state = create_state(private)
+    prepare_first_use(state, private)
     state['dsn'] = state['dsn'].replace(':15432/', ':25432/')
     state['panel_url'] = 'http://127.0.0.1:28080'
     state['mqtt']['port'] = 28883
@@ -90,7 +94,7 @@ def main():
             run(api_command + ['prepare', '--state', private/'state.json'])
         else:
             prepare_database(private/'state.json')
-        check(True, 'fresh_product_migrations_and_protected_grant')
+        check(not (private/'bootstrap.secret').exists(), 'fresh_migrations_without_manual_grant')
         process([args.mosquitto, '-c', config], 'broker')
         wait_for(lambda: probe_broker(state) == {'connected': True, 'subscribed': True})
         check(True, 'real_broker_tls_authentication_and_suback')
@@ -98,10 +102,11 @@ def main():
         probe_broker(dict(state, mqtt=dict(state['mqtt'], mode='external')))
         check(hashlib.sha256(config.read_bytes()).hexdigest() == original_broker_config,
               'external_mode_validates_tls_and_suback_without_administering_broker')
-        api = process(api_command + ['api', '--state', str(private/'state.json')], 'api')
+        native_api_command = [sys.executable, str(ROOT/'packaging/native/acceptance_first_use.py')]
+        api = process(native_api_command + ['api', '--state', str(private/'state.json')], 'api')
         consumer = process(api_command + ['consumer', '--state', str(private/'state.json')], 'consumer')
         base = state['panel_url']
-        http = httpx.Client(base_url=base, timeout=10, trust_env=False)
+        http = httpx.Client(base_url=base, timeout=10, trust_env=False, headers={'Origin': base})
         wait_for(lambda: http.get('/').status_code == 200)
         prefix = '/p11-api/api/v1'
         check(http.get(prefix + '/p11/telemetry').status_code == 401, 'anonymous_p11_denied')
@@ -113,9 +118,9 @@ def main():
         with sync_playwright() as pw:
             browser = pw.chromium.launch()
             page = browser.new_page()
+            authorize_browser(page, state)
             page.goto(base)
-            page.get_by_role('button', name='Primeira configuração', exact=True).click()
-            page.get_by_label('Grant local de uso único', exact=True).fill((private/'bootstrap.secret').read_text())
+            page.get_by_role('button', name='Autenticação inicial', exact=True).click()
             page.get_by_label('Usuário', exact=True).fill(username)
             page.get_by_label('Senha da conta administrativa', exact=True).fill(password)
             page.get_by_role('button', name='Criar conta e configurar MFA', exact=True).click()
@@ -129,10 +134,9 @@ def main():
                 check(not conn.execute('SELECT 1 FROM hs_admin_mfa WHERE enabled_at IS NOT NULL').fetchone(), 'invalid_totp_does_not_activate')
             page.get_by_label('Código de 6 dígitos', exact=True).fill(pyotp.TOTP(key).now())
             page.get_by_role('button', name='Confirmar MFA', exact=True).click()
-            expect(page.get_by_role('heading', name='Guarde seus códigos de recuperação')).to_be_visible()
-            check(page.locator('.recovery-codes li').count() == 10, 'ten_recovery_codes_browser')
-            page.get_by_label('Guardei os códigos em local seguro.').check()
-            page.get_by_role('button', name='Concluir e continuar', exact=True).click()
+            expect(page.get_by_role('heading', name='Guarde seus 3 códigos de recuperação')).to_be_visible()
+            check(page.locator('.recovery-codes li').count() == 3, 'three_password_recovery_codes_browser')
+            page.get_by_role('button', name='Já guardei os códigos', exact=True).click()
             expect(page.get_by_role('button', name='Sair', exact=True)).to_be_visible()
             check(True, 'browser_bootstrap_totp_confirmation_dashboard')
             page.get_by_role('button', name='Iniciar assistente', exact=True).click()
@@ -156,7 +160,7 @@ def main():
                 run(api_command + ['prepare', '--state', private/'state.json'])
             else:
                 prepare_database(private/'state.json')
-            api = process(api_command + ['api', '--state', str(private/'state.json')], 'api-restarted')
+            api = process(native_api_command + ['api', '--state', str(private/'state.json')], 'api-restarted')
             consumer = process(api_command + ['consumer', '--state', str(private/'state.json')], 'consumer-restarted')
             wait_for(lambda: http.get('/').status_code == 200)
             with psycopg.connect(state['dsn']) as conn:

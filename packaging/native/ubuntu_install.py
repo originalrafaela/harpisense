@@ -15,7 +15,7 @@ APP = Path('/opt/harpisense')
 DATA = Path('/var/lib/harpisense')
 
 
-def unit(name, command, dependencies=()):
+def unit(name, command, dependencies=(), *, api=False):
     after = 'network-online.target ' + ' '.join(x + '.service' for x in dependencies)
     content = f'''[Unit]
 Description=HarpiSense {name}
@@ -23,8 +23,8 @@ After={after}
 Wants=network-online.target
 Requires={' '.join(x + '.service' for x in dependencies)}
 [Service]
-User=harpisense
-Group=harpisense
+User={'harpisense-api' if api else 'harpisense'}
+Group={'harpisense-api' if api else 'harpisense'}
 WorkingDirectory=/opt/harpisense
 Environment=PYTHONPATH=/opt/harpisense/backend:/opt/harpisense/backend/domain:/opt/harpisense/genai
 ExecStart={command}
@@ -35,7 +35,8 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/var/lib/harpisense
+ReadWritePaths={'/var/lib/harpisense/api' if api else '/var/lib/harpisense'}
+{('RuntimeDirectory=harpisense-api' + chr(10) + 'RuntimeDirectoryMode=0700' + chr(10) + 'RuntimeDirectoryPreserve=no' + chr(10) + 'LoadCredentialEncrypted=activation-key:/etc/credstore.encrypted/harpisense-activation') if api else ''}
 [Install]
 WantedBy=multi-user.target
 '''
@@ -57,7 +58,7 @@ def main():
     mode = 'external' if args.external_broker else 'local_managed'
     preflight(DATA, APP, mode)
     # Inspect before apt; do not adopt pre-existing installations or service users.
-    for account in ('harpisense',):
+    for account in ('harpisense', 'harpisense-api'):
         try:
             pwd.getpwnam(account)
         except KeyError:
@@ -66,29 +67,29 @@ def main():
             raise SystemExit('EXISTING_SERVICE_ACCOUNT')
     external = json.loads(args.external_broker.read_text()) if args.external_broker else None
     print('Preparando componentes do HarpiSense…', flush=True)
-    run(['apt-get', 'update'], timeout=1200)
     # Since preflight rejects existing PostgreSQL/broker configuration, any default
     # services below were installed by this invocation, never third-party services.
-    packages = ['python3-venv', 'python3-pip', 'postgresql-16', 'ca-certificates']
-    if mode == 'local_managed':
-        packages.append('mosquitto')
-    run(['apt-get', 'install', '-y'] + packages, env=dict(os.environ, DEBIAN_FRONTEND='noninteractive'), timeout=1200)
+    debs = sorted((args.payload/'vendor/debs').glob('*.deb'))
+    if not debs:
+        raise RuntimeError('OFFLINE_UBUNTU_DEBS_REQUIRED')
+    run(['dpkg', '--install', *debs], env=dict(os.environ, DEBIAN_FRONTEND='noninteractive'), timeout=1200)
     run(['systemctl', 'stop', 'postgresql@16-main.service'])
     run(['systemctl', 'disable', 'postgresql.service'])
     if mode == 'local_managed':
         run(['systemctl', 'disable', '--now', 'mosquitto.service'])
     run(['useradd', '--system', '--home', str(DATA), '--shell', '/usr/sbin/nologin', 'harpisense'])
-    shutil.copytree(args.payload, APP)
+    run(['useradd', '--system', '--home', str(DATA/'api'), '--shell', '/usr/sbin/nologin', 'harpisense-api'])
+    shutil.copytree(args.payload, APP, ignore=shutil.ignore_patterns('delivery-license.secret'))
     run(['python3', '-m', 'venv', APP/'venv'])
     run([APP/'venv/bin/pip', 'install', '--no-index', '--find-links', APP/'wheels', '-r', APP/'requirements.lock'])
     # Use the installed application interpreter for database, TLS and auth modules.
     if sys.prefix != str(APP/'venv'):
         os.execve(str(APP/'venv/bin/python'), [str(APP/'venv/bin/python'), str(APP/'packaging/native/ubuntu_install.py'),
-            '--finish', str(args.external_broker or '')], dict(os.environ, PYTHONPATH=':'.join(
+            '--finish', str(args.external_broker or ''), str(args.payload/'delivery-license.secret')], dict(os.environ, PYTHONPATH=':'.join(
                 str(APP/p) for p in ('backend', 'backend/domain', 'genai', 'packaging/native'))))
 
 
-def finish(external_path):
+def finish(external_path, license_path):
     # Installed interpreter, isolated mode and package-owned paths; before any DB writes.
     run([APP/'venv/bin/python', '-I', APP/'packaging/native/entry.py', 'check-runtime'],
         env={k: v for k, v in os.environ.items() if k not in ('PYTHONPATH', 'PYTHONHOME')})
@@ -111,13 +112,40 @@ def finish(external_path):
         run(['runuser', '-u', 'harpisense', '--', '/usr/lib/postgresql/16/bin/pg_ctl', '-D', pgdata, '-w', 'stop'])
     (DATA/'pg-init.secret').rename(DATA/'pg-admin.secret')
     run(['chown', '-R', 'harpisense:harpisense', DATA])
+    # Dedicated API identity cannot read the PG cluster; PG cannot read activation
+    # or TOTP keys. PID1 delivers the wrapping credential only to the API unit.
+    api_data = DATA/'api'
+    api_data.mkdir(mode=0o700)
+    private = api_data/'activation'
+    private.mkdir(mode=0o700)
+    from provision import write_private
+    write_private(private/'activation.pending', Path(license_path).read_text(encoding='ascii').strip())
+    (DATA/'admin-mfa.key').unlink()  # Fresh installation: no MFA ciphertext exists.
+    api_state = dict(state, activation_directory=str(private),
+        handoff_directory='/run/harpisense-api', key_file=str(private/'legacy-mfa.key'))
+    api_state['mqtt'] = dict(state['mqtt'])
+    shutil.copyfile(state['mqtt']['ca_file'], api_data/'mqtt-ca.crt')
+    os.chmod(api_data/'mqtt-ca.crt', 0o600)
+    api_state['mqtt']['ca_file'] = str(api_data/'mqtt-ca.crt')
+    write_private(api_data/'state.json', json.dumps(api_state))
+    run(['chown', '-R', 'harpisense-api:harpisense-api', api_data])
+    run(['chown', 'root:root', DATA])
+    DATA.chmod(0o711)
+    credentials = Path('/etc/credstore.encrypted')
+    credentials.mkdir(mode=0o700, exist_ok=True)
+    credential = credentials/'harpisense-activation'
+    if credential.exists():
+        raise RuntimeError('EXISTING_ACTIVATION_CREDENTIAL')
+    run(['systemd-creds', 'setup'])
+    run(['systemd-creds', 'encrypt', '--with-key=host', '--name=activation-key', '-', credential], input=os.urandom(32))
+    credential.chmod(0o600)
     unit('harpisense-postgres', '/usr/lib/postgresql/16/bin/postgres -D /var/lib/harpisense/postgres')
     broker_deps = ()
     if mode == 'local_managed':
         unit('harpisense-broker', '/usr/sbin/mosquitto -c /var/lib/harpisense/mosquitto.conf')
         broker_deps = ('harpisense-broker',)
     command = '/opt/harpisense/venv/bin/python /opt/harpisense/packaging/native/entry.py '
-    unit('harpisense-api', command + 'api --state /var/lib/harpisense/state.json', ('harpisense-postgres',))
+    unit('harpisense-api', command + 'api --state /var/lib/harpisense/api/state.json', ('harpisense-postgres',), api=True)
     unit('harpisense-mqtt', command + 'consumer --state /var/lib/harpisense/state.json', ('harpisense-postgres',) + broker_deps)
     run(['systemctl', 'daemon-reload'])
     run(['systemctl', 'enable', '--now', 'harpisense-postgres', *broker_deps, 'harpisense-api', 'harpisense-mqtt'])
@@ -134,16 +162,19 @@ Icon=network-server
 Categories=Network;
 Terminal=false
 ''')
+    Path('/usr/share/applications/harpisense-first-access.desktop').write_text('''[Desktop Entry]
+Type=Application
+Name=HarpiSense Autenticação inicial
+Exec=pkexec /opt/harpisense/venv/bin/python /opt/harpisense/packaging/native/entry.py first-access --state /var/lib/harpisense/api/state.json
+Icon=network-server
+Categories=Network;
+Terminal=false
+''')
     print('HarpiSense instalado. Abra HarpiSense no menu de aplicações: http://127.0.0.1:18080')
-    # Local authorized installer console only. Never put grant in URL or logs.
-    if sys.stdout.isatty():
-        print('Segredo de primeiro acesso (10 minutos):', (DATA/'bootstrap.secret').read_text())
-    else:
-        print('Grant no arquivo privado /var/lib/harpisense/bootstrap.secret; acesso administrativo local necessário.')
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 3 and sys.argv[1] == '--finish':
-        finish(sys.argv[2])
+    if len(sys.argv) == 4 and sys.argv[1] == '--finish':
+        finish(sys.argv[2], sys.argv[3])
     else:
         main()

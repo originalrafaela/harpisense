@@ -9,8 +9,11 @@ for path in ('backend', 'backend/domain', 'genai', 'packaging/native'):
 
 
 def main():
+    if len(sys.argv)>1 and sys.argv[1]=='xai':
+        from harpisense_xai.__main__ import main as xai_main
+        return xai_main(sys.argv[2:])
     parser = argparse.ArgumentParser()
-    parser.add_argument('operation', choices=['check-runtime', 'api', 'consumer', 'prepare', 'probe', 'preflight', 'grant'])
+    parser.add_argument('operation', choices=['check-runtime', 'api', 'consumer', 'prepare', 'probe', 'preflight', 'grant', 'first-access'])
     parser.add_argument('--state', type=Path)
     args = parser.parse_args()
     if args.operation in ('check-runtime', 'prepare'):
@@ -30,22 +33,23 @@ def main():
         return
     from native_server.runtime import load_state, build_native_app, run_consumer, probe_broker
     state = load_state(args.state)
-    if args.operation == 'grant':
-        import psycopg
-        from admin_auth.mfa import MFAAdminAuth
-        with psycopg.connect(state['dsn']) as conn:
-            if conn.execute('SELECT 1 FROM hs_admin_account').fetchone():
-                raise SystemExit('ACCOUNT_EXISTS_USE_EXISTING_LOGIN')
-        grant = MFAAdminAuth(state['dsn'], protection_key=Path(state['key_file']).read_bytes()).issue_local_grant()
-        with (args.state.parent/'bootstrap.secret').open('w', encoding='ascii') as stream:
-            stream.write(grant)
-        print('Grant renovado no arquivo privado bootstrap.secret; validade 10 minutos.')
+    if args.operation == 'first-access':
+        from native_activation import launch_installer_browser
+        launch_installer_browser(state, ROOT)
         return
+    if args.operation == 'grant':
+        raise SystemExit('MANUAL_GRANT_DISABLED_USE_LOCAL_FIRST_ACCESS')
     if args.operation == 'api':
         import uvicorn
         from urllib.parse import urlparse
-        uvicorn.run(build_native_app(state, ROOT/'frontend/dist'),
-                    host='127.0.0.1', port=urlparse(state['panel_url']).port, access_log=False)
+        from native_activation import NativeActivationRuntime
+        with NativeActivationRuntime(state, ROOT) as runtime:
+            app = build_native_app(state, ROOT/'frontend/dist',
+                                   initial_access=runtime.adapter,
+                                   protection_key=runtime.totp_key)
+            uvicorn.run(runtime.transport.wrap(app), host='127.0.0.1',
+                        port=urlparse(state['panel_url']).port,
+                        proxy_headers=False, access_log=False)
     elif args.operation == 'consumer':
         run_consumer(state)
     else:
