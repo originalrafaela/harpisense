@@ -13,12 +13,11 @@ class Challenge(BaseModel):
 
 
 class Factor(Challenge):
-    code: SecretStr = Field(min_length=6, max_length=32)
+    code: SecretStr = Field(min_length=6, max_length=6)
 
 
 class Bootstrap(BaseModel):
     model_config = ConfigDict(extra='forbid')
-    bootstrap_secret: SecretStr = Field(min_length=43, max_length=43)
     username: str = Field(pattern=r'^[A-Za-z0-9_.@-]{3,64}$')
     password: SecretStr = Field(min_length=8, max_length=128)
 
@@ -33,15 +32,20 @@ class PasswordReset(BaseModel):
     model_config = ConfigDict(extra='forbid')
     username: str = Field(pattern=r'^[A-Za-z0-9_.@-]{3,64}$')
     code: SecretStr = Field(min_length=32, max_length=32)
+    totp_code: SecretStr = Field(min_length=6, max_length=6)
     new_password: SecretStr = Field(min_length=8, max_length=128)
 
 
 class FirstAccessConfirmation(BaseModel):
     model_config=ConfigDict(extra='forbid')
-    password_reset_generation:StrictInt=Field(ge=1)
+    generation:StrictInt=Field(ge=1)
 
 
-def install_candidate_admin_auth(app, conninfo, *, protection_key, allowed_origins, technical_credentials=()):
+class Empty(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
+
+def install_candidate_admin_auth(app, conninfo, *, protection_key, allowed_origins, technical_credentials=(), initial_access=None):
     """Call instead of install_admin_auth, AFTER P11/controls, BEFORE config API.
 
     Requires both explicit migrations. Does not run migrations or create accounts.
@@ -60,16 +64,19 @@ def install_candidate_admin_auth(app, conninfo, *, protection_key, allowed_origi
     router = APIRouter(prefix='/api/v1/admin-auth', route_class=PrivateRoute, dependencies=[Depends(private)])
 
     @router.post('/bootstrap')
-    def bootstrap(body: Bootstrap):
-        return auth.bootstrap(body.bootstrap_secret.get_secret_value(), body.username, body.password.get_secret_value())
+    def bootstrap(body: Bootstrap, request: Request):
+        if initial_access is None:
+            raise AuthError(403, 'INITIAL_ACCESS_REQUIRED')
+        identity = initial_access.require(request)
+        return auth.bootstrap(identity, body.username, body.password.get_secret_value())
 
     @router.post('/local-recovery')
-    def local_recovery(body: Bootstrap):
-        return auth.local_recover(body.bootstrap_secret.get_secret_value(), body.username, body.password.get_secret_value())
+    def local_recovery():
+        raise AuthError(403, 'MFA_RECOVERY_POLICY_UNAVAILABLE')
 
     @router.post('/password-reset/confirm')
     def reset_password(body: PasswordReset):
-        return auth.reset_password(body.username, body.code.get_secret_value(), body.new_password.get_secret_value())
+        return auth.reset_password(body.username, body.code.get_secret_value(), body.new_password.get_secret_value(), body.totp_code.get_secret_value())
 
     @router.post('/password-reset/codes')
     def reset_codes(body: EnrollmentAuthorization, token=Depends(app.state.require_admin_token)):
@@ -77,7 +84,11 @@ def install_candidate_admin_auth(app, conninfo, *, protection_key, allowed_origi
                                                     body.code.get_secret_value() if body.code else None)
 
     @router.post('/first-access/codes')
-    def first_access_codes(body:EnrollmentAuthorization,token=Depends(app.state.require_admin_token)):
+    def first_access_codes(body:Empty,token=Depends(app.state.require_admin_token)):
+        return auth.issue_first_access_codes(token)
+
+    @router.post('/first-access/reissue')
+    def first_access_reissue(body:EnrollmentAuthorization,token=Depends(app.state.require_admin_token)):
         return auth.regenerate_password_reset_codes(token,body.current_password.get_secret_value(),
             body.code.get_secret_value() if body.code else None,both=True)
 
@@ -87,7 +98,7 @@ def install_candidate_admin_auth(app, conninfo, *, protection_key, allowed_origi
 
     @router.post('/first-access/confirm')
     def first_access_confirm(body:FirstAccessConfirmation,token=Depends(app.state.require_admin_token)):
-        return auth.confirm_first_access(token,body.password_reset_generation)
+        return auth.confirm_first_access(token,body.generation)
 
     @router.post('/mfa/enrollment/authorize')
     def authorize(body: EnrollmentAuthorization, token=Depends(app.state.require_admin_token)):
@@ -100,15 +111,18 @@ def install_candidate_admin_auth(app, conninfo, *, protection_key, allowed_origi
 
     @router.post('/mfa/enrollment/confirm')
     def confirm(body: Factor):
-        return auth.confirm_enrollment(body.challenge_token.get_secret_value(), body.code.get_secret_value())
+        result = auth.confirm_enrollment(body.challenge_token.get_secret_value(), body.code.get_secret_value())
+        if initial_access is not None:
+            initial_access.invalidate()
+        return result
 
     @router.post('/mfa/verify')
     def verify(body: Factor):
         return auth.verify_login(body.challenge_token.get_secret_value(), body.code.get_secret_value())
 
     @router.post('/mfa/recover')
-    def recover(body: Factor):
-        return auth.verify_login(body.challenge_token.get_secret_value(), body.code.get_secret_value(), recovery=True)
+    def recover():
+        raise AuthError(403, 'MFA_RECOVERY_POLICY_UNAVAILABLE')
 
     @router.post('/mfa/cancel', status_code=204)
     def cancel(body: Challenge):
@@ -116,6 +130,21 @@ def install_candidate_admin_auth(app, conninfo, *, protection_key, allowed_origi
         return Response(status_code=204, headers={'Cache-Control': 'no-store'})
 
     app.include_router(router)
+    activation = APIRouter(prefix='/api/v1/activation', route_class=PrivateRoute, dependencies=[Depends(private)])
+
+    @activation.get('/status')
+    def activation_status(request: Request):
+        if initial_access is None:
+            raise AuthError(403, 'INITIAL_ACCESS_REQUIRED')
+        return initial_access.status(request)
+
+    @activation.post('/retry')
+    def activation_retry(body: Empty, request: Request):
+        if initial_access is None:
+            raise AuthError(403, 'INITIAL_ACCESS_REQUIRED')
+        return initial_access.retry(request)
+
+    app.include_router(activation)
     from .http_contract import install_http_contract
     install_http_contract(app)
     return auth

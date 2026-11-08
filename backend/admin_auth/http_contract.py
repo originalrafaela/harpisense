@@ -10,12 +10,12 @@ class Exact(BaseModel):
 
 
 class FirstAccessState(Exact):
-    status:Literal['pending','completed']
-    password_reset_generation:int=Field(ge=0)
-    password_reset_purpose:Literal['password_reset']
-    codes_issued:bool
-    issued_at:datetime|None
-    completed_at:datetime|None
+    contract_version:Literal[2]
+    status:Literal['not_issued','pending','completed']
+    generation:int=Field(ge=0)
+    codes_remaining:int=Field(ge=0,le=3)
+    installation_id:str
+    account_id:int
 
 
 class FirstAccessResult(Exact):
@@ -48,8 +48,6 @@ class EnrollmentDetails(Exact):
 
 
 class EnrollmentComplete(AdminSession):
-    recovery_codes: list[str] = Field(min_length=10, max_length=10)
-    password_reset_codes: list[str] = Field(min_length=10, max_length=10)
     first_access:FirstAccessState
 
 
@@ -61,13 +59,12 @@ class PasswordResetResult(Exact):
 
 
 class PasswordResetCodes(Exact):
-    password_reset_codes: list[str] = Field(min_length=10, max_length=10)
-    username:str
+    recovery_codes: list[str] = Field(min_length=3, max_length=3)
     first_access:FirstAccessState
 
 
 class FirstAccessCodes(PasswordResetCodes):
-    recovery_codes:list[str]=Field(min_length=10,max_length=10)
+    pass
 
 
 class SessionState(Exact):
@@ -103,6 +100,7 @@ RESPONSES = {
     ('post', '/password-reset/confirm'): ('PasswordResetResult',),
     ('post', '/password-reset/codes'): ('PasswordResetCodes',),
     ('post', '/first-access/codes'): ('FirstAccessCodes',),
+    ('post', '/first-access/reissue'): ('FirstAccessCodes',),
     ('get', '/first-access'): ('FirstAccessResult',),
     ('post', '/first-access/confirm'): ('FirstAccessResult',),
     ('post', '/mfa/enrollment/authorize'): ('MFAChallenge',),

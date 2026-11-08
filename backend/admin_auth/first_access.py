@@ -1,52 +1,42 @@
-"""Account-scoped onboarding metadata. Original reset codes are never stored."""
+"""V2 recovery sets. Caller holds the auth singleton transaction lock."""
 import secrets
-
-from .service import AuthError,token_hash
-
-
-def status(conn,account_id):
-    conn.execute('INSERT INTO hs_admin_first_access(account_id) VALUES(%s) ON CONFLICT DO NOTHING',(account_id,))
-    row=conn.execute('SELECT * FROM hs_admin_first_access WHERE account_id=%s',(account_id,)).fetchone()
-    return {'status':'completed' if row['completed_at'] is not None else 'pending',
-        'password_reset_generation':row['password_reset_generation'],
-        'password_reset_purpose':'password_reset',
-        'codes_issued':row['issued_at'] is not None,
-        'issued_at':row['issued_at'].isoformat() if row['issued_at'] is not None else None,
-        'completed_at':row['completed_at'].isoformat() if row['completed_at'] is not None else None}
+from .service import AuthError, token_hash
 
 
-def issue_password_reset_codes(conn,account_id):
-    # Caller holds the existing auth singleton row lock. Revocation, issuance,
-    # generation and pending state commit together, including the audit event.
-    conn.execute('INSERT INTO hs_admin_first_access(account_id) VALUES(%s) ON CONFLICT DO NOTHING',(account_id,))
-    generation=conn.execute('UPDATE hs_admin_first_access SET password_reset_generation=password_reset_generation+1, '
-        'issued_at=clock_timestamp(),completed_at=NULL WHERE account_id=%s RETURNING password_reset_generation',
-        (account_id,)).fetchone()['password_reset_generation']
-    conn.execute('UPDATE hs_admin_password_reset_code SET revoked_at=clock_timestamp() '
-                 'WHERE account_id=%s AND revoked_at IS NULL',(account_id,))
-    codes=[secrets.token_urlsafe(24) for _ in range(10)]
-    for value in codes:
-        conn.execute('INSERT INTO hs_admin_password_reset_code(code_hash,account_id,generation,purpose) '
-                     "VALUES(%s,%s,%s,'password_reset')",(token_hash(value),account_id,generation))
-    return codes
+def status(conn, account_id):
+    conn.execute('INSERT INTO hs_admin_recovery_set_v2(account_id,installation_id) SELECT id,installation_id FROM hs_admin_account WHERE id=%s ON CONFLICT DO NOTHING', (account_id,))
+    row = conn.execute('SELECT * FROM hs_admin_recovery_set_v2 WHERE account_id=%s FOR UPDATE', (account_id,)).fetchone()
+    remaining = conn.execute('SELECT count(*) AS n FROM hs_admin_recovery_v2 WHERE account_id=%s AND generation=%s AND used_at IS NULL AND revoked_at IS NULL', (account_id, row['generation'])).fetchone()['n']
+    return dict(contract_version=2, status='completed' if row['confirmed_at'] else 'pending' if row['issued_at'] else 'not_issued', generation=row['generation'], codes_remaining=remaining, installation_id=str(row['installation_id']), account_id=account_id)
 
 
-def confirm(conn,account_id,generation):
-    current=status(conn,account_id)
-    if (type(generation) is not int or generation<1 or not current['codes_issued']
-            or current['password_reset_generation']!=generation):
-        raise AuthError(409,'FIRST_ACCESS_GENERATION_CONFLICT')
-    conn.execute('UPDATE hs_admin_first_access SET completed_at=coalesce(completed_at,clock_timestamp()) '
-                 'WHERE account_id=%s',(account_id,))
-    return status(conn,account_id)
+def issue(conn, account_id, *, reissue=False):
+    current = status(conn, account_id)
+    if current['generation'] and not reissue:
+        error = AuthError(409, 'CODES_ALREADY_ISSUED')
+        error.first_access = current
+        raise error
+    generation = current['generation'] + 1
+    conn.execute('UPDATE hs_admin_recovery_v2 SET revoked_at=clock_timestamp() WHERE account_id=%s AND revoked_at IS NULL', (account_id,))
+    for table in ('hs_admin_password_reset_code', 'hs_admin_recovery_code'):
+        conn.execute(f'UPDATE {table} SET revoked_at=clock_timestamp() WHERE account_id=%s AND revoked_at IS NULL', (account_id,))
+    codes = set()
+    for _ in range(32):
+        codes.add(secrets.token_urlsafe(24))
+        if len(codes) == 3:
+            break
+    if len(codes) != 3:
+        raise AuthError(503, 'AUTH_UNAVAILABLE')
+    codes = list(codes)
+    for slot, code in enumerate(codes, 1):
+        conn.execute('INSERT INTO hs_admin_recovery_v2(account_id,installation_id,generation,slot,verifier) VALUES(%s,%s,%s,%s,%s)', (account_id, current['installation_id'], generation, slot, token_hash(code)))
+    conn.execute('UPDATE hs_admin_recovery_set_v2 SET generation=%s,issued_at=clock_timestamp(),confirmed_at=NULL WHERE account_id=%s', (generation, account_id))
+    return {'first_access': status(conn, account_id), 'recovery_codes': codes}
 
 
-def issue_authenticator_recovery_codes(conn,account_id,generation):
-    conn.execute('UPDATE hs_admin_recovery_code SET revoked_at=clock_timestamp() '
-                 'WHERE account_id=%s AND revoked_at IS NULL',(account_id,))
-    codes=[secrets.token_urlsafe(24) for _ in range(10)]
-    for value in codes:
-        conn.execute('INSERT INTO hs_admin_recovery_code(code_hash,account_id,purpose,issued_at,generation) '
-                     "VALUES(%s,%s,'authenticator_recovery',clock_timestamp(),%s)",
-                     (token_hash(value),account_id,generation))
-    return codes
+def confirm(conn, account_id, generation):
+    current = status(conn, account_id)
+    if type(generation) is not int or generation < 1 or current['generation'] != generation:
+        raise AuthError(409, 'GENERATION_CONFLICT')
+    conn.execute('UPDATE hs_admin_recovery_set_v2 SET confirmed_at=coalesce(confirmed_at,clock_timestamp()) WHERE account_id=%s', (account_id,))
+    return status(conn, account_id)

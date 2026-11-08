@@ -1,4 +1,5 @@
 alembic==1.13.2
+-r admin_auth/requirements-passwords.txt
 fastapi==0.115.0
 paho-mqtt==2.1.0
 psycopg[binary]==3.2.1

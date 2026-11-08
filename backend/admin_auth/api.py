@@ -28,6 +28,21 @@ class PrivateRoute(APIRoute):
                                                 headers={'Cache-Control': 'no-store'})
                         chunks.append(chunk)
                     request._body = b''.join(chunks)
+                    # Reject duplicate JSON names before Pydantic can discard them.
+                    import json
+                    def pairs(items):
+                        result = {}
+                        for key, value in items:
+                            if key in result:
+                                raise ValueError()
+                            result[key] = value
+                        return result
+                    try:
+                        json.loads(request._body, object_pairs_hook=pairs,
+                                   parse_constant=lambda value: (_ for _ in ()).throw(ValueError()))
+                    except (ValueError, UnicodeError):
+                        return JSONResponse({'error': {'code': 'INVALID_REQUEST'}}, status_code=422,
+                                            headers={'Cache-Control': 'no-store'})
                 return await handler(request)
             except RequestValidationError:
                 # Default Pydantic error includes rejected inputs, including secrets.
@@ -110,7 +125,10 @@ def install_admin_auth(app, auth, *, allowed_origins):
             headers['WWW-Authenticate'] = 'Bearer'
         if exc.retry_after:
             headers['Retry-After'] = str(exc.retry_after)
-        return JSONResponse({'error': {'code': exc.code}}, status_code=exc.status, headers=headers)
+        body = {'error': {'code': exc.code}}
+        if hasattr(exc, 'first_access'):
+            body['first_access'] = exc.first_access
+        return JSONResponse(body, status_code=exc.status, headers=headers)
 
     def no_store(response: Response, request: Request):
         response.headers['Cache-Control'] = 'no-store'
