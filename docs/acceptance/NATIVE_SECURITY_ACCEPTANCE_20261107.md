@@ -1,5 +1,7 @@
 # Preparação do aceite nativo e segurança — 2026-11-07
 
+Delta obrigatório offline e percurso por funcionalidade: [matriz atual](offline/FUNCTIONAL_MATRIX.md), [inventário segurança](offline/CAPTURE_EXECUTOR_INVENTORY.md) e [hashes/VMs/testes observados](offline/inventory-observed.json). As evidências anteriores abaixo permanecem com seu escopo original e não aprovam offline completo.
+
 Branch: `audit/native-security-acceptance-20261107`. Base integral: `a8fef1f5810ad5077658a29fe2aa407ffd21df6d`.
 Worktree: `harpisense-worktrees/native-security-acceptance`.
 Escopo: levantamento, testes isolados e preparação; nenhuma contenção real, reboot do host, alteração de instalação em uso ou build de instalador para revisão visual.

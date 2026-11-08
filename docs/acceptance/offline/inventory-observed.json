@@ -1,0 +1,204 @@
+{
+  "observed_at": "2026-11-08T01:49:16.760190+00:00",
+  "scope": "source inventory and capture fixtures only",
+  "installed_offline_acceptance": false,
+  "host_network_modified": false,
+  "guest_network_modified": false,
+  "reboot_performed": false,
+  "containment_performed": false,
+  "files": [
+    {
+      "path": "edge/requirements.txt",
+      "sha256": "9bbc26677c4957802590b21398e7b21414ddac1c483299be87590d181131af54"
+    },
+    {
+      "path": "edge/capture/scapy_gateway.py",
+      "sha256": "f513431eb6b961d7bbd1b9822eb2781001adb41bc72ac0560e9d36fc3d84884c"
+    },
+    {
+      "path": "edge/capture/offline_pcap.py",
+      "sha256": "016977f1dbd3316d652f16e74ce8d67d581c8eaad482b1070ee6cce319d6acef"
+    },
+    {
+      "path": "edge/capture/aggregator.py",
+      "sha256": "52ff23cecf54e5cade2901a9932fc30a75c849d04fdf9ea0eb00fb3a1c101c3b"
+    },
+    {
+      "path": "edge/capture/backend_client.py",
+      "sha256": "c01a50e429304608e7544790395f118956362faf155723b670ab28c71c626e47"
+    },
+    {
+      "path": "backend/delivery/action_review.py",
+      "sha256": "25beba807cfc9b9d9e8687fa8cad3c16c2adda5058f9990a823381269d5e3cd3"
+    },
+    {
+      "path": "backend/delivery/controls.py",
+      "sha256": "a76ff9fa570c49d5cedc89296061bbc58378c56e2c50eaf88e1091df5237dd80"
+    },
+    {
+      "path": "backend/native_server/runtime.py",
+      "sha256": "687e5f2f163b9a8143588f0eb5afc188015486bcba3fb422972a55109817ba95"
+    },
+    {
+      "path": "packaging/native/build_windows.py",
+      "sha256": "f5f865aba4edcee1a26e3fdde955fa5b8b99a0cc212c4ade53c3ac85e545cde1"
+    },
+    {
+      "path": "packaging/native/build_ubuntu.py",
+      "sha256": "6923f1fa6918c26ea3fe5471d429b0a20c43dc85fb981d4f829f95353cb37d2f"
+    },
+    {
+      "path": "packaging/native/ubuntu_install.py",
+      "sha256": "0b6cdd4dd8a3a43ffd9159b17722897b835911fe3af8f1848ee5996f18d785ba"
+    },
+    {
+      "path": "genai/artifacts.lock.json",
+      "sha256": "4b085ee46d8fb445f87de31d6620e8284e68981b2027e9408926f98747da40f6"
+    },
+    {
+      "path": "../native-installers/packaging/native/build_windows.py",
+      "sha256": "bb563a92d043664e11bd2a2eaf931356cdb8d74e209edbc61f7920d166dcaf6e",
+      "worktree_content_not_commit_attestation": true
+    },
+    {
+      "path": "../native-installers/packaging/native/build_ubuntu.py",
+      "sha256": "03f906160f044b5b941ef5d47eaedc5a7eb02f878917791a1c73b14e61abd085",
+      "worktree_content_not_commit_attestation": true
+    },
+    {
+      "path": "../native-installers/packaging/native/ubuntu_install.py",
+      "sha256": "98b2207abec86ca7a451a0c7ef15baaed9b304ed7263c6ae6b7f911ac99fe8c6",
+      "worktree_content_not_commit_attestation": true
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "HarpiSense-Setup-Windows-x64.exe",
+      "exists": true,
+      "offline_complete_verified": false,
+      "bytes": 166071966,
+      "sha256": "102ad86dd89d578237451cbe1e457e529510812b2d070b7815e946041b8069ff",
+      "provenance": "existing artifact; not rebuilt or changed"
+    },
+    {
+      "name": "HarpiSense-Setup-Ubuntu-24.04-x86_64.run",
+      "exists": true,
+      "offline_complete_verified": false,
+      "bytes": 17225396,
+      "sha256": "9c01092be0c3246fb90e0c6916af5b22c1cc789487eec8935409c8e9b711a3d8",
+      "provenance": "existing artifact; not rebuilt or changed"
+    }
+  ],
+  "machines": [
+    {
+      "platform": "windows11",
+      "vmx": "clean-os/windows11/HarpiSense-Clean.vmx",
+      "exists": true,
+      "protected_historical": false,
+      "clean_os_proven": false,
+      "guest_access_verified": false,
+      "offline_lan_verified": false,
+      "running": false,
+      "vmx_sha256": "7fa55983865600db74e5def9ac5a977e362e714318fcca1251d57fdb5e51c6f3",
+      "identity": {
+        "displayName": "HarpiSense native Windows CLEAN TEST",
+        "guestOS": "windows11-64",
+        "memsize": "4096",
+        "ethernet0.connectionType": "nat"
+      }
+    },
+    {
+      "platform": "ubuntu2404",
+      "vmx": "clean-os/ubuntu2404/HarpiSense-Clean.vmx",
+      "exists": true,
+      "protected_historical": false,
+      "clean_os_proven": false,
+      "guest_access_verified": false,
+      "offline_lan_verified": false,
+      "running": false,
+      "vmx_sha256": "5fa84d84a41c81e04b443e343ae6559ee6d445ac0eda82b011a6287109faad55",
+      "identity": {
+        "displayName": "HarpiSense native Ubuntu CLEAN TEST",
+        "guestOS": "ubuntu-64",
+        "memsize": "4096",
+        "ethernet0.connectionType": "nat",
+        "uuid.bios": "56 4d 3a 1b ba 93 ba 94-7c 2d 17 a6 cc fb 4f d7"
+      }
+    },
+    {
+      "platform": "ubuntu-candidate3-history",
+      "vmx": "candidate2-clean-20261106/Candidate2-Clean.vmx",
+      "exists": true,
+      "protected_historical": true,
+      "clean_os_proven": false,
+      "guest_access_verified": false,
+      "offline_lan_verified": false,
+      "running": false,
+      "vmx_sha256": "709cd9ae9927fd65584f686836e163398b810ede142f87982c321376f6342800",
+      "identity": {
+        "displayName": "HarpiSense candidate2 CLEAN 20261106",
+        "guestOS": "ubuntu-64",
+        "ethernet0.connectionType": "nat",
+        "memsize": "2048",
+        "uuid.bios": "56 4d a1 d4 ae fd 78 20-5e a1 71 44 5a 76 a2 5f"
+      }
+    },
+    {
+      "platform": "ubuntu-retest-history",
+      "vmx": "ubuntu-clean-retest-20261106/Ubuntu-Clean-Retest.vmx",
+      "exists": true,
+      "protected_historical": true,
+      "clean_os_proven": false,
+      "guest_access_verified": false,
+      "offline_lan_verified": false,
+      "running": false,
+      "vmx_sha256": "a1191486d9a6e863fdddc40cf3b4fceb962f91d382f711cad0a9e73c35a624fc",
+      "identity": {
+        "displayName": "HarpiSense Ubuntu LIMPO RETESTE",
+        "guestOS": "ubuntu-64",
+        "ethernet0.connectionType": "nat",
+        "memsize": "2048",
+        "uuid.bios": "56 4d ab 2a 4b df f3 5e-ce 71 f1 fa d2 a9 9d 21"
+      }
+    }
+  ],
+  "ubuntu_destination_uses_apt_update_install": true,
+  "reference_executors": [
+    {
+      "path": "referencias\\Versões corretas\\HarpiSense_Defense_Executor_Refatorado_v1\\defense_executor.py",
+      "sha256": "8202b5dc5b86d1556bdd88bf7fbbd6e3d358ad1b0b4fd2da5cf5deced827dc77",
+      "imports": [
+        "datetime",
+        "hashlib",
+        "json",
+        "schema_source",
+        "sqlite3"
+      ],
+      "deployed": false,
+      "executed": false
+    },
+    {
+      "path": "referencias\\Versões corretas\\HarpiSense_Gerenciador_Execucao_v1\\execution_manager.py",
+      "sha256": "09486a3348d1fad6f96938dbec98df65072da741c590efebea4283fb2dd9fcc9",
+      "imports": [
+        "datetime",
+        "hashlib",
+        "json",
+        "sqlite3",
+        "uuid"
+      ],
+      "deployed": false,
+      "executed": false
+    }
+  ],
+  "capture_fixture_tests": {
+    "tests_run": 12,
+    "passed": true,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "failing_ids": [],
+    "live_capture": false,
+    "installed_runtime": false
+  }
+}
