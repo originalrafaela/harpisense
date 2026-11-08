@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-08",
+  "branch": "integration/initial-auth-20261108",
+  "backend_source_commit": "1598ed4",
+  "environment": "Windows development workspace; native disposable PostgreSQL; no Docker",
+  "production_modified": false,
+  "backend_integrated": {
+    "command": "../issuer-local-auth/.venv311/Scripts/python.exe backend/initial_auth_tests/run_native_postgres.py --pg-bin D:/Programas/PostgreSQL/bin --edge-backend backend",
+    "passed": 22,
+    "failed": 0,
+    "warnings": 3,
+    "elapsed_seconds": 26.60,
+    "coverage": ["cryptographic issuance", "forced collision", "concurrent issuance", "simultaneous activation", "real TLS and DPAPI interoperability", "lost activation response", "receipt-only copy rejected", "offline activation verification", "interrupted registration", "three-code emission concurrency", "explicit reissue", "concurrent password reset", "TOTP replay", "MFA enforcement", "administrative Basic rejected", "legacy migration", "late failure rollback"]
+  },
+  "frontend_unit": {"passed": 76, "failed": 0},
+  "frontend_browser": {"passed": 11, "failed": 0, "backend": "intercepted HTTP fixtures", "screenshots": false, "videos": false, "traces": false},
+  "frontend_build": {"passed": true, "modules": 55},
+  "clean_install_windows": "not_validated",
+  "clean_install_ubuntu": "not_validated",
+  "argon2_clean_machine_windows": "not_validated",
+  "argon2_clean_machine_ubuntu": "not_validated",
+  "vmware_clone_resistance": "not_implemented",
+  "lost_authenticator_policy": "not_approved"
+}
