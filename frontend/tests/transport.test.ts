@@ -81,6 +81,14 @@ test('proxy real Vite: caminho, Bearer, status, leitura restrita e logs sem cred
   for(const suffix of ['', '?incident_revision=0','?incident_revision=1&incident_revision=2','?limit=1'])
     assert.equal((await fetch(base+'/incidents/incident-1/explanations'+suffix,{headers})).status,400);
   assert.equal((await fetch(base+'/incidents/incident-1/explanations?incident_revision=1',{method:'POST',headers})).status,405);
+  assert.equal((await fetch(base+'/incidents/incident-1/dossier?incident_revision=1',{headers})).status,200);
+  for(const suffix of ['', '?incident_revision=0','?incident_revision=1&incident_revision=2','?limit=1','?incident_revision=1&secret=no'])
+    assert.equal((await fetch(base+'/incidents/incident-1/dossier'+suffix,{headers})).status,400);
+  assert.equal((await fetch(base+'/incidents/incident-1/dossier?incident_revision=1',{method:'POST',headers})).status,405);
+  assert.equal((await fetch(base+'/incidents/incident-1/assessments',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({incident_revision:1,assessment:'confirmed',reason:'isolated test'})})).status,200);
+  assert.equal((await fetch(base+'/incidents/incident-1/assessments?incident_revision=1',{method:'POST',headers})).status,400);
+  assert.equal((await fetch(base+'/incidents/incident-1/assessments',{method:'GET',headers})).status,404);
+  assert.equal((await fetch(base+'/incidents/incident-1/assessments',{method:'PUT',headers})).status,405);
 });
 
 test('proxy libera somente as rotas candidatas de primeiro acesso/MFA e não envia Basic',async t=>{

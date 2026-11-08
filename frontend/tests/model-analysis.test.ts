@@ -20,6 +20,19 @@ const makeAnalysis=(detector:'random_forest'|'isolation_forest',id:string,state:
 };
 const response=(analyses:unknown[],state='available')=>({incident_ref:{id:'incident-1',revision:4},state,analyses,read_only:true});
 
+test('TreeExplainer RF is explicit raw output and cannot masquerade as calibrated RF or IF score',()=>{
+ const raw=makeAnalysis('random_forest','detect-raw');
+ raw.explanations[0].record.method='SHAP_TREE_EXPLAINER';
+ raw.explanations[0].record.target.output='RAW_CLASS_PROBABILITY';
+ raw.explanations[0].output_direction='positive_increases_raw_class_probability';
+ assert.equal(parseIncidentModelResponse(response([raw]),'incident-1',4)?.analyses[0].explanations[0].output,'RAW_CLASS_PROBABILITY');
+ raw.explanations[0].record.target.output='CALIBRATED_CLASS_PROBABILITY';
+ assert.equal(parseIncidentModelResponse(response([raw]),'incident-1',4),null);
+ const operational=makeAnalysis('isolation_forest','detect-if-permutation');
+ operational.explanations[0].record.method='SHAP_PERMUTATION_EXPLAINER';
+ assert.equal(parseIncidentModelResponse(response([operational]),'incident-1',4)?.analyses[0].explanations[0].method,'SHAP_PERMUTATION_EXPLAINER');
+});
+
 test('vincula explicações RF e IF ao incidente, revisão, modelo e detecção',()=>{
  const parsed=parseIncidentModelResponse(response([makeAnalysis('random_forest','detect-rf'),makeAnalysis('isolation_forest','detect-if')]),'incident-1',4);
  assert.ok(parsed);assert.equal(parsed.analyses.length,2);
@@ -72,7 +85,7 @@ test('rejeita mistura de incidente, detector ou saída explicada',()=>{
 test('RF é exibido como probabilidade calibrada e IF como score sem porcentagem',()=>{
  assert.equal(formatModelValue(.75,'CALIBRATED_CLASS_PROBABILITY'),'75%');
  assert.equal(formatModelValue(-.25,'ANOMALY_SCORE'),'-0,25');
- assert.equal(methodLabel('SHAPLEY_PERMUTATION'),'Shapley por permutações');
+ assert.equal(methodLabel('SHAPLEY_PERMUTATION'),'SHAPLEY_PERMUTATION · implementação histórica');
  assert.equal(contributionDirection(.2,'positive_increases_class_probability'),'Aumentou probabilidade da classe');
  assert.equal(contributionDirection(-.2,'positive_increases_anomaly_score'),'Reduziu score de anomalia');
  assert.equal(contributionDirection(.1,'positive_increases_class_probability').includes('ataque'),false);

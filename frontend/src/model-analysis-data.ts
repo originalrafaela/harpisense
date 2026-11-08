@@ -5,9 +5,9 @@ export type AnalysisState='available'|'absent'|'invalid'|'unavailable';
 export type ModelExplanation={
  id:string; projectionRevision:number; detectionId:string; modelVersion:string;
  linkedToIncident:boolean;
- method:string; output:'CALIBRATED_CLASS_PROBABILITY'|'ANOMALY_SCORE'; classLabel:string|null;
+ method:string; output:'CALIBRATED_CLASS_PROBABILITY'|'RAW_CLASS_PROBABILITY'|'ANOMALY_SCORE'; classLabel:string|null;
  baseValue:number; outputValue:number; contributions:{feature:string;value:number;contribution:number}[];
- outputDirection:string; createdAt:string|null; limitations:string[];
+ outputDirection:string; createdAt:string|null; limitations:string[];referenceRef:string|null;
 };
 export type ModelAnalysis={
  detectionId:string; detectionRevision:number|null; state:AnalysisState; reasonCode:string|null;
@@ -28,9 +28,12 @@ function explanationView(value:unknown, detectionId:string, modelVersion:string,
  if(!number(value.coherence.absolute_error)||!number(value.coherence.reconstruction_tolerance)||
     value.coherence.absolute_error>value.coherence.reconstruction_tolerance||value.coherence.causality_or_detector_accuracy_proven!==false)return null;
  const r=value.record;const target=object(r.target)?r.target:{};
- const expectedDirection=detector==='random_forest'?'positive_increases_class_probability':'positive_increases_anomaly_score';
+ if(r.method==='SHAP_TREE_EXPLAINER'&&detector!=='random_forest')return null;
+ const rawTree=r.method==='SHAP_TREE_EXPLAINER'&&detector==='random_forest';
+ const expectedOutput=rawTree?'RAW_CLASS_PROBABILITY':detector==='random_forest'?'CALIBRATED_CLASS_PROBABILITY':'ANOMALY_SCORE';
+ const expectedDirection=rawTree?'positive_increases_raw_class_probability':detector==='random_forest'?'positive_increases_class_probability':'positive_increases_anomaly_score';
  if(r.record_type!=='explanation'||r.detection_id!==detectionId||r.model_version!==modelVersion||!string(r.method)||
-    target.output!==(detector==='random_forest'?'CALIBRATED_CLASS_PROBABILITY':'ANOMALY_SCORE')||
+    target.output!==expectedOutput||
     !(target.class_label===null||string(target.class_label))||!number(r.base_value)||!number(r.output_value)||
     (detector==='random_forest'?!string(target.class_label):target.class_label!==null)||
     !Array.isArray(r.contributions)||value.output_direction!==expectedDirection)return null;
@@ -42,7 +45,7 @@ function explanationView(value:unknown, detectionId:string, modelVersion:string,
  return {id:value.id,projectionRevision:Number(value.projection_revision),detectionId,modelVersion,linkedToIncident:value.in_incident_explanation_refs,method:r.method,
   output:target.output as ModelExplanation['output'],classLabel:target.class_label as string|null,
   baseValue:r.base_value as number,outputValue:r.output_value as number,contributions,outputDirection:value.output_direction as string,
-  createdAt:string(r.created_at)?r.created_at:null,limitations};
+  createdAt:string(r.created_at)?r.created_at:null,limitations,referenceRef:string(r.reference_ref)?r.reference_ref:null};
 }
 
 function analysisView(value:unknown,incidentId:string,incidentRevision:number):ModelAnalysis|null{
@@ -98,15 +101,15 @@ export function incidentIdentity(row:Row):{id:string;revision:number}|null{
  return string(id)&&Number.isInteger(revision)&&Number(revision)>0?{id,revision:Number(revision)}:null;
 }
 
-export function methodLabel(method:string){return method==='SHAPLEY_PERMUTATION'?'Shapley por permutações':method==='SHAP_MODEL_AGNOSTIC'?'SHAP agnóstico de modelo':`Método informado: ${method}`}
+export function methodLabel(method:string){return method==='SHAP_TREE_EXPLAINER'?'TreeExplainer (SHAP)':method==='SHAP_PERMUTATION_EXPLAINER'?'PermutationExplainer (SHAP)':method==='SHAPLEY_PERMUTATION'?'SHAPLEY_PERMUTATION · implementação histórica':method==='SHAP_MODEL_AGNOSTIC'?'SHAP agnóstico de modelo':`Método informado: ${method}`}
 
 export function formatModelValue(value:number,output:ModelExplanation['output'],digits=4){
- if(output==='CALIBRATED_CLASS_PROBABILITY')return `${new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(value*100)}%`;
+ if(output==='CALIBRATED_CLASS_PROBABILITY'||output==='RAW_CLASS_PROBABILITY')return `${new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(value*100)}%`;
  return new Intl.NumberFormat('pt-BR',{maximumFractionDigits:digits}).format(value);
 }
 
 export function contributionDirection(value:number,outputDirection:string){
- const result=outputDirection==='positive_increases_class_probability'?'probabilidade da classe':
+ const result=outputDirection==='positive_increases_raw_class_probability'?'probabilidade original antes da calibração':outputDirection==='positive_increases_class_probability'?'probabilidade da classe':
   outputDirection==='positive_increases_anomaly_score'?'score de anomalia':'resultado explicado';
  return value>0?`Aumentou ${result}`:value<0?`Reduziu ${result}`:`Sem alteração (${result})`;
 }

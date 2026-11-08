@@ -18,7 +18,8 @@ export function p11Transport(target) {
   const configOperation=path=>/^\/api\/v1\/config\/proposals\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(path);
   const configValidation=path=>/^\/api\/v1\/config\/proposals\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/(validate|apply)$/.test(path);
   const projectionHistory=path=>/^\/api\/v1\/p11\/(asset|telemetry|network_event|window|detection|xai|evidence|incident|risk|decision|approval|execution|verification|bitnet)\/(?:[A-Za-z0-9_.:@-]|%[0-9A-Fa-f]{2}){1,384}\/history$/.test(path);
-  const incidentModelAnalysis=path=>/^\/api\/v1\/p11\/incidents\/(?:[A-Za-z0-9_.:@-]|%[0-9A-Fa-f]{2}){1,256}\/explanations$/.test(path);
+  const incidentModelAnalysis=path=>/^\/api\/v1\/p11\/incidents\/(?:[A-Za-z0-9_.:@-]|%[0-9A-Fa-f]{2}){1,256}\/(explanations|dossier)$/.test(path);
+  const incidentAssessment=path=>/^\/api\/v1\/p11\/incidents\/(?:[A-Za-z0-9_.:@-]|%[0-9A-Fa-f]{2}){1,256}\/assessments$/.test(path);
   const guard = server => {server.middlewares.use((request, response, next) => {
     if (!request.url?.startsWith(prefix)) return next();
     const url = new URL(request.url, 'http://127.0.0.1');
@@ -39,7 +40,7 @@ export function p11Transport(target) {
       return response.end('{"error":{"code":"AUTH_REQUIRED"}}');
     }
     const read=request.method==='GET'&&(allowed.has(path)||configReads.has(path)||configOperation(path)||projectionHistory(path)||incidentModelAnalysis(path)||/^\/api\/v1\/p11\/explain\/[A-Za-z0-9_.:@-]{1,128}$/.test(path));
-    const write=(request.method==='PUT'&&path==='/api/v1/security/settings/mode/default')||(request.method==='POST'&&path==='/api/v1/security/emergency-stop')||configWrite(path,request.method)||request.method==='POST'&&configValidation(path);
+    const write=(request.method==='PUT'&&path==='/api/v1/security/settings/mode/default')||(request.method==='POST'&&path==='/api/v1/security/emergency-stop')||configWrite(path,request.method)||request.method==='POST'&&(configValidation(path)||incidentAssessment(path));
     if (!read&&!write&&!auth) {
       response.writeHead(request.method !== 'GET' ? 405 : 404, {'Content-Type': 'application/json'});
       return response.end('{"detail":"Recurso não integrado neste transporte restrito"}');

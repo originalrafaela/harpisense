@@ -16,7 +16,7 @@ const numberText=(value:number)=>new Intl.NumberFormat('pt-BR',{maximumFractionD
 const detectorName=(analysis:ModelAnalysis)=>analysis.detector==='random_forest'?'Random Forest':analysis.detector==='isolation_forest'?'Isolation Forest':'Modelo não informado';
 const assetLabel=(analysis:ModelAnalysis)=>analysis.assetName||analysis.technicalAssetId||'Ativo não identificado';
 const when=(start:string|null,end:string|null)=>start&&end?`${new Date(start).toLocaleString('pt-BR')} — ${new Date(end).toLocaleString('pt-BR')}`:'Janela sem horário informado';
-const contributionValue=(value:number,output:ModelExplanation['output'])=>output==='CALIBRATED_CLASS_PROBABILITY'?`${new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2,signDisplay:'always'}).format(value*100)} pp`:new Intl.NumberFormat('pt-BR',{maximumFractionDigits:6,signDisplay:'always'}).format(value);
+const contributionValue=(value:number,output:ModelExplanation['output'])=>output!=='ANOMALY_SCORE'?`${new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2,signDisplay:'always'}).format(value*100)} pp`:new Intl.NumberFormat('pt-BR',{maximumFractionDigits:6,signDisplay:'always'}).format(value);
 
 export function ModelAnalysis({incidents,client,selectedIncidentId,onIncidentChange}:ModelAnalysisProps){
  const [localIncidentId,setLocalIncidentId]=useState<string|null>(null);
@@ -67,7 +67,7 @@ export function ModelAnalysis({incidents,client,selectedIncidentId,onIncidentCha
  const chooseDetection=(analysis:ModelAnalysis)=>{setSelectedDetection(analysis.detectionId);setSelectedExplanation(analysis.explanations[0]?.id||'')};
  const output=explanation?.output;
 
- return <Panel title="Análise do modelo (XAI/SHAP)">
+ return <Panel title="XAI / SHAP">
   <div className="model-analysis-controls">
    <label>Incidente<select aria-label="Incidente da análise do modelo" value={resolvedIncidentId||''} onChange={event=>changeIncident(event.target.value)}>
     {!incidents.length&&<option value="">Nenhum incidente disponível</option>}
@@ -85,17 +85,19 @@ export function ModelAnalysis({incidents,client,selectedIncidentId,onIncidentCha
     <header className="model-analysis-heading"><div><strong>{assetLabel(activeAnalysis)}</strong><small>{activeAnalysis.technicalAssetId&&activeAnalysis.assetName?`ID técnico: ${activeAnalysis.technicalAssetId} · `:''}Incidente {activeAnalysis.incidentId} · rev. {activeAnalysis.incidentRevision}</small></div><div><strong>{detectorName(activeAnalysis)}</strong><small>Modelo {activeAnalysis.modelVersion}</small></div></header>
     <p className="model-analysis-window">Janela {activeAnalysis.windowId} · {when(activeAnalysis.windowStart,activeAnalysis.windowEnd)}</p>
     <div className="model-analysis-scores">
-     {output==='CALIBRATED_CLASS_PROBABILITY'?<article><span>Classe analisada</span><strong>{explanation.classLabel||'Não informada'}</strong></article>:<article><span>Score de anomalia (IF)</span><strong>{formatModelValue(explanation.outputValue,output)}</strong></article>}
+     {output!=='ANOMALY_SCORE'?<article><span>Classe analisada</span><strong>{explanation.classLabel||'Não informada'}</strong></article>:<article><span>Score de anomalia (IF)</span><strong>{formatModelValue(explanation.outputValue,output)}</strong></article>}
      <article><span>Referência do modelo</span><strong>{formatModelValue(explanation.baseValue,output)}</strong></article>
-     <article><span>{output==='CALIBRATED_CLASS_PROBABILITY'?'Probabilidade calibrada · pontuação final':'Pontuação final do modelo'}</span><strong>{formatModelValue(explanation.outputValue,output)}</strong></article>
+     <article><span>{output==='RAW_CLASS_PROBABILITY'?'Probabilidade original antes da calibração':output==='CALIBRATED_CLASS_PROBABILITY'?'Probabilidade calibrada · pontuação final':'Score operacional de anomalia'}</span><strong>{formatModelValue(explanation.outputValue,output)}</strong></article>
     </div>
     <div className="model-analysis-meta"><span>Método: {methodLabel(explanation.method)}</span><span>Explicação {explanation.id} · rev. {explanation.projectionRevision}</span></div>
+    <p className="technical-reference">Referência utilizada: {explanation.referenceRef||'Não informada'} · valor {formatModelValue(explanation.baseValue,output)}</p>
     <h3>Características que influenciaram o resultado</h3>
     <ol className="model-contributions">{sortedContributions.map((item,index)=>{const positive=item.contribution>=0;const width=item.contribution===0||!maxContribution?0:Math.max(1,Math.abs(item.contribution)/maxContribution*50);return <li key={`${item.feature}-${index}`}>
       <div className="model-feature"><strong>{item.feature}</strong><span>Valor observado: {numberText(item.value)}</span></div>
       <div className="model-contribution-plot" aria-hidden="true"><span className="model-contribution-axis"/><span className={positive?'model-contribution-bar positive':'model-contribution-bar negative'} style={positive?{left:'50%',width:`${width}%`}:{right:'50%',width:`${width}%`}}/></div>
       <div className="model-contribution-text"><span>{contributionDirection(item.contribution,explanation.outputDirection)}</span><strong>{contributionValue(item.contribution,output)}</strong></div>
      </li>})}</ol>
+    <div className="technical-table" role="region" aria-label="Tabela completa de contribuições" tabIndex={0}><table><caption>Características da explicação {explanation.id}</caption><thead><tr><th>Característica</th><th>Valor observado</th><th>Contribuição com sinal</th></tr></thead><tbody>{explanation.contributions.map((item,index)=><tr key={`${item.feature}-${index}`}><td>{item.feature}</td><td>{numberText(item.value)}</td><td>{contributionValue(item.contribution,output)}</td></tr>)}</tbody></table></div>
     {explanation.limitations.length>0&&<details className="model-limitations"><summary>Limitações informadas</summary><ul>{explanation.limitations.map((item,index)=><li key={`${item}-${index}`}>{item}</li>)}</ul></details>}
    </section>
   </>:displayState==='ready'?<Empty>Explicação não disponível para o incidente selecionado.</Empty>:null}
