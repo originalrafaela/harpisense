@@ -1,0 +1,457 @@
+{
+  "fixture_notice": "Controlled trusted-service transport fixtures in a disposable native PostgreSQL cluster. No real traffic, real attack, approved model or containment is attested.",
+  "response": {
+    "value": {
+      "operation": "IDS",
+      "autonomy_mode": 2,
+      "execution_enabled": false
+    },
+    "revision": 2,
+    "emergency_stopped": false,
+    "updated_at": "2026-11-07T23:30:19.732367-03:00",
+    "pending": {
+      "reliable": false,
+      "blockers": [
+        {
+          "id": "anomaly:fixture-anomaly",
+          "state": "ACTIVE",
+          "source": "anomaly",
+          "record_id": "fixture-anomaly",
+          "source_revision": 2,
+          "fresh": false,
+          "record_revision": 4
+        },
+        {
+          "id": "incident:fixture-lifecycle",
+          "state": "ACTIVE",
+          "source": "incident",
+          "record_id": "fixture-lifecycle",
+          "source_revision": 2,
+          "fresh": false,
+          "record_revision": 7
+        }
+      ],
+      "cases": {
+        "contract_version": 2,
+        "status": "active",
+        "coverage": "unknown",
+        "count_basis": "distinct_incident_id",
+        "known_active_count": 1,
+        "total_active_count": null,
+        "classification_counts": {
+          "anomaly": 1,
+          "confirmed_attack": 1,
+          "incident": 1
+        },
+        "classification_count_basis": "distinct_incident_id_per_class",
+        "classification_overlap": true,
+        "unlinked_active_item_count": 0,
+        "observation_sufficient": false,
+        "observed_at": "2026-11-07T23:29:24.093814-03:00",
+        "observation_basis": "oldest_required_source_report",
+        "sources": [
+          {
+            "source": "anomaly",
+            "source_revision": 2,
+            "observed_at": "2026-11-07T23:29:24.093814-03:00",
+            "fresh": false,
+            "valid": true,
+            "complete": false,
+            "reason_codes": [
+              "SOURCE_REPORT_STALE"
+            ],
+            "freshness_policy": {
+              "version": "operational-authority.v1",
+              "max_age_seconds": 30,
+              "clock": "postgresql"
+            }
+          },
+          {
+            "source": "incident",
+            "source_revision": 2,
+            "observed_at": "2026-11-07T23:29:24.093891-03:00",
+            "fresh": false,
+            "valid": true,
+            "complete": false,
+            "reason_codes": [
+              "SOURCE_REPORT_STALE"
+            ],
+            "freshness_policy": {
+              "version": "operational-authority.v1",
+              "max_age_seconds": 30,
+              "clock": "postgresql"
+            }
+          }
+        ],
+        "items": [
+          {
+            "case_id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+            "incident_refs": [
+              {
+                "id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+                "revision": 1
+              }
+            ],
+            "incident_ref": {
+              "id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+              "revision": 1
+            },
+            "classifications": [
+              "anomaly",
+              "confirmed_attack",
+              "incident"
+            ],
+            "confirmed_attack_refs": [
+              {
+                "id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+                "revision": 1
+              }
+            ],
+            "items": [
+              {
+                "source": "anomaly",
+                "record_id": "fixture-anomaly",
+                "source_revision": 2,
+                "source_observed_at": "2026-11-07T23:29:24.093814-03:00",
+                "fresh": false,
+                "state": "ACTIVE",
+                "origin": "trusted-service",
+                "incident_ref": {
+                  "id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+                  "revision": 1
+                },
+                "record_revision": 4,
+                "activity_type": "anomaly"
+              },
+              {
+                "source": "incident",
+                "record_id": "fixture-lifecycle",
+                "source_revision": 2,
+                "source_observed_at": "2026-11-07T23:29:24.093891-03:00",
+                "fresh": false,
+                "state": "ACTIVE",
+                "origin": "trusted-service",
+                "incident_ref": {
+                  "id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+                  "revision": 1
+                },
+                "record_revision": 7,
+                "activity_type": "attack"
+              }
+            ],
+            "assessment_records": [
+              {
+                "incident_ref": {
+                  "id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+                  "revision": 1
+                },
+                "assessment_id": "4",
+                "state": "confirmed",
+                "reason": "Controlled fixture assessment",
+                "actor": "dossier-owner",
+                "at": "2026-11-07T23:30:23.938344-03:00"
+              }
+            ],
+            "links": [
+              {
+                "rel": "incident_dossier",
+                "incident_ref": {
+                  "id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+                  "revision": 1
+                },
+                "path": "/api/v1/p11/incidents/fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a/dossier?incident_revision=1"
+              }
+            ]
+          }
+        ],
+        "unlinked_items": [],
+        "reason_codes": [
+          {
+            "code": "SOURCE_REPORT_STALE",
+            "source": "anomaly"
+          },
+          {
+            "code": "SOURCE_REPORT_STALE",
+            "source": "incident"
+          }
+        ]
+      },
+      "sources": [
+        {
+          "source": "anomaly",
+          "source_revision": 2,
+          "observed_at": "2026-11-07T23:29:24.093814-03:00",
+          "fresh": false,
+          "valid": true,
+          "complete": false
+        },
+        {
+          "source": "approval",
+          "source_revision": 1,
+          "observed_at": "2026-11-07T23:30:23.441487-03:00",
+          "fresh": true,
+          "valid": true,
+          "complete": true
+        },
+        {
+          "source": "execution",
+          "source_revision": 1,
+          "observed_at": "2026-11-07T23:30:23.342175-03:00",
+          "fresh": true,
+          "valid": true,
+          "complete": true
+        },
+        {
+          "source": "incident",
+          "source_revision": 2,
+          "observed_at": "2026-11-07T23:29:24.093891-03:00",
+          "fresh": false,
+          "valid": true,
+          "complete": false
+        },
+        {
+          "source": "verification",
+          "source_revision": 1,
+          "observed_at": "2026-11-07T23:30:23.687341-03:00",
+          "fresh": true,
+          "valid": true,
+          "complete": true
+        }
+      ],
+      "dependency": "Fontes autoritativas ausentes, desconhecidas ou desatualizadas: anomaly, incident",
+      "source_cases": {
+        "status": "active",
+        "known_active_count": 2,
+        "count_basis": "source_item",
+        "coverage": "unknown",
+        "sources": [
+          {
+            "source": "anomaly",
+            "source_revision": 2,
+            "observed_at": "2026-11-07T23:29:24.093814-03:00",
+            "fresh": false,
+            "valid": true,
+            "complete": false
+          },
+          {
+            "source": "incident",
+            "source_revision": 2,
+            "observed_at": "2026-11-07T23:29:24.093891-03:00",
+            "fresh": false,
+            "valid": true,
+            "complete": false
+          }
+        ],
+        "items": [
+          {
+            "id": "anomaly:fixture-anomaly",
+            "state": "ACTIVE",
+            "source": "anomaly",
+            "record_id": "fixture-anomaly",
+            "source_revision": 2,
+            "fresh": false,
+            "record_revision": 4
+          },
+          {
+            "id": "incident:fixture-lifecycle",
+            "state": "ACTIVE",
+            "source": "incident",
+            "record_id": "fixture-lifecycle",
+            "source_revision": 2,
+            "fresh": false,
+            "record_revision": 7
+          }
+        ]
+      }
+    },
+    "observed_at": "2026-11-08T02:30:24.223975+00:00",
+    "cases": {
+      "contract_version": 2,
+      "status": "active",
+      "coverage": "unknown",
+      "count_basis": "distinct_incident_id",
+      "known_active_count": 1,
+      "total_active_count": null,
+      "classification_counts": {
+        "anomaly": 1,
+        "confirmed_attack": 1,
+        "incident": 1
+      },
+      "classification_count_basis": "distinct_incident_id_per_class",
+      "classification_overlap": true,
+      "unlinked_active_item_count": 0,
+      "observation_sufficient": false,
+      "observed_at": "2026-11-07T23:29:24.093814-03:00",
+      "observation_basis": "oldest_required_source_report",
+      "sources": [
+        {
+          "source": "anomaly",
+          "source_revision": 2,
+          "observed_at": "2026-11-07T23:29:24.093814-03:00",
+          "fresh": false,
+          "valid": true,
+          "complete": false,
+          "reason_codes": [
+            "SOURCE_REPORT_STALE"
+          ],
+          "freshness_policy": {
+            "version": "operational-authority.v1",
+            "max_age_seconds": 30,
+            "clock": "postgresql"
+          }
+        },
+        {
+          "source": "incident",
+          "source_revision": 2,
+          "observed_at": "2026-11-07T23:29:24.093891-03:00",
+          "fresh": false,
+          "valid": true,
+          "complete": false,
+          "reason_codes": [
+            "SOURCE_REPORT_STALE"
+          ],
+          "freshness_policy": {
+            "version": "operational-authority.v1",
+            "max_age_seconds": 30,
+            "clock": "postgresql"
+          }
+        }
+      ],
+      "items": [
+        {
+          "case_id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+          "incident_refs": [
+            {
+              "id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+              "revision": 1
+            }
+          ],
+          "incident_ref": {
+            "id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+            "revision": 1
+          },
+          "classifications": [
+            "anomaly",
+            "confirmed_attack",
+            "incident"
+          ],
+          "confirmed_attack_refs": [
+            {
+              "id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+              "revision": 1
+            }
+          ],
+          "items": [
+            {
+              "source": "anomaly",
+              "record_id": "fixture-anomaly",
+              "source_revision": 2,
+              "source_observed_at": "2026-11-07T23:29:24.093814-03:00",
+              "fresh": false,
+              "state": "ACTIVE",
+              "origin": "trusted-service",
+              "incident_ref": {
+                "id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+                "revision": 1
+              },
+              "record_revision": 4,
+              "activity_type": "anomaly"
+            },
+            {
+              "source": "incident",
+              "record_id": "fixture-lifecycle",
+              "source_revision": 2,
+              "source_observed_at": "2026-11-07T23:29:24.093891-03:00",
+              "fresh": false,
+              "state": "ACTIVE",
+              "origin": "trusted-service",
+              "incident_ref": {
+                "id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+                "revision": 1
+              },
+              "record_revision": 7,
+              "activity_type": "attack"
+            }
+          ],
+          "assessment_records": [
+            {
+              "incident_ref": {
+                "id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+                "revision": 1
+              },
+              "assessment_id": "4",
+              "state": "confirmed",
+              "reason": "Controlled fixture assessment",
+              "actor": "dossier-owner",
+              "at": "2026-11-07T23:30:23.938344-03:00"
+            }
+          ],
+          "links": [
+            {
+              "rel": "incident_dossier",
+              "incident_ref": {
+                "id": "fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a",
+                "revision": 1
+              },
+              "path": "/api/v1/p11/incidents/fixture-linked-case-b2967bb68cae4a709ab8711aae19fd3a/dossier?incident_revision=1"
+            }
+          ]
+        }
+      ],
+      "unlinked_items": [],
+      "reason_codes": [
+        {
+          "code": "SOURCE_REPORT_STALE",
+          "source": "anomaly"
+        },
+        {
+          "code": "SOURCE_REPORT_STALE",
+          "source": "incident"
+        }
+      ]
+    },
+    "real_execution_blocked": true,
+    "executor": "isolated_simulation_only",
+    "change_allowed": false,
+    "effective_state": {
+      "applied_profile": "M2",
+      "control_revision": 2,
+      "executor": "isolated_simulation_only",
+      "availability": "real_executor_unavailable",
+      "execution_enabled": false,
+      "updated_at": "2026-11-07T23:30:19.732367-03:00",
+      "operational_visibility": "unknown_or_partial",
+      "blockers": [
+        {
+          "id": "anomaly:fixture-anomaly",
+          "state": "ACTIVE",
+          "source": "anomaly",
+          "record_id": "fixture-anomaly",
+          "source_revision": 2,
+          "fresh": false,
+          "record_revision": 4
+        },
+        {
+          "id": "incident:fixture-lifecycle",
+          "state": "ACTIVE",
+          "source": "incident",
+          "record_id": "fixture-lifecycle",
+          "source_revision": 2,
+          "fresh": false,
+          "record_revision": 7
+        }
+      ],
+      "change_allowed": false,
+      "containment_confirmed": false,
+      "executor_state": {
+        "status": "not_integrated",
+        "available": false,
+        "observed_at": null,
+        "source": null,
+        "blockers": [
+          "REAL_EXECUTOR_NOT_INTEGRATED"
+        ]
+      }
+    }
+  }
+}

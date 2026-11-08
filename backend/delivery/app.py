@@ -13,6 +13,7 @@ from .control_store import PostgresControls
 from .controls import Controls
 from .routes import install_controls
 from .operational_queue import OperationalQueue
+from .linked_cases import LinkedOperationalQueue
 
 
 def build_app():
@@ -34,7 +35,7 @@ def build_app():
 
     health.dependant.call = checked_health
     install_deterministic_harpia(app, store)
-    install_controls(app, Controls(PostgresControls(dsn), OperationalQueue()))
+    install_controls(app, Controls(PostgresControls(dsn), LinkedOperationalQueue()))
     return app
 
 

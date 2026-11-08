@@ -53,11 +53,14 @@ class ActivityProducer:
             raise ValueError('INVALID_ACTIVITY_REPORT')
         prepared=[]; seen=set()
         for item in deepcopy(items):
-            if (not isinstance(item,dict) or set(item)-{'id','state','record_revision','incident_ref'}
+            if (not isinstance(item,dict) or set(item)-{'id','state','record_revision','incident_ref','activity_type'}
                     or not isinstance(item.get('id'),str) or not 1<=len(item['id'])<=128
                     or item['id'].startswith('__coverage__:') or item['id'] in seen
                     or item.get('state') not in ACTIVE|CLOSED):
                 raise ValueError('INVALID_ACTIVITY_ITEM')
+            if 'activity_type' in item and (source not in ('incident','anomaly')
+                    or item['activity_type'] not in ({'incident','attack'} if source=='incident' else {'anomaly'})):
+                raise ValueError('INVALID_ACTIVITY_TYPE')
             if 'record_revision' in item and (type(item['record_revision']) is not int or item['record_revision']<1):
                 raise ValueError('INVALID_RECORD_REVISION')
             ref=item.get('incident_ref')
@@ -78,7 +81,7 @@ class ActivityProducer:
         if origin=='trusted-service':
             # Queue contract calls the producer record revision `revision`;
             # source_revision remains the independent full-snapshot generation.
-            operational=[{**item,**({'revision':item['record_revision']}
+            operational=[{**item,'origin':origin,**({'revision':item['record_revision']}
                          if 'record_revision' in item else {})} for item in prepared]
             if not complete:
                 operational.append({'id':'__coverage__:'+source,'state':'UNKNOWN'})
