@@ -68,12 +68,15 @@ class PostgresStore:
 
             latest = conn.execute(
                 """
-                SELECT MAX(revision)
+                SELECT MAX(revision), COUNT(DISTINCT source), MIN(source)
                 FROM projections
                 WHERE kind = %s AND id = %s
                 """,
                 (kind, item.id),
-            ).fetchone()[0]
+            ).fetchone()
+            latest, origin_count, original_source = latest
+            if latest is not None and (origin_count != 1 or original_source != item.source):
+                raise ValueError('immutable origin conflict')
 
             if latest is None and item.revision != 1:
                 raise ValueError("first revision must be 1")

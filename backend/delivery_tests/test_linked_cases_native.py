@@ -67,7 +67,7 @@ class LinkedCasesNativeTests(unittest.TestCase):
         (self.output/(name+'.json')).write_text(json.dumps({'fixture_notice':
             'Controlled trusted-service transport fixtures in a disposable native PostgreSQL cluster. '
             'No real traffic, real attack, approved model or containment is attested.',
-            'response':body},indent=2,ensure_ascii=False),encoding='utf-8')
+            'response':body},indent=2,ensure_ascii=False),encoding='utf-8',newline='\n')
 
     def test_assessment_alone_does_not_create_activity_and_duplicate_sources_count_once(self):
         ref=self.case()
@@ -137,6 +137,35 @@ class LinkedCasesNativeTests(unittest.TestCase):
         self.assertNotEqual(state['cases']['status'],'none_active')
         self.evidence('partial-observation',state)
 
+    def test_partial_coverage_marker_does_not_invent_an_active_case(self):
+        self.report('incident',[],complete=False)
+        state=self.http();cases=state['cases']
+        self.assertEqual(cases['status'],'partial')
+        self.assertEqual(cases['known_active_count'],0)
+        self.assertEqual(cases['unlinked_active_item_count'],0)
+        self.assertIsNone(cases['total_active_count'])
+        self.assertFalse(state['change_allowed'])
+
+    def test_unknown_without_prior_active_fact_does_not_claim_active_case(self):
+        ref=self.case()
+        self.report('incident',[{'id':'fixture-state-unknown','state':'UNKNOWN','incident_ref':ref}])
+        state=self.http();cases=state['cases']
+        self.assertEqual(cases['status'],'partial')
+        self.assertIsNone(cases['known_active_count']);self.assertIsNone(cases['total_active_count'])
+        self.assertFalse(state['change_allowed'])
+
+    def test_new_revision_cannot_promote_synthetic_origin_to_service_origin(self):
+        original=self.fixture.store.history('incident',self.fixture.ident)[0]['data']
+        changed=deepcopy(original);changed['revision']=2
+        with self.assertRaisesRegex(ValueError,'immutable origin conflict'):
+            self.fixture.store.insert('incident',Record(id=self.fixture.ident,revision=2,source='trusted-service',data=changed))
+        rows=self.fixture.store.history('incident',self.fixture.ident)
+        self.assertEqual(len(rows),1)
+        self.assertEqual(rows[0]['source'],'synthetic')
+        same_origin=Record(id=self.fixture.ident,revision=2,source='synthetic',data=changed)
+        self.assertTrue(self.fixture.store.insert('incident',same_origin))
+        self.assertFalse(self.fixture.store.insert('incident',same_origin))
+
     def test_closed_history_and_closed_assessment_do_not_block_apply(self):
         ref=self.case()
         self.fixture.interface.assess(ref['id'],1,'confirmed','Controlled fixture assessment','dossier-owner')
@@ -182,6 +211,7 @@ class LinkedCasesNativeTests(unittest.TestCase):
         self.assertEqual(response.status_code,409)
         self.assertEqual(response.json()['detail']['current_revision'],before['revision'])
         self.assertEqual(self.http()['value'],before['value'])
+        self.evidence('profile-change-refused',response.json())
 
 
 if __name__=='__main__':unittest.main()

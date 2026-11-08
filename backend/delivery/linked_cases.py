@@ -32,6 +32,7 @@ class LinkedOperationalQueue(OperationalQueue):
             if source not in CASE_SOURCES or not isinstance(items,list):continue
             for item in items:
                 if not valid_item(item) or item['state'] not in ACTIVE:continue
+                if item['id'].startswith('__coverage__:'):continue
                 fact={'source':source,'record_id':item['id'],'source_revision':revision,
                       'source_observed_at':observed_at.isoformat(),'fresh':fresh is True,
                       'state':item['state'],'origin':item.get('origin'),'item':item}
@@ -140,7 +141,9 @@ class LinkedOperationalQueue(OperationalQueue):
         coverage=legacy['coverage']
         if unlinked and coverage=='complete':coverage='partial'
         sufficient=coverage=='complete' and not unlinked
-        active=bool(cases or unlinked)
+        # Coverage markers and a never-observed UNKNOWN item are not evidence
+        # of an active case. They still block Apply and prevent a healthy zero.
+        active=bool(cases or any(item['state'] not in UNKNOWN for item in unlinked))
         status='active' if active else ('none_active' if sufficient else coverage)
         observed=[s['observed_at'] for s in sources if s['observed_at'] is not None]
         result['cases']={'contract_version':2,'status':status,'coverage':coverage,

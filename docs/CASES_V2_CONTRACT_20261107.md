@@ -97,7 +97,7 @@ para diagnóstico; não é o total distinto. O frontend deve consumir cases v2.
 
 ## Evidências
 
-`backend/delivery_tests/test_linked_cases_native.py`: nove testes aprovados com
+`backend/delivery_tests/test_linked_cases_native.py`: doze testes aprovados com
 PostgreSQL nativo Windows, HTTP autenticado, sem Docker; inclui concorrência real
 entre conexões, duplicação incidente/anomalia, revisões distintas do mesmo ID,
 avaliação separada, ausência de vínculo, stale/UNKNOWN e encerramento explícito.
@@ -105,10 +105,15 @@ avaliação separada, ausência de vínculo, stale/UNKNOWN e encerramento explí
 Payloads exatos em `docs/evidence/backend-integration-20261107/cases-v2/*.json`:
 `current-sufficient-active`, `current-sufficient-zero`, `partial-unlinked`,
 `partial-observation`, `never-observed`, `stale-known-attack`,
-`communication-loss-known-attack`. Cada arquivo identifica fixtures controladas
+`communication-loss-known-attack`, `profile-change-refused`. Cada arquivo identifica fixtures controladas
 e encapsula a resposta real em `response`; não comprova ataque/tráfego real.
 
 Sem dependência ou migração nova além de delivery/004_activity_decision_snapshot.sql
 e delivery/003_incident_assessment.sql já integradas. Os produtores reais ainda
 precisam declarar cobertura completa: o produto novo sem relatório permanece
 unknown. Não comprova instalado, reboot nem captura operacional certificada.
+
+Marcadores internos __coverage__ não são casos; UNKNOWN sem fato ativo anterior
+não inventa atividade. Ambos impedem total saudável e bloqueiam Aplicar. O store
+de projeções também recusa mudança de origem entre revisões do mesmo ID, sem
+impedir novas revisões da mesma origem ou reenvio idempotente.

@@ -8,7 +8,7 @@
     },
     "revision": 2,
     "emergency_stopped": false,
-    "updated_at": "2026-11-07T23:30:19.732367-03:00",
+    "updated_at": "2026-11-08T00:55:04.715867-03:00",
     "pending": {
       "reliable": false,
       "blockers": [],
@@ -50,7 +50,7 @@
           {
             "source": "incident",
             "source_revision": 1,
-            "observed_at": "2026-11-07T23:30:23.124771-03:00",
+            "observed_at": "2026-11-08T00:55:09.874806-03:00",
             "fresh": true,
             "valid": true,
             "complete": true,
@@ -99,7 +99,7 @@
         {
           "source": "incident",
           "source_revision": 1,
-          "observed_at": "2026-11-07T23:30:23.124771-03:00",
+          "observed_at": "2026-11-08T00:55:09.874806-03:00",
           "fresh": true,
           "valid": true,
           "complete": true
@@ -131,7 +131,7 @@
           {
             "source": "incident",
             "source_revision": 1,
-            "observed_at": "2026-11-07T23:30:23.124771-03:00",
+            "observed_at": "2026-11-08T00:55:09.874806-03:00",
             "fresh": true,
             "valid": true,
             "complete": true
@@ -140,7 +140,7 @@
         "items": []
       }
     },
-    "observed_at": "2026-11-08T02:30:23.237486+00:00",
+    "observed_at": "2026-11-08T03:55:10.062798+00:00",
     "cases": {
       "contract_version": 2,
       "status": "partial",
@@ -179,7 +179,7 @@
         {
           "source": "incident",
           "source_revision": 1,
-          "observed_at": "2026-11-07T23:30:23.124771-03:00",
+          "observed_at": "2026-11-08T00:55:09.874806-03:00",
           "fresh": true,
           "valid": true,
           "complete": true,
@@ -209,7 +209,7 @@
       "executor": "isolated_simulation_only",
       "availability": "real_executor_unavailable",
       "execution_enabled": false,
-      "updated_at": "2026-11-07T23:30:19.732367-03:00",
+      "updated_at": "2026-11-08T00:55:04.715867-03:00",
       "operational_visibility": "unknown_or_partial",
       "blockers": [],
       "change_allowed": false,
