@@ -55,7 +55,8 @@ Omissão exige encerramento explícito anterior do ID. UNKNOWN nunca é confiáv
 Somente none_active permite "Sem casos ativos"; 0 com cobertura desconhecida não.
 
 Totais distintos, classificação sustentada por ciclo de vida e avaliação e
-navegação exata estão implementados em 5608399 e passaram nove testes HTTP/PG.
+navegação exata estão implementados em 5608399 e complementos; a suíte ampliada
+passou quatorze testes HTTP/PG, incluindo emergência e falha de adapter em V2.
 Ausência de vínculo ainda impede total completo: total_active_count é null,
 nunca uma soma presumida de itens fonte. Não fabricar IDs a partir de record_id.
 As contagens por classe se sobrepõem; não somá-las. Cobertura operacional real

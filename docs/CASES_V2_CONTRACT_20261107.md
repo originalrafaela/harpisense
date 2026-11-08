@@ -97,7 +97,7 @@ para diagnóstico; não é o total distinto. O frontend deve consumir cases v2.
 
 ## Evidências
 
-`backend/delivery_tests/test_linked_cases_native.py`: doze testes aprovados com
+`backend/delivery_tests/test_linked_cases_native.py`: quatorze testes aprovados com
 PostgreSQL nativo Windows, HTTP autenticado, sem Docker; inclui concorrência real
 entre conexões, duplicação incidente/anomalia, revisões distintas do mesmo ID,
 avaliação separada, ausência de vínculo, stale/UNKNOWN e encerramento explícito.
@@ -117,3 +117,9 @@ Marcadores internos __coverage__ não são casos; UNKNOWN sem fato ativo anterio
 não inventa atividade. Ambos impedem total saudável e bloqueiam Aplicar. O store
 de projeções também recusa mudança de origem entre revisões do mesmo ID, sem
 impedir novas revisões da mesma origem ou reenvio idempotente.
+
+CaseSnapshotControls adapta somente a apresentação, herdando Apply/emergência/
+locks sem duplicar o mecanismo. Stop e falha do adapter devolvem cases V2 unknown,
+total null e ACTIVITY_SNAPSHOT_NOT_CONSULTED, sem consulta à autoridade no Stop.
+Essa resposta status-only não é fechamento de atividade; os fatos persistidos
+continuam disponíveis no GET seguinte e não devem ser apagados pela interface.

@@ -6,9 +6,9 @@
       "autonomy_mode": 2,
       "execution_enabled": false
     },
-    "revision": 2,
-    "emergency_stopped": false,
-    "updated_at": "2026-11-08T00:55:04.715867-03:00",
+    "revision": 3,
+    "emergency_stopped": true,
+    "updated_at": "2026-11-08T03:00:36.367671-03:00",
     "pending": {
       "reliable": false,
       "blockers": [],
@@ -50,7 +50,7 @@
           {
             "source": "incident",
             "source_revision": 1,
-            "observed_at": "2026-11-08T00:55:09.874806-03:00",
+            "observed_at": "2026-11-08T03:00:37.176278-03:00",
             "fresh": true,
             "valid": true,
             "complete": true,
@@ -99,7 +99,7 @@
         {
           "source": "incident",
           "source_revision": 1,
-          "observed_at": "2026-11-08T00:55:09.874806-03:00",
+          "observed_at": "2026-11-08T03:00:37.176278-03:00",
           "fresh": true,
           "valid": true,
           "complete": true
@@ -131,7 +131,7 @@
           {
             "source": "incident",
             "source_revision": 1,
-            "observed_at": "2026-11-08T00:55:09.874806-03:00",
+            "observed_at": "2026-11-08T03:00:37.176278-03:00",
             "fresh": true,
             "valid": true,
             "complete": true
@@ -140,7 +140,7 @@
         "items": []
       }
     },
-    "observed_at": "2026-11-08T03:55:10.062798+00:00",
+    "observed_at": "2026-11-08T06:00:37.316341+00:00",
     "cases": {
       "contract_version": 2,
       "status": "partial",
@@ -179,7 +179,7 @@
         {
           "source": "incident",
           "source_revision": 1,
-          "observed_at": "2026-11-08T00:55:09.874806-03:00",
+          "observed_at": "2026-11-08T03:00:37.176278-03:00",
           "fresh": true,
           "valid": true,
           "complete": true,
@@ -205,11 +205,11 @@
     "change_allowed": false,
     "effective_state": {
       "applied_profile": "M2",
-      "control_revision": 2,
+      "control_revision": 3,
       "executor": "isolated_simulation_only",
-      "availability": "real_executor_unavailable",
+      "availability": "stopped",
       "execution_enabled": false,
-      "updated_at": "2026-11-08T00:55:04.715867-03:00",
+      "updated_at": "2026-11-08T03:00:36.367671-03:00",
       "operational_visibility": "unknown_or_partial",
       "blockers": [],
       "change_allowed": false,

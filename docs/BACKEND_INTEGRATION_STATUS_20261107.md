@@ -62,8 +62,9 @@ Não comprova reboot/serviço instalado nem uso do aplicativo Microsoft Authenti
 
 - 11 testes próprios de primeiro acesso: HTTP/PG nativos, reset/replay concorrente,
   rotação das listas, escopo de conta, MFA preservado e rollback atômico.
-- 12 testes de casos: HTTP/PG nativos, concorrência entre conexões, dedup/origem,
-  nunca observado, fechamento, vínculo ausente, stale/UNKNOWN.
+- 14 testes de casos: HTTP/PG nativos, concorrência entre conexões, dedup/origem,
+  nunca observado, fechamento, vínculo ausente, stale/UNKNOWN e emergência/falha
+  de adapter com apresentação V2 sem consulta de autoridade no Stop.
 - 7 testes SHAP reais + 6 ficha/atividade HTTP/PG. BitNet off mantém estruturados.
 - 7 controles e 14 regressões passaram inicialmente; 4 PG foram ignorados naquela
   regressão sem DSN (não confundir com suítes nativas posteriores).

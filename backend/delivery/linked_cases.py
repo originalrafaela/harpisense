@@ -9,6 +9,7 @@ from urllib.parse import quote
 
 from psycopg.types.json import Jsonb
 from harpisense_contracts import validate
+from .controls import Controls
 from .operational_queue import OperationalQueue, summarize, valid_item, ACTIVE, CLOSED, UNKNOWN, CASE_SOURCES
 
 
@@ -18,6 +19,31 @@ def reason_for_source(source):
     if not source['fresh']:return 'SOURCE_REPORT_STALE'
     if not source['complete']:return 'SOURCE_STATE_UNKNOWN'
     return None
+
+
+class CaseSnapshotControls(Controls):
+    """Presentation adapter only; inherit all Apply/stop/transaction behavior.
+
+    Emergency deliberately does not call the queue. Its status-only response,
+    and adapter failure responses, must still conform to the V2 wire contract.
+    No activity closure or healthy zero is asserted without a snapshot.
+    """
+    def present(self,current,pending):
+        if pending.get('cases',{}).get('contract_version')!=2:
+            pending=deepcopy(pending)
+            sources=[{'source':source,'source_revision':None,'observed_at':None,
+                'fresh':False,'valid':False,'complete':False,
+                'reason_codes':['ACTIVITY_SNAPSHOT_NOT_CONSULTED'],
+                'freshness_policy':{'version':'operational-authority.v1','max_age_seconds':30,'clock':'postgresql'}}
+                for source in sorted(CASE_SOURCES)]
+            pending['cases']={'contract_version':2,'status':'unknown','coverage':'unknown',
+                'count_basis':'distinct_incident_id','known_active_count':None,'total_active_count':None,
+                'classification_counts':{'anomaly':0,'confirmed_attack':0,'incident':0},
+                'classification_count_basis':'distinct_incident_id_per_class','classification_overlap':True,
+                'unlinked_active_item_count':0,'observation_sufficient':False,'observed_at':None,
+                'observation_basis':'oldest_required_source_report','sources':sources,'items':[],
+                'unlinked_items':[],'reason_codes':[{'code':'ACTIVITY_SNAPSHOT_NOT_CONSULTED','source':s['source']} for s in sources]}
+        return super().present(current,pending)
 
 
 class LinkedOperationalQueue(OperationalQueue):

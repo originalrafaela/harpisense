@@ -154,6 +154,35 @@ class LinkedCasesNativeTests(unittest.TestCase):
         self.assertIsNone(cases['known_active_count']);self.assertIsNone(cases['total_active_count'])
         self.assertFalse(state['change_allowed'])
 
+    def test_emergency_keeps_v2_contract_without_querying_authority_or_erasing_cases(self):
+        ref=self.case();self.activate(ref)
+        controls=self.fixture.server.config.app.state.operational_controls
+        original=controls.queue.snapshot
+        def forbidden(tx):raise AssertionError('Emergency must not consult authority')
+        controls.queue.snapshot=forbidden
+        try:
+            response=self.fixture.client.post('/api/v1/security/emergency-stop',json={'reason':'Controlled emergency contract test'})
+        finally:controls.queue.snapshot=original
+        self.assertEqual(response.status_code,200)
+        body=response.json();self.assertTrue(body['emergency_stopped'])
+        self.assertEqual(body['cases']['contract_version'],2)
+        self.assertEqual(body['cases']['status'],'unknown')
+        self.assertIsNone(body['cases']['total_active_count'])
+        self.assertEqual(self.http()['cases']['known_active_count'],1)
+
+    def test_adapter_failure_remains_v2_unknown_not_healthy_zero(self):
+        controls=self.fixture.server.config.app.state.operational_controls
+        original=controls.queue.snapshot
+        def unavailable(tx):raise RuntimeError('Controlled adapter outage')
+        controls.queue.snapshot=unavailable
+        try:state=self.http()
+        finally:controls.queue.snapshot=original
+        self.assertEqual(state['cases']['contract_version'],2)
+        self.assertEqual(state['cases']['status'],'unknown')
+        self.assertIsNone(state['cases']['known_active_count'])
+        self.assertIsNone(state['cases']['total_active_count'])
+        self.assertFalse(state['change_allowed'])
+
     def test_new_revision_cannot_promote_synthetic_origin_to_service_origin(self):
         original=self.fixture.store.history('incident',self.fixture.ident)[0]['data']
         changed=deepcopy(original);changed['revision']=2

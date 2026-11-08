@@ -32,13 +32,13 @@
           "classification_overlap": true,
           "unlinked_active_item_count": 0,
           "observation_sufficient": true,
-          "observed_at": "2026-11-08T00:55:04.889732-03:00",
+          "observed_at": "2026-11-08T03:00:32.632884-03:00",
           "observation_basis": "oldest_required_source_report",
           "sources": [
             {
               "source": "anomaly",
               "source_revision": 1,
-              "observed_at": "2026-11-08T00:55:04.889732-03:00",
+              "observed_at": "2026-11-08T03:00:32.632884-03:00",
               "fresh": true,
               "valid": true,
               "complete": true,
@@ -52,7 +52,7 @@
             {
               "source": "incident",
               "source_revision": 2,
-              "observed_at": "2026-11-08T00:55:05.605699-03:00",
+              "observed_at": "2026-11-08T03:00:33.280802-03:00",
               "fresh": true,
               "valid": true,
               "complete": true,
@@ -66,15 +66,15 @@
           ],
           "items": [
             {
-              "case_id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+              "case_id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
               "incident_refs": [
                 {
-                  "id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+                  "id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
                   "revision": 1
                 }
               ],
               "incident_ref": {
-                "id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+                "id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
                 "revision": 1
               },
               "classifications": [
@@ -86,12 +86,12 @@
                   "source": "incident",
                   "record_id": "fixture-concurrent",
                   "source_revision": 2,
-                  "source_observed_at": "2026-11-08T00:55:05.605699-03:00",
+                  "source_observed_at": "2026-11-08T03:00:33.280802-03:00",
                   "fresh": true,
                   "state": "ACTIVE",
                   "origin": "trusted-service",
                   "incident_ref": {
-                    "id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+                    "id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
                     "revision": 1
                   },
                   "activity_type": "incident"
@@ -102,10 +102,10 @@
                 {
                   "rel": "incident_dossier",
                   "incident_ref": {
-                    "id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+                    "id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
                     "revision": 1
                   },
-                  "path": "/api/v1/p11/incidents/fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88/dossier?incident_revision=1"
+                  "path": "/api/v1/p11/incidents/fixture-linked-case-99c476ef716d4471ade2134eb9812fa1/dossier?incident_revision=1"
                 }
               ]
             }
@@ -117,7 +117,7 @@
           {
             "source": "anomaly",
             "source_revision": 1,
-            "observed_at": "2026-11-08T00:55:04.889732-03:00",
+            "observed_at": "2026-11-08T03:00:32.632884-03:00",
             "fresh": true,
             "valid": true,
             "complete": true
@@ -125,7 +125,7 @@
           {
             "source": "approval",
             "source_revision": 1,
-            "observed_at": "2026-11-08T00:55:04.969320-03:00",
+            "observed_at": "2026-11-08T03:00:32.579313-03:00",
             "fresh": true,
             "valid": true,
             "complete": true
@@ -133,7 +133,7 @@
           {
             "source": "execution",
             "source_revision": 1,
-            "observed_at": "2026-11-08T00:55:05.203792-03:00",
+            "observed_at": "2026-11-08T03:00:32.739112-03:00",
             "fresh": true,
             "valid": true,
             "complete": true
@@ -141,7 +141,7 @@
           {
             "source": "incident",
             "source_revision": 2,
-            "observed_at": "2026-11-08T00:55:05.605699-03:00",
+            "observed_at": "2026-11-08T03:00:33.280802-03:00",
             "fresh": true,
             "valid": true,
             "complete": true
@@ -149,7 +149,7 @@
           {
             "source": "verification",
             "source_revision": 1,
-            "observed_at": "2026-11-08T00:55:05.127237-03:00",
+            "observed_at": "2026-11-08T03:00:32.688508-03:00",
             "fresh": true,
             "valid": true,
             "complete": true
@@ -164,7 +164,7 @@
             {
               "source": "anomaly",
               "source_revision": 1,
-              "observed_at": "2026-11-08T00:55:04.889732-03:00",
+              "observed_at": "2026-11-08T03:00:32.632884-03:00",
               "fresh": true,
               "valid": true,
               "complete": true
@@ -172,7 +172,7 @@
             {
               "source": "incident",
               "source_revision": 2,
-              "observed_at": "2026-11-08T00:55:05.605699-03:00",
+              "observed_at": "2026-11-08T03:00:33.280802-03:00",
               "fresh": true,
               "valid": true,
               "complete": true
@@ -199,7 +199,7 @@
         },
         "revision": 2,
         "emergency_stopped": false,
-        "updated_at": "2026-11-08T00:55:04.715867-03:00",
+        "updated_at": "2026-11-08T03:00:32.440286-03:00",
         "pending": {
           "reliable": true,
           "blockers": [
@@ -228,13 +228,13 @@
             "classification_overlap": true,
             "unlinked_active_item_count": 0,
             "observation_sufficient": true,
-            "observed_at": "2026-11-08T00:55:04.889732-03:00",
+            "observed_at": "2026-11-08T03:00:32.632884-03:00",
             "observation_basis": "oldest_required_source_report",
             "sources": [
               {
                 "source": "anomaly",
                 "source_revision": 1,
-                "observed_at": "2026-11-08T00:55:04.889732-03:00",
+                "observed_at": "2026-11-08T03:00:32.632884-03:00",
                 "fresh": true,
                 "valid": true,
                 "complete": true,
@@ -248,7 +248,7 @@
               {
                 "source": "incident",
                 "source_revision": 2,
-                "observed_at": "2026-11-08T00:55:05.605699-03:00",
+                "observed_at": "2026-11-08T03:00:33.280802-03:00",
                 "fresh": true,
                 "valid": true,
                 "complete": true,
@@ -262,15 +262,15 @@
             ],
             "items": [
               {
-                "case_id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+                "case_id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
                 "incident_refs": [
                   {
-                    "id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+                    "id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
                     "revision": 1
                   }
                 ],
                 "incident_ref": {
-                  "id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+                  "id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
                   "revision": 1
                 },
                 "classifications": [
@@ -282,12 +282,12 @@
                     "source": "incident",
                     "record_id": "fixture-concurrent",
                     "source_revision": 2,
-                    "source_observed_at": "2026-11-08T00:55:05.605699-03:00",
+                    "source_observed_at": "2026-11-08T03:00:33.280802-03:00",
                     "fresh": true,
                     "state": "ACTIVE",
                     "origin": "trusted-service",
                     "incident_ref": {
-                      "id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+                      "id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
                       "revision": 1
                     },
                     "activity_type": "incident"
@@ -298,10 +298,10 @@
                   {
                     "rel": "incident_dossier",
                     "incident_ref": {
-                      "id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+                      "id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
                       "revision": 1
                     },
-                    "path": "/api/v1/p11/incidents/fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88/dossier?incident_revision=1"
+                    "path": "/api/v1/p11/incidents/fixture-linked-case-99c476ef716d4471ade2134eb9812fa1/dossier?incident_revision=1"
                   }
                 ]
               }
@@ -313,7 +313,7 @@
             {
               "source": "anomaly",
               "source_revision": 1,
-              "observed_at": "2026-11-08T00:55:04.889732-03:00",
+              "observed_at": "2026-11-08T03:00:32.632884-03:00",
               "fresh": true,
               "valid": true,
               "complete": true
@@ -321,7 +321,7 @@
             {
               "source": "approval",
               "source_revision": 1,
-              "observed_at": "2026-11-08T00:55:04.969320-03:00",
+              "observed_at": "2026-11-08T03:00:32.579313-03:00",
               "fresh": true,
               "valid": true,
               "complete": true
@@ -329,7 +329,7 @@
             {
               "source": "execution",
               "source_revision": 1,
-              "observed_at": "2026-11-08T00:55:05.203792-03:00",
+              "observed_at": "2026-11-08T03:00:32.739112-03:00",
               "fresh": true,
               "valid": true,
               "complete": true
@@ -337,7 +337,7 @@
             {
               "source": "incident",
               "source_revision": 2,
-              "observed_at": "2026-11-08T00:55:05.605699-03:00",
+              "observed_at": "2026-11-08T03:00:33.280802-03:00",
               "fresh": true,
               "valid": true,
               "complete": true
@@ -345,7 +345,7 @@
             {
               "source": "verification",
               "source_revision": 1,
-              "observed_at": "2026-11-08T00:55:05.127237-03:00",
+              "observed_at": "2026-11-08T03:00:32.688508-03:00",
               "fresh": true,
               "valid": true,
               "complete": true
@@ -360,7 +360,7 @@
               {
                 "source": "anomaly",
                 "source_revision": 1,
-                "observed_at": "2026-11-08T00:55:04.889732-03:00",
+                "observed_at": "2026-11-08T03:00:32.632884-03:00",
                 "fresh": true,
                 "valid": true,
                 "complete": true
@@ -368,7 +368,7 @@
               {
                 "source": "incident",
                 "source_revision": 2,
-                "observed_at": "2026-11-08T00:55:05.605699-03:00",
+                "observed_at": "2026-11-08T03:00:33.280802-03:00",
                 "fresh": true,
                 "valid": true,
                 "complete": true
@@ -386,7 +386,7 @@
             ]
           }
         },
-        "observed_at": "2026-11-08T03:55:05.771754+00:00",
+        "observed_at": "2026-11-08T06:00:33.414178+00:00",
         "cases": {
           "contract_version": 2,
           "status": "active",
@@ -403,13 +403,13 @@
           "classification_overlap": true,
           "unlinked_active_item_count": 0,
           "observation_sufficient": true,
-          "observed_at": "2026-11-08T00:55:04.889732-03:00",
+          "observed_at": "2026-11-08T03:00:32.632884-03:00",
           "observation_basis": "oldest_required_source_report",
           "sources": [
             {
               "source": "anomaly",
               "source_revision": 1,
-              "observed_at": "2026-11-08T00:55:04.889732-03:00",
+              "observed_at": "2026-11-08T03:00:32.632884-03:00",
               "fresh": true,
               "valid": true,
               "complete": true,
@@ -423,7 +423,7 @@
             {
               "source": "incident",
               "source_revision": 2,
-              "observed_at": "2026-11-08T00:55:05.605699-03:00",
+              "observed_at": "2026-11-08T03:00:33.280802-03:00",
               "fresh": true,
               "valid": true,
               "complete": true,
@@ -437,15 +437,15 @@
           ],
           "items": [
             {
-              "case_id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+              "case_id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
               "incident_refs": [
                 {
-                  "id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+                  "id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
                   "revision": 1
                 }
               ],
               "incident_ref": {
-                "id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+                "id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
                 "revision": 1
               },
               "classifications": [
@@ -457,12 +457,12 @@
                   "source": "incident",
                   "record_id": "fixture-concurrent",
                   "source_revision": 2,
-                  "source_observed_at": "2026-11-08T00:55:05.605699-03:00",
+                  "source_observed_at": "2026-11-08T03:00:33.280802-03:00",
                   "fresh": true,
                   "state": "ACTIVE",
                   "origin": "trusted-service",
                   "incident_ref": {
-                    "id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+                    "id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
                     "revision": 1
                   },
                   "activity_type": "incident"
@@ -473,10 +473,10 @@
                 {
                   "rel": "incident_dossier",
                   "incident_ref": {
-                    "id": "fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88",
+                    "id": "fixture-linked-case-99c476ef716d4471ade2134eb9812fa1",
                     "revision": 1
                   },
-                  "path": "/api/v1/p11/incidents/fixture-linked-case-9ec7daf99de34c259b65905dabbbcd88/dossier?incident_revision=1"
+                  "path": "/api/v1/p11/incidents/fixture-linked-case-99c476ef716d4471ade2134eb9812fa1/dossier?incident_revision=1"
                 }
               ]
             }
@@ -493,7 +493,7 @@
           "executor": "isolated_simulation_only",
           "availability": "real_executor_unavailable",
           "execution_enabled": false,
-          "updated_at": "2026-11-08T00:55:04.715867-03:00",
+          "updated_at": "2026-11-08T03:00:32.440286-03:00",
           "operational_visibility": "current",
           "blockers": [
             {
