@@ -9,6 +9,20 @@ class Exact(BaseModel):
     model_config = ConfigDict(extra='forbid')
 
 
+class FirstAccessState(Exact):
+    status:Literal['pending','completed']
+    password_reset_generation:int=Field(ge=0)
+    password_reset_purpose:Literal['password_reset']
+    codes_issued:bool
+    issued_at:datetime|None
+    completed_at:datetime|None
+
+
+class FirstAccessResult(Exact):
+    username:str
+    first_access:FirstAccessState
+
+
 class AdminSession(Exact):
     access_token: str = Field(pattern=r'^[A-Za-z0-9_-]{43}$')
     token_type: Literal['Bearer']
@@ -17,6 +31,7 @@ class AdminSession(Exact):
     username: str
     mfa_enrollment_required: bool | None = None
     mfa_enrollment_available: bool | None = None
+    first_access:FirstAccessState|None=None
 
 
 class MFAChallenge(Exact):
@@ -35,6 +50,7 @@ class EnrollmentDetails(Exact):
 class EnrollmentComplete(AdminSession):
     recovery_codes: list[str] = Field(min_length=10, max_length=10)
     password_reset_codes: list[str] = Field(min_length=10, max_length=10)
+    first_access:FirstAccessState
 
 
 class PasswordResetResult(Exact):
@@ -46,6 +62,12 @@ class PasswordResetResult(Exact):
 
 class PasswordResetCodes(Exact):
     password_reset_codes: list[str] = Field(min_length=10, max_length=10)
+    username:str
+    first_access:FirstAccessState
+
+
+class FirstAccessCodes(PasswordResetCodes):
+    recovery_codes:list[str]=Field(min_length=10,max_length=10)
 
 
 class SessionState(Exact):
@@ -57,6 +79,7 @@ class SessionState(Exact):
     mfa_enabled: bool
     mfa_enrollment_available: Literal[True]
     email_recovery_available: Literal[False]
+    first_access:FirstAccessState
 
 
 class CredentialChange(Exact):
@@ -79,6 +102,9 @@ RESPONSES = {
     ('post', '/local-recovery'): ('MFAChallenge',),
     ('post', '/password-reset/confirm'): ('PasswordResetResult',),
     ('post', '/password-reset/codes'): ('PasswordResetCodes',),
+    ('post', '/first-access/codes'): ('FirstAccessCodes',),
+    ('get', '/first-access'): ('FirstAccessResult',),
+    ('post', '/first-access/confirm'): ('FirstAccessResult',),
     ('post', '/mfa/enrollment/authorize'): ('MFAChallenge',),
     ('post', '/mfa/enrollment/begin'): ('EnrollmentDetails',),
     ('post', '/mfa/enrollment/confirm'): ('EnrollmentComplete',),
@@ -88,7 +114,7 @@ RESPONSES = {
     ('put', '/password'): ('CredentialChange',),
     ('put', '/username'): ('CredentialChange',),
 }
-MODELS = (AdminSession, MFAChallenge, EnrollmentDetails, EnrollmentComplete, PasswordResetResult, PasswordResetCodes,
+MODELS = (FirstAccessState,FirstAccessResult,FirstAccessCodes,AdminSession, MFAChallenge, EnrollmentDetails, EnrollmentComplete, PasswordResetResult, PasswordResetCodes,
           SessionState, CredentialChange, AuthFailure)
 
 

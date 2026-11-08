@@ -1,6 +1,6 @@
 """Isolated integration point; shared delivery/bootstrap is intentionally untouched."""
 from fastapi import APIRouter, Depends, Request, Response
-from pydantic import BaseModel, ConfigDict, Field, SecretStr
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, StrictInt
 
 from .api import PrivateRoute, install_admin_auth
 from .mfa import MFAAdminAuth
@@ -34,6 +34,11 @@ class PasswordReset(BaseModel):
     username: str = Field(pattern=r'^[A-Za-z0-9_.@-]{3,64}$')
     code: SecretStr = Field(min_length=32, max_length=32)
     new_password: SecretStr = Field(min_length=8, max_length=128)
+
+
+class FirstAccessConfirmation(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    password_reset_generation:StrictInt=Field(ge=1)
 
 
 def install_candidate_admin_auth(app, conninfo, *, protection_key, allowed_origins, technical_credentials=()):
@@ -70,6 +75,19 @@ def install_candidate_admin_auth(app, conninfo, *, protection_key, allowed_origi
     def reset_codes(body: EnrollmentAuthorization, token=Depends(app.state.require_admin_token)):
         return auth.regenerate_password_reset_codes(token, body.current_password.get_secret_value(),
                                                     body.code.get_secret_value() if body.code else None)
+
+    @router.post('/first-access/codes')
+    def first_access_codes(body:EnrollmentAuthorization,token=Depends(app.state.require_admin_token)):
+        return auth.regenerate_password_reset_codes(token,body.current_password.get_secret_value(),
+            body.code.get_secret_value() if body.code else None,both=True)
+
+    @router.get('/first-access')
+    def first_access_status(token=Depends(app.state.require_admin_token)):
+        return auth.first_access_status(token)
+
+    @router.post('/first-access/confirm')
+    def first_access_confirm(body:FirstAccessConfirmation,token=Depends(app.state.require_admin_token)):
+        return auth.confirm_first_access(token,body.password_reset_generation)
 
     @router.post('/mfa/enrollment/authorize')
     def authorize(body: EnrollmentAuthorization, token=Depends(app.state.require_admin_token)):

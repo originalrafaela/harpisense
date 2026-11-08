@@ -43,6 +43,7 @@ class MFATests(unittest.TestCase):
                 conn.execute((ROOT/'backend/admin_auth/001_admin_auth.sql').read_text())
             conn.execute((ROOT/'backend/admin_auth/002_admin_mfa.sql').read_text())
             conn.execute((ROOT/'backend/admin_auth/003_password_reset.sql').read_text())
+            conn.execute((ROOT/'backend/admin_auth/004_first_access.sql').read_text())
 
     def sql(self, statement, params=()):
         with psycopg.connect(self.dsn) as conn:
@@ -50,7 +51,7 @@ class MFATests(unittest.TestCase):
             return result.fetchall() if result.description else None
 
     def setUp(self):
-        self.sql('TRUNCATE hs_admin_password_reset_code,hs_admin_mfa_challenge,hs_admin_recovery_code,hs_admin_mfa,hs_admin_local_grant, '
+        self.sql('TRUNCATE hs_admin_first_access,hs_admin_password_reset_code,hs_admin_mfa_challenge,hs_admin_recovery_code,hs_admin_mfa,hs_admin_local_grant, '
                  'hs_admin_session,hs_admin_account,hs_admin_audit')
         self.sql("UPDATE hs_admin_throttle SET failures=0,blocked_until='-infinity'")
         self.key = Fernet.generate_key()
@@ -187,7 +188,7 @@ class MFATests(unittest.TestCase):
         replacement = self.auth.confirm_enrollment(limited['challenge_token'], pyotp.TOTP(payload['manual_key']).at(self.now()))
         self.assertTrue(self.auth.current(replacement['access_token'])['mfa_enabled'])
         self.assertNotIn(code, replacement['recovery_codes'])
-        self.assertEqual(self.sql('SELECT count(*) FROM hs_admin_recovery_code')[0][0], 10)
+        self.assertEqual(self.sql('SELECT count(*) FROM hs_admin_recovery_code WHERE revoked_at IS NULL')[0][0], 10)
 
     def test_existing_account_migration_does_not_reset_password_or_revoke_session(self):
         legacy = AdminAuth(self.dsn)

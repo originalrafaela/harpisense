@@ -187,6 +187,7 @@ def prepare_database(state_file):
             conn.execute((root/'backend/admin_auth/001_admin_auth.sql').read_text(encoding='utf-8'))
         conn.execute((root/'backend/admin_auth/002_admin_mfa.sql').read_text(encoding='utf-8'))
         conn.execute((root/'backend/admin_auth/003_password_reset.sql').read_text(encoding='utf-8'))
+        conn.execute((root/'backend/admin_auth/004_first_access.sql').read_text(encoding='utf-8'))
         conn.execute((root/'backend/native_server/001_mqtt_observer.sql').read_text(encoding='utf-8'))
         present = conn.execute('SELECT 1 FROM hs_admin_account').fetchone()
     connect = lambda: psycopg.connect(state['dsn'])

@@ -17,6 +17,7 @@ from cryptography.fernet import Fernet, InvalidToken
 from .service import (AdminAuth, AuthError, checked_verify, token_hash,
                       valid_password, valid_username)
 from .passwords import password_hash
+from . import first_access
 
 
 class MFAAdminAuth(AdminAuth):
@@ -178,7 +179,8 @@ class MFAAdminAuth(AdminAuth):
         if not isinstance(code, str) or not re.fullmatch(r'[A-Za-z0-9_-]{32}', code):
             raise AuthError(401, 'FACTOR_INVALID')
         row = conn.execute('UPDATE hs_admin_recovery_code SET used_at=clock_timestamp() '
-                           'WHERE code_hash=%s AND account_id=1 AND used_at IS NULL RETURNING code_hash',
+                           "WHERE code_hash=%s AND account_id=1 AND purpose='authenticator_recovery' "
+                           'AND used_at IS NULL AND revoked_at IS NULL RETURNING code_hash',
                            (token_hash(code),)).fetchone()
         if not row:
             raise AuthError(401, 'FACTOR_INVALID')
@@ -202,6 +204,7 @@ class MFAAdminAuth(AdminAuth):
     def issue_verified_session(self, conn, account):
         result = self.issue_session(conn, account)
         conn.execute('UPDATE hs_admin_session SET mfa_verified=true WHERE token_hash=%s', (token_hash(result['access_token']),))
+        result['first_access'] = first_access.status(conn,account['id'])
         return result
 
     def session(self, conn, token):
@@ -217,7 +220,8 @@ class MFAAdminAuth(AdminAuth):
             state = self.state(conn)
             return dict(authenticated=True, username=row['username'], expires_at=row['expires_at'].isoformat(),
                         idle_timeout_seconds=1800, mfa_available=True, mfa_enabled=bool(state and state['enabled_at']),
-                        mfa_enrollment_available=True, email_recovery_available=False)
+                        mfa_enrollment_available=True, email_recovery_available=False,
+                        first_access=first_access.status(conn,row['account_id']))
 
     def authorize_enrollment(self, token, password, code=None):
         """Existing-account opt-in or replacement. Password AND current factor when active."""
@@ -265,33 +269,51 @@ class MFAAdminAuth(AdminAuth):
                          'SET required=true,secret_cipher=excluded.secret_cipher,last_step=excluded.last_step,enabled_at=excluded.enabled_at',
                          (challenge['pending_cipher'], step))
             self.revoke(conn)
-            conn.execute('DELETE FROM hs_admin_recovery_code WHERE account_id=1')
-            codes = [secrets.token_urlsafe(24) for _ in range(10)]
-            for value in codes:
-                conn.execute('INSERT INTO hs_admin_recovery_code(code_hash,account_id) VALUES(%s,1)', (token_hash(value),))
+            reset_codes = self.password_reset_codes(conn)
+            generation=first_access.status(conn,1)['password_reset_generation']
+            codes=first_access.issue_authenticator_recovery_codes(conn,1,generation)
             result = self.issue_verified_session(conn, self.account(conn))
             result['recovery_codes'] = codes
-            result['password_reset_codes'] = self.password_reset_codes(conn)
+            result['password_reset_codes'] = reset_codes
             self.reset_throttle(conn)
         return result
 
     @staticmethod
     def password_reset_codes(conn):
-        conn.execute('DELETE FROM hs_admin_password_reset_code WHERE account_id=1')
-        codes = [secrets.token_urlsafe(24) for _ in range(10)]
-        for code in codes:
-            conn.execute('INSERT INTO hs_admin_password_reset_code(code_hash,account_id) VALUES(%s,1)',
-                         (token_hash(code),))
-        return codes
+        return first_access.issue_password_reset_codes(conn,1)
 
-    def regenerate_password_reset_codes(self, token, password, code):
-        with self.security_transaction('PASSWORD_RESET_CODES') as conn:
+    def regenerate_password_reset_codes(self, token, password, code, *, both=False):
+        with self.security_transaction('FIRST_ACCESS_CODES' if both else 'PASSWORD_RESET_CODES') as conn:
             self.session(conn, token)
             account = self.account(conn)
             if not checked_verify(password, account['password_hash']):
                 raise AuthError(403, 'REAUTHENTICATION_REQUIRED')
             self.totp(conn, code, self.state(conn))
-            result = {'password_reset_codes': self.password_reset_codes(conn)}
+            result = {'password_reset_codes': self.password_reset_codes(conn),
+                      'first_access': first_access.status(conn,account['id']),
+                      'username':account['username']}
+            if both:
+                result['recovery_codes']=first_access.issue_authenticator_recovery_codes(
+                    conn,account['id'],result['first_access']['password_reset_generation'])
+        return result
+
+    def first_access_status(self,token):
+        with self.transaction() as conn:
+            session=self.first_access_session(conn,token)
+            return {'username':session['username'],'first_access':first_access.status(conn,session['account_id'])}
+
+    def first_access_session(self,conn,token):
+        session=self.session(conn,token)
+        state=self.state(conn)
+        if not state or not state['enabled_at'] or not session['mfa_verified']:
+            raise AuthError(403,'MFA_REQUIRED')
+        return session
+
+    def confirm_first_access(self,token,generation):
+        with self.security_transaction('FIRST_ACCESS_CONFIRMED') as conn:
+            session=self.first_access_session(conn,token)
+            result={'username':session['username'],
+                    'first_access':first_access.confirm(conn,session['account_id'],generation)}
         return result
 
     def reset_password(self, username, code, password):
@@ -303,7 +325,8 @@ class MFAAdminAuth(AdminAuth):
         with self.security_transaction('PASSWORD_RESET') as conn:
             account = self.account(conn)
             row = conn.execute('SELECT used_at FROM hs_admin_password_reset_code '
-                               'WHERE code_hash=%s AND account_id=1 FOR UPDATE', (token_hash(code),)).fetchone()
+                               "WHERE code_hash=%s AND account_id=1 AND purpose='password_reset' "
+                               'AND revoked_at IS NULL FOR UPDATE', (token_hash(code),)).fetchone()
             if (not account or not hmac.compare_digest(username.encode(), account['username'].encode())
                     or not row or row['used_at'] is not None):
                 raise AuthError(401, 'PASSWORD_RESET_INVALID')
