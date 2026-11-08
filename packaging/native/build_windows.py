@@ -35,10 +35,12 @@ def main():
               '--paths', str(ROOT/'backend'), '--paths', str(ROOT/'backend/domain'),
               '--paths', str(ROOT/'genai'), '--paths', str(ROOT/'packaging/native')]
     packages = ['native_server', 'delivery', 'admin_auth', 'config_manager', 'xai_api',
-                'harpia', 'harpisense_contracts', 'harpisense_engines', 'uvicorn', 'psycopg', 'psycopg_binary',
-                'jsonschema', 'qrcode', 'paho.mqtt', 'detection_composition',
-                'harpisense_data','harpisense_rf','harpisense_if','harpisense_xai',
-                'shap','sklearn','numpy','pandas','scipy','joblib','numba','llvmlite']
+                'harpia', 'harpisense_contracts', 'harpisense_engines',
+                'harpisense_data','harpisense_rf','harpisense_if','harpisense_xai','detection_composition',
+                'shap','sklearn','numpy','pandas','scipy','joblib','numba','llvmlite',
+                'uvicorn', 'psycopg', 'psycopg_binary',
+                'jsonschema', 'qrcode', 'paho.mqtt', 'argon2', '_argon2_cffi_bindings',
+                'cryptography', 'cffi', '_cffi_backend']
     collect = [item for package in packages for item in ('--collect-all', package)]
     collect += ['--hidden-import', 'harpisense_catalog', '--hidden-import', 'runtime_check']
     data = ['--add-data', str(ROOT/'frontend/dist') + ';frontend/dist',

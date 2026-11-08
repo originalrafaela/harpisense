@@ -41,8 +41,8 @@ def main():
     shutil.copytree(ROOT/'genai/harpia', stage/'genai/harpia', ignore=shutil.ignore_patterns('__pycache__'))
     requirements = []
     for name in ('backend/delivery/requirements.txt', 'backend/config_manager/requirements.txt',
-                 'backend/admin_auth/requirements-mfa.txt',
-                 'backend/domain/requirements-scientific.txt'):
+                 'backend/admin_auth/requirements-mfa.txt', 'backend/domain/requirements-scientific.txt',
+                 'packaging/native/requirements-activation.txt'):
         requirements.extend((ROOT/name).read_text().splitlines())
     requirements.append('paho-mqtt==2.1.0')
     (stage/'requirements.lock').write_text('\n'.join(requirements) + '\n')
