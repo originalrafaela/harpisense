@@ -43,13 +43,15 @@ def build_app():
 
 def build_candidate_app(*, installation_id, capabilities, allowed_origins,
                         technical_credentials=(), presentation_directory=None,
-                        presentation_fault=None):
+                        presentation_fault=None, protection_key=None, initial_access=None):
     """Installer-supplied scope and trusted manifest; no migrations or seeds.
 
     Explicit candidate factory: existing build_app callers remain compatible.
     Authentication and configuration share the existing PostgreSQL connection.
     """
-    from admin_auth import AdminAuth, install_admin_auth
+    if protection_key is None:
+        raise RuntimeError('MFA_COMPOSITION_REQUIRED')
+    from admin_auth.candidate import install_candidate_admin_auth
     from config_manager.store import ConfigStore
     from config_manager.api import install_config_api
 
@@ -58,8 +60,9 @@ def build_candidate_app(*, installation_id, capabilities, allowed_origins,
     app = build_app()
     dsn = os.environ['DATABASE_URL']
     store = PostgresStore(dsn)
-    install_admin_auth(app, AdminAuth(dsn, technical_credentials=technical_credentials),
-                       allowed_origins=allowed_origins)
+    install_candidate_admin_auth(app, dsn, protection_key=protection_key,
+                                 technical_credentials=technical_credentials,
+                                 allowed_origins=allowed_origins, initial_access=initial_access)
     config = ConfigStore(store._connect, capabilities)
     presentation = None
     if presentation_directory is not None:

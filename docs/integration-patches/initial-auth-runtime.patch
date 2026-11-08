@@ -1,0 +1,31 @@
+--- a/backend/native_server/runtime.py
++++ b/backend/native_server/runtime.py
+@@ -49,13 +49,15 @@
+-def build_native_api(state, *, allowed_origins, runtime_kind='installed'):
++def build_native_api(state, *, allowed_origins, runtime_kind='installed', initial_access=None, protection_key=None):
+     """Reuse the native composition for installed and isolated review transports."""
+     environment(state)
+     api = build_app()
+     credentials = [(state['technical_user'], state['technical_password']),
+                    (state['mqtt']['username'], state['mqtt']['password'])]
++    if protection_key is None:
++        raise RuntimeError('MFA_KEY_PROTECTOR_REQUIRED')
+     install_candidate_admin_auth(api, state['dsn'],
+-        protection_key=Path(state['key_file']).read_bytes().strip(),
+-        allowed_origins=allowed_origins, technical_credentials=credentials)
++        protection_key=protection_key,
++        allowed_origins=allowed_origins, technical_credentials=credentials, initial_access=initial_access)
+     store = PostgresStore(state['dsn'])
+     from xai_api import install_xai_api
+     install_xai_api(api, store, installation_id=state['installation_id'],
+                     asset_identifier_column='device_id')
+@@ -85,6 +87,7 @@
+     return api
+
+
+-def build_native_app(state, frontend):
+-    api=build_native_api(state,allowed_origins=[state['panel_url']])
++def build_native_app(state, frontend, *, initial_access=None, protection_key=None):
++    api=build_native_api(state,allowed_origins=[state['panel_url']],
++                         initial_access=initial_access, protection_key=protection_key)
+     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
