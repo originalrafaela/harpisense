@@ -52,6 +52,8 @@ test('proxy real Vite: caminho, Bearer, status, leitura restrita e logs sem cred
   assert.equal(calls[3].url,'/api/v1/p11/explain/synthetic-fixture');assert.equal(calls[3].authorization,headers.Authorization);
   const incidentHistory=await fetch(base+'/incident/incident-1/history',{headers});assert.equal(incidentHistory.status,200);assert.equal((await incidentHistory.json())[0].revision,1);
   assert.equal(calls[4].url,'/api/v1/p11/incident/incident-1/history');assert.equal(calls[4].authorization,headers.Authorization);
+  const modelAnalysis=await fetch(base+'/incidents/incident-1/explanations?incident_revision=4',{headers});assert.equal(modelAnalysis.status,200);
+  assert.equal(calls[5].url,'/api/v1/p11/incidents/incident-1/explanations?incident_revision=4');assert.equal(calls[5].authorization,headers.Authorization);
   const count=calls.length;
   assert.equal((await fetch(base+'/health',{headers:{Authorization:'Basic '+btoa('technical:fixture')}})).status,401);
   assert.equal((await fetch(base+'/ingest/telemetry',{method:'POST',headers})).status,405);
@@ -60,6 +62,10 @@ test('proxy real Vite: caminho, Bearer, status, leitura restrita e logs sem cred
   assert.equal((await fetch(base+'/incident',{headers})).status,200);
   assert.equal((await fetch(base+'/unknown-kind/id/history',{headers})).status,404);
   assert.equal((await fetch(base+'/incident/incident-1/history?limit=10',{headers})).status,400);
+  assert.equal((await fetch(base+'/incidents/incident-1/explanations?incident_revision=4&token=secret',{headers})).status,400);
+  assert.equal((await fetch(base+'/incidents/incident-1/explanations?incident_revision=0',{headers})).status,400);
+  assert.equal((await fetch(base+'/incidents/incident-1/explanations',{headers})).status,400);
+  assert.equal((await fetch(base+'/incidents/incident-1/explanations?incident_revision=4',{method:'POST',headers})).status,405);
   assert.equal((await fetch(base+'/health',{headers:{...headers,Origin:'https://foreign.example'}})).status,403);
   assert.equal((await fetch(base+'/telemetry?password=forbidden',{headers})).status,400);
   assert.equal(calls.length,count+1);
