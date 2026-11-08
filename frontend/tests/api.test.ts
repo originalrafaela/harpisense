@@ -83,7 +83,7 @@ test('histórico com esquema inválido não é apresentado como vazio',async()=>
 
 test('login com segundo fator retorna desafio temporário sem criar sessão administrativa',async()=>{
  const calls:{path:string;method:string;authorization:string|undefined;body:unknown}[]=[];
- const candidateSession={authenticated:true,username:'fixture-owner',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,mfa_available:true,mfa_enabled:true,mfa_enrollment_available:true,email_recovery_available:false};
+ const candidateSession={authenticated:true,username:'fixture-owner',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,mfa_available:true,mfa_enabled:true,mfa_enrollment_available:true,email_recovery_available:false,first_access:{status:'completed',password_reset_generation:1,password_reset_purpose:'password_reset',codes_issued:true,issued_at:new Date(Date.now()-60_000).toISOString(),completed_at:new Date(Date.now()-30_000).toISOString()}};
  const fetcher=(async(url,init)=>{const path=new URL(String(url),'http://local').pathname;const headers=init?.headers as Record<string,string>|undefined;let body:unknown;try{body=JSON.parse(String(init?.body))}catch{}calls.push({path,method:init?.method||'GET',authorization:headers?.Authorization,body});
   if(path.endsWith('/admin-auth/login'))return new Response(JSON.stringify({challenge_token:'c'.repeat(43),next_step:'login',expires_at:new Date(Date.now()+300000).toISOString()}));
   if(path.endsWith('/mfa/verify'))return new Response(JSON.stringify({access_token:'b'.repeat(43),token_type:'Bearer',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,username:'fixture-owner'}));
@@ -101,7 +101,7 @@ test('login com segundo fator retorna desafio temporário sem criar sessão admi
 
 test('bootstrap, QR, confirmação e códigos de recuperação ficam em memória e validam sessão',async()=>{
  const calls:{path:string;authorization:string|undefined;body:unknown}[]=[];const recovery=Array.from({length:10},(_,i)=>String(i).padStart(32,'a'));
- const session={authenticated:true,username:'new-owner',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,mfa_available:true,mfa_enabled:true,mfa_enrollment_available:true,email_recovery_available:false};
+ const session={authenticated:true,username:'new-owner',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,mfa_available:true,mfa_enabled:true,mfa_enrollment_available:true,email_recovery_available:false,first_access:{status:'pending',password_reset_generation:1,password_reset_purpose:'password_reset',codes_issued:true,issued_at:new Date().toISOString(),completed_at:null}};
  const fetcher=(async(url,init)=>{const path=new URL(String(url),'http://local').pathname;const headers=init?.headers as Record<string,string>|undefined;let body:unknown;try{body=JSON.parse(String(init?.body))}catch{}calls.push({path,authorization:headers?.Authorization,body});
   if(path.endsWith('/bootstrap'))return new Response(JSON.stringify({challenge_token:'e'.repeat(43),next_step:'enroll',expires_at:new Date(Date.now()+300000).toISOString()}));
   if(path.endsWith('/enrollment/begin'))return new Response(JSON.stringify({manual_key:'JBSWY3DPEHPK3PXP',provisioning_uri:'otpauth://totp/HarpiSense:owner?secret=JBSWY3DPEHPK3PXP',qr_svg:'<svg viewBox="0 0 21 21"><path fill="#000000" d="M0 0h1v1z"/></svg>',expires_at:new Date(Date.now()+300000).toISOString()}));

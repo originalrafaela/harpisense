@@ -19,16 +19,16 @@ export function InstallationEntry({client,onOpenSettings}:InstallationEntryProps
  const result=query?.client===client&&query.attempt===attempt?query:null;
  const snapshot=result?.value;
  return <Panel title="Instalação e configuração">
-  {!result?<p role="status">Consultando progresso persistido… As funções disponíveis continuam acessíveis.</p>:
-   result.failed?<p role="alert">Não foi possível consultar a instalação. O estado é desconhecido; as funções disponíveis continuam acessíveis.</p>:
-   snapshot?.status==='new'?<p role="status">Instalação nova: nenhum progresso ou revisão de configuração foi registrado. Abra Configurações para iniciar o assistente.</p>:
-   snapshot?.status==='pending'?<p role="status">Instalação existente com configuração pendente. {snapshot.setup.document?`O assistente pode ser retomado na etapa ${snapshot.setup.document.step}.`:'Ainda não há rascunho do assistente; a configuração existente será preservada.'}</p>:
-   <p role="status">Configuração concluída no escopo da revisão aplicada e confirmada. Isso não comprova prontidão operacional de todos os serviços.</p>}
-  {snapshot&&<p>Progresso salvo: versão {snapshot.setup.version}. Revisão desejada: {String(snapshot.current.desired_revision)}. Revisão efetiva: {String(snapshot.current.effective_revision??'nenhuma')}. Prontidão operacional: {snapshot.current.operational===true?'confirmada pelo backend':'não comprovada pelo backend'}.</p>}
+  {!result?<p role="status">Consultando progresso…</p>:
+   result.failed?<p role="alert">Instalação indisponível</p>:
+   snapshot?.status==='new'?<p role="status">Primeira configuração · não iniciada</p>:
+   snapshot?.status==='pending'?<p role="status">Configuração pendente{snapshot.setup.document?` · etapa ${snapshot.setup.document.step}`:' · rascunho não iniciado'}</p>:
+   <p role="status">Revisão aplicada: {String(snapshot?.current.effective_revision??'não informada')}</p>}
+  {snapshot&&<dl className="installation-progress"><dt>Versão do progresso</dt><dd>{snapshot.setup.version}</dd><dt>Revisão desejada</dt><dd>{String(snapshot.current.desired_revision)}</dd><dt>Revisão efetiva</dt><dd>{String(snapshot.current.effective_revision??'não informada')}</dd><dt>Estado operacional</dt><dd>{snapshot.current.operational===true?'Confirmado pelo backend':'Não confirmado'}</dd></dl>}
   <div className="flow-actions">
    {snapshot&&onOpenSettings&&<button type="button" onClick={onOpenSettings}>{snapshot.status==='new'?'Iniciar assistente':snapshot.status==='pending'?'Retomar assistente':'Abrir Configurações'}</button>}
    <button type="button" disabled={!result} onClick={()=>setAttempt(n=>n+1)}>{result?.failed?'Tentar consultar novamente':'Atualizar progresso'}</button>
   </div>
-  {!onOpenSettings&&snapshot&&<p>O assistente permanece acessível em Configurações.</p>}
+  {!onOpenSettings&&snapshot&&<p>Assistente em Configurações</p>}
  </Panel>;
 }

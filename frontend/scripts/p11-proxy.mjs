@@ -19,6 +19,7 @@ export function p11Transport(target) {
   const configValidation=path=>/^\/api\/v1\/config\/proposals\/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\/(validate|apply)$/.test(path);
   const projectionHistory=path=>/^\/api\/v1\/p11\/(asset|telemetry|network_event|window|detection|xai|evidence|incident|risk|decision|approval|execution|verification|bitnet)\/(?:[A-Za-z0-9_.:@-]|%[0-9A-Fa-f]{2}){1,384}\/history$/.test(path);
   const incidentModelAnalysis=path=>/^\/api\/v1\/p11\/incidents\/(?:[A-Za-z0-9_.:@-]|%[0-9A-Fa-f]{2}){1,256}\/explanations$/.test(path);
+  const incidentDossier=path=>/^\/api\/v1\/p11\/incidents\/(?:[A-Za-z0-9_.:@-]|%[0-9A-Fa-f]{2}){1,256}\/dossier$/.test(path);
   const guard = server => {server.middlewares.use((request, response, next) => {
     if (!request.url?.startsWith(prefix)) return next();
     const url = new URL(request.url, 'http://127.0.0.1');
@@ -30,6 +31,9 @@ export function p11Transport(target) {
       return response.end('{"detail":"Origem não permitida no transporte local"}');
     }
     const authRoutes = new Map([['/api/v1/admin-auth/login','POST'],['/api/v1/admin-auth/session','GET'],['/api/v1/admin-auth/logout','POST'],['/api/v1/admin-auth/password','PUT'],['/api/v1/admin-auth/username','PUT'],['/api/v1/admin-auth/bootstrap','POST'],['/api/v1/admin-auth/local-recovery','POST'],['/api/v1/admin-auth/mfa/enrollment/authorize','POST'],['/api/v1/admin-auth/mfa/enrollment/begin','POST'],['/api/v1/admin-auth/mfa/enrollment/confirm','POST'],['/api/v1/admin-auth/mfa/verify','POST'],['/api/v1/admin-auth/mfa/recover','POST'],['/api/v1/admin-auth/mfa/cancel','POST']]);
+    authRoutes.set('/api/v1/admin-auth/first-access','GET');
+    authRoutes.set('/api/v1/admin-auth/first-access/codes','POST');
+    authRoutes.set('/api/v1/admin-auth/first-access/confirm','POST');
     authRoutes.set('/api/v1/admin-auth/password-reset/confirm','POST');
     authRoutes.set('/api/v1/admin-auth/password-reset/codes','POST');
     const auth = authRoutes.get(path) === request.method;
@@ -38,19 +42,20 @@ export function p11Transport(target) {
       response.writeHead(401, {'Content-Type':'application/json','WWW-Authenticate':'Bearer'});
       return response.end('{"error":{"code":"AUTH_REQUIRED"}}');
     }
-    const read=request.method==='GET'&&(allowed.has(path)||configReads.has(path)||configOperation(path)||projectionHistory(path)||incidentModelAnalysis(path)||/^\/api\/v1\/p11\/explain\/[A-Za-z0-9_.:@-]{1,128}$/.test(path));
+    const read=request.method==='GET'&&(allowed.has(path)||configReads.has(path)||configOperation(path)||projectionHistory(path)||incidentModelAnalysis(path)||incidentDossier(path)||/^\/api\/v1\/p11\/explain\/[A-Za-z0-9_.:@-]{1,128}$/.test(path));
     const write=(request.method==='PUT'&&path==='/api/v1/security/settings/mode/default')||(request.method==='POST'&&path==='/api/v1/security/emergency-stop')||configWrite(path,request.method)||request.method==='POST'&&configValidation(path);
     if (!read&&!write&&!auth) {
       response.writeHead(request.method !== 'GET' ? 405 : 404, {'Content-Type': 'application/json'});
       return response.end('{"detail":"Recurso não integrado neste transporte restrito"}');
     }
     // Only pagination fields documented by P11; reject arbitrary URL parameters.
-    const allowedQuery=path==='/api/v1/config/history'?['after','limit']:incidentModelAnalysis(path)?['incident_revision']:projectionHistory(path)?[]:['limit','offset'];
+    const allowedQuery=path==='/api/v1/config/history'?['after','limit']:incidentModelAnalysis(path)||incidentDossier(path)?['incident_revision']:projectionHistory(path)?[]:['limit','offset'];
     if (((write||auth)&&url.search)||[...url.searchParams.keys()].some(key => !allowedQuery.includes(key))) {
       response.writeHead(400, {'Content-Type': 'application/json'});
       return response.end('{"detail":"Parâmetro não permitido"}');
     }
     if(incidentModelAnalysis(path)){const revisions=url.searchParams.getAll('incident_revision');if(revisions.length!==1||!/^[1-9]\d{0,8}$/.test(revisions[0])){response.writeHead(400,{'Content-Type':'application/json'});return response.end('{"detail":"Revisão do incidente inválida"}')}}
+    if(incidentDossier(path)){const revisions=url.searchParams.getAll('incident_revision');if(revisions.length!==1||!/^[1-9]\d{0,8}$/.test(revisions[0])){response.writeHead(400,{'Content-Type':'application/json'});return response.end('{"detail":"Revisão do incidente inválida"}')}}
     next();
   });};
   return {

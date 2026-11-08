@@ -7,7 +7,7 @@ export type ModelExplanation={
  linkedToIncident:boolean;
  method:string; output:'CALIBRATED_CLASS_PROBABILITY'|'ANOMALY_SCORE'; classLabel:string|null;
  baseValue:number; outputValue:number; contributions:{feature:string;value:number;contribution:number}[];
- outputDirection:string; createdAt:string|null; limitations:string[];
+ outputDirection:string; createdAt:string|null; limitations:string[]; referenceRef:string|null; explainerVersion:string|null; summary:string|null;
 };
 export type ModelAnalysis={
  detectionId:string; detectionRevision:number|null; state:AnalysisState; reasonCode:string|null;
@@ -39,10 +39,11 @@ function explanationView(value:unknown, detectionId:string, modelVersion:string,
  if(!contributions.length)return null;
  const limitations=Array.isArray(r.limitations)&&r.limitations.every(string)?r.limitations as string[]:[];
  if(typeof value.in_incident_explanation_refs!=='boolean')return null;
+ const referenceRef=object(r.reference_ref)&&string(r.reference_ref.id)?r.reference_ref.id:typeof r.reference_ref==='string'?r.reference_ref:null;
  return {id:value.id,projectionRevision:Number(value.projection_revision),detectionId,modelVersion,linkedToIncident:value.in_incident_explanation_refs,method:r.method,
   output:target.output as ModelExplanation['output'],classLabel:target.class_label as string|null,
   baseValue:r.base_value as number,outputValue:r.output_value as number,contributions,outputDirection:value.output_direction as string,
-  createdAt:string(r.created_at)?r.created_at:null,limitations};
+  createdAt:string(r.created_at)?r.created_at:null,limitations,referenceRef,explainerVersion:string(r.explainer_version)?r.explainer_version:null,summary:string(r.summary)?r.summary:null};
 }
 
 function analysisView(value:unknown,incidentId:string,incidentRevision:number):ModelAnalysis|null{

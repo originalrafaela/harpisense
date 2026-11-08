@@ -1,0 +1,41 @@
+import {test,expect} from '@playwright/test';
+
+test('login compacto, selecao local, resumo do dashboard e pagina Conta (fixture isolada)',async({page})=>{
+ await page.clock.install();
+ const now=new Date().toISOString();
+ const control={value:{autonomy_mode:1,operation:'IDS',execution_enabled:false},revision:3,emergency_stopped:false,updated_at:now,observed_at:now,real_execution_blocked:true,change_allowed:true,pending:{reliable:true,blockers:[{id:'incident-fixture',state:'active'}]},effective_state:{applied_profile:'M1',control_revision:3,executor:'not_integrated',availability:'unavailable',executor_state:{status:'not_integrated',available:false,observed_at:null,source:null,blockers:['REAL_EXECUTOR_NOT_INTEGRATED']},execution_enabled:false,updated_at:now,operational_visibility:'current',blockers:[{id:'incident-fixture',state:'active'}],change_allowed:false,containment_confirmed:false}};
+ await page.route('**/*',async route=>{
+  const path=new URL(route.request().url()).pathname;if(!path.includes('/api/v1/'))return route.continue();
+  if(path.endsWith('/admin-auth/login'))return route.fulfill({json:{access_token:'a'.repeat(43),token_type:'Bearer',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,username:'admin-local'}});
+  if(path.endsWith('/admin-auth/session'))return route.fulfill({json:{authenticated:true,username:'admin-local',expires_at:new Date(Date.now()+3600000).toISOString(),idle_timeout_seconds:1800,mfa_available:false,mfa_enabled:true,email_recovery_available:false,first_access:{status:'completed',password_reset_generation:1,password_reset_purpose:'password_reset',codes_issued:true,issued_at:now,completed_at:now}}});
+  if(path.endsWith('/admin-auth/logout'))return route.fulfill({status:204});
+  if(path.endsWith('/security/settings/mode/default'))return route.request().method()==='PUT'?route.fulfill({status:409,json:{detail:{code:'OPERATIONAL_PENDING',message:'Há pendências operacionais.',current_revision:3,current:control}}}):route.fulfill({json:control});
+  if(path.endsWith('/config/presentation'))return route.fulfill({status:404,json:{detail:'fixture'}});
+  if(path.endsWith('/p11/health'))return route.fulfill({json:{api:'available',control_api:{version:1},operational_controls:{autonomy_mode:1,operation:'IDS',execution_enabled:false,effective_state:{applied_profile:'M1',executor_state:{status:'not_integrated',available:false,observed_at:null,source:null,blockers:['REAL_EXECUTOR_NOT_INTEGRATED']},operational_visibility:'current',updated_at:now}}}});
+  if(path.includes('/api/v1/p11/'))return route.fulfill({json:[]});
+  return route.fulfill({status:404,json:{detail:'Rota ausente na fixture'}});
+ });
+ await page.goto('http://127.0.0.1:5176/');
+ await expect(page.getByText('Conexão da API')).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Entrar na central'})).toBeVisible();
+ await page.evaluate(()=>{const badge=document.createElement('div');badge.setAttribute('data-test-fixture-banner','true');badge.textContent='TESTE ISOLADO · SEM API OPERACIONAL';badge.style.cssText='position:fixed;z-index:9999;top:8px;left:50%;transform:translateX(-50%);padding:7px 12px;border-radius:7px;background:#f7c948;color:#111;font:700 11px sans-serif';document.body.append(badge)});
+ await page.screenshot({path:'docs/evidence/login-visual-alignment-fixture-20261108.png',fullPage:true});await page.evaluate(()=>document.querySelector('[data-test-fixture-banner]')?.remove());
+ await page.getByLabel('Usuário',{exact:true}).fill('admin-local');await page.getByLabel('Senha',{exact:true}).fill('isolated');await page.getByRole('button',{name:'Entrar na central'}).click();
+ await expect(page.locator('.signed-user')).toHaveText('admin-local');
+ const options=page.getByRole('group',{name:'Selecionar perfil de autonomia'});
+ await page.evaluate(()=>{for(const index of [1,2,0])(document.querySelectorAll('.profile-options button')[index] as HTMLButtonElement).click()});
+ await expect(page.getByRole('button',{name:/Estado Operacional Efetivo/})).toContainText('M1 · IDS');
+ await expect(page.getByRole('heading',{name:'Incidentes atuais'})).toBeVisible();await expect(page.getByRole('heading',{name:'Anomalias atuais'})).toBeVisible();
+ const harpia=page.locator('.dashboard-overview-grid > .panel').first().boundingBox();const cases=page.locator('.dashboard-live-cards').boundingBox();
+ const [harpiaBox,casesBox]=await Promise.all([harpia,cases]);expect(harpiaBox).not.toBeNull();expect(casesBox).not.toBeNull();expect(casesBox!.x).toBeGreaterThan(harpiaBox!.x);
+ await page.evaluate(()=>{const badge=document.createElement('div');badge.textContent='TESTE ISOLADO · DADOS FICTÍCIOS · SEM API OPERACIONAL';badge.setAttribute('data-test-fixture-banner','true');badge.style.cssText='position:fixed;z-index:9999;top:8px;left:50%;transform:translateX(-50%);padding:7px 12px;border-radius:7px;background:#f7c948;color:#111;font:700 11px sans-serif';document.body.append(badge)});
+ await page.screenshot({path:'docs/evidence/dashboard-visual-alignment-fixture-20261108.png',fullPage:true});await page.evaluate(()=>document.querySelector('[data-test-fixture-banner]')?.remove());
+ const profileRow=await page.locator('.profile-options').boundingBox();const operationRow=await page.locator('.operation-options').boundingBox();const profileApply=await page.locator('.strip-profile .strip-apply').boundingBox();const operationApply=await page.locator('.strip-operation .strip-apply').boundingBox();expect(profileRow).not.toBeNull();expect(operationRow).not.toBeNull();expect(Math.abs(profileRow!.y-operationRow!.y)).toBeLessThanOrEqual(1);expect(Math.abs(profileApply!.y-operationApply!.y)).toBeLessThanOrEqual(1);
+ await options.getByRole('button',{name:'M2'}).click();await page.locator('.strip-profile').getByRole('button',{name:'Aplicar',exact:true}).click();await expect(page.locator('.strip-message')).toContainText('Há pendências operacionais');await expect(page.getByRole('button',{name:/Estado Operacional Efetivo/})).toContainText('M1 · IDS');
+ const operationOptions=page.getByRole('group',{name:'Selecionar estado operacional'});await operationOptions.getByRole('button',{name:'SIMULATION'}).click();await expect(page.getByRole('button',{name:/Estado Operacional Efetivo/})).toContainText('M1 · IDS');await page.locator('.strip-operation').getByRole('button',{name:'Aplicar',exact:true}).click();await expect(page.locator('.strip-message')).toContainText('Há pendências operacionais');await expect(page.getByRole('button',{name:/Estado Operacional Efetivo/})).toContainText('M1 · IDS');
+ await page.getByRole('button',{name:/Estado Operacional Efetivo/}).click();await expect(page.locator('.effective-details')).toContainText('not_integrated');await expect(page.locator('.effective-details')).toContainText('REAL_EXECUTOR_NOT_INTEGRATED');
+ await expect(page.getByRole('link',{name:'XAI / SHAP',exact:true})).toBeVisible();
+ await page.setViewportSize({width:390,height:844});const [smallHarpia,smallCases,smallProfileRow,smallProfileApply,smallOperationRow,smallOperationApply]=await Promise.all([page.locator('.dashboard-overview-grid > .panel').first().boundingBox(),page.locator('.dashboard-live-cards').boundingBox(),page.locator('.profile-options').boundingBox(),page.locator('.strip-profile .strip-apply').boundingBox(),page.locator('.operation-options').boundingBox(),page.locator('.strip-operation .strip-apply').boundingBox()]);expect(smallCases!.y).toBeGreaterThan(smallHarpia!.y);expect(Math.abs(smallProfileRow!.y-smallProfileApply!.y)).toBeLessThanOrEqual(1);expect(Math.abs(smallOperationRow!.y-smallOperationApply!.y)).toBeLessThanOrEqual(1);await expect(options.getByRole('button',{name:'M2'})).toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+ await page.getByRole('button',{name:'Conta',exact:true}).click();await expect(page.getByRole('heading',{name:'Conta e autenticação'})).toBeVisible();await expect(page.getByText('admin-local',{exact:false}).first()).toBeVisible();
+});
