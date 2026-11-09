@@ -18,8 +18,11 @@ from .linked_cases import LinkedOperationalQueue,CaseSnapshotControls
 
 def build_app():
     dsn = os.environ['DATABASE_URL']
-    if not dsn.startswith(('postgresql://', 'postgres://', 'host=')):
-        raise RuntimeError('PostgreSQL required')
+    from psycopg.conninfo import conninfo_to_dict
+    try:
+        conninfo_to_dict(dsn)
+    except Exception:
+        raise RuntimeError('PostgreSQL required') from None
     store = PostgresStore(dsn)
     app = create_app(store)
     health = next(r for r in app.routes if isinstance(r, APIRoute) and r.path == '/api/v1/p11/health')

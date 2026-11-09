@@ -100,6 +100,16 @@ class P11BitNetTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'loopback'):
                 build_app()
 
+    def test_keyword_postgres_connection_and_invalid_driver(self):
+        from delivery.app import build_app
+        with patch.dict(os.environ, {'DATABASE_URL': 'user=fixture dbname=fixture host=127.0.0.1',
+                'HARPISENSE_ADMIN_USER': 'technical', 'HARPISENSE_ADMIN_PASSWORD': 'fixture-password',
+                'HARPISENSE_BITNET_ENABLED': '0'}):
+            self.assertIsNotNone(build_app())
+            os.environ['DATABASE_URL'] = 'sqlite:///fixture'
+            with self.assertRaisesRegex(RuntimeError, 'PostgreSQL required'):
+                build_app()
+
 
 if __name__ == '__main__':
     unittest.main()

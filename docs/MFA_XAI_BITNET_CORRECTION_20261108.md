@@ -37,9 +37,11 @@ saída sanitizada de dependências/permissões, sem imprimir configuração ou c
 
 ## Testes executados
 
-- **5 testes novos HTTP**: capacidade/prontidão BitNet, resposta vinculada à
+- **6 testes novos HTTP/composição**: capacidade/prontidão BitNet, resposta vinculada à
   revisão, indisponibilidade com fallback, autenticação e rotas MFA/XAI/dossiê,
   recusa de endereço externo. Runtime gerador **sintético**, não inferência GGUF.
+  Conninfo PostgreSQL com `user=` antes de `host=` também é aceito; driver
+  incompatível é recusado. Isso permite conectar o cluster de restauração Unix.
 - **37 testes HarpIA: 36 aprovados, 1 skip** dependente de referência P11 opcional.
 - **77 testes frontend aprovados** e build/typecheck aprovados.
 - **20 testes de autenticação aprovados com PostgreSQL 18 nativo descartável**,
@@ -54,6 +56,9 @@ Windows: testes de desenvolvimento com Python/PostgreSQL locais; não é aceite
 de instalador em Windows limpo nem reboot do SO.
 Ubuntu/HarpiServer: inspeção e preparação de release no servidor existente;
 não é instalação limpa nem aceite após reboot.
+**Smoke da release em Ubuntu aprovado:** frontend compilado, MFA presente,
+XAI protegido e Argon2id criando/verificando senha com as dependências do venv
+separado. Sem conexão a banco nesse smoke; não comprova a migração real.
 
 ## Situação da implantação
 
@@ -71,3 +76,12 @@ real e sua migração só podem ser declaradas aprovadas após essa execução.
 O BitNet continua bloqueado por recursos/provisionamento e pela ausência de
 nova validação textual; nenhuma inferência real foi executada nesta rodada.
 Política de perda do autenticador permanece pendente.
+
+## Auditoria frontend independente recebida
+
+O relatório informado em `harpisense-worktrees/audit-final-385b363/docs/FRONTEND_ACCEPTANCE_AUDIT_20261108.md`
+se refere exatamente a `385b363725479767fc7c61523003cfba10ae285e`, anterior a esta
+correção. Registra build/typecheck, 76 unitários e duas suítes Playwright de
+11 testes aprovados, sem homologação de instalador ou reboot para essa fonte.
+Seus resultados não são atribuídos ao commit novo nem aos candidatos antigos.
+O parecer de não iniciar C01–C09 é mantido; nenhum ataque foi executado aqui.
