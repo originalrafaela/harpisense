@@ -1,4 +1,4 @@
-"""Adaptador preparatório; não é instalado/importado pelo backend nesta entrega."""
+"""Bounded BitNet adapter, explicitly enabled by the backend composition."""
 import hashlib
 import json
 import logging
@@ -58,6 +58,21 @@ class Client:
         self.transport = transport or post_json
         self.cache = OrderedDict()
         self.lock = threading.Lock()
+
+    def ready(self):
+        """Readiness is the loaded model, never just an HTTP process being alive."""
+        class NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, *args, **kwargs):
+                return None
+        headers = {'Authorization': 'Bearer ' + self.token} if self.token else {}
+        request = urllib.request.Request(self.url + '/ready', headers=headers)
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+        try:
+            with opener.open(request, timeout=min(self.timeout, 1)) as response:
+                value = json.loads(response.read(1025))
+                return value.get('ready') is True and value.get('model_loaded') is True
+        except Exception:
+            return False
 
     def explanation(self, context):
         context = context_dto(context)  # invalid input is not disguised as LLM failure

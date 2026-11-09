@@ -189,10 +189,12 @@ export class Client {
  async incidentExplanations(incidentId:string):Promise<Row[]>{
   if(this.profile!=='p11')throw new ApiError('unavailable','Explicações não disponíveis nesta API.');
   const health = await this.health();
-  if (object(health.harpia) && health.harpia.mode === 'deterministic_only' &&
-      health.harpia.contract_version === 1 && health.harpia.generation_enabled === false) {
+  if (object(health.harpia) && health.harpia.contract_version === 1 &&
+      (health.harpia.mode === 'deterministic_only' && health.harpia.generation_enabled === false ||
+       health.harpia.mode === 'bitnet_optional' && health.harpia.generation_enabled === true)) {
    const value = await this.get(`${this.path('explain')}/${encodeURIComponent(incidentId)}`);
-   if (!object(value) || value.source !== 'deterministic_fallback' || value.incident_id !== incidentId ||
+   if (!object(value) || !(value.source === 'deterministic_fallback' ||
+       health.harpia.mode === 'bitnet_optional' && value.source === 'bitnet_unverified_text' && value.bitnet_status === 'responded_unverified') || value.incident_id !== incidentId ||
        !Number.isInteger(value.revision) || Number(value.revision) < 1 || typeof value.text !== 'string' ||
        !value.text.trim() || typeof value.generated_at !== 'string' || !Number.isFinite(Date.parse(value.generated_at)))
     throw new ApiError('invalid','Explicação determinística incompatível ou vinculada a outro incidente.');

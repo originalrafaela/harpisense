@@ -50,6 +50,19 @@ test('capacidade determinística permite somente explicação vinculada e valida
  assert.ok(paths.some(path=>path.endsWith('/explain/synthetic-1')));
  assert.ok(!paths.some(path=>path.includes('/bitnet?')));
 });
+test('capacidade BitNet explícita aceita texto não verificado e fallback',async()=>{
+ for(const source of ['bitnet_unverified_text','deterministic_fallback']){
+  const client=new Client('https://synthetic.test','p11',(async url=>{
+   const auth=sessionResponse(url);if(auth)return auth;
+   return new Response(JSON.stringify(String(url).endsWith('/health')?
+    {api:'available',harpia:{mode:'bitnet_optional',contract_version:1,generation_enabled:true,model_ready:source==='bitnet_unverified_text'}}:
+    {source,bitnet_status:source==='bitnet_unverified_text'?'responded_unverified':'unavailable_or_timeout',incident_id:'synthetic-1',revision:3,generated_at:'2026-11-08T23:00:00Z',text:'Fixture sintética'}));
+  }) as typeof fetch);
+  await client.login({username:'synthetic',password:'fixture'});
+  const rows=await client.incidentExplanations('synthetic-1');
+  assert.equal(rows[0].data.source,source);
+ }
+});
 test('capacidade e identidade incompatíveis falham fechadas',async()=>{
  const paths:string[]=[];
  const client=new Client('https://synthetic.test','p11',(async url=>{const auth=sessionResponse(url);if(auth)return auth;

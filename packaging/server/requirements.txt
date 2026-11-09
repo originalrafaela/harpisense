@@ -1,0 +1,4 @@
+-r backend/delivery/requirements.txt
+-r backend/config_manager/requirements.txt
+-r backend/admin_auth/requirements-mfa.txt
+httpx==0.28.1

@@ -133,7 +133,7 @@ def explain(store, incident_id):
     return result
 
 
-def install_deterministic_harpia(app, store):
+def install_deterministic_harpia(app, store, *, bitnet_client=None):
     """Preserve the approved routes' dependency trees, including Basic authentication.
 
     Pinned FastAPI 0.115 integration; fail closed if the expected authenticated routes
@@ -149,12 +149,33 @@ def install_deterministic_harpia(app, store):
     original_health = health.dependant.call
 
     def deterministic(incident_id: str, **kwargs):
-        return explain(store, incident_id)
+        result = explain(store, incident_id)
+        if bitnet_client is None:
+            return result
+        # Only bounded, typed facts from this exact immutable revision leave P11.
+        # No credentials, free logs, policy writes or model execution privileges.
+        from .contracts import FIELDS, context_dto
+        facts = {k: v for k, v in result['facts'].items() if k in FIELDS}
+        if isinstance(facts.get('risk_factors'), dict):
+            facts['risk_factors'] = [f'{k}={v}' for k, v in facts['risk_factors'].items()][:8]
+        verified = result['facts'].get('execution_verified_at')
+        if verified:
+            facts['verified_at'] = verified
+        generated = bitnet_client.explanation(context_dto({
+            'incident_id': result['incident_id'], 'revision': result['revision'], 'facts': facts}))
+        if generated['source'] == 'bitnet_unverified_text':
+            return {**result, **generated, 'source_label': 'BitNet · texto não verificado',
+                    'deterministic_text': result['text']}
+        # Preserve the complete deterministic explanation when inference fails.
+        return {**result, 'bitnet_status': generated['bitnet_status']}
 
     def capabilities(**kwargs):
         value = original_health(**kwargs)
-        return {**value, 'harpia': {'mode': 'deterministic_only', 'contract_version': 1,
-                                  'generation_enabled': False, 'model': 'bitnet'}}
+        return {**value, 'harpia': {
+            'mode': 'bitnet_optional' if bitnet_client is not None else 'deterministic_only',
+            'contract_version': 1, 'generation_enabled': bitnet_client is not None,
+            'model': 'bitnet', 'model_ready': bitnet_client.ready() if bitnet_client is not None else False,
+            'text_verified': False}}
 
     endpoint.dependant.call = deterministic
     health.dependant.call = capabilities

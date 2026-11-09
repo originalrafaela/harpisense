@@ -34,7 +34,13 @@ def build_app():
         return {**original(**kwargs), 'database': 'available', 'executor': 'not_configured'}
 
     health.dependant.call = checked_health
-    install_deterministic_harpia(app, store)
+    bitnet_client = None
+    if os.environ.get('HARPISENSE_BITNET_ENABLED', '0') == '1':
+        from harpia.client import Client, endpoint_url
+        # Never send incident context to an external URL or an environment proxy.
+        url = endpoint_url(os.environ.get('HARPIA_URL', 'http://127.0.0.1:8091'), loopback=True)
+        bitnet_client = Client(url=url)
+    install_deterministic_harpia(app, store, bitnet_client=bitnet_client)
     controls=CaseSnapshotControls(PostgresControls(dsn),LinkedOperationalQueue())
     install_controls(app,controls)
     app.state.operational_controls=controls
@@ -76,4 +82,8 @@ def build_candidate_app(*, installation_id, capabilities, allowed_origins,
         app.state.presentation = presentation
     install_config_api(app, config, installation_id=installation_id,
                        presentation=presentation)
+    from xai_api import install_xai_api
+    from .incident_dossier import install_incident_api
+    install_xai_api(app, store, installation_id=installation_id, asset_identifier_column='device_id')
+    install_incident_api(app, store, installation_id)
     return app
