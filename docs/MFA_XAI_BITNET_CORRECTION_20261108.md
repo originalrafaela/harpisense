@@ -85,3 +85,26 @@ correção. Registra build/typecheck, 76 unitários e duas suítes Playwright de
 11 testes aprovados, sem homologação de instalador ou reboot para essa fonte.
 Seus resultados não são atribuídos ao commit novo nem aos candidatos antigos.
 O parecer de não iniciar C01–C09 é mantido; nenhum ataque foi executado aqui.
+
+## Release final disponível ao operador
+
+Código `0a1962328d2ec16d2ee46f3bab536ce85ad714d6`, pacote de 251 arquivos,
+SHA256 `60c9a77e70fecbbf076f936c196403b794651981626715539f61f0d2a14cfd4a`.
+Enviado/extrato conferido em
+`/opt/harpisense/staging/p11-postgresql/.integration-releases/initial-auth-20261108-r3`.
+O smoke desta release passou em Ubuntu, com dependências separadas. Evidência:
+[ubuntu-release-smoke.json](evidence/mfa-xai-bitnet-correction-20261108/ubuntu-release-smoke.json).
+Na coleta, API, MQTT e Tailscale originais continuavam ativos; as rotas MFA/XAI
+originais ainda ausentes. Nenhuma aplicação administrativa foi realizada.
+
+Comando concreto para o operador no HarpiServer, solicitado na conversa:
+
+```sh
+sudo /opt/harpisense/staging/p11-postgresql/.integration-releases/initial-auth-20261108-r3/venv/bin/python /opt/harpisense/staging/p11-postgresql/.integration-releases/initial-auth-20261108-r3/upgrade_gateway.py deploy
+```
+
+Não enviar a senha pelo chat. O comando faz backup completo, ensaio de restauração
+e migração privada antes de tocar no banco real, aplica as migrações e reinicia
+somente a API. Se o ensaio falhar, não aplica no banco real. Deve-se então conferir
+o login do administrador existente, cadastro do Authenticator, MFA e XAI pelo
+dashboard real; esses passos com a conta humana não foram declarados aprovados.

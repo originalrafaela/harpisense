@@ -1,0 +1,29 @@
+{
+  "source_commit": "0a1962328d2ec16d2ee46f3bab536ce85ad714d6",
+  "archive_sha256": "60c9a77e70fecbbf076f936c196403b794651981626715539f61f0d2a14cfd4a",
+  "release_directory": "/opt/harpisense/staging/p11-postgresql/.integration-releases/initial-auth-20261108-r3",
+  "smoke": {
+    "passed": true,
+    "platform": "linux",
+    "built_frontend": true,
+    "mfa_route_present": true,
+    "xai_route_protected": true,
+    "argon2id_create_verify": true,
+    "live_database_touched": false,
+    "live_service_updated": false
+  },
+  "live_mfa_route": false,
+  "live_xai_route": false,
+  "live_bootstrap_sha256": "d8dc01de8ee14ca4daa31d34408882ef2a22a1d7858cad46abdd308bb0e957a9",
+  "live_services": {
+    "harpisense-p11": "active",
+    "harpisense-mqtt": "active",
+    "tailscaled": "active"
+  },
+  "administrative_apply_performed": false,
+  "bitnet_loaded": false,
+  "full_live_database_restore_rehearsed": false,
+  "windows_clean_install_tested": false,
+  "ubuntu_clean_install_tested": false,
+  "os_reboot_tested": false
+}
